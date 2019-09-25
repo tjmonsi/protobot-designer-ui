@@ -1,0 +1,23 @@
+{
+  "editor.tabSize": 2,
+  "files.trimTrailingWhitespace": true,
+  "javascript.validate.enable": true,
+  "standard.enable": true,
+  "standard.semistandard": true,
+  "standard.options": {
+    "plugins": [
+      "html"
+    ],
+    "parser": "babel-eslint",
+    "env": [
+      "mocha"
+    ]
+  },
+  "standard.validate": [
+    "javascript",
+    "html"
+  ],
+  "git.enableSmartCommit": true,
+  "git.autofetch": true,
+  "javascript.implicitProjectConfig.checkJs": true
+}

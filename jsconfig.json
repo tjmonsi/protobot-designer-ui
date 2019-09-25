@@ -1,12 +1,16 @@
 {
   "compilerOptions": {
-    "checkJs": false,
-    "target": "es2016"
+    "experimentalDecorators": true
   },
   "exclude": [
     "node_modules",
     "**/node_modules/*",
     "dist",
-    "**/dist"
+    "**/dist",
+    "coverage",
+    "**/coverage",
+    "./*.js",
+    "__archive",
+    "example"
   ]
 }

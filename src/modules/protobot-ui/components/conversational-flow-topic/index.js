@@ -34,7 +34,7 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
     this.createTopic();
   }
 
-  subTopic (event) {
+  subTopic () {
     this.createTopic(true);
   }
 

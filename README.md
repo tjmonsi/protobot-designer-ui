@@ -8,11 +8,28 @@ This will be my base JS template for Github and Gitlab.
 
 # Installation
 
-Put your installation instructions here
+You should have npm and node installed in your system.
 
-# Usage
+To install dependencies, just type this on the terminal of this project's folder
 
-Put your usage here or how to run this system
+```
+npm install
+npm i -g http-server
+```
+
+# Run
+
+To run...
+
+```
+npm run watch
+```
+
+and on another terminal
+
+```
+http-server
+```
 
 # Development Setup and Contributing
 

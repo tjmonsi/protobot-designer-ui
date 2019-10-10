@@ -1,6 +1,10 @@
 import ejs from 'rollup-plugin-emit-ejs';
 import resolve from 'rollup-plugin-node-resolve';
 import html from 'rollup-plugin-html-minifier';
+import babel from 'rollup-plugin-babel';
+import analyze from 'rollup-plugin-analyzer';
+import { string } from 'rollup-plugin-string';
+import { terser as uglify } from 'rollup-plugin-terser';
 
 const output = [];
 
@@ -12,6 +16,10 @@ output.push({
   },
   plugins: [
     resolve(),
+    string({
+      // Required to be specified
+      include: 'src/modules/**/*.css'
+    }),
     ejs({
       src: 'src',
       layout: 'src/layout/layout.html.ejs',
@@ -23,7 +31,17 @@ output.push({
         }
       }
     }),
-    html()
+    html(),
+
+    babel({
+      babelrc: false,
+      plugins: [
+        ['@babel/plugin-proposal-decorators', { 'decoratorsBeforeExport': true }],
+        '@babel/plugin-proposal-class-properties'
+      ]
+    }),
+    uglify(),
+    analyze()
   ]
 });
 

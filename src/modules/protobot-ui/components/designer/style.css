@@ -1,0 +1,34 @@
+:host {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+}
+
+.left {
+  background: #888888;
+  color: white;
+  padding: 10px;
+  height: 100vh
+}
+
+.center {
+  background: white;
+  padding: 10px;
+  height: 100vh
+}
+
+.right {
+  background: #888888;
+  color: white;
+  padding: 10px;
+  height: 100vh
+}
+
+.center-modal {
+  background: #888888;
+  font-size: 20px;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}

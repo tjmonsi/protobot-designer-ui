@@ -11,7 +11,8 @@
     "size": "npx bundlesize",
     "karma": "karma start --coverage",
     "karma:watch": "karma start --auto-watch=true --single-run=false",
-    "build": "npx rollup -c"
+    "build": "npx rollup -c",
+    "watch": "npx rollup -c -w"
   },
   "repository": {
     "type": "git",
@@ -73,6 +74,10 @@
     "rollup-plugin-generate-html-template": "^1.2.0",
     "rollup-plugin-html-minifier": "^1.0.1",
     "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-postcss": "^2.0.3",
+    "rollup-plugin-string": "^3.0.0",
+    "rollup-plugin-stylus-compiler": "^1.0.1",
+    "rollup-plugin-stylus-css-modules": "^1.5.0",
     "rollup-plugin-terser": "^5.1.0",
     "semistandard": "^13.0.1",
     "sinon": "^7.3.2",
@@ -90,11 +95,16 @@
     }
   },
   "semistandard": {
+    "parser": "babel-eslint",
     "globals": [
       "describe",
       "it",
       "after",
       "before"
     ]
+  },
+  "dependencies": {
+    "firebase": "^7.0.0",
+    "lit-element": "^2.2.1"
   }
 }

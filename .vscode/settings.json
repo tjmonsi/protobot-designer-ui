@@ -6,11 +6,29 @@
   "standard.semistandard": true,
   "standard.options": {
     "plugins": [
-      "html"
+      "html",
+      "standard",
+      "promise",
+      "mocha",
+      "html",
+      "@typescript-eslint",
+      "chai-expect"
     ],
     "parser": "babel-eslint",
     "env": [
       "mocha"
+    ],
+    "ignore": [
+      "example/dist",
+      "dist",
+      "dist/**"
+    ],
+    "globals": [
+      "describe",
+      "it",
+      "after",
+      "before",
+      "expect"
     ]
   },
   "standard.validate": [
@@ -19,5 +37,6 @@
   ],
   "git.enableSmartCommit": true,
   "git.autofetch": true,
-  "javascript.implicitProjectConfig.checkJs": true
+  "javascript.implicitProjectConfig.checkJs": true,
+  "javascript.implicitProjectConfig.experimentalDecorators": true
 }

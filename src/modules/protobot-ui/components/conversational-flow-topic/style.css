@@ -1,0 +1,26 @@
+.flex-area {
+  display: flex;
+
+  margin: 20px auto;
+  max-width: 800px;
+}
+
+.flex-1 {
+  flex: 1;
+  background: purple;
+  padding: 12px;
+}
+
+.flex-2 {
+  flex: 3;
+  background: purple;
+  padding: 12px
+}
+
+.text-area {
+  width: 100%;
+}
+
+.sub {
+  padding-left: 80px
+}

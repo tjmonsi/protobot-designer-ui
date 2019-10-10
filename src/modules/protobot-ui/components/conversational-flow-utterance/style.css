@@ -1,0 +1,11 @@
+.flex-area {
+  display: flex;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.text-area {
+  width: 100%
+}

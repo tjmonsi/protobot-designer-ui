@@ -1,1 +1,1 @@
-console.log('hello');
+import './modules/protobot-ui/components/designer';

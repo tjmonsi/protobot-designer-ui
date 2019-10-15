@@ -12,7 +12,8 @@
     "karma": "karma start --coverage",
     "karma:watch": "karma start --auto-watch=true --single-run=false",
     "build": "npx rollup -c",
-    "watch": "npx rollup -c -w"
+    "watch": "npx rollup -c -w",
+    "start": "python -m http.server --directory public"
   },
   "repository": {
     "type": "git",

@@ -14,6 +14,7 @@ output.push({
     file: './public/index.js',
     format: 'esm'
   },
+  cache: true,
   plugins: [
     resolve(),
     string({
@@ -40,7 +41,7 @@ output.push({
         '@babel/plugin-proposal-class-properties'
       ]
     }),
-    uglify(),
+    // uglify(),
     analyze()
   ]
 });

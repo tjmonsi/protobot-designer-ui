@@ -11,12 +11,10 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
   // @ts-ignore
   @property({ type: Number })
   index;
-  /**
-   * Implement `render` to define a template for your element.
-   *
-   * You must provide an implementation of `render` for any element
-   * that uses LitElement as a base class.
-   */
+
+  @property({ type: Boolean })
+  sub = false;
+
   render () {
     return template(this);
   }
@@ -41,7 +39,7 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
   async createTopic (sub) {
     const { key: topicId } = database.ref('labels/data').push();
     const { key: utteranceId } = database.ref('utterances/data').push();
-    const { domain, sub: topicSub } = this.topic;
+    const { domain } = this.topic;
     const updates = {};
     const snap = await database.ref(`domains/data/${domain}`).once('value');
     const { topics } = snap.val() || { topics: {} };
@@ -55,7 +53,6 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
       domain,
       name: 'Topic',
       required: true,
-      sub: sub || topicSub || false,
       mainUtterance: utteranceId,
       utterances: {}
     };
@@ -83,10 +80,9 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
     updates[`labels/data/${topicId}`] = topic;
     updates[`utterances/data/${utteranceId}`] = utterance;
     updates[`domains/data/${domain}/topics`] = newTopics;
+    updates[`domains/data/${domain}/subs/${topicId}`] = sub || false;
 
     await database.ref().update(updates);
-
-    this.dispatchEvent(new window.CustomEvent('refresh-list'));
   }
 
   async deleteTopic () {

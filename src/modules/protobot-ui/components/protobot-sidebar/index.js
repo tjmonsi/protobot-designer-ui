@@ -6,8 +6,8 @@ import { database } from '../../../firebase';
 
 // Extend the LitElement base class
 // @ts-ignore
-@customElement('protobot-left-side')
-class ProtobotLeftSide extends GetDomainMixin(LitElement) {
+@customElement('protobot-sidebar')
+class ProtobotSidebar extends GetDomainMixin(LitElement) {
   @property()
   domainName = '';
 
@@ -46,4 +46,4 @@ class ProtobotLeftSide extends GetDomainMixin(LitElement) {
   }
 }
 
-export { ProtobotLeftSide };
+export { ProtobotSidebar };

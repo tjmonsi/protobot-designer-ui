@@ -36,25 +36,4 @@ export const GetTopicMixin = (base) => (class extends base {
     }
     this.mainUtteranceId = mainUtterance || utteranceId;
   }
-
-  // /**
-  //  *
-  //  * @param {String} id
-  //  */
-  // async getDomainName (id) {
-  //   if (id) {
-  //     const snap = await database.ref(`domains/data/${id}`).once('value');
-  //     this.domainId = id;
-  //     this.domain = snap.val() || null;
-  //     const { topics } = this.domain;
-  //     const array = [];
-  //     for (let topic in topics) {
-  //       array.push({ topic, order: topics[topic] });
-  //     }
-  //     this.topics = array.sort((i, j) => (i.order - j.order)).map(i => i.topic);
-  //     this.domainChanged(this.domain);
-  //   }
-  // }
-
-  // domainChanged (domain) { console.log(domain); }
 });

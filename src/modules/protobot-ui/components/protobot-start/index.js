@@ -5,20 +5,24 @@ import { GetPathMixin } from '../../mixins/get-path';
 
 // Extend the LitElement base class
 // @ts-ignore
-@customElement('protobot-designer-ui')
-class ProtobotDesignerUI extends GetPathMixin(LitElement) {
+@customElement('protobot-start')
+class ProtobotStart extends GetPathMixin(LitElement) {
   @property()
   x = 1;
 
-  /**
-   * Implement `render` to define a template for your element.
-   *
-   * You must provide an implementation of `render` for any element
-   * that uses LitElement as a base class.
-   */
   render () {
     return template(this);
   }
+
+  submit (event) {
+    event.preventDefault();
+    const { target } = event;
+    const { domain } = target;
+
+    if (domain.value) {
+      window.location.href = `/?domain=${domain.value}`;
+    }
+  }
 }
 
-export { ProtobotDesignerUI };
+export { ProtobotStart };

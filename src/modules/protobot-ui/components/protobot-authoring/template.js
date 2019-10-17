@@ -9,7 +9,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topics, refreshList } = this;
+  const { topics, swap } = this;
 
   return html`
     <style>
@@ -21,7 +21,13 @@ export const template = self => function () {
     </h1>
 
     ${topics.map((topic, index) => html`
-      <conversational-flow-topic topicId="${topic}" index="${index}" @refresh-list="${refreshList.bind(this)}"></conversational-flow-topic>
+      <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" index="${index}"></conversational-flow-topic>
+
+      ${index !== topics.length - 1 ? html`
+        <div style="text-align: center">
+          <button style="text-align: center" type="button" @click="${swap.bind(this)}" index="${index}">Swap</button>
+        </div>
+      ` : ''}
     `)}
   `;
 }.bind(self)();

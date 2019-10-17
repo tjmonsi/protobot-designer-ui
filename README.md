@@ -14,7 +14,6 @@ To install dependencies, just type this on the terminal of this project's folder
 
 ```
 npm install
-npm i -g http-server
 ```
 
 # Run
@@ -22,13 +21,7 @@ npm i -g http-server
 To run...
 
 ```
-npm run watch
-```
-
-and on another terminal
-
-```
-http-server
+npm start
 ```
 
 # Development Setup and Contributing

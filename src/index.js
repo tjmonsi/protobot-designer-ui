@@ -1,1 +1,1 @@
-import './modules/protobot-ui/components/designer';
+import './modules/protobot-ui/components/protobot-designer-ui';

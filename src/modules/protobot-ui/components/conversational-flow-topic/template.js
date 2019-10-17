@@ -9,8 +9,8 @@ import '../conversational-flow-utterance';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topic, topicNameChanged, mainUtteranceId, newTopic, subTopic, deleteTopic } = this;
-  const { name, sub } = topic || {};
+  const { topic, topicNameChanged, mainUtteranceId, newTopic, subTopic, deleteTopic, sub } = this;
+  const { name } = topic || {};
 
   return html`
     <style>
@@ -26,12 +26,14 @@ export const template = self => function () {
         <conversational-flow-utterance .utteranceId="${mainUtteranceId}" ></conversational-flow-utterance>
       </div>
 
-      <button type="button" @click="${newTopic.bind(this)}">New</button>
 
       <!-- ternary expression -->
-      ${!sub
-    ? html`<button type="button" @click="${subTopic.bind(this)}">Sub</button>`
-    : ''}
+      ${!sub ? html`
+        <button type="button" @click="${newTopic.bind(this)}">New</button>
+        <button type="button" @click="${subTopic.bind(this)}">Sub</button>
+      ` : html`
+        <button type="button" @click="${subTopic.bind(this)}">New</button>
+      `}
 
       <button type="button" @click="${deleteTopic.bind(this)}">Delete</button>
     </div>

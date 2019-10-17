@@ -20,6 +20,11 @@ export const GetDomainMixin = (base) => (class extends GetPathMixin(base) {
   @property({ type: Array })
   topics = [];
 
+  constructor () {
+    super();
+    this.boundSaveDomain = this.saveDomain.bind(this);
+  }
+
   connectedCallback () {
     super.connectedCallback();
 
@@ -31,23 +36,43 @@ export const GetDomainMixin = (base) => (class extends GetPathMixin(base) {
     }
   }
 
+  disconnectedCallback () {
+    if (super.disconnectedCallback) {
+      super.disconnectedCallback();
+    }
+
+    this.disconnectRef();
+  }
+
+  disconnectRef () {
+    if (this.domainRef) {
+      this.domainRef.off('value', this.boundSaveDomain);
+    }
+  }
+
   /**
    *
    * @param {String} id
    */
-  async getDomainName (id) {
+  getDomainName (id) {
+    this.disconnectRef();
+
     if (id) {
-      const snap = await database.ref(`domains/data/${id}`).once('value');
-      this.domainId = id;
-      this.domain = snap.val() || null;
-      const { topics } = this.domain;
-      const array = [];
-      for (let topic in topics) {
-        array.push({ topic, order: topics[topic] });
-      }
-      this.topics = array.sort((i, j) => (i.order - j.order)).map(i => i.topic);
-      this.domainChanged(this.domain);
+      this.domainRef = database.ref(`domains/data/${id}`);
+      this.domainRef.on('value', this.boundSaveDomain);
     }
+  }
+
+  saveDomain (snap) {
+    this.domainId = snap.key;
+    this.domain = snap.val() || null;
+    const { topics, subs } = this.domain;
+    const array = [];
+    for (let topic in topics) {
+      array.push({ topic, order: topics[topic], sub: subs[topic] || false });
+    }
+    this.topics = array.sort((i, j) => (i.order - j.order)).map(i => ({ id: i.topic, sub: i.sub }));
+    this.domainChanged(this.domain);
   }
 
   domainChanged (domain) { console.log(domain); }

@@ -41,7 +41,7 @@
     "@babel/preset-env": "7.6.3",
     "@babel/runtime": "7.6.3",
     "@commitlint/cli": "8.2.0",
-    "@commitlint/config-conventional": "8.0.0",
+    "@commitlint/config-conventional": "8.2.0",
     "@open-wc/testing": "1.0.15",
     "@open-wc/testing-helpers": "1.2.1",
     "@open-wc/testing-karma": "3.1.34",

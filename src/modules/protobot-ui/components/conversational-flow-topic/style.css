@@ -3,18 +3,18 @@
   display: flex;
   margin: 20px auto;
   max-width: 800px;
-  border-radius: 5px;
+  border-radius: 10px;
 }
 
 .flex-1 {
   flex: 1;
-  background: purple;
+  background: coral;
   padding: 12px;
 }
 
 .flex-2 {
   flex: 3;
-  background: purple;
+  background:hsl(242, 46%, 66%);
   padding: 12px
 }
 
@@ -23,5 +23,5 @@
 }
 
 .sub {
-  padding-left: 80px
+  margin-left: 80px
 }

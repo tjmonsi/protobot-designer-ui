@@ -74,7 +74,7 @@
     "rollup-plugin-commonjs": "10.1.0",
     "rollup-plugin-ejs": "2.2.0",
     "rollup-plugin-emit-ejs": "2.0.3",
-    "rollup-plugin-generate-html-template": "1.2.0",
+    "rollup-plugin-generate-html-template": "1.5.0",
     "rollup-plugin-html-minifier": "1.0.1",
     "rollup-plugin-node-resolve": "5.2.0",
     "rollup-plugin-postcss": "2.0.3",

@@ -84,7 +84,7 @@
     "rollup-plugin-terser": "5.1.2",
     "semistandard": "14.2.0",
     "sinon": "7.5.0",
-    "typescript": "3.6.3",
+    "typescript": "3.6.4",
     "webpack-merge": "4.2.2"
   },
   "config": {

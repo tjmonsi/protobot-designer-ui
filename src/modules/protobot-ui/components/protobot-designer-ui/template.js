@@ -3,6 +3,9 @@ import '../protobot-sidebar';
 import '../protobot-start';
 import '../protobot-authoring';
 import '../protobot-authoring-sidebar';
+import '../protobot-micro';
+import '../protobot-macro';
+import '../protobot-history';
 // @ts-ignore
 import styles from './style.css';
 /**

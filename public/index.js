@@ -3238,7 +3238,7 @@ LitElement['finalized'] = true;
 
 LitElement.render = render$1;
 
-var styles = ":host {\n  margin: 20px\n}\n\n.left-side-text {\n  font-size: 20px;\n}\n";
+var styles = ":host {\n  margin: 40px;\n}\n\n.left-side-text {\n  font-size: 20px;\n}\n\n.review-link {\n  font-size: 20px;\n}";
 
 /**
  *
@@ -3251,7 +3251,10 @@ const template = self => function () {
     domainName,
     changeDomainName,
     designerName,
-    changeDesignerName
+    changeDesignerName,
+    goMacro,
+    goMicro,
+    goHistory
   } = this;
   return html`
     <style>
@@ -3263,6 +3266,15 @@ const template = self => function () {
 
     <h1>Designer</h1>
     <input class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
+    <br>
+    <br>
+    <br>
+    <h1>Review pages</h1>
+    <ul class = "review-link">
+      <li><a href="/?domain=${this.domainId}&page=macro">Macro review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=history">History review</a></li>
+    </ul>
   `;
 }.bind(self)();
 
@@ -11723,7 +11735,6 @@ const template$6 = self => function () {
     </style>
 
     <ul>
-
     ${topics.map(topic => html`
       <li>
         <topic-list-item class="item" topicId="${topic.id}">
@@ -11769,7 +11780,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   };
 }, GetDomainMixin(LitElement));
 
-var styles$7 = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: #888888;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #888888;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$7 = "";
 
 /**
  *
@@ -11777,6 +11788,141 @@ var styles$7 = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-t
  */
 
 const template$7 = self => function () {
+  // @ts-ignore
+  // const { topic } = this;
+  console.log(this);
+  return html`
+    <style>
+      ${styles$7}
+    </style>
+
+    Micro
+  `;
+}.bind(self)();
+
+// Extend the LitElement base class
+// @ts-ignore
+
+let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_initialize, _GetDomainMixin) {
+  class ProtobotMicro extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotMicro,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$7(this);
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$8 = "";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$8 = self => function () {
+  // @ts-ignore
+  // const { topic } = this;
+  console.log(this);
+  return html`
+    <style>
+      ${styles$8}
+    </style>
+
+    Macro
+  `;
+}.bind(self)();
+
+// Extend the LitElement base class
+// @ts-ignore
+
+let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_initialize, _GetDomainMixin) {
+  class ProtobotMacro extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotMacro,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$8(this);
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$9 = "";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$9 = self => function () {
+  // @ts-ignore
+  // const { topic } = this;
+  console.log(this);
+  return html`
+    <style>
+      ${styles$9}
+    </style>
+
+    History
+  `;
+}.bind(self)();
+
+// Extend the LitElement base class
+// @ts-ignore
+
+let ProtobotHistory = _decorate([customElement('protobot-history')], function (_initialize, _GetDomainMixin) {
+  class ProtobotHistory extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotHistory,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$9(this);
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$a = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: #888888;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #888888;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$a = self => function () {
   // @ts-ignore
   const {
     queryObject
@@ -11787,7 +11933,7 @@ const template$7 = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$7}
+      ${styles$a}
     </style>
 
     ${domain ? html`
@@ -11842,7 +11988,7 @@ let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], func
       kind: "method",
       key: "render",
       value: function render() {
-        return template$7(this);
+        return template$a(this);
       }
     }]
   };

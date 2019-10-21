@@ -1,7 +1,11 @@
 :host {
-  margin: 20px
+  margin: 40px;
 }
 
 .left-side-text {
+  font-size: 20px;
+}
+
+.review-link {
   font-size: 20px;
 }

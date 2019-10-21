@@ -17,7 +17,6 @@ export const template = self => function () {
     </style>
 
     <ul>
-
     ${topics.map(topic => html`
       <li>
         <topic-list-item class="item" topicId="${topic.id}">

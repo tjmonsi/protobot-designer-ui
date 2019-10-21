@@ -63,7 +63,7 @@
     "eslint-plugin-standard": "4.0.1",
     "http-server": "0.11.1",
     "husky": "3.0.9",
-    "karma": "4.4.0",
+    "karma": "4.4.1",
     "lit-html": "1.1.2",
     "mocha": "6.2.1",
     "must": "0.13.4",

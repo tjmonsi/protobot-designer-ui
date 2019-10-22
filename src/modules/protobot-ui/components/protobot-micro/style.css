@@ -1,0 +1,43 @@
+h1 {
+    text-align: center;
+}
+
+h3 {
+    text-align: right;
+}
+
+.user-part {
+    float: right;
+    clear: both;
+}
+
+.user-label{
+    font-weight: bold;
+    text-align: right;
+    padding-right: 20px;
+}
+
+.user-say{
+    border-radius: 15px;
+    background: cornflowerblue;
+    width: 300px;
+    height: 70px;
+}
+
+.bot-part {
+    float:left;
+    clear:both;
+}
+
+.bot-label{
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.bot-say{
+    border-radius: 15px;
+    background: #73AD21;
+    padding: 20px;
+    width: 300px;
+    height: 70px;
+}

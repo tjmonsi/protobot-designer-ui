@@ -13,6 +13,7 @@ export const template = self => function () {
   return html`
     <style>
       ${styles}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
     </style>
 
     <h1>Micro Review</h1>
@@ -21,18 +22,18 @@ export const template = self => function () {
     <div class = "user-part">
       <div class = "user-label">User</div>
       <vaadin-button 
-        theme="primary"
+        theme= "primary"
         class = "user-say"
-        @click = "$this.addLabel">
+        @click = "$this.addLabel"> User said!
       </vaadin-button>
     </div>
     <br>
     <div class = "bot-part">
       <div class = "bot-label">Bot</div>
       <vaadin-button 
-        theme= "primary"
+        theme= "contrast primary"
         class= "bot-say"
-        @click="$this.addLabel">
+        @click="$this.addLabel"> Bot said!
       </vaadin-button>
     </div>
 

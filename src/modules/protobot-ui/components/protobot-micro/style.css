@@ -1,9 +1,11 @@
 h1 {
     text-align: center;
+    font-family: 'Noto Sans', sans-serif;
 }
 
 h3 {
     text-align: right;
+    font-family: 'Noto Sans', sans-serif;
 }
 
 .user-part {
@@ -15,13 +17,17 @@ h3 {
     font-weight: bold;
     text-align: right;
     padding-right: 20px;
+    font-family: 'Noto Sans', sans-serif;
+
 }
 
 .user-say{
     border-radius: 15px;
-    background: cornflowerblue;
+    /*background: cornflowerblue;*/
     width: 300px;
     height: 70px;
+    font-family: 'Noto Sans', sans-serif;
+
 }
 
 .bot-part {
@@ -32,12 +38,16 @@ h3 {
 .bot-label{
     font-weight: bold;
     margin-left: 10px;
+    font-family: 'Noto Sans', sans-serif;
+
 }
 
 .bot-say{
     border-radius: 15px;
-    background: #73AD21;
+    /*background: #73AD21;*/
     padding: 20px;
     width: 300px;
     height: 70px;
+    font-family: 'Noto Sans', sans-serif;
+
 }

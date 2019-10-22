@@ -11115,9 +11115,9 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
   };
 }, GetPathMixin(LitElement));
 
-var styles$2 = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px auto;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: coral;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:hsl(242, 46%, 66%);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  margin-left: 80px\n}\n";
+var styles$2 = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background:hsl(242, 46%, 66%);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:hsl(242, 46%, 66%);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background:skyblue;\n}\n";
 
-var styles$3 = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%\n}\n";
+var styles$3 = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%;\n  font-size: 15px;\n}\n";
 
 /**
  *
@@ -11716,7 +11716,7 @@ let TopicListItem = _decorate([customElement('topic-list-item')], function (_ini
   };
 }, GetTopicMixin(LitElement));
 
-var styles$6 = ".button {\n  background: green;\n  color: white;\n  padding: 12px;\n}\n";
+var styles$6 = "h2 {\n  margin-left: 20px;\n}\n\n.topic-list {\n  font-size: 20px;\n}\n\n.button {\n  margin-left: 20px;\n  background: black;\n  color: white;\n  font-size: 20px;\n  padding: 12px;\n  border-radius: 10px;\n}\n";
 
 /**
  *
@@ -11733,8 +11733,9 @@ const template$6 = self => function () {
     <style>
       ${styles$6}
     </style>
+    <h2>Topic list</h2>
 
-    <ul>
+    <ul class ="topic-list">
     ${topics.map(topic => html`
       <li>
         <topic-list-item class="item" topicId="${topic.id}">
@@ -11780,7 +11781,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   };
 }, GetDomainMixin(LitElement));
 
-var styles$7 = "h1 {\n    text-align: center;\n}\n\nh3 {\n    text-align: right;\n}\n\n.user-part {\n    float: right;\n    clear: both;\n}\n\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n}\n\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n}\n\n.bot-part {\n    float:left;\n    clear:both;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n}\n\n.bot-say{\n    border-radius: 15px;\n    background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n}\n";
+var styles$7 = "h1 {\n    text-align: center;\n    font-family: 'Noto Sans', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.user-part {\n    float: right;\n    clear: both;\n}\n\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.user-say{\n    border-radius: 15px;\n    /*background: cornflowerblue;*/\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.bot-part {\n    float:left;\n    clear:both;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;*/\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n";
 
 class Lumo extends HTMLElement {
   static get version() {
@@ -22918,6 +22919,7 @@ const template$7 = self => function () {
   return html`
     <style>
       ${styles$7}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
     </style>
 
     <h1>Micro Review</h1>
@@ -22926,18 +22928,18 @@ const template$7 = self => function () {
     <div class = "user-part">
       <div class = "user-label">User</div>
       <vaadin-button 
-        theme="primary"
+        theme= "primary"
         class = "user-say"
-        @click = "$this.addLabel">
+        @click = "$this.addLabel"> User said!
       </vaadin-button>
     </div>
     <br>
     <div class = "bot-part">
       <div class = "bot-label">Bot</div>
       <vaadin-button 
-        theme= "primary"
+        theme= "contrast primary"
         class= "bot-say"
-        @click="$this.addLabel">
+        @click="$this.addLabel"> Bot said!
       </vaadin-button>
     </div>
 

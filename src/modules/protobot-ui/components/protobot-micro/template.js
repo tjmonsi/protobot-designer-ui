@@ -14,6 +14,7 @@ export const template = self => function () {
     <style>
       ${styles}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
     </style>
 
     <h1>Micro Review</h1>
@@ -21,7 +22,7 @@ export const template = self => function () {
     <br>
     <div class = "user-part">
       <div class = "user-label">User</div>
-      <vaadin-button 
+      <vaadin-button
         theme= "primary"
         class = "user-say"
         @click = "$this.addLabel"> User said!
@@ -30,13 +31,18 @@ export const template = self => function () {
     <br>
     <div class = "bot-part">
       <div class = "bot-label">Bot</div>
-      <vaadin-button 
+      <vaadin-button
         theme= "contrast primary"
         class= "bot-say"
         @click="$this.addLabel"> Bot said!
       </vaadin-button>
     </div>
-
+    <div class = "topic">
+      <vaadin-button>
+        <iron-icon icon="lumo:edit" slot="prefix"></iron-icon>
+        topic
+      </vaadin-button>
+    </div>
 
   `;
 }.bind(self)();

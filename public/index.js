@@ -11781,7 +11781,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   };
 }, GetDomainMixin(LitElement));
 
-var styles$7 = "h1 {\n    text-align: center;\n    font-family: 'Noto Sans', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.user-part {\n    float: right;\n    clear: both;\n}\n\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.user-say{\n    border-radius: 15px;\n    /*background: cornflowerblue;*/\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.bot-part {\n    float:left;\n    clear:both;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;*/\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n";
+var styles$7 = "h1 {\n    text-align: center;\n    font-family: 'Raleway', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.user-part {\n    float: right;\n    clear: both;\n}\n\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.user-say{\n    border-radius: 15px;\n    /*background: cornflowerblue;*/\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.bot-part {\n    float:left;\n    clear:both;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;*/\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n";
 
 class Lumo extends HTMLElement {
   static get version() {
@@ -22920,6 +22920,7 @@ const template$7 = self => function () {
     <style>
       ${styles$7}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
     </style>
 
     <h1>Micro Review</h1>
@@ -22927,7 +22928,7 @@ const template$7 = self => function () {
     <br>
     <div class = "user-part">
       <div class = "user-label">User</div>
-      <vaadin-button 
+      <vaadin-button
         theme= "primary"
         class = "user-say"
         @click = "$this.addLabel"> User said!
@@ -22936,13 +22937,18 @@ const template$7 = self => function () {
     <br>
     <div class = "bot-part">
       <div class = "bot-label">Bot</div>
-      <vaadin-button 
+      <vaadin-button
         theme= "contrast primary"
         class= "bot-say"
         @click="$this.addLabel"> Bot said!
       </vaadin-button>
     </div>
-
+    <div class = "topic">
+      <vaadin-button>
+        <iron-icon icon="lumo:edit" slot="prefix"></iron-icon>
+        topic
+      </vaadin-button>
+    </div>
 
   `;
 }.bind(self)();
@@ -22972,7 +22978,9 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
     }, {
       kind: "method",
       key: "addLabel",
-      value: function addLabel(event) {}
+      value: function addLabel() {
+        if (this.click) ;
+      }
     }]
   };
 }, GetDomainMixin(LitElement));

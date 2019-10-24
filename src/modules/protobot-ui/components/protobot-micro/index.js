@@ -13,7 +13,10 @@ class ProtobotMicro extends GetDomainMixin(LitElement) {
     return template(this);
   }
 
-  addLabel (event) {
+  addLabel() {
+    if (this.click) {
+      // enables to open the dropdown
+    }
 
 
   }

@@ -8,10 +8,29 @@ h3 {
     font-family: 'Noto Sans', sans-serif;
 }
 
-.user-part {
-    float: right;
-    clear: both;
+.feed{
+    display:flex;
 }
+.feed.feed__right{
+    flex-direction: row-reverse;
+}
+
+
+.label{
+    font-weight: bold;
+    font-family: 'Noto Sans', sans-serif;
+}
+
+.feed.feed__right .label{
+    text-align: right;
+}
+
+.feed.feed__right .button-container{
+    flex-direction: row-reverse;
+}
+
+
+
 
 .user-label{
     font-weight: bold;
@@ -48,4 +67,8 @@ h3 {
     height: 70px;
     font-family: 'Noto Sans', sans-serif;
 
+}
+
+.button-container{
+    display: flex;
 }

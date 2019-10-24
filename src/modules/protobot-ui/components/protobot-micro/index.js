@@ -15,10 +15,11 @@ class ProtobotMicro extends GetDomainMixin(LitElement) {
 
   addLabel() {
     if (this.click) {
-      // enables to open the dropdown
     }
+  }
 
-
+  addToUtterance() {
+    // if there's utterance, then automatically generate this button a lot
   }
 }
 

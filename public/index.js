@@ -11781,7 +11781,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   };
 }, GetDomainMixin(LitElement));
 
-var styles$7 = "h1 {\n    text-align: center;\n    font-family: 'Raleway', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.user-part {\n    float: right;\n    clear: both;\n}\n\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.user-say{\n    border-radius: 15px;\n    /*background: cornflowerblue;*/\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.bot-part {\n    float:left;\n    clear:both;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;*/\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n";
+var styles$7 = "h1 {\n    text-align: center;\n    font-family: 'Raleway', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.feed{\n    display:flex;\n}\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n\n.label{\n    font-weight: bold;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n}\n\n\n\n\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.user-say{\n    border-radius: 15px;\n    /*background: cornflowerblue;*/\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.bot-part {\n    float:left;\n    clear:both;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;*/\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.button-container{\n    display: flex;\n}";
 
 class Lumo extends HTMLElement {
   static get version() {
@@ -12024,6 +12024,19 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 */
+const VAR_ASSIGN = /(?:^|[;\s{]\s*)(--[\w-]*?)\s*:\s*(?:((?:'(?:\\'|.)*?'|"(?:\\"|.)*?"|\([^)]*?\)|[^};{])+)|\{([^}]*)\}(?:(?=[;\s}])|$))/gi;
+const MIXIN_MATCH = /(?:^|\W+)@apply\s*\(?([^);\n]*)\)?/gi;
+const MEDIA_MATCH = /@media\s(.*)/;
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
 /**
  * @param {Element} element
  * @param {Object=} properties
@@ -12057,6 +12070,19 @@ function getComputedStyleValue(element, property) {
   } else {
     return value.trim();
   }
+}
+/**
+ * return true if `cssText` contains a mixin definition or consumption
+ * @param {string} cssText
+ * @return {boolean}
+ */
+
+function detectMixin(cssText) {
+  const has = MIXIN_MATCH.test(cssText) || VAR_ASSIGN.test(cssText); // reset state of the regexes
+
+  MIXIN_MATCH.lastIndex = 0;
+  VAR_ASSIGN.lastIndex = 0;
+  return has;
 }
 
 /**
@@ -12333,6 +12359,7 @@ The complete set of contributors may be found at http://polymer.github.io/CONTRI
 Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 */
+const useShadow = !window.ShadyDOM;
 const useNativeCSSProperties = Boolean(!window.ShadyCSS || window.ShadyCSS.nativeCss);
 /**
  * Globally settable property that is automatically assigned to
@@ -13976,6 +14003,15 @@ function isDescendant(base, path) {
 
 function translate(base, newBase, path) {
   return newBase + path.slice(base.length);
+}
+/**
+ * @param {string} base Path string to test against
+ * @param {string} path Path string to test
+ * @return {boolean} True if `path` is equal to `base`
+ */
+
+function matches(base, path) {
+  return base === path || isAncestor(base, path) || isDescendant(base, path);
 }
 /**
  * Converts array-based paths to flattened path.  String-based paths
@@ -20440,6 +20476,27 @@ let debouncerQueue = new Set();
 const enqueueDebouncer = function (debouncer) {
   debouncerQueue.add(debouncer);
 };
+/**
+ * Flushes any enqueued debouncers
+ *
+ * @return {boolean} Returns whether any debouncers were flushed
+ */
+
+const flushDebouncers = function () {
+  const didFlush = Boolean(debouncerQueue.size); // If new debouncers are added while flushing, Set.forEach will ensure
+  // newly added ones are also flushed
+
+  debouncerQueue.forEach(debouncer => {
+    try {
+      debouncer.flush();
+    } catch (e) {
+      setTimeout(() => {
+        throw e;
+      });
+    }
+  });
+  return didFlush;
+};
 
 /**
 @license
@@ -22135,6 +22192,37 @@ const ControlStateMixin = superClass => class VaadinControlStateMixin extends Ta
 
 };
 
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/**
+ * Forces several classes of asynchronously queued tasks to flush:
+ * - Debouncers added via `enqueueDebouncer`
+ * - ShadyDOM distribution
+ *
+ * @return {void}
+ */
+
+const flush = function () {
+  let shadyDOM, debouncers;
+
+  do {
+    shadyDOM = window.ShadyDOM && ShadyDOM.flush();
+
+    if (window.ShadyCSS && window.ShadyCSS.ScopingShim) {
+      window.ShadyCSS.ScopingShim.flush();
+    }
+
+    debouncers = flushDebouncers();
+  } while (shadyDOM || debouncers);
+};
+
 const DEV_MODE_CODE_REGEXP = /\/\*\*\s+vaadin-dev-mode:start([\s\S]*)vaadin-dev-mode:end\s+\*\*\//i;
 const FlowClients = window.Vaadin && window.Vaadin.Flow && window.Vaadin.Flow.clients;
 
@@ -22906,6 +22994,12367 @@ class ButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(Gestu
 
 customElements.define(ButtonElement.is, ButtonElement);
 
+const $_documentContainer$6 = document.createElement('template');
+$_documentContainer$6.innerHTML = `<custom-style>
+  <style>
+    @font-face {
+      font-family: 'lumo-icons';
+      src: url(data:application/font-woff;charset=utf-8;base64,d09GRgABAAAAABEgAAsAAAAAIiwAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABHU1VCAAABCAAAADsAAABUIIslek9TLzIAAAFEAAAAQwAAAFZAIUuKY21hcAAAAYgAAAD4AAADrsCU8d5nbHlmAAACgAAAC2MAABd4h9To2WhlYWQAAA3kAAAAMQAAADYSnCkuaGhlYQAADhgAAAAdAAAAJAbpA35obXR4AAAOOAAAABAAAACspBAAAGxvY2EAAA5IAAAAWAAAAFh55IAsbWF4cAAADqAAAAAfAAAAIAFKAXBuYW1lAAAOwAAAATEAAAIuUUJZCHBvc3QAAA/0AAABKwAAAelm8SzVeJxjYGRgYOBiMGCwY2BycfMJYeDLSSzJY5BiYGGAAJA8MpsxJzM9kYEDxgPKsYBpDiBmg4gCACY7BUgAeJxjYGS+yDiBgZWBgamKaQ8DA0MPhGZ8wGDIyAQUZWBlZsAKAtJcUxgcXjG+0mIO+p/FEMUcxDANKMwIkgMABn8MLQB4nO3SWW6DMABF0UtwCEnIPM/zhLK8LqhfXRybSP14XUYtHV9hGYQwQBNIo3cUIPkhQeM7rib1ekqnXg981XuC1qvy84lzojleh3puxL0hPjGjRU473teloEefAUNGjJkwZcacBUtWrNmwZceeA0dOnLlw5cadB09elPGhGf+j0NTI/65KfXerT6JhqKnpRKtgOpuqaTrtKjPUlqHmhto21I7pL6i6hlqY3q7qGWrfUAeGOjTUkaGODXViqFNDnRnq3FAXhro01JWhrg11Y6hbQ90Z6t5QD4Z6NNSToZ4N9WKoV0O9GerdUB+G+jTUl6GWRvkL24BkEXictVh9bFvVFb/nxvbz+7Rf/N6zHcd2bCfP+Wgc1Z9N0jpNnEL6kbRVS6HA2hQYGh9TGR1CbCqa2rXrWOkQE/sHNJgmtZvoVNZqE1B1DNHxzTQxCehUTYiJTQyENui0qSLezr3PduyQfgmRWOfde8+9551z7rnn/O4jLoJ/bRP0UaKQMLFJjpBAvphLZC3Dk0ok7WBzR2/upJs7Ryw/nfFbln/uuN/apCvwrKLrSvUqRufbm5pn0fs0w4gYxnGVP6qHnO4bWiDQGQgwtS6lm3lB3QoX1M2vwEmuzirF39y+Es2+DJ8d1pkyqBIqoze3D1+Zz4DrFoazxI8dWwMrDlZ2DMqQAR9AROsJU+2cmlTPazTco52F1xTa2a2+K8vvq92dVHmtLoPeQX/AZPRYGthDYOeZjBjKoFsVGulR3lWU95WeCK44qHU7MhWUGUKZDT3oKUcG2GWuh+EDDfUYA/jhAhl0TOsJNYSEu7mQmi3UzfXwZKA4BsVsHLXQYGgRW95uEtpJ1Vfn9XiLriRBlFEqxsDjA09yCNUoQxxwd7KWSTt2y3GTKiflqHRSoWZc3m11Wa/fJdFgXD4sSYfleJBKd8GMz7J8dZn/cGRCcKGDnA2Ge3fKzcvlnTDNthGWLXzX/WaXtUAmRgeLlHSr30r0G9UTXMb0AtmwzOoy73fkSlHZkduw/TYuU9cAD4YutPoxTTsA3797wVr4Z/1NC5zARHr4vtxJjxIfiZMhMkbWk+14BnJZKwqGZwDfswLyxWDSg11rFLJF7Nopxjd1h1/QOT+oezgfu3Yq+Hk+duf5x+40o1GTkaIgikK/IEnC6aYxCUBaZJSN4XTYFjU/YMNIKqJwhDGOCCI8FDXnXmXjtGhGJyShqjAOnBOkW2JG9S7GgYeMWAU5JzhnWmBOaOM+CKEPoqSfFDC2Unq+DLlUgUVUFFLZGJg6jtlojsdsa8kPObPuJdi5dnBdBsLJMGTWDa4t2JvtwuPo9s+Y86suv/W33QG1rAaOAUV+vx4K6f2D04PVKlC7WLSrZzAi45ZV6lIC7WoXqmRyvUqoVwrzUoVsIjeTXWQv+RH5GTlBXiB/In8ln0IbBCAFOajAJrgZYyOHWqOfUe/aHjI12R6OQo1jCgt215l+4f6XPb+0MNou0V+43n2F77tSfRb24d7zitgnKmvYHs69zugaPvBwv6ioXkb2LdL65Atw51uLkXlu1bhMMRcXSPcYoqKIRlh34lQP8/5JbuUFye4vxD6/6MxFF11C0uVLr9Ulgw44tS3pMViNLUExbycFgLIct+QDMibRimx1ydUz8FXZiuOIDBOMVX2nUZc+huNE5XUJ81uiJoiabwqaVF0uacKbau/pl4R2VW0XXlJra6boVrYG646TF5NYzwy4vjENVrDlcNpZPl8DH6XX8XWCx0mvWVZY6KFLrvsY66/zPict5FnxaNUR/juvZCM3TvD60E2W1tZizbXTPDuabcm0nbbzpWKpmA1ayBQ8giedLUM+A0kNjBjQjmuYz7YrgIXYvmF63ZLBwSXrpn9Tb9wwdd/U1H0PMQK3XcO8ul3WT7PyPPdpy0TemKxNRcJNauiXJnnUDpUppQWs4SnUIy0EESGYqJYQLGHxzaGWwVIaS6Y7mQFM8ZjYDQ3axjf61SWjU33JwOZA1pwaG1L9mzf71aHRdX1JHw6Fp0aXhNwbqyeGNg4NbdzGCBxoz4ZXjy4Nu69Zr6sDY6vMrLU5nA1P8JkbdWXJ6ERfMryvNh1JfQ9+T4dIhGvK9w3dxjBBzatsQ/MlOHVIDnYpDz6odAXlQ01t2Pa5Iafd8MMpxAeDKP0C6CjgVLT5osB6icUx01lWjXxzT/GyRF2welEM5Z/7jG3VjQ1SrNn5IbyzOG5dobB3/QHxyZvsXcoz8IoEwS7plCg+zxHQk424q9BfEpkESJbFHQusDBSWFkuBkoPO0kLKwRVYjxGXlHTcTDQMJ/H6TX9afkO7mnraTO1feTnZAXLu4cp7HAXMmNG1yeFk9TgS/NHhZR/4QoBTr/ZB+6hCgyl15Nq1UbN6nE1/ZnP1U2cizCBpvs8cJQZJ4LkYx5N/yZPAUZNQQ0V4f3BQllWrK3YRzl30dOT6RVn2upNur6woSa8CqpdT/aKnBM4o3jNur9d9xqtUT6veBEt9Ca9at+ERzEEhUkR8sa5mQ4aVvJoVeEA8zI4ei5mULXFGyU7z/6TAeYLVcpzSWZY8PYYF5yrTV60sT0+XV141vX++Wf16V2bFeGVPZXxFpkvyeKTWLlzfW0mnKxsY6Y3294/0998SCfX1blm5pbcvFGlq/r07MRAMhYIDiW5JFKWW3vdrEpCsZSJG+om7Zu/PSScZJhNkLbmW5Wsr12pWqW5zKtlwRS4bFOxUw17mCzy6lskCDl1WYOGWDYrADrMA7BDDweWWNd5koiJnR1dz+ytLP2q0SqPB1lnK2ccB7RYe4FSoPks3iB3t4txTSHctb2sy1ivk0pvHuCNm6w1f6wxv3+OCgN78LqdQnUVh7R0oTAp0zOf2rbW770Vu5C2dIyGdTnHo8zSji7dppj0USoVCz+lhRMTh53Teq9VbGfbjuSbAooSdXayY4PYHg374C6f7gl1B/DXuJ4/QXxOBdJFJspFsI3egpoWUUCjlTIFnNYNl+ZyZKmBeYKGHkD1QyDlhaKbKwKcIJqJ4TLJ2OmdY/JWXae4DdGBw8HZ7eXcgFF2zr2SoalDry5iKqoa0Puhe3hPQ2s3elTYM+MI+n3rK0KgL7/La3GeMLt6m7u912vGnvtORiIa0qBmhqVi+XW9XNBmqb8eVgKzIHfGI5bNoG7X0UCzeISmqIcO/nY8FH7U8avX9fx/ST+hx0sezPw9Qy8Mum3GWf2N4Uy/yIYGVBXbJHWIZp7dfTcptdMTr9Qmq7DaiK/ukqCL4kt4RUfS5XPnMtmT22/mQFqF7emSqtrlu8SVElxDRJrZODkpuwe0VfTfjdEp1f7A7v+fozNBXUJ/6WTuK2TtFlpFVZAZ3LcFvUi1Z2p2YT+EMAkGJVStOzLTAPg4IqWIAlzRSjOBkl2zxj3TKycpzT/MnvX3uaSMWM+gU0rkXjohhefVRMaps3/kLMSKv23lT23uxQrkQjyOJleMDsdhAnD6ZGElWZ5MjCXzCE/hkWX+WF4knzGhVOyK2eQZekV3eyo0zL8kuYWCnDCvjjhAkcTPOBDXVdoav3HVcFnQjLvtV9S2p0zA6JegPwMQxt+yFb3ll9zGlq/5dRKb3cEyQYoaNYpharJ7xCB7AWxsLY3jjZXY0XsZj0Wjwc9I6PP/dKABnCZaqHpaZEACxk4ZeLZSKNgZABl+lYQX1sJQOSX3n6r410evcoud5JeAGUXVP9H1tZOKejTq4Ono0z0erro1FrnOpohva1d/hTdtVsQdKN5W9RlT3NjD0nznyKNTgKAMfWNWcyodV0IGLPIHOF0o4JyqufaK4z6WIIzuGh3d8c8cwQg8ER+OVxyrjdm8vNuhts4LoOihGxIMuUdgzwiYN7xhh1+oZnJNuTG7gQZvu4XWZ9GAZZjGEubwePqYhtKDTH+9VQkl17/iGybsnJ+8+sKtyPrcll9ty65Zsdst/9iqpEKh7M5VdBxh3csOdNc6tW3I1uyM1PzOXegSOrLFsFNI2O27M+TF2ApnN9MUv5ud6LjxIvEQnHRzxIu4IsA9MLFkJn2tcZoZ7ON7dXe7ujrc8HrusPKamlqXwd77lQUuLpilau4PUMapueBb7irU4RoUXEYXuVuIGlRGmOp+2lNkaRPVziOqmlaZvaqG4dFgSj0jxEJWrv12IUWntmw+rfQarRE0Aph4ocI6nlUlGqs+u3/+T/ethW62PpHp2eHbZstnh/wOO95yDAHicY2BkYGAAYi2NOJ94fpuvDNzML4AiDNc/fzqEoP+/Zp7KdAvI5WBgAokCAGkcDfgAAAB4nGNgZGBgDvqfBSRfMAAB81QGRgZUoA0AVvYDbwAAAHicY2BgYGB+MTQwAM8EJo8AAAAAAE4AmgDoAQoBLAFOAXABmgHEAe4CGgKcAugEmgS8BNYE8gUOBSoFegXQBf4GRAZmBrYHGAeQCBgIUghqCP4JRgm+CdoKBAo8CoIKuArwC1ALlgu8eJxjYGRgYNBmTGEQZQABJiDmAkIGhv9gPgMAGJQBvAB4nG2RPU7DMBiG3/QP0UoIBGJh8QILavozdmRo9w7d09RpUzlx5LgVvQMn4BAcgoEzcAgOwVvzSZVQbcnf48fvFysJgGt8IcJxROiG9TgauODuj5ukG+EW+UG4jR4ehTv0Q+EunjER7uEWmk+IWpc0d3gVbuAKb8JN+nfhFvlDuI17fAp36L+Fu1jgR7iHp+jF7Arbz1Nb1nO93pnEncSJFtrVuS3VKB6e5EyX2iVer9TyoOr9eux9pjJnCzW1pdfGWFU5u9WpjzfeV5PBIBMfp7aAwQ4FLPrIkbKWqDHn+67pDRK4s4lzbsEux5qHvcIIMb/nueSMyTKkE3jWFdNLHLjW2PPmMa1Hxn3GjGW/wjT0HtOG09JU4WxLk9LH2ISuiv9twJn9y8fh9uIXI+BknAAAAHicbY7ZboMwEEW5CVBCSLrv+76kfJRjTwHFsdGAG+Xvy5JUfehIHp0rnxmNN/D6ir3/a4YBhvARIMQOIowQY4wEE0yxiz3s4wCHOMIxTnCKM5zjApe4wjVucIs73OMBj3jCM17wije84wMzfHqJ0EVmUkmmJo77oOmrHvfIRZbXsTCZplTZldlgb3TYGVHProwFs11t1A57tcON2rErR3PBqcwF1/6ctI6k0GSU4JHMSS6WghdJQ99sTbfuN7QLJ9vQ37dNrgyktnIxlDYLJNuqitpRbYWKFNuyDT6pog6oOYKHtKakeakqKjHXpPwlGRcsC+OqxLIiJpXqoqqDMreG2l5bv9Ri3TRX+c23DZna9WFFgmXuO6Ps1Jm/w6ErW8N3FbHn/QC444j0AA==) format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    html {
+      --lumo-icons-align-center: "\\ea01";
+      --lumo-icons-align-left: "\\ea02";
+      --lumo-icons-align-right: "\\ea03";
+      --lumo-icons-angle-down: "\\ea04";
+      --lumo-icons-angle-left: "\\ea05";
+      --lumo-icons-angle-right: "\\ea06";
+      --lumo-icons-angle-up: "\\ea07";
+      --lumo-icons-arrow-down: "\\ea08";
+      --lumo-icons-arrow-left: "\\ea09";
+      --lumo-icons-arrow-right: "\\ea0a";
+      --lumo-icons-arrow-up: "\\ea0b";
+      --lumo-icons-bar-chart: "\\ea0c";
+      --lumo-icons-bell: "\\ea0d";
+      --lumo-icons-calendar: "\\ea0e";
+      --lumo-icons-checkmark: "\\ea0f";
+      --lumo-icons-chevron-down: "\\ea10";
+      --lumo-icons-chevron-left: "\\ea11";
+      --lumo-icons-chevron-right: "\\ea12";
+      --lumo-icons-chevron-up: "\\ea13";
+      --lumo-icons-clock: "\\ea14";
+      --lumo-icons-cog: "\\ea15";
+      --lumo-icons-cross: "\\ea16";
+      --lumo-icons-download: "\\ea17";
+      --lumo-icons-dropdown: "\\ea18";
+      --lumo-icons-edit: "\\ea19";
+      --lumo-icons-error: "\\ea1a";
+      --lumo-icons-eye: "\\ea1b";
+      --lumo-icons-eye-disabled: "\\ea1c";
+      --lumo-icons-menu: "\\ea1d";
+      --lumo-icons-minus: "\\ea1e";
+      --lumo-icons-ordered-list: "\\ea1f";
+      --lumo-icons-phone: "\\ea20";
+      --lumo-icons-photo: "\\ea21";
+      --lumo-icons-play: "\\ea22";
+      --lumo-icons-plus: "\\ea23";
+      --lumo-icons-redo: "\\ea24";
+      --lumo-icons-reload: "\\ea25";
+      --lumo-icons-search: "\\ea26";
+      --lumo-icons-undo: "\\ea27";
+      --lumo-icons-unordered-list: "\\ea28";
+      --lumo-icons-upload: "\\ea29";
+      --lumo-icons-user: "\\ea2a";
+    }
+  </style>
+</custom-style>`;
+document.head.appendChild($_documentContainer$6.content);
+
+const $_documentContainer$7 = document.createElement('template');
+$_documentContainer$7.innerHTML = `<dom-module id="lumo-overlay">
+  <template>
+    <style>
+      :host {
+        top: var(--lumo-space-m);
+        right: var(--lumo-space-m);
+        bottom: var(--lumo-space-m);
+        left: var(--lumo-space-m);
+        /* Workaround for Edge issue (only on Surface), where an overflowing vaadin-list-box inside vaadin-select-overlay makes the overlay transparent */
+        /* stylelint-disable-next-line */
+        outline: 0px solid transparent;
+      }
+
+      [part="overlay"] {
+        background-color: var(--lumo-base-color);
+        background-image: linear-gradient(var(--lumo-tint-5pct), var(--lumo-tint-5pct));
+        border-radius: var(--lumo-border-radius-m);
+        box-shadow: 0 0 0 1px var(--lumo-shade-5pct), var(--lumo-box-shadow-m);
+        color: var(--lumo-body-text-color);
+        font-family: var(--lumo-font-family);
+        font-size: var(--lumo-font-size-m);
+        font-weight: 400;
+        line-height: var(--lumo-line-height-m);
+        letter-spacing: 0;
+        text-transform: none;
+        -webkit-text-size-adjust: 100%;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      [part="content"] {
+        padding: var(--lumo-space-xs);
+      }
+
+      [part="backdrop"] {
+        background-color: var(--lumo-shade-20pct);
+        animation: 0.2s lumo-overlay-backdrop-enter both;
+        will-change: opacity;
+      }
+
+      @keyframes lumo-overlay-backdrop-enter {
+        0% {
+          opacity: 0;
+        }
+      }
+
+      :host([closing]) [part="backdrop"] {
+        animation: 0.2s lumo-overlay-backdrop-exit both;
+      }
+
+      @keyframes lumo-overlay-backdrop-exit {
+        100% {
+          opacity: 0;
+        }
+      }
+
+      @keyframes lumo-overlay-dummy-animation {
+        0% { opacity: 1; }
+        100% { opacity: 1; }
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$7.content);
+
+const $_documentContainer$8 = document.createElement('template');
+$_documentContainer$8.innerHTML = `<dom-module id="lumo-menu-overlay-core">
+  <template>
+    <style>
+      :host([opening]),
+      :host([closing]) {
+        animation: 0.14s lumo-overlay-dummy-animation;
+      }
+
+      [part="overlay"] {
+        will-change: opacity, transform;
+      }
+
+      :host([opening]) [part="overlay"] {
+        animation: 0.1s lumo-menu-overlay-enter ease-out both;
+      }
+
+      @keyframes lumo-menu-overlay-enter {
+        0% {
+          opacity: 0;
+          transform: translateY(-4px);
+        }
+      }
+
+      :host([closing]) [part="overlay"] {
+        animation: 0.1s lumo-menu-overlay-exit both;
+      }
+
+      @keyframes lumo-menu-overlay-exit {
+        100% {
+          opacity: 0;
+        }
+      }
+    </style>
+  </template>
+</dom-module><dom-module id="lumo-menu-overlay">
+  <template>
+    <style include="lumo-overlay lumo-menu-overlay-core">
+      /* Small viewport (bottom sheet) styles */
+      /* Use direct media queries instead of the state attributes (\`[phone]\` and \`[fullscreen]\`) provided by the elements */
+      @media (max-width: 420px), (max-height: 420px) {
+        :host {
+          top: 0 !important;
+          right: 0 !important;
+          bottom: var(--vaadin-overlay-viewport-bottom, 0) !important;
+          left: 0 !important;
+          align-items: stretch !important;
+          justify-content: flex-end !important;
+        }
+
+        [part="overlay"] {
+          max-height: 50vh;
+          width: 100vw;
+          border-radius: 0;
+          box-shadow: var(--lumo-box-shadow-xl);
+        }
+
+        /* The content part scrolls instead of the overlay part, because of the gradient fade-out */
+        [part="content"] {
+          padding: 30px var(--lumo-space-m);
+          max-height: inherit;
+          box-sizing: border-box;
+          -webkit-overflow-scrolling: touch;
+          overflow: auto;
+          -webkit-mask-image: linear-gradient(transparent, #000 40px, #000 calc(100% - 40px), transparent);
+          mask-image: linear-gradient(transparent, #000 40px, #000 calc(100% - 40px), transparent);
+        }
+
+        [part="backdrop"] {
+          display: block;
+        }
+
+        /* Animations */
+
+        :host([opening]) [part="overlay"] {
+          animation: 0.2s lumo-mobile-menu-overlay-enter cubic-bezier(.215, .61, .355, 1) both;
+        }
+
+        :host([closing]),
+        :host([closing]) [part="backdrop"] {
+          animation-delay: 0.14s;
+        }
+
+        :host([closing]) [part="overlay"] {
+          animation: 0.14s 0.14s lumo-mobile-menu-overlay-exit cubic-bezier(.55, .055, .675, .19) both;
+        }
+      }
+
+      @keyframes lumo-mobile-menu-overlay-enter {
+        0% {
+          transform: translateY(150%);
+        }
+      }
+
+      @keyframes lumo-mobile-menu-overlay-exit {
+        100% {
+          transform: translateY(150%);
+        }
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$8.content);
+
+const $_documentContainer$9 = document.createElement('template');
+$_documentContainer$9.innerHTML = `<dom-module id="lumo-field-button">
+  <template>
+    <style>
+      [part\$="button"] {
+        flex: none;
+        width: 1em;
+        height: 1em;
+        line-height: 1;
+        font-size: var(--lumo-icon-size-m);
+        text-align: center;
+        color: var(--lumo-contrast-60pct);
+        transition: 0.2s color;
+        cursor: var(--lumo-clickable-cursor);
+      }
+
+      :host(:not([readonly])) [part\$="button"]:hover {
+        color: var(--lumo-contrast-90pct);
+      }
+
+      :host([disabled]) [part\$="button"],
+      :host([readonly]) [part\$="button"] {
+        color: var(--lumo-contrast-20pct);
+      }
+
+      [part\$="button"]::before {
+        font-family: "lumo-icons";
+        display: block;
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$9.content);
+
+const $_documentContainer$a = document.createElement('template');
+$_documentContainer$a.innerHTML = `<dom-module id="lumo-required-field">
+  <template>
+    <style>
+      [part="label"] {
+        align-self: flex-start;
+        color: var(--lumo-secondary-text-color);
+        font-weight: 500;
+        font-size: var(--lumo-font-size-s);
+        margin-left: calc(var(--lumo-border-radius-m) / 4);
+        transition: color 0.2s;
+        line-height: 1;
+        padding-bottom: 0.5em;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        position: relative;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      :host([has-label])::before {
+        margin-top: calc(var(--lumo-font-size-s) * 1.5);
+      }
+
+      :host([has-label]) {
+        padding-top: var(--lumo-space-m);
+      }
+
+      :host([required]) [part="label"] {
+        padding-right: 1em;
+      }
+
+      [part="label"]::after {
+        content: var(--lumo-required-field-indicator, "•");
+        transition: opacity 0.2s;
+        opacity: 0;
+        color: var(--lumo-primary-text-color);
+        position: absolute;
+        right: 0;
+        width: 1em;
+        text-align: center;
+      }
+
+      :host([required]:not([has-value])) [part="label"]::after {
+        opacity: 1;
+      }
+
+      :host([invalid]) [part="label"]::after {
+        color: var(--lumo-error-text-color);
+      }
+
+      [part="error-message"] {
+        margin-left: calc(var(--lumo-border-radius-m) / 4);
+        font-size: var(--lumo-font-size-xs);
+        line-height: var(--lumo-line-height-xs);
+        color: var(--lumo-error-text-color);
+        will-change: max-height;
+        transition: 0.4s max-height;
+        max-height: 5em;
+      }
+
+      /* Margin that doesn’t reserve space when there’s no error message */
+      [part="error-message"]:not(:empty)::before,
+      [part="error-message"]:not(:empty)::after {
+        content: "";
+        display: block;
+        height: 0.4em;
+      }
+
+      :host(:not([invalid])) [part="error-message"] {
+        max-height: 0;
+        overflow: hidden;
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$a.content);
+
+const $_documentContainer$b = html$1`<dom-module id="lumo-text-field" theme-for="vaadin-text-field">
+  <template>
+    <style include="lumo-required-field lumo-field-button">
+      :host {
+        --lumo-text-field-size: var(--lumo-size-m);
+        color: var(--lumo-body-text-color);
+        font-size: var(--lumo-font-size-m);
+        font-family: var(--lumo-font-family);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-tap-highlight-color: transparent;
+        padding: var(--lumo-space-xs) 0;
+      }
+
+      :host::before {
+        height: var(--lumo-text-field-size);
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      :host([focused]:not([readonly])) [part="label"] {
+        color: var(--lumo-primary-text-color);
+      }
+
+      [part="value"],
+      [part="input-field"] ::slotted(input),
+      [part="input-field"] ::slotted(textarea),
+      /* Slotted by vaadin-select-text-field */
+      [part="input-field"] ::slotted([part="value"]) {
+        cursor: inherit;
+        min-height: var(--lumo-text-field-size);
+        padding: 0 0.25em;
+        --_lumo-text-field-overflow-mask-image: linear-gradient(to left, transparent, #000 1.25em);
+        -webkit-mask-image: var(--_lumo-text-field-overflow-mask-image);
+      }
+
+      [part="value"]:focus,
+      [part="input-field"] ::slotted(input):focus,
+      [part="input-field"] ::slotted(textarea):focus {
+        -webkit-mask-image: none;
+        mask-image: none;
+      }
+
+      /*
+        TODO: CSS custom property in \`mask-image\` causes crash in Edge
+        see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/15415089/
+      */
+      @-moz-document url-prefix() {
+        [part="value"],
+        [part="input-field"] ::slotted(input),
+        [part="input-field"] ::slotted(textarea),
+        [part="input-field"] ::slotted([part="value"]) {
+          mask-image: var(--_lumo-text-field-overflow-mask-image);
+        }
+      }
+
+      [part="value"]::-webkit-input-placeholder {
+        color: inherit;
+        transition: opacity 0.175s 0.05s;
+        opacity: 0.5;
+      }
+
+      [part="value"]:-ms-input-placeholder {
+        color: inherit;
+        opacity: 0.5;
+      }
+
+      [part="value"]::-moz-placeholder {
+        color: inherit;
+        transition: opacity 0.175s 0.05s;
+        opacity: 0.5;
+      }
+
+      [part="value"]::placeholder {
+        color: inherit;
+        transition: opacity 0.175s 0.1s;
+        opacity: 0.5;
+      }
+
+      [part="input-field"] {
+        border-radius: var(--lumo-border-radius);
+        background-color: var(--lumo-contrast-10pct);
+        padding: 0 calc(0.375em + var(--lumo-border-radius) / 4 - 1px);
+        font-weight: 500;
+        line-height: 1;
+        position: relative;
+        cursor: text;
+        box-sizing: border-box;
+      }
+
+      /* Used for hover and activation effects */
+      [part="input-field"]::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        background-color: var(--lumo-contrast-50pct);
+        opacity: 0;
+        transition: transform 0.15s, opacity 0.2s;
+        transform-origin: 100% 0;
+      }
+
+      /* Hover */
+
+      :host(:hover:not([readonly]):not([focused])) [part="label"] {
+        color: var(--lumo-body-text-color);
+      }
+
+      :host(:hover:not([readonly]):not([focused])) [part="input-field"]::after {
+        opacity: 0.1;
+      }
+
+      /* Touch device adjustment */
+      @media (pointer: coarse) {
+        :host(:hover:not([readonly]):not([focused])) [part="label"] {
+          color: var(--lumo-secondary-text-color);
+        }
+
+        :host(:hover:not([readonly]):not([focused])) [part="input-field"]::after {
+          opacity: 0;
+        }
+
+        :host(:active:not([readonly]):not([focused])) [part="input-field"]::after {
+          opacity: 0.2;
+        }
+      }
+
+      /* Trigger when not focusing using the keyboard */
+      :host([focused]:not([focus-ring]):not([readonly])) [part="input-field"]::after {
+        transform: scaleX(0);
+        transition-duration: 0.15s, 1s;
+      }
+
+      /* Focus-ring */
+
+      :host([focus-ring]) [part="input-field"] {
+        box-shadow: 0 0 0 2px var(--lumo-primary-color-50pct);
+      }
+
+      /* Read-only and disabled */
+      :host([readonly]) [part="value"]::-webkit-input-placeholder,
+      :host([disabled]) [part="value"]::-webkit-input-placeholder {
+        opacity: 0;
+      }
+
+      :host([readonly]) [part="value"]:-ms-input-placeholder,
+      :host([disabled]) [part="value"]:-ms-input-placeholder {
+        opacity: 0;
+      }
+
+      :host([readonly]) [part="value"]::-moz-placeholder,
+      :host([disabled]) [part="value"]::-moz-placeholder {
+        opacity: 0;
+      }
+
+      :host([readonly]) [part="value"]::placeholder,
+      :host([disabled]) [part="value"]::placeholder {
+        opacity: 0;
+      }
+
+      /* Read-only */
+
+      :host([readonly]) [part="input-field"] {
+        color: var(--lumo-secondary-text-color);
+        background-color: transparent;
+        cursor: default;
+      }
+
+      :host([readonly]) [part="input-field"]::after {
+        background-color: transparent;
+        opacity: 1;
+        border: 1px dashed var(--lumo-contrast-30pct);
+      }
+
+      /* Disabled style */
+
+      :host([disabled]) {
+        pointer-events: none;
+      }
+
+      :host([disabled]) [part="input-field"] {
+        background-color: var(--lumo-contrast-5pct);
+      }
+
+      :host([disabled]) [part="label"],
+      :host([disabled]) [part="value"],
+      :host([disabled]) [part="input-field"] ::slotted(*) {
+        color: var(--lumo-disabled-text-color);
+        -webkit-text-fill-color: var(--lumo-disabled-text-color);
+      }
+
+      /* Invalid style */
+
+      :host([invalid]) [part="input-field"] {
+        background-color: var(--lumo-error-color-10pct);
+      }
+
+      :host([invalid]) [part="input-field"]::after {
+        background-color: var(--lumo-error-color-50pct);
+      }
+
+      :host([invalid][focus-ring]) [part="input-field"] {
+        box-shadow: 0 0 0 2px var(--lumo-error-color-50pct);
+      }
+
+      :host([input-prevented]) [part="input-field"] {
+        color: var(--lumo-error-text-color);
+      }
+
+      /* Small theme */
+
+      :host([theme~="small"]) {
+        font-size: var(--lumo-font-size-s);
+        --lumo-text-field-size: var(--lumo-size-s);
+      }
+
+      :host([theme~="small"][has-label]) [part="label"] {
+        font-size: var(--lumo-font-size-xs);
+      }
+
+      :host([theme~="small"][has-label]) [part="error-message"] {
+        font-size: var(--lumo-font-size-xxs);
+      }
+
+      /* Text align */
+
+      :host([theme~="align-center"]) [part="value"] {
+        text-align: center;
+        --_lumo-text-field-overflow-mask-image: none;
+      }
+
+      :host([theme~="align-right"]) [part="value"] {
+        text-align: right;
+        --_lumo-text-field-overflow-mask-image: none;
+      }
+
+      @-moz-document url-prefix() {
+        /* Firefox is smart enough to align overflowing text to right */
+        :host([theme~="align-right"]) [part="value"] {
+          --_lumo-text-field-overflow-mask-image: linear-gradient(to right, transparent 0.25em, #000 1.5em);
+        }
+      }
+
+      /* Slotted content */
+
+      [part="input-field"] ::slotted(:not([part]):not(iron-icon):not(input):not(textarea)) {
+        color: var(--lumo-secondary-text-color);
+        font-weight: 400;
+      }
+
+      /* Slotted icons */
+
+      [part="input-field"] ::slotted(iron-icon) {
+        color: var(--lumo-contrast-60pct);
+        width: var(--lumo-icon-size-m);
+        height: var(--lumo-icon-size-m);
+      }
+
+      /* Vaadin icons are based on a 16x16 grid (unlike Lumo and Material icons with 24x24), so they look too big by default */
+      [part="input-field"] ::slotted(iron-icon[icon^="vaadin:"]) {
+        padding: 0.25em;
+        box-sizing: border-box !important;
+      }
+
+      [part="clear-button"]::before {
+        content: var(--lumo-icons-cross);
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$b.content);
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+const $_documentContainer$c = document.createElement('template');
+$_documentContainer$c.innerHTML = `<dom-module id="vaadin-text-field-shared-styles">
+  <template>
+    <style>
+      :host {
+        display: inline-flex;
+        outline: none;
+      }
+
+      :host::before {
+        content: "\\2003";
+        width: 0;
+        display: inline-block;
+        /* Size and position this element on the same vertical position as the input-field element
+           to make vertical align for the host element work as expected */
+      }
+
+      :host([hidden]) {
+        display: none !important;
+      }
+
+      .vaadin-text-field-container,
+      .vaadin-text-area-container {
+        display: flex;
+        flex-direction: column;
+        min-width: 100%;
+        max-width: 100%;
+        width: var(--vaadin-text-field-default-width, 12em);
+      }
+
+      [part="label"]:empty {
+        display: none;
+      }
+
+      [part="input-field"] {
+        display: flex;
+        align-items: center;
+        flex: auto;
+      }
+
+      .vaadin-text-field-container [part="input-field"] {
+        flex-grow: 0;
+      }
+
+      /* Reset the native input styles */
+      [part="value"],
+      [part="input-field"] ::slotted(input),
+      [part="input-field"] ::slotted(textarea) {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        outline: none;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        min-width: 0;
+        font: inherit;
+        font-size: 1em;
+        line-height: normal;
+        color: inherit;
+        background-color: transparent;
+        /* Disable default invalid style in Firefox */
+        box-shadow: none;
+      }
+
+      [part="input-field"] ::slotted(*) {
+        flex: none;
+      }
+
+      [part="value"],
+      [part="input-field"] ::slotted(input),
+      [part="input-field"] ::slotted(textarea),
+      /* Slotted by vaadin-select-text-field */
+      [part="input-field"] ::slotted([part="value"]) {
+        flex: auto;
+        white-space: nowrap;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+      }
+
+      [part="input-field"] ::slotted(textarea) {
+        resize: none;
+      }
+
+      [part="value"]::-ms-clear,
+      [part="input-field"] ::slotted(input)::-ms-clear {
+        display: none;
+      }
+
+      [part="clear-button"] {
+        cursor: default;
+      }
+
+      [part="clear-button"]::before {
+        content: "✕";
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$c.content);
+const HOST_PROPS = {
+  default: ['list', 'autofocus', 'pattern', 'autocapitalize', 'autocorrect', 'maxlength', 'minlength', 'name', 'placeholder', 'autocomplete', 'title'],
+  accessible: ['disabled', 'readonly', 'required', 'invalid']
+};
+const PROP_TYPE = {
+  DEFAULT: 'default',
+  ACCESSIBLE: 'accessible'
+};
+/**
+ * @polymerMixin
+ * @mixes Vaadin.ControlStateMixin
+ */
+
+const TextFieldMixin = subclass => class VaadinTextFieldMixin extends ControlStateMixin(subclass) {
+  static get properties() {
+    return {
+      /**
+       * Whether the value of the control can be automatically completed by the browser.
+       * List of available options at:
+       * https://developer.mozilla.org/en/docs/Web/HTML/Element/input#attr-autocomplete
+       */
+      autocomplete: {
+        type: String
+      },
+
+      /**
+       * This is a property supported by Safari that is used to control whether
+       * autocorrection should be enabled when the user is entering/editing the text.
+       * Possible values are:
+       * on: Enable autocorrection.
+       * off: Disable autocorrection.
+       */
+      autocorrect: {
+        type: String
+      },
+
+      /**
+       * This is a property supported by Safari and Chrome that is used to control whether
+       * autocapitalization should be enabled when the user is entering/editing the text.
+       * Possible values are:
+       * characters: Characters capitalization.
+       * words: Words capitalization.
+       * sentences: Sentences capitalization.
+       * none: No capitalization.
+       */
+      autocapitalize: {
+        type: String
+      },
+
+      /**
+       * Specify that the value should be automatically selected when the field gains focus.
+       */
+      autoselect: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Set to true to display the clear icon which clears the input.
+       */
+      clearButtonVisible: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Error to show when the input value is invalid.
+       */
+      errorMessage: {
+        type: String,
+        value: ''
+      },
+
+      /**
+       * Object with translated strings used for localization. Has
+       * the following structure and default values:
+       *
+       * ```
+       * {
+       *   // Translation of the clear icon button accessible label
+       *   clear: 'Clear'
+       * }
+       * ```
+       */
+      i18n: {
+        type: Object,
+        value: () => {
+          return {
+            clear: 'Clear'
+          };
+        }
+      },
+
+      /**
+       * String used for the label element.
+       */
+      label: {
+        type: String,
+        value: '',
+        observer: '_labelChanged'
+      },
+
+      /**
+       * Maximum number of characters (in Unicode code points) that the user can enter.
+       */
+      maxlength: {
+        type: Number
+      },
+
+      /**
+       * Minimum number of characters (in Unicode code points) that the user can enter.
+       */
+      minlength: {
+        type: Number
+      },
+
+      /**
+       * The name of the control, which is submitted with the form data.
+       */
+      name: {
+        type: String
+      },
+
+      /**
+       * A hint to the user of what can be entered in the control.
+       */
+      placeholder: {
+        type: String
+      },
+
+      /**
+       * This attribute indicates that the user cannot modify the value of the control.
+       */
+      readonly: {
+        type: Boolean,
+        reflectToAttribute: true
+      },
+
+      /**
+       * Specifies that the user must fill in a value.
+       */
+      required: {
+        type: Boolean,
+        reflectToAttribute: true
+      },
+
+      /**
+       * The initial value of the control.
+       * It can be used for two-way data binding.
+       */
+      value: {
+        type: String,
+        value: '',
+        observer: '_valueChanged',
+        notify: true
+      },
+
+      /**
+       * This property is set to true when the control value is invalid.
+       */
+      invalid: {
+        type: Boolean,
+        reflectToAttribute: true,
+        notify: true,
+        value: false
+      },
+
+      /**
+       * Specifies that the text field has value.
+       */
+      hasValue: {
+        type: Boolean,
+        reflectToAttribute: true
+      },
+
+      /**
+       * When set to true, user is prevented from typing a value that
+       * conflicts with the given `pattern`.
+       */
+      preventInvalidInput: {
+        type: Boolean
+      },
+      _labelId: String,
+      _errorId: String,
+      _inputId: String
+    };
+  }
+
+  static get observers() {
+    return ['_stateChanged(disabled, readonly, clearButtonVisible, hasValue)', '_hostPropsChanged(' + HOST_PROPS.default.join(', ') + ')', '_hostAccessiblePropsChanged(' + HOST_PROPS.accessible.join(', ') + ')', '_getActiveErrorId(invalid, errorMessage, _errorId)', '_getActiveLabelId(label, _labelId, _inputId)', '__observeOffsetHeight(errorMessage, invalid, label)'];
+  }
+
+  get focusElement() {
+    if (!this.shadowRoot) {
+      return;
+    }
+
+    const slotted = this.querySelector(`${this._slottedTagName}[slot="${this._slottedTagName}"]`);
+
+    if (slotted) {
+      return slotted;
+    }
+
+    return this.shadowRoot.querySelector('[part="value"]');
+  }
+  /**
+   * @private
+   */
+
+
+  get inputElement() {
+    return this.focusElement;
+  }
+
+  get _slottedTagName() {
+    return 'input';
+  }
+
+  _createConstraintsObserver() {
+    // This complex observer needs to be added dynamically here (instead of defining it above in the `get observers()`)
+    // so that it runs after complex observers of inheriting classes. Otherwise e.g. `_stepOrMinChanged()` observer of
+    // vaadin-number-field would run after this and the `min` and `step` properties would not yet be propagated to
+    // the `inputElement` when this runs.
+    this._createMethodObserver('_constraintsChanged(required, minlength, maxlength, pattern)');
+  }
+
+  _onInput(e) {
+    if (this.__preventInput) {
+      e.stopImmediatePropagation();
+      this.__preventInput = false;
+      return;
+    }
+
+    if (this.preventInvalidInput) {
+      const input = this.inputElement;
+
+      if (input.value.length > 0 && !this.checkValidity()) {
+        input.value = this.value || ''; // add input-prevented attribute for 200ms
+
+        this.setAttribute('input-prevented', '');
+        this._inputDebouncer = Debouncer.debounce(this._inputDebouncer, timeOut.after(200), () => {
+          this.removeAttribute('input-prevented');
+        });
+        return;
+      }
+    }
+
+    if (!e.__fromClearButton) {
+      this.__userInput = true;
+    }
+
+    this.value = e.target.value;
+  } // NOTE(yuriy): Workaround needed for IE11 and Edge for proper displaying
+  // of the clear button instead of setting display property for it depending on state.
+
+
+  _stateChanged(disabled, readonly, clearButtonVisible, hasValue) {
+    if (!disabled && !readonly && clearButtonVisible && hasValue) {
+      this.$.clearButton.removeAttribute('hidden');
+    } else {
+      this.$.clearButton.setAttribute('hidden', true);
+    }
+  }
+
+  _onChange(e) {
+    if (this._valueClearing) {
+      return;
+    } // In the Shadow DOM, the `change` event is not leaked into the
+    // ancestor tree, so we must do this manually.
+
+
+    const changeEvent = new CustomEvent('change', {
+      detail: {
+        sourceEvent: e
+      },
+      bubbles: e.bubbles,
+      cancelable: e.cancelable
+    });
+    this.dispatchEvent(changeEvent);
+  }
+
+  _valueChanged(newVal, oldVal) {
+    // setting initial value to empty string, skip validation
+    if (newVal === '' && oldVal === undefined) {
+      return;
+    }
+
+    if (newVal !== '' && newVal != null) {
+      this.hasValue = true;
+    } else {
+      this.hasValue = false;
+    }
+
+    if (this.__userInput) {
+      this.__userInput = false;
+      return;
+    } else if (newVal !== undefined) {
+      this.inputElement.value = newVal;
+    } else {
+      this.value = this.inputElement.value = '';
+    }
+
+    if (this.invalid) {
+      this.validate();
+    }
+  }
+
+  _labelChanged(label) {
+    if (label !== '' && label != null) {
+      this.setAttribute('has-label', '');
+    } else {
+      this.removeAttribute('has-label');
+    }
+  }
+
+  _onSlotChange() {
+    const slotted = this.querySelector(`${this._slottedTagName}[slot="${this._slottedTagName}"]`);
+
+    if (this.value) {
+      this.inputElement.value = this.value;
+      this.validate();
+    }
+
+    if (slotted && !this._slottedInput) {
+      this._validateSlottedValue(slotted);
+
+      this._addInputListeners(slotted);
+
+      this._addIEListeners(slotted);
+
+      this._slottedInput = slotted;
+    } else if (!slotted && this._slottedInput) {
+      this._removeInputListeners(this._slottedInput);
+
+      this._removeIEListeners(this._slottedInput);
+
+      this._slottedInput = undefined;
+    }
+
+    Object.keys(PROP_TYPE).map(key => PROP_TYPE[key]).forEach(type => this._propagateHostAttributes(HOST_PROPS[type].map(attr => this[attr]), type));
+  }
+
+  _hostPropsChanged(...attributesValues) {
+    this._propagateHostAttributes(attributesValues, PROP_TYPE.DEFAULT);
+  }
+
+  _hostAccessiblePropsChanged(...attributesValues) {
+    this._propagateHostAttributes(attributesValues, PROP_TYPE.ACCESSIBLE);
+  }
+
+  _validateSlottedValue(slotted) {
+    if (slotted.value !== this.value) {
+      console.warn('Please define value on the vaadin-text-field component!');
+      slotted.value = '';
+    }
+  }
+
+  _propagateHostAttributes(attributesValues, type) {
+    const input = this.inputElement;
+    const attributeNames = HOST_PROPS[type];
+
+    if (type === 'accessible') {
+      attributeNames.forEach((attr, index) => {
+        this._setOrToggleAttribute(attr, attributesValues[index], input);
+
+        this._setOrToggleAttribute(`aria-${attr}`, attributesValues[index], input);
+      });
+    } else {
+      attributeNames.forEach((attr, index) => {
+        this._setOrToggleAttribute(attr, attributesValues[index], input);
+      });
+    }
+  }
+
+  _setOrToggleAttribute(name, value, node) {
+    if (!name || !node) {
+      return;
+    }
+
+    if (value) {
+      node.setAttribute(name, typeof value === 'boolean' ? '' : value);
+    } else {
+      node.removeAttribute(name);
+    }
+  }
+
+  _constraintsChanged(required, minlength, maxlength, pattern) {
+    if (!this.invalid) {
+      return;
+    }
+
+    if (!required && !minlength && !maxlength && !pattern) {
+      this.invalid = false;
+    } else {
+      this.validate();
+    }
+  }
+  /**
+   * Returns true if the current input value satisfies all constraints (if any)
+   * @returns {boolean}
+   */
+
+
+  checkValidity() {
+    if (this.required || this.pattern || this.maxlength || this.minlength) {
+      return this.inputElement.checkValidity();
+    } else {
+      return !this.invalid;
+    }
+  }
+
+  _addInputListeners(node) {
+    node.addEventListener('input', this._boundOnInput);
+    node.addEventListener('change', this._boundOnChange);
+    node.addEventListener('blur', this._boundOnBlur);
+    node.addEventListener('focus', this._boundOnFocus);
+  }
+
+  _removeInputListeners(node) {
+    node.removeEventListener('input', this._boundOnInput);
+    node.removeEventListener('change', this._boundOnChange);
+    node.removeEventListener('blur', this._boundOnBlur);
+    node.removeEventListener('focus', this._boundOnFocus);
+  }
+
+  ready() {
+    super.ready();
+
+    this._createConstraintsObserver();
+
+    this._boundOnInput = this._onInput.bind(this);
+    this._boundOnChange = this._onChange.bind(this);
+    this._boundOnBlur = this._onBlur.bind(this);
+    this._boundOnFocus = this._onFocus.bind(this);
+    const defaultInput = this.shadowRoot.querySelector('[part="value"]');
+    this._slottedInput = this.querySelector(`${this._slottedTagName}[slot="${this._slottedTagName}"]`);
+
+    this._addInputListeners(defaultInput);
+
+    this._addIEListeners(defaultInput);
+
+    if (this._slottedInput) {
+      this._addIEListeners(this._slottedInput);
+
+      this._addInputListeners(this._slottedInput);
+    }
+
+    this.shadowRoot.querySelector('[name="input"], [name="textarea"]').addEventListener('slotchange', this._onSlotChange.bind(this));
+
+    if (!(window.ShadyCSS && window.ShadyCSS.nativeCss)) {
+      this.updateStyles();
+    }
+
+    this.$.clearButton.addEventListener('mousedown', () => this._valueClearing = true);
+    this.$.clearButton.addEventListener('mouseleave', () => this._valueClearing = false);
+    this.$.clearButton.addEventListener('click', this._onClearButtonClick.bind(this));
+    this.addEventListener('keydown', this._onKeyDown.bind(this));
+    var uniqueId = TextFieldMixin._uniqueId = 1 + TextFieldMixin._uniqueId || 0;
+    this._errorId = `${this.constructor.is}-error-${uniqueId}`;
+    this._labelId = `${this.constructor.is}-label-${uniqueId}`;
+    this._inputId = `${this.constructor.is}-input-${uniqueId}`; // Lumo theme defines a max-height transition for the "error-message"
+    // part on invalid state change.
+
+    this.shadowRoot.querySelector('[part="error-message"]').addEventListener('transitionend', () => {
+      this.__observeOffsetHeight();
+    });
+  }
+  /**
+   * Returns true if `value` is valid.
+   * `<iron-form>` uses this to check the validity for all its elements.
+   *
+   * @return {boolean} True if the value is valid.
+   */
+
+
+  validate() {
+    return !(this.invalid = !this.checkValidity());
+  }
+
+  clear() {
+    this.value = '';
+  }
+
+  _onBlur() {
+    this.validate();
+  }
+
+  _onFocus() {
+    if (this.autoselect) {
+      this.inputElement.select(); // iOS 9 workaround: https://stackoverflow.com/a/7436574
+
+      setTimeout(() => {
+        try {
+          this.inputElement.setSelectionRange(0, 9999);
+        } catch (e) {// The workaround may cause errors on different input types.
+          // Needs to be suppressed. See https://github.com/vaadin/flow/issues/6070
+        }
+      });
+    }
+  }
+
+  _onClearButtonClick(e) {
+    e.preventDefault(); // NOTE(yuriy): This line won't affect focus on the host. Cannot be properly tested.
+
+    this.inputElement.focus();
+    this.clear();
+    this._valueClearing = false;
+
+    if (navigator.userAgent.match(/Trident/)) {
+      // Disable IE input" event prevention here, we want the input event from
+      // below to propagate normally.
+      this.__preventInput = false;
+    }
+
+    const inputEvent = new Event('input', {
+      bubbles: true,
+      composed: true
+    });
+    inputEvent.__fromClearButton = true;
+    const changeEvent = new Event('change', {
+      bubbles: !this._slottedInput
+    });
+    changeEvent.__fromClearButton = true;
+    this.inputElement.dispatchEvent(inputEvent);
+    this.inputElement.dispatchEvent(changeEvent);
+  }
+
+  _onKeyDown(e) {
+    if (e.keyCode === 27 && this.clearButtonVisible) {
+      const dispatchChange = !!this.value;
+      this.clear();
+      dispatchChange && this.inputElement.dispatchEvent(new Event('change', {
+        bubbles: !this._slottedInput
+      }));
+    }
+  }
+
+  _addIEListeners(node) {
+    /* istanbul ignore if */
+    if (navigator.userAgent.match(/Trident/)) {
+      // IE11 dispatches `input` event in following cases:
+      // - focus or blur, when placeholder attribute is set
+      // - placeholder attribute value changed
+      // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/101220/
+      this._shouldPreventInput = () => {
+        this.__preventInput = true;
+        requestAnimationFrame(() => {
+          this.__preventInput = false;
+        });
+      };
+
+      node.addEventListener('focusin', this._shouldPreventInput);
+      node.addEventListener('focusout', this._shouldPreventInput);
+
+      this._createPropertyObserver('placeholder', this._shouldPreventInput);
+    }
+  }
+
+  _removeIEListeners(node) {
+    /* istanbul ignore if */
+    if (navigator.userAgent.match(/Trident/)) {
+      node.removeEventListener('focusin', this._shouldPreventInput);
+      node.removeEventListener('focusout', this._shouldPreventInput);
+    }
+  }
+
+  _getActiveErrorId(invalid, errorMessage, errorId) {
+    this._setOrToggleAttribute('aria-describedby', errorMessage && invalid ? errorId : undefined, this.focusElement);
+  }
+
+  _getActiveLabelId(label, _labelId, _inputId) {
+    let ids = _inputId;
+
+    if (label) {
+      ids = `${_labelId} ${_inputId}`;
+    }
+
+    this.focusElement.setAttribute('aria-labelledby', ids);
+  }
+
+  _getErrorMessageAriaHidden(invalid, errorMessage, errorId) {
+    return (!(errorMessage && invalid ? errorId : undefined)).toString();
+  }
+
+  _dispatchIronResizeEventIfNeeded(sizePropertyName, value) {
+    const previousSizePropertyName = '__previous' + sizePropertyName;
+
+    if (this[previousSizePropertyName] !== undefined && this[previousSizePropertyName] !== value) {
+      this.dispatchEvent(new CustomEvent('iron-resize', {
+        bubbles: true
+      }));
+    }
+
+    this[previousSizePropertyName] = value;
+  }
+
+  __observeOffsetHeight() {
+    this._dispatchIronResizeEventIfNeeded('Height', this.offsetHeight);
+  }
+  /**
+   * @protected
+   */
+
+
+  attributeChangedCallback(prop, oldVal, newVal) {
+    super.attributeChangedCallback(prop, oldVal, newVal); // Needed until Edge has CSS Custom Properties (present in Edge Preview)
+
+    /* istanbul ignore if */
+
+    if (!(window.ShadyCSS && window.ShadyCSS.nativeCss) && /^(focused|focus-ring|invalid|disabled|placeholder|has-value)$/.test(prop)) {
+      this.updateStyles();
+    } // Safari has an issue with repainting shadow root element styles when a host attribute changes.
+    // Need this workaround (toggle any inline css property on and off) until the issue gets fixed.
+
+
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    /* istanbul ignore if */
+
+    if (isSafari && this.root) {
+      const WEBKIT_PROPERTY = '-webkit-backface-visibility';
+      this.root.querySelectorAll('*').forEach(el => {
+        el.style[WEBKIT_PROPERTY] = 'visible';
+        el.style[WEBKIT_PROPERTY] = '';
+      });
+    }
+  }
+  /**
+   * Fired when the user commits a value change.
+   *
+   * @event change
+   */
+
+  /**
+   * Fired when the value is changed by the user: on every typing keystroke,
+   * and the value is cleared using the clear button.
+   *
+   * @event input
+   */
+
+  /**
+   * Fired when the size of the element changes.
+   *
+   * @event iron-resize
+   */
+
+
+};
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+/**
+ * `<vaadin-text-field>` is a Web Component for text field control in forms.
+ *
+ * ```html
+ * <vaadin-text-field label="First Name">
+ * </vaadin-text-field>
+ * ```
+ *
+ * ### Prefixes and suffixes
+ *
+ * These are child elements of a `<vaadin-text-field>` that are displayed
+ * inline with the input, before or after.
+ * In order for an element to be considered as a prefix, it must have the slot
+ * attribute set to `prefix` (and similarly for `suffix`).
+ *
+ * ```html
+ * <vaadin-text-field label="Email address">
+ *   <div slot="prefix">Sent to:</div>
+ *   <div slot="suffix">@vaadin.com</div>
+ * </vaadin-text-area>
+ * ```
+ *
+ * ### Styling
+ *
+ * The following custom properties are available for styling:
+ *
+ * Custom property | Description | Default
+ * ----------------|-------------|-------------
+ * `--vaadin-text-field-default-width` | Set the default width of the input field | `12em`
+ *
+ * The following shadow DOM parts are available for styling:
+ *
+ * Part name | Description
+ * ----------------|----------------
+ * `label` | The label element
+ * `input-field` | The element that wraps prefix, value and suffix
+ * `value` | The text value element inside the `input-field` element
+ * `error-message` | The error message element
+ *
+ * The following state attributes are available for styling:
+ *
+ * Attribute    | Description | Part name
+ * -------------|-------------|------------
+ * `disabled` | Set to a disabled text field | :host
+ * `has-value` | Set when the element has a value | :host
+ * `has-label` | Set when the element has a label | :host
+ * `invalid` | Set when the element is invalid | :host
+ * `input-prevented` | Temporarily set when invalid input is prevented | :host
+ * `focused` | Set when the element is focused | :host
+ * `focus-ring` | Set when the element is keyboard focused | :host
+ * `readonly` | Set to a readonly text field | :host
+ *
+ * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
+ *
+ * @memberof Vaadin
+ * @mixes Vaadin.TextFieldMixin
+ * @mixes Vaadin.ThemableMixin
+ * @demo demo/index.html
+ */
+
+class TextFieldElement extends ElementMixin$1(TextFieldMixin(ThemableMixin(PolymerElement))) {
+  static get template() {
+    return html$1`
+    <style include="vaadin-text-field-shared-styles">
+      /* polymer-cli linter breaks with empty line */
+    </style>
+
+    <div class="vaadin-text-field-container">
+
+      <label part="label" on-click="focus" id="[[_labelId]]">[[label]]</label>
+
+      <div part="input-field" id="[[_inputId]]">
+
+        <slot name="prefix"></slot>
+
+        <slot name="input">
+          <input part="value">
+        </slot>
+
+        <div part="clear-button" id="clearButton" role="button" aria-label\$="[[i18n.clear]]"></div>
+        <slot name="suffix"></slot>
+
+      </div>
+
+      <div part="error-message" id="[[_errorId]]" aria-live="assertive" aria-hidden\$="[[_getErrorMessageAriaHidden(invalid, errorMessage, _errorId)]]">[[errorMessage]]</div>
+
+    </div>
+`;
+  }
+
+  static get is() {
+    return 'vaadin-text-field';
+  }
+
+  static get version() {
+    return '2.4.12';
+  }
+
+  static get properties() {
+    return {
+      /**
+       * Identifies a list of pre-defined options to suggest to the user.
+       * The value must be the id of a <datalist> element in the same document.
+       */
+      list: {
+        type: String
+      },
+
+      /**
+       * A regular expression that the value is checked against.
+       * The pattern must match the entire value, not just some subset.
+       */
+      pattern: {
+        type: String
+      },
+
+      /**
+       * Message to show to the user when validation fails.
+       */
+      title: {
+        type: String
+      }
+    };
+  }
+
+}
+
+customElements.define(TextFieldElement.is, TextFieldElement);
+
+const $_documentContainer$d = html$1`<dom-module id="lumo-item" theme-for="vaadin-item">
+  <template>
+    <style>
+      :host {
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        font-family: var(--lumo-font-family);
+        font-size: var(--lumo-font-size-m);
+        line-height: var(--lumo-line-height-xs);
+        padding: 0.5em 1em;
+        min-height: var(--lumo-size-m);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      /* Selectable items have a checkmark icon */
+      :host([tabindex])::before {
+        display: var(--_lumo-item-selected-icon-display, none);
+        content: var(--lumo-icons-checkmark);
+        font-family: lumo-icons;
+        font-size: var(--lumo-icon-size-m);
+        line-height: 1;
+        font-weight: normal;
+        width: 1em;
+        height: 1em;
+        margin: calc((1 - var(--lumo-line-height-xs)) * var(--lumo-font-size-m) / 2) 0;
+        color: var(--lumo-primary-text-color);
+        flex: none;
+        opacity: 0;
+        transition: transform 0.2s cubic-bezier(.12, .32, .54, 2), opacity 0.1s;
+      }
+
+      :host([selected])::before {
+        opacity: 1;
+      }
+
+      :host([active]:not([selected]))::before {
+        transform: scale(0.8);
+        opacity: 0;
+        transition-duration: 0s;
+      }
+
+      [part="content"] {
+        flex: auto;
+      }
+
+      /* Disabled item */
+
+      :host([disabled]) {
+        color: var(--lumo-disabled-text-color);
+        cursor: default;
+        pointer-events: none;
+      }
+
+      /* Slotted icons */
+
+      :host ::slotted(iron-icon) {
+        width: var(--lumo-icon-size-m);
+        height: var(--lumo-icon-size-m);
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$d.content);
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+
+/**
+ * A mixin providing `focused`, `focus-ring`, `active`, `disabled` and `selected`.
+ *
+ * `focused`, `active` and `focus-ring` are set as only as attributes.
+ * @polymerMixin
+ */
+const ItemMixin = superClass => class VaadinItemMixin extends superClass {
+  static get properties() {
+    return {
+      /**
+       * Used for mixin detection because `instanceof` does not work with mixins.
+       * e.g. in VaadinListMixin it filters items by using the
+       * `element._hasVaadinItemMixin` condition.
+       */
+      _hasVaadinItemMixin: {
+        value: true
+      },
+
+      /**
+       * If true, the user cannot interact with this element.
+       */
+      disabled: {
+        type: Boolean,
+        value: false,
+        observer: '_disabledChanged',
+        reflectToAttribute: true
+      },
+
+      /**
+       * If true, the item is in selected state.
+       */
+      selected: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+        observer: '_selectedChanged'
+      },
+      _value: String
+    };
+  }
+
+  get value() {
+    return this._value !== undefined ? this._value : this.textContent.trim();
+  }
+
+  set value(value) {
+    this._value = value;
+  }
+
+  ready() {
+    super.ready();
+    const attrValue = this.getAttribute('value');
+
+    if (attrValue !== null) {
+      this.value = attrValue;
+    }
+
+    this.addEventListener('focus', e => this._setFocused(true), true);
+    this.addEventListener('blur', e => this._setFocused(false), true);
+    this.addEventListener('mousedown', e => {
+      this._setActive(this._mousedown = true);
+
+      const mouseUpListener = () => {
+        this._setActive(this._mousedown = false);
+
+        document.removeEventListener('mouseup', mouseUpListener);
+      };
+
+      document.addEventListener('mouseup', mouseUpListener);
+    });
+    this.addEventListener('keydown', e => this._onKeydown(e));
+    this.addEventListener('keyup', e => this._onKeyup(e));
+  }
+  /**
+   * @protected
+   */
+
+
+  disconnectedCallback() {
+    super.disconnectedCallback(); // in Firefox and Safari, blur does not fire on the element when it is removed,
+    // especially between keydown and keyup events, being active at the same time.
+    // reproducible in `<vaadin-select>` when closing overlay on select.
+
+    if (this.hasAttribute('active')) {
+      this._setFocused(false);
+    }
+  }
+
+  _selectedChanged(selected) {
+    this.setAttribute('aria-selected', selected);
+  }
+
+  _disabledChanged(disabled) {
+    if (disabled) {
+      this.selected = false;
+      this.setAttribute('aria-disabled', 'true');
+      this.blur();
+    } else {
+      this.removeAttribute('aria-disabled');
+    }
+  }
+
+  _setFocused(focused) {
+    if (focused) {
+      this.setAttribute('focused', '');
+
+      if (!this._mousedown) {
+        this.setAttribute('focus-ring', '');
+      }
+    } else {
+      this.removeAttribute('focused');
+      this.removeAttribute('focus-ring');
+
+      this._setActive(false);
+    }
+  }
+
+  _setActive(active) {
+    if (active) {
+      this.setAttribute('active', '');
+    } else {
+      this.removeAttribute('active');
+    }
+  }
+
+  _onKeydown(event) {
+    if (/^( |SpaceBar|Enter)$/.test(event.key) && !event.defaultPrevented) {
+      event.preventDefault();
+
+      this._setActive(true);
+    }
+  }
+
+  _onKeyup(event) {
+    if (this.hasAttribute('active')) {
+      this._setActive(false);
+
+      this.click();
+    }
+  }
+
+};
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+/**
+ * `<vaadin-item>` is a Web Component providing layout for items in tabs and menus.
+ *
+ * ```
+ *   <vaadin-item>
+ *     Item content
+ *   </vaadin-item>
+ * ```
+ *
+ * ### Selectable
+ *
+ * `<vaadin-item>` has the `selected` property and the corresponding state attribute.
+ * Currently, the component sets the `selected` to false, when `disabled` property is set to true.
+ * But other than that, the `<vaadin-item>` does not switch selection by itself.
+ * In general, it is the wrapper component, like `<vaadin-list-box>`, which should update
+ * the `selected` property on the items, e. g. on mousedown or when Enter / Spacebar is pressed.
+ *
+ * ### Styling
+ *
+ * The following shadow DOM parts are available for styling:
+ *
+ * Part name | Description
+ * ---|---
+ * `content` | The element that wraps the slot
+ *
+ * The following state attributes are available for styling:
+ *
+ * Attribute  | Description | Part name
+ * -----------|-------------|------------
+ * `disabled` | Set to a disabled item | :host
+ * `focused` | Set when the element is focused | :host
+ * `focus-ring` | Set when the element is keyboard focused | :host
+ * `selected` | Set when the item is selected | :host
+ * `active` | Set when mousedown or enter/spacebar pressed | :host
+ *
+ * @memberof Vaadin
+ * @mixes Vaadin.ItemMixin
+ * @mixes Vaadin.ThemableMixin
+ */
+
+class ItemElement extends ItemMixin(ThemableMixin(PolymerElement)) {
+  static get template() {
+    return html$1`
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      :host([hidden]) {
+        display: none !important;
+      }
+    </style>
+    <div part="content">
+      <slot></slot>
+    </div>
+`;
+  }
+
+  static get is() {
+    return 'vaadin-item';
+  }
+
+  static get version() {
+    return '2.1.1';
+  }
+
+  constructor() {
+    super();
+    /**
+     * Submittable string value. The default value is the trimmed text content of the element.
+     * @type {string}
+     */
+
+    this.value;
+  }
+
+}
+
+customElements.define(ItemElement.is, ItemElement);
+
+const $_documentContainer$e = html$1`<dom-module id="lumo-list-box" theme-for="vaadin-list-box">
+  <template>
+    <style>
+      :host {
+        -webkit-tap-highlight-color: transparent;
+        --_lumo-item-selected-icon-display: var(--_lumo-list-box-item-selected-icon-display, block);
+      }
+
+      /* IE11 flexbox issue workaround (vaadin-items are flex containers with min-height) */
+      [part="items"] {
+        display: flex;
+        flex-direction: column;
+      }
+
+      [part="items"] ::slotted(*) {
+        flex: none;
+      }
+
+      /* Normal item */
+
+      [part="items"] ::slotted(vaadin-item) {
+        -webkit-tap-highlight-color: var(--lumo-primary-color-10pct);
+        cursor: default;
+      }
+
+      [part="items"] ::slotted(vaadin-item) {
+        outline: none;
+        border-radius: var(--lumo-border-radius);
+        padding-left: var(--_lumo-list-box-item-padding-left, calc(var(--lumo-border-radius) / 4));
+        padding-right: calc(var(--lumo-space-l) + var(--lumo-border-radius) / 4);
+      }
+
+      /* Workaround to display checkmark in IE11 when list-box is not used in dropdown-menu */
+      [part="items"] ::slotted(vaadin-item)::before {
+        display: var(--_lumo-item-selected-icon-display);
+      }
+
+      /* Hovered item */
+      /* TODO a workaround until we have "focus-follows-mouse". After that, use the hover style for focus-ring as well */
+
+      [part="items"] ::slotted(vaadin-item:hover:not([disabled])) {
+        background-color: var(--lumo-primary-color-10pct);
+      }
+
+      /* Focused item */
+
+      [part="items"] ::slotted([focus-ring]:not([disabled])) {
+        box-shadow: inset 0 0 0 2px var(--lumo-primary-color-50pct);
+      }
+
+      @media (pointer: coarse) {
+        [part="items"] ::slotted(vaadin-item:hover:not([disabled])) {
+          background-color: transparent;
+        }
+
+        [part="items"] ::slotted([focus-ring]:not([disabled])) {
+          box-shadow: none;
+        }
+      }
+
+      /* Easily add section dividers */
+
+      [part="items"] ::slotted(hr) {
+        height: 1px;
+        border: 0;
+        padding: 0;
+        margin: var(--lumo-space-s) var(--lumo-border-radius);
+        background-color: var(--lumo-contrast-10pct);
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$e.content);
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+
+function newSplice(index, removed, addedCount) {
+  return {
+    index: index,
+    removed: removed,
+    addedCount: addedCount
+  };
+}
+
+const EDIT_LEAVE = 0;
+const EDIT_UPDATE = 1;
+const EDIT_ADD = 2;
+const EDIT_DELETE = 3; // Note: This function is *based* on the computation of the Levenshtein
+// "edit" distance. The one change is that "updates" are treated as two
+// edits - not one. With Array splices, an update is really a delete
+// followed by an add. By retaining this, we optimize for "keeping" the
+// maximum array items in the original array. For example:
+//
+//   'xxxx123' -> '123yyyy'
+//
+// With 1-edit updates, the shortest path would be just to update all seven
+// characters. With 2-edit updates, we delete 4, leave 3, and add 4. This
+// leaves the substring '123' intact.
+
+function calcEditDistances(current, currentStart, currentEnd, old, oldStart, oldEnd) {
+  // "Deletion" columns
+  let rowCount = oldEnd - oldStart + 1;
+  let columnCount = currentEnd - currentStart + 1;
+  let distances = new Array(rowCount); // "Addition" rows. Initialize null column.
+
+  for (let i = 0; i < rowCount; i++) {
+    distances[i] = new Array(columnCount);
+    distances[i][0] = i;
+  } // Initialize null row
+
+
+  for (let j = 0; j < columnCount; j++) distances[0][j] = j;
+
+  for (let i = 1; i < rowCount; i++) {
+    for (let j = 1; j < columnCount; j++) {
+      if (equals(current[currentStart + j - 1], old[oldStart + i - 1])) distances[i][j] = distances[i - 1][j - 1];else {
+        let north = distances[i - 1][j] + 1;
+        let west = distances[i][j - 1] + 1;
+        distances[i][j] = north < west ? north : west;
+      }
+    }
+  }
+
+  return distances;
+} // This starts at the final weight, and walks "backward" by finding
+// the minimum previous weight recursively until the origin of the weight
+// matrix.
+
+
+function spliceOperationsFromEditDistances(distances) {
+  let i = distances.length - 1;
+  let j = distances[0].length - 1;
+  let current = distances[i][j];
+  let edits = [];
+
+  while (i > 0 || j > 0) {
+    if (i == 0) {
+      edits.push(EDIT_ADD);
+      j--;
+      continue;
+    }
+
+    if (j == 0) {
+      edits.push(EDIT_DELETE);
+      i--;
+      continue;
+    }
+
+    let northWest = distances[i - 1][j - 1];
+    let west = distances[i - 1][j];
+    let north = distances[i][j - 1];
+    let min;
+    if (west < north) min = west < northWest ? west : northWest;else min = north < northWest ? north : northWest;
+
+    if (min == northWest) {
+      if (northWest == current) {
+        edits.push(EDIT_LEAVE);
+      } else {
+        edits.push(EDIT_UPDATE);
+        current = northWest;
+      }
+
+      i--;
+      j--;
+    } else if (min == west) {
+      edits.push(EDIT_DELETE);
+      i--;
+      current = west;
+    } else {
+      edits.push(EDIT_ADD);
+      j--;
+      current = north;
+    }
+  }
+
+  edits.reverse();
+  return edits;
+}
+/**
+ * Splice Projection functions:
+ *
+ * A splice map is a representation of how a previous array of items
+ * was transformed into a new array of items. Conceptually it is a list of
+ * tuples of
+ *
+ *   <index, removed, addedCount>
+ *
+ * which are kept in ascending index order of. The tuple represents that at
+ * the |index|, |removed| sequence of items were removed, and counting forward
+ * from |index|, |addedCount| items were added.
+ */
+
+/**
+ * Lacking individual splice mutation information, the minimal set of
+ * splices can be synthesized given the previous state and final state of an
+ * array. The basic approach is to calculate the edit distance matrix and
+ * choose the shortest path through it.
+ *
+ * Complexity: O(l * p)
+ *   l: The length of the current array
+ *   p: The length of the old array
+ *
+ * @param {!Array} current The current "changed" array for which to
+ * calculate splices.
+ * @param {number} currentStart Starting index in the `current` array for
+ * which splices are calculated.
+ * @param {number} currentEnd Ending index in the `current` array for
+ * which splices are calculated.
+ * @param {!Array} old The original "unchanged" array to compare `current`
+ * against to determine splices.
+ * @param {number} oldStart Starting index in the `old` array for
+ * which splices are calculated.
+ * @param {number} oldEnd Ending index in the `old` array for
+ * which splices are calculated.
+ * @return {!Array} Returns an array of splice record objects. Each of these
+ * contains: `index` the location where the splice occurred; `removed`
+ * the array of removed items from this location; `addedCount` the number
+ * of items added at this location.
+ */
+
+
+function calcSplices(current, currentStart, currentEnd, old, oldStart, oldEnd) {
+  let prefixCount = 0;
+  let suffixCount = 0;
+  let splice;
+  let minLength = Math.min(currentEnd - currentStart, oldEnd - oldStart);
+  if (currentStart == 0 && oldStart == 0) prefixCount = sharedPrefix(current, old, minLength);
+  if (currentEnd == current.length && oldEnd == old.length) suffixCount = sharedSuffix(current, old, minLength - prefixCount);
+  currentStart += prefixCount;
+  oldStart += prefixCount;
+  currentEnd -= suffixCount;
+  oldEnd -= suffixCount;
+  if (currentEnd - currentStart == 0 && oldEnd - oldStart == 0) return [];
+
+  if (currentStart == currentEnd) {
+    splice = newSplice(currentStart, [], 0);
+
+    while (oldStart < oldEnd) splice.removed.push(old[oldStart++]);
+
+    return [splice];
+  } else if (oldStart == oldEnd) return [newSplice(currentStart, [], currentEnd - currentStart)];
+
+  let ops = spliceOperationsFromEditDistances(calcEditDistances(current, currentStart, currentEnd, old, oldStart, oldEnd));
+  splice = undefined;
+  let splices = [];
+  let index = currentStart;
+  let oldIndex = oldStart;
+
+  for (let i = 0; i < ops.length; i++) {
+    switch (ops[i]) {
+      case EDIT_LEAVE:
+        if (splice) {
+          splices.push(splice);
+          splice = undefined;
+        }
+
+        index++;
+        oldIndex++;
+        break;
+
+      case EDIT_UPDATE:
+        if (!splice) splice = newSplice(index, [], 0);
+        splice.addedCount++;
+        index++;
+        splice.removed.push(old[oldIndex]);
+        oldIndex++;
+        break;
+
+      case EDIT_ADD:
+        if (!splice) splice = newSplice(index, [], 0);
+        splice.addedCount++;
+        index++;
+        break;
+
+      case EDIT_DELETE:
+        if (!splice) splice = newSplice(index, [], 0);
+        splice.removed.push(old[oldIndex]);
+        oldIndex++;
+        break;
+    }
+  }
+
+  if (splice) {
+    splices.push(splice);
+  }
+
+  return splices;
+}
+
+function sharedPrefix(current, old, searchLength) {
+  for (let i = 0; i < searchLength; i++) if (!equals(current[i], old[i])) return i;
+
+  return searchLength;
+}
+
+function sharedSuffix(current, old, searchLength) {
+  let index1 = current.length;
+  let index2 = old.length;
+  let count = 0;
+
+  while (count < searchLength && equals(current[--index1], old[--index2])) count++;
+
+  return count;
+}
+/**
+ * Returns an array of splice records indicating the minimum edits required
+ * to transform the `previous` array into the `current` array.
+ *
+ * Splice records are ordered by index and contain the following fields:
+ * - `index`: index where edit started
+ * - `removed`: array of removed items from this index
+ * - `addedCount`: number of items added at this index
+ *
+ * This function is based on the Levenshtein "minimum edit distance"
+ * algorithm. Note that updates are treated as removal followed by addition.
+ *
+ * The worst-case time complexity of this algorithm is `O(l * p)`
+ *   l: The length of the current array
+ *   p: The length of the previous array
+ *
+ * However, the worst-case complexity is reduced by an `O(n)` optimization
+ * to detect any shared prefix & suffix between the two arrays and only
+ * perform the more expensive minimum edit distance calculation over the
+ * non-shared portions of the arrays.
+ *
+ * @function
+ * @param {!Array} current The "changed" array for which splices will be
+ * calculated.
+ * @param {!Array} previous The "unchanged" original array to compare
+ * `current` against to determine the splices.
+ * @return {!Array} Returns an array of splice record objects. Each of these
+ * contains: `index` the location where the splice occurred; `removed`
+ * the array of removed items from this location; `addedCount` the number
+ * of items added at this location.
+ */
+
+
+function calculateSplices(current, previous) {
+  return calcSplices(current, 0, current.length, previous, 0, previous.length);
+}
+
+function equals(currentValue, previousValue) {
+  return currentValue === previousValue;
+}
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/**
+ * Returns true if `node` is a slot element
+ * @param {!Node} node Node to test.
+ * @return {boolean} Returns true if the given `node` is a slot
+ * @private
+ */
+
+function isSlot(node) {
+  return node.localName === 'slot';
+}
+/**
+ * Class that listens for changes (additions or removals) to
+ * "flattened nodes" on a given `node`. The list of flattened nodes consists
+ * of a node's children and, for any children that are `<slot>` elements,
+ * the expanded flattened list of `assignedNodes`.
+ * For example, if the observed node has children `<a></a><slot></slot><b></b>`
+ * and the `<slot>` has one `<div>` assigned to it, then the flattened
+ * nodes list is `<a></a><div></div><b></b>`. If the `<slot>` has other
+ * `<slot>` elements assigned to it, these are flattened as well.
+ *
+ * The provided `callback` is called whenever any change to this list
+ * of flattened nodes occurs, where an addition or removal of a node is
+ * considered a change. The `callback` is called with one argument, an object
+ * containing an array of any `addedNodes` and `removedNodes`.
+ *
+ * Note: the callback is called asynchronous to any changes
+ * at a microtask checkpoint. This is because observation is performed using
+ * `MutationObserver` and the `<slot>` element's `slotchange` event which
+ * are asynchronous.
+ *
+ * An example:
+ * ```js
+ * class TestSelfObserve extends PolymerElement {
+ *   static get is() { return 'test-self-observe';}
+ *   connectedCallback() {
+ *     super.connectedCallback();
+ *     this._observer = new FlattenedNodesObserver(this, (info) => {
+ *       this.info = info;
+ *     });
+ *   }
+ *   disconnectedCallback() {
+ *     super.disconnectedCallback();
+ *     this._observer.disconnect();
+ *   }
+ * }
+ * customElements.define(TestSelfObserve.is, TestSelfObserve);
+ * ```
+ *
+ * @summary Class that listens for changes (additions or removals) to
+ * "flattened nodes" on a given `node`.
+ * @implements {PolymerDomApi.ObserveHandle}
+ */
+
+
+let FlattenedNodesObserver = class {
+  /**
+   * Returns the list of flattened nodes for the given `node`.
+   * This list consists of a node's children and, for any children
+   * that are `<slot>` elements, the expanded flattened list of `assignedNodes`.
+   * For example, if the observed node has children `<a></a><slot></slot><b></b>`
+   * and the `<slot>` has one `<div>` assigned to it, then the flattened
+   * nodes list is `<a></a><div></div><b></b>`. If the `<slot>` has other
+   * `<slot>` elements assigned to it, these are flattened as well.
+   *
+   * @param {!HTMLElement|!HTMLSlotElement} node The node for which to
+   *      return the list of flattened nodes.
+   * @return {!Array<!Node>} The list of flattened nodes for the given `node`.
+   * @nocollapse See https://github.com/google/closure-compiler/issues/2763
+   */
+  // eslint-disable-next-line
+  static getFlattenedNodes(node) {
+    const wrapped = wrap(node);
+
+    if (isSlot(node)) {
+      node =
+      /** @type {!HTMLSlotElement} */
+      node; // eslint-disable-line no-self-assign
+
+      return wrapped.assignedNodes({
+        flatten: true
+      });
+    } else {
+      return Array.from(wrapped.childNodes).map(node => {
+        if (isSlot(node)) {
+          node =
+          /** @type {!HTMLSlotElement} */
+          node; // eslint-disable-line no-self-assign
+
+          return wrap(node).assignedNodes({
+            flatten: true
+          });
+        } else {
+          return [node];
+        }
+      }).reduce((a, b) => a.concat(b), []);
+    }
+  }
+  /**
+   * @param {!HTMLElement} target Node on which to listen for changes.
+   * @param {?function(this: Element, { target: !HTMLElement, addedNodes: !Array<!Element>, removedNodes: !Array<!Element> }):void} callback Function called when there are additions
+   * or removals from the target's list of flattened nodes.
+   */
+  // eslint-disable-next-line
+
+
+  constructor(target, callback) {
+    /**
+     * @type {MutationObserver}
+     * @private
+     */
+    this._shadyChildrenObserver = null;
+    /**
+     * @type {MutationObserver}
+     * @private
+     */
+
+    this._nativeChildrenObserver = null;
+    this._connected = false;
+    /**
+     * @type {!HTMLElement}
+     * @private
+     */
+
+    this._target = target;
+    this.callback = callback;
+    this._effectiveNodes = [];
+    this._observer = null;
+    this._scheduled = false;
+    /**
+     * @type {function()}
+     * @private
+     */
+
+    this._boundSchedule = () => {
+      this._schedule();
+    };
+
+    this.connect();
+
+    this._schedule();
+  }
+  /**
+   * Activates an observer. This method is automatically called when
+   * a `FlattenedNodesObserver` is created. It should only be called to
+   * re-activate an observer that has been deactivated via the `disconnect` method.
+   *
+   * @return {void}
+   */
+
+
+  connect() {
+    if (isSlot(this._target)) {
+      this._listenSlots([this._target]);
+    } else if (wrap(this._target).children) {
+      this._listenSlots(
+      /** @type {!NodeList<!Node>} */
+      wrap(this._target).children);
+
+      if (window.ShadyDOM) {
+        this._shadyChildrenObserver = ShadyDOM.observeChildren(this._target, mutations => {
+          this._processMutations(mutations);
+        });
+      } else {
+        this._nativeChildrenObserver = new MutationObserver(mutations => {
+          this._processMutations(mutations);
+        });
+
+        this._nativeChildrenObserver.observe(this._target, {
+          childList: true
+        });
+      }
+    }
+
+    this._connected = true;
+  }
+  /**
+   * Deactivates the flattened nodes observer. After calling this method
+   * the observer callback will not be called when changes to flattened nodes
+   * occur. The `connect` method may be subsequently called to reactivate
+   * the observer.
+   *
+   * @return {void}
+   * @override
+   */
+
+
+  disconnect() {
+    if (isSlot(this._target)) {
+      this._unlistenSlots([this._target]);
+    } else if (wrap(this._target).children) {
+      this._unlistenSlots(
+      /** @type {!NodeList<!Node>} */
+      wrap(this._target).children);
+
+      if (window.ShadyDOM && this._shadyChildrenObserver) {
+        ShadyDOM.unobserveChildren(this._shadyChildrenObserver);
+        this._shadyChildrenObserver = null;
+      } else if (this._nativeChildrenObserver) {
+        this._nativeChildrenObserver.disconnect();
+
+        this._nativeChildrenObserver = null;
+      }
+    }
+
+    this._connected = false;
+  }
+  /**
+   * @return {void}
+   * @private
+   */
+
+
+  _schedule() {
+    if (!this._scheduled) {
+      this._scheduled = true;
+      microTask.run(() => this.flush());
+    }
+  }
+  /**
+   * @param {Array<MutationRecord>} mutations Mutations signaled by the mutation observer
+   * @return {void}
+   * @private
+   */
+
+
+  _processMutations(mutations) {
+    this._processSlotMutations(mutations);
+
+    this.flush();
+  }
+  /**
+   * @param {Array<MutationRecord>} mutations Mutations signaled by the mutation observer
+   * @return {void}
+   * @private
+   */
+
+
+  _processSlotMutations(mutations) {
+    if (mutations) {
+      for (let i = 0; i < mutations.length; i++) {
+        let mutation = mutations[i];
+
+        if (mutation.addedNodes) {
+          this._listenSlots(mutation.addedNodes);
+        }
+
+        if (mutation.removedNodes) {
+          this._unlistenSlots(mutation.removedNodes);
+        }
+      }
+    }
+  }
+  /**
+   * Flushes the observer causing any pending changes to be immediately
+   * delivered the observer callback. By default these changes are delivered
+   * asynchronously at the next microtask checkpoint.
+   *
+   * @return {boolean} Returns true if any pending changes caused the observer
+   * callback to run.
+   */
+
+
+  flush() {
+    if (!this._connected) {
+      return false;
+    }
+
+    if (window.ShadyDOM) {
+      ShadyDOM.flush();
+    }
+
+    if (this._nativeChildrenObserver) {
+      this._processSlotMutations(this._nativeChildrenObserver.takeRecords());
+    } else if (this._shadyChildrenObserver) {
+      this._processSlotMutations(this._shadyChildrenObserver.takeRecords());
+    }
+
+    this._scheduled = false;
+    let info = {
+      target: this._target,
+      addedNodes: [],
+      removedNodes: []
+    };
+    let newNodes = this.constructor.getFlattenedNodes(this._target);
+    let splices = calculateSplices(newNodes, this._effectiveNodes); // process removals
+
+    for (let i = 0, s; i < splices.length && (s = splices[i]); i++) {
+      for (let j = 0, n; j < s.removed.length && (n = s.removed[j]); j++) {
+        info.removedNodes.push(n);
+      }
+    } // process adds
+
+
+    for (let i = 0, s; i < splices.length && (s = splices[i]); i++) {
+      for (let j = s.index; j < s.index + s.addedCount; j++) {
+        info.addedNodes.push(newNodes[j]);
+      }
+    } // update cache
+
+
+    this._effectiveNodes = newNodes;
+    let didFlush = false;
+
+    if (info.addedNodes.length || info.removedNodes.length) {
+      didFlush = true;
+      this.callback.call(this._target, info);
+    }
+
+    return didFlush;
+  }
+  /**
+   * @param {!Array<!Node>|!NodeList<!Node>} nodeList Nodes that could change
+   * @return {void}
+   * @private
+   */
+
+
+  _listenSlots(nodeList) {
+    for (let i = 0; i < nodeList.length; i++) {
+      let n = nodeList[i];
+
+      if (isSlot(n)) {
+        n.addEventListener('slotchange', this._boundSchedule);
+      }
+    }
+  }
+  /**
+   * @param {!Array<!Node>|!NodeList<!Node>} nodeList Nodes that could change
+   * @return {void}
+   * @private
+   */
+
+
+  _unlistenSlots(nodeList) {
+    for (let i = 0; i < nodeList.length; i++) {
+      let n = nodeList[i];
+
+      if (isSlot(n)) {
+        n.removeEventListener('slotchange', this._boundSchedule);
+      }
+    }
+  }
+
+};
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+/**
+ * A mixin for `nav` elements, facilitating navigation and selection of childNodes.
+ *
+ * @polymerMixin
+ */
+
+const ListMixin = superClass => class VaadinListMixin extends superClass {
+  static get properties() {
+    return {
+      /**
+       * Used for mixin detection because `instanceof` does not work with mixins.
+       */
+      _hasVaadinListMixin: {
+        value: true
+      },
+
+      /**
+       * The index of the item selected in the items array.
+       * Note: Not updated when used in `multiple` selection mode.
+       */
+      selected: {
+        type: Number,
+        reflectToAttribute: true,
+        notify: true
+      },
+
+      /**
+       * Define how items are disposed in the dom.
+       * Possible values are: `horizontal|vertical`.
+       * It also changes navigation keys from left/right to up/down.
+       */
+      orientation: {
+        type: String,
+        reflectToAttribute: true,
+        value: ''
+      },
+
+      /**
+       * The list of items from which a selection can be made.
+       * It is populated from the elements passed to the light DOM,
+       * and updated dynamically when adding or removing items.
+       *
+       * The item elements must implement `Vaadin.ItemMixin`.
+       *
+       * Note: unlike `<vaadin-combo-box>`, this property is read-only,
+       * so if you want to provide items by iterating array of data,
+       * you have to use `dom-repeat` and place it to the light DOM.
+       */
+      items: {
+        type: Array,
+        readOnly: true,
+        notify: true
+      },
+
+      /**
+       * The search buffer for the keyboard selection feature.
+       */
+      _searchBuf: {
+        type: String,
+        value: ''
+      }
+    };
+  }
+
+  static get observers() {
+    return ['_enhanceItems(items, orientation, selected)'];
+  }
+
+  ready() {
+    super.ready();
+    this.addEventListener('keydown', e => this._onKeydown(e));
+    this.addEventListener('click', e => this._onClick(e));
+    this._observer = new FlattenedNodesObserver(this, info => {
+      this._setItems(this._filterItems(Array.from(this.children)));
+    });
+  }
+
+  _enhanceItems(items, orientation, selected) {
+    if (items) {
+      this.setAttribute('aria-orientation', orientation || 'vertical');
+      this.items.forEach(item => {
+        orientation ? item.setAttribute('orientation', orientation) : item.removeAttribute('orientation');
+        item.updateStyles();
+      });
+
+      this._setFocusable(selected);
+
+      const itemToSelect = items[selected];
+      items.forEach(item => item.selected = item === itemToSelect);
+
+      if (itemToSelect && !itemToSelect.disabled) {
+        this._scrollToItem(selected);
+      }
+    }
+  }
+
+  get focused() {
+    return this.getRootNode().activeElement;
+  }
+
+  _filterItems(array) {
+    return array.filter(e => e._hasVaadinItemMixin);
+  }
+
+  _onClick(event) {
+    if (event.metaKey || event.shiftKey || event.ctrlKey || event.defaultPrevented) {
+      return;
+    }
+
+    const item = this._filterItems(event.composedPath())[0];
+
+    let idx;
+
+    if (item && !item.disabled && (idx = this.items.indexOf(item)) >= 0) {
+      this.selected = idx;
+    }
+  }
+
+  _searchKey(currentIdx, key) {
+    this._searchReset = Debouncer.debounce(this._searchReset, timeOut.after(500), () => this._searchBuf = '');
+    this._searchBuf += key.toLowerCase();
+    const increment = 1;
+
+    const condition = item => !item.disabled && item.textContent.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().indexOf(this._searchBuf) === 0;
+
+    if (!this.items.some(item => item.textContent.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().indexOf(this._searchBuf) === 0)) {
+      this._searchBuf = key.toLowerCase();
+    }
+
+    const idx = this._searchBuf.length === 1 ? currentIdx + 1 : currentIdx;
+    return this._getAvailableIndex(idx, increment, condition);
+  }
+
+  _onKeydown(event) {
+    if (event.metaKey || event.ctrlKey) {
+      return;
+    } // IE names for arrows do not include the Arrow prefix
+
+
+    const key = event.key.replace(/^Arrow/, '');
+    const currentIdx = this.items.indexOf(this.focused);
+
+    if (/[a-zA-Z0-9]/.test(key) && key.length === 1) {
+      const idx = this._searchKey(currentIdx, key);
+
+      if (idx >= 0) {
+        this._focus(idx);
+      }
+
+      return;
+    }
+
+    const condition = item => !item.disabled;
+
+    let idx, increment;
+
+    if (this._vertical && key === 'Up' || !this._vertical && key === 'Left') {
+      increment = -1;
+      idx = currentIdx - 1;
+    } else if (this._vertical && key === 'Down' || !this._vertical && key === 'Right') {
+      increment = 1;
+      idx = currentIdx + 1;
+    } else if (key === 'Home') {
+      increment = 1;
+      idx = 0;
+    } else if (key === 'End') {
+      increment = -1;
+      idx = this.items.length - 1;
+    }
+
+    idx = this._getAvailableIndex(idx, increment, condition);
+
+    if (idx >= 0) {
+      this._focus(idx);
+
+      event.preventDefault();
+    }
+  }
+
+  _getAvailableIndex(idx, increment, condition) {
+    const totalItems = this.items.length;
+
+    for (let i = 0; typeof idx == 'number' && i < totalItems; i++, idx += increment || 1) {
+      if (idx < 0) {
+        idx = totalItems - 1;
+      } else if (idx >= totalItems) {
+        idx = 0;
+      }
+
+      const item = this.items[idx];
+
+      if (condition(item)) {
+        return idx;
+      }
+    }
+
+    return -1;
+  }
+
+  _setFocusable(idx) {
+    idx = this._getAvailableIndex(idx, 1, item => !item.disabled);
+    const item = this.items[idx] || this.items[0];
+    this.items.forEach(e => e.tabIndex = e === item ? 0 : -1);
+  }
+
+  _focus(idx) {
+    const item = this.items[idx];
+    this.items.forEach(e => e.focused = e === item);
+
+    this._setFocusable(idx);
+
+    this._scrollToItem(idx);
+
+    item.focus();
+  }
+
+  focus() {
+    // In initialisation (e.g vaadin-select) observer might not been run yet.
+    this._observer && this._observer.flush();
+    const firstItem = this.querySelector('[tabindex="0"]') || (this.items ? this.items[0] : null);
+    firstItem && firstItem.focus();
+  }
+  /* @protected */
+
+
+  get _scrollerElement() {} // Returning scroller element of the component
+  // Scroll the container to have the next item by the edge of the viewport
+
+
+  _scrollToItem(idx) {
+    const item = this.items[idx];
+
+    if (!item) {
+      return;
+    }
+
+    const props = this._vertical ? ['top', 'bottom'] : ['left', 'right'];
+
+    const scrollerRect = this._scrollerElement.getBoundingClientRect();
+
+    const nextItemRect = (this.items[idx + 1] || item).getBoundingClientRect();
+    const prevItemRect = (this.items[idx - 1] || item).getBoundingClientRect();
+    let scrollDistance = 0;
+
+    if (nextItemRect[props[1]] >= scrollerRect[props[1]]) {
+      scrollDistance = nextItemRect[props[1]] - scrollerRect[props[1]];
+    } else if (prevItemRect[props[0]] <= scrollerRect[props[0]]) {
+      scrollDistance = prevItemRect[props[0]] - scrollerRect[props[0]];
+    }
+
+    this._scroll(scrollDistance);
+  }
+  /* @protected */
+
+
+  get _vertical() {
+    return this.orientation !== 'horizontal';
+  }
+
+  _scroll(pixels) {
+    this._scrollerElement['scroll' + (this._vertical ? 'Top' : 'Left')] += pixels;
+  }
+  /**
+   * Fired when the selection is changed.
+   * Not fired when used in `multiple` selection mode.
+   *
+   * @event selected-changed
+   * @param {Object} detail
+   * @param {Object} detail.value the index of the item selected in the items array.
+   */
+
+
+};
+
+/**
+@license
+Copyright (c) 2019 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+/**
+ * A mixin for `nav` elements, facilitating multiple selection of childNodes.
+ *
+ * @polymerMixin
+ * @mixes Vaadin.ListMixin
+ */
+
+const MultiSelectListMixin = superClass => class VaadinMultiSelectListMixin extends ListMixin(superClass) {
+  static get properties() {
+    return {
+      /**
+       * Specifies that multiple options can be selected at once.
+       */
+      multiple: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+        observer: '_multipleChanged'
+      },
+
+      /**
+       * Array of indexes of the items selected in the items array
+       * Note: Not updated when used in single selection mode.
+       */
+      selectedValues: {
+        type: Array,
+        notify: true,
+        value: function () {
+          return [];
+        }
+      }
+    };
+  }
+
+  static get observers() {
+    return [`_enhanceMultipleItems(items, multiple, selected, selectedValues, selectedValues.*)`];
+  }
+
+  ready() {
+    // Should be attached before click listener in list-mixin
+    this.addEventListener('click', e => this._onMultipleClick(e));
+    super.ready();
+  }
+
+  _enhanceMultipleItems(items, multiple, selected, selectedValues) {
+    if (!items || !multiple) {
+      return;
+    }
+
+    if (selectedValues) {
+      const selectedItems = selectedValues.map(selectedId => items[selectedId]);
+      items.forEach(item => item.selected = selectedItems.indexOf(item) !== -1);
+    }
+
+    const lastSelectedItem = this.selectedValues.slice(-1)[0];
+
+    if (lastSelectedItem && !lastSelectedItem.disabled) {
+      this._scrollToItem(lastSelectedItem);
+    }
+  }
+
+  _onMultipleClick(event) {
+    const item = this._filterItems(event.composedPath())[0];
+
+    const idx = item && !item.disabled ? this.items.indexOf(item) : -1;
+
+    if (idx < 0 || !this.multiple) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (this.selectedValues.indexOf(idx) !== -1) {
+      this.selectedValues = this.selectedValues.filter(v => v !== idx);
+    } else {
+      this.selectedValues = this.selectedValues.concat(idx);
+    }
+  }
+
+  _multipleChanged(value, oldValue) {
+    // Changing from multiple to single selection, clear selection.
+    if (!value && oldValue) {
+      this.selectedValues = [];
+      this.items.forEach(item => item.selected = false);
+    } // Changing from single to multiple selection, add selected to selectedValues.
+
+
+    if (value && !oldValue && this.selected !== undefined) {
+      this.push('selectedValues', this.selected);
+      this.selected = undefined;
+    }
+  }
+  /**
+   * Fired when the selection is changed.
+   * Not fired in single selection mode.
+   *
+   * @event selected-values-changed
+   * @param {Object} detail
+   * @param {Object} detail.value the array of indexes of the items selected in the items array.
+   */
+
+
+};
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+/**
+ * `<vaadin-list-box>` is a Web Component for creating menus.
+ *
+ * ```
+ *   <vaadin-list-box selected="2">
+ *     <vaadin-item>Item 1</vaadin-item>
+ *     <vaadin-item>Item 2</vaadin-item>
+ *     <vaadin-item>Item 3</vaadin-item>
+ *     <vaadin-item>Item 4</vaadin-item>
+ *   </vaadin-list-box>
+ * ```
+ *
+ * ### Styling
+ *
+ * The following shadow DOM parts are available for styling:
+ *
+ * Part name         | Description
+ * ------------------|------------------------
+ * `items`           | The items container
+ *
+ * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
+ *
+ * @memberof Vaadin
+ * @mixes Vaadin.MultiSelectListMixin
+ * @mixes Vaadin.ThemableMixin
+ * @demo demo/index.html
+ */
+
+class ListBoxElement extends ElementMixin$1(MultiSelectListMixin(ThemableMixin(PolymerElement))) {
+  static get template() {
+    return html$1`
+    <style>
+      :host {
+        display: flex;
+      }
+
+      :host([hidden]) {
+        display: none !important;
+      }
+
+      [part="items"] {
+        height: 100%;
+        width: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+    </style>
+    <div part="items">
+      <slot></slot>
+    </div>
+`;
+  }
+
+  static get is() {
+    return 'vaadin-list-box';
+  }
+
+  static get version() {
+    return '1.2.0';
+  }
+
+  static get properties() {
+    return {
+      // We don't need to define this property since super default is vertical,
+      // but we don't want it to be modified, or be shown in the API docs.
+
+      /** @private */
+      orientation: {
+        readOnly: true
+      }
+    };
+  }
+
+  constructor() {
+    super();
+    /** @protected */
+
+    this.focused;
+  }
+
+  ready() {
+    super.ready();
+    this.setAttribute('role', 'list');
+    setTimeout(this._checkImport.bind(this), 2000);
+  }
+
+  get _scrollerElement() {
+    return this.shadowRoot.querySelector('[part="items"]');
+  }
+
+  _checkImport() {
+    var item = this.querySelector('vaadin-item');
+
+    if (item && !(item instanceof PolymerElement)) {
+      console.warn(`Make sure you have imported the vaadin-item element.`);
+    }
+  }
+
+}
+
+customElements.define(ListBoxElement.is, ListBoxElement);
+
+const $_documentContainer$f = html$1`<dom-module id="lumo-select" theme-for="vaadin-select">
+  <template>
+    <style include="lumo-field-button">
+      :host {
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      [selected] {
+        padding-left: 0;
+        padding-right: 0;
+        flex: auto;
+      }
+
+      :host([theme~="small"]) [selected] {
+        padding: 0;
+        min-height: var(--lumo-size-s);
+      }
+
+      :host([theme~="align-right"]) [selected] {
+        text-align: right;
+      }
+
+      :host([theme~="align-center"]) [selected] {
+        text-align: center;
+      }
+
+      [part="toggle-button"]::before {
+        content: var(--lumo-icons-dropdown);
+      }
+
+      /* Highlight the toggle button when hovering over the entire component */
+      :host(:hover:not([readonly]):not([disabled])) [part="toggle-button"] {
+        color: var(--lumo-contrast-80pct);
+      }
+    </style>
+  </template>
+</dom-module><dom-module id="lumo-select-text-field" theme-for="vaadin-select-text-field">
+  <template>
+    <style>
+      :host([theme~="align-center"]) ::slotted([part~="value"]) {
+        --_lumo-text-field-overflow-mask-image: none;
+      }
+
+      :host([theme~="align-right"]) ::slotted([part~="value"]) {
+        --_lumo-text-field-overflow-mask-image: linear-gradient(to right, transparent 0.25em, #000 1.5em);
+      }
+
+      [part="input-field"] {
+        cursor: default;
+      }
+
+      [part="input-field"] ::slotted([part="value"]) {
+        display: flex;
+      }
+
+      /* ShadyCSS limitation workaround */
+      [part="input-field"] ::slotted([part="value"]) [selected]::before {
+        display: none;
+      }
+
+      [part="input-field"]:focus {
+        outline: none;
+      }
+    </style>
+  </template>
+</dom-module><dom-module id="lumo-select-overlay" theme-for="vaadin-select-overlay">
+  <template>
+    <style include="lumo-menu-overlay">
+      :host {
+        --_lumo-item-selected-icon-display: block;
+      }
+
+      :host([bottom-aligned]) {
+        justify-content: flex-end;
+      }
+
+      [part~="overlay"] {
+        min-width: var(--vaadin-select-text-field-width);
+      }
+
+      /* Small viewport adjustment */
+      :host([phone]) {
+        top: 0 !important;
+        right: 0 !important;
+        bottom: var(--vaadin-overlay-viewport-bottom, 0) !important;
+        left: 0 !important;
+        align-items: stretch;
+        justify-content: flex-end;
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$f.content);
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/** @unrestricted */
+
+class StyleNode {
+  constructor() {
+    /** @type {number} */
+    this['start'] = 0;
+    /** @type {number} */
+
+    this['end'] = 0;
+    /** @type {StyleNode} */
+
+    this['previous'] = null;
+    /** @type {StyleNode} */
+
+    this['parent'] = null;
+    /** @type {Array<StyleNode>} */
+
+    this['rules'] = null;
+    /** @type {string} */
+
+    this['parsedCssText'] = '';
+    /** @type {string} */
+
+    this['cssText'] = '';
+    /** @type {boolean} */
+
+    this['atRule'] = false;
+    /** @type {number} */
+
+    this['type'] = 0;
+    /** @type {string} */
+
+    this['keyframesName'] = '';
+    /** @type {string} */
+
+    this['selector'] = '';
+    /** @type {string} */
+
+    this['parsedSelector'] = '';
+  }
+
+}
+
+/**
+ * @param {string} text
+ * @return {StyleNode}
+ */
+
+function parse(text) {
+  text = clean(text);
+  return parseCss(lex(text), text);
+} // remove stuff we don't care about that may hinder parsing
+
+/**
+ * @param {string} cssText
+ * @return {string}
+ */
+
+function clean(cssText) {
+  return cssText.replace(RX.comments, '').replace(RX.port, '');
+} // super simple {...} lexer that returns a node tree
+
+/**
+ * @param {string} text
+ * @return {StyleNode}
+ */
+
+
+function lex(text) {
+  let root = new StyleNode();
+  root['start'] = 0;
+  root['end'] = text.length;
+  let n = root;
+
+  for (let i = 0, l = text.length; i < l; i++) {
+    if (text[i] === OPEN_BRACE) {
+      if (!n['rules']) {
+        n['rules'] = [];
+      }
+
+      let p = n;
+      let previous = p['rules'][p['rules'].length - 1] || null;
+      n = new StyleNode();
+      n['start'] = i + 1;
+      n['parent'] = p;
+      n['previous'] = previous;
+      p['rules'].push(n);
+    } else if (text[i] === CLOSE_BRACE) {
+      n['end'] = i + 1;
+      n = n['parent'] || root;
+    }
+  }
+
+  return root;
+} // add selectors/cssText to node tree
+
+/**
+ * @param {StyleNode} node
+ * @param {string} text
+ * @return {StyleNode}
+ */
+
+
+function parseCss(node, text) {
+  let t = text.substring(node['start'], node['end'] - 1);
+  node['parsedCssText'] = node['cssText'] = t.trim();
+
+  if (node['parent']) {
+    let ss = node['previous'] ? node['previous']['end'] : node['parent']['start'];
+    t = text.substring(ss, node['start'] - 1);
+    t = _expandUnicodeEscapes(t);
+    t = t.replace(RX.multipleSpaces, ' '); // TODO(sorvell): ad hoc; make selector include only after last ;
+    // helps with mixin syntax
+
+    t = t.substring(t.lastIndexOf(';') + 1);
+    let s = node['parsedSelector'] = node['selector'] = t.trim();
+    node['atRule'] = s.indexOf(AT_START) === 0; // note, support a subset of rule types...
+
+    if (node['atRule']) {
+      if (s.indexOf(MEDIA_START) === 0) {
+        node['type'] = types.MEDIA_RULE;
+      } else if (s.match(RX.keyframesRule)) {
+        node['type'] = types.KEYFRAMES_RULE;
+        node['keyframesName'] = node['selector'].split(RX.multipleSpaces).pop();
+      }
+    } else {
+      if (s.indexOf(VAR_START) === 0) {
+        node['type'] = types.MIXIN_RULE;
+      } else {
+        node['type'] = types.STYLE_RULE;
+      }
+    }
+  }
+
+  let r$ = node['rules'];
+
+  if (r$) {
+    for (let i = 0, l = r$.length, r; i < l && (r = r$[i]); i++) {
+      parseCss(r, text);
+    }
+  }
+
+  return node;
+}
+/**
+ * conversion of sort unicode escapes with spaces like `\33 ` (and longer) into
+ * expanded form that doesn't require trailing space `\000033`
+ * @param {string} s
+ * @return {string}
+ */
+
+
+function _expandUnicodeEscapes(s) {
+  return s.replace(/\\([0-9a-f]{1,6})\s/gi, function () {
+    let code = arguments[1],
+        repeat = 6 - code.length;
+
+    while (repeat--) {
+      code = '0' + code;
+    }
+
+    return '\\' + code;
+  });
+}
+/**
+ * stringify parsed css.
+ * @param {StyleNode} node
+ * @param {boolean=} preserveProperties
+ * @param {string=} text
+ * @return {string}
+ */
+
+
+function stringify$1(node, preserveProperties, text = '') {
+  // calc rule cssText
+  let cssText = '';
+
+  if (node['cssText'] || node['rules']) {
+    let r$ = node['rules'];
+
+    if (r$ && !_hasMixinRules(r$)) {
+      for (let i = 0, l = r$.length, r; i < l && (r = r$[i]); i++) {
+        cssText = stringify$1(r, preserveProperties, cssText);
+      }
+    } else {
+      cssText = preserveProperties ? node['cssText'] : removeCustomProps(node['cssText']);
+      cssText = cssText.trim();
+
+      if (cssText) {
+        cssText = '  ' + cssText + '\n';
+      }
+    }
+  } // emit rule if there is cssText
+
+
+  if (cssText) {
+    if (node['selector']) {
+      text += node['selector'] + ' ' + OPEN_BRACE + '\n';
+    }
+
+    text += cssText;
+
+    if (node['selector']) {
+      text += CLOSE_BRACE + '\n\n';
+    }
+  }
+
+  return text;
+}
+/**
+ * @param {Array<StyleNode>} rules
+ * @return {boolean}
+ */
+
+function _hasMixinRules(rules) {
+  let r = rules[0];
+  return Boolean(r) && Boolean(r['selector']) && r['selector'].indexOf(VAR_START) === 0;
+}
+/**
+ * @param {string} cssText
+ * @return {string}
+ */
+
+
+function removeCustomProps(cssText) {
+  cssText = removeCustomPropAssignment(cssText);
+  return removeCustomPropApply(cssText);
+}
+/**
+ * @param {string} cssText
+ * @return {string}
+ */
+
+
+function removeCustomPropAssignment(cssText) {
+  return cssText.replace(RX.customProp, '').replace(RX.mixinProp, '');
+}
+/**
+ * @param {string} cssText
+ * @return {string}
+ */
+
+function removeCustomPropApply(cssText) {
+  return cssText.replace(RX.mixinApply, '').replace(RX.varApply, '');
+}
+/** @enum {number} */
+
+
+const types = {
+  STYLE_RULE: 1,
+  KEYFRAMES_RULE: 7,
+  MEDIA_RULE: 4,
+  MIXIN_RULE: 1000
+};
+const OPEN_BRACE = '{';
+const CLOSE_BRACE = '}'; // helper regexp's
+
+const RX = {
+  comments: /\/\*[^*]*\*+([^/*][^*]*\*+)*\//gim,
+  port: /@import[^;]*;/gim,
+  customProp: /(?:^[^;\-\s}]+)?--[^;{}]*?:[^{};]*?(?:[;\n]|$)/gim,
+  mixinProp: /(?:^[^;\-\s}]+)?--[^;{}]*?:[^{};]*?{[^}]*?}(?:[;\n]|$)?/gim,
+  mixinApply: /@apply\s*\(?[^);]*\)?\s*(?:[;\n]|$)?/gim,
+  varApply: /[^;:]*?:[^;]*?var\([^;]*\)(?:[;\n]|$)?/gim,
+  keyframesRule: /^@[^\s]*keyframes/,
+  multipleSpaces: /\s+/g
+};
+const VAR_START = '--';
+const MEDIA_START = '@media';
+const AT_START = '@';
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/** @type {!Set<string>} */
+
+const styleTextSet = new Set();
+const scopingAttribute = 'shady-unscoped';
+/**
+ * Add a specifically-marked style to the document directly, and only one copy of that style.
+ *
+ * @param {!HTMLStyleElement} style
+ * @return {undefined}
+ */
+
+function processUnscopedStyle(style) {
+  const text = style.textContent;
+
+  if (!styleTextSet.has(text)) {
+    styleTextSet.add(text);
+    const newStyle = style.cloneNode(true);
+    document.head.appendChild(newStyle);
+  }
+}
+/**
+ * Check if a style is supposed to be unscoped
+ * @param {!HTMLStyleElement} style
+ * @return {boolean} true if the style has the unscoping attribute
+ */
+
+function isUnscopedStyle(style) {
+  return style.hasAttribute(scopingAttribute);
+}
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/**
+ * @param {string|StyleNode} rules
+ * @param {function(StyleNode)=} callback
+ * @return {string}
+ */
+
+function toCssText(rules, callback) {
+  if (!rules) {
+    return '';
+  }
+
+  if (typeof rules === 'string') {
+    rules = parse(rules);
+  }
+
+  if (callback) {
+    forEachRule(rules, callback);
+  }
+
+  return stringify$1(rules, nativeCssVariables);
+}
+/**
+ * @param {HTMLStyleElement} style
+ * @return {StyleNode}
+ */
+
+function rulesForStyle(style) {
+  if (!style['__cssRules'] && style.textContent) {
+    style['__cssRules'] = parse(style.textContent);
+  }
+
+  return style['__cssRules'] || null;
+} // Tests if a rule is a keyframes selector, which looks almost exactly
+/**
+ * @param {StyleNode} node
+ * @param {Function=} styleRuleCallback
+ * @param {Function=} keyframesRuleCallback
+ * @param {boolean=} onlyActiveRules
+ */
+
+function forEachRule(node, styleRuleCallback, keyframesRuleCallback, onlyActiveRules) {
+  if (!node) {
+    return;
+  }
+
+  let skipRules = false;
+  let type = node['type'];
+
+  if (onlyActiveRules) {
+    if (type === types.MEDIA_RULE) {
+      let matchMedia = node['selector'].match(MEDIA_MATCH);
+
+      if (matchMedia) {
+        // if rule is a non matching @media rule, skip subrules
+        if (!window.matchMedia(matchMedia[1]).matches) {
+          skipRules = true;
+        }
+      }
+    }
+  }
+
+  if (type === types.STYLE_RULE) {
+    styleRuleCallback(node);
+  } else if (keyframesRuleCallback && type === types.KEYFRAMES_RULE) {
+    keyframesRuleCallback(node);
+  } else if (type === types.MIXIN_RULE) {
+    skipRules = true;
+  }
+
+  let r$ = node['rules'];
+
+  if (r$ && !skipRules) {
+    for (let i = 0, l = r$.length, r; i < l && (r = r$[i]); i++) {
+      forEachRule(r, styleRuleCallback, keyframesRuleCallback, onlyActiveRules);
+    }
+  }
+} // add a string of cssText to the document.
+/**
+ * Walk from text[start] matching parens and
+ * returns position of the outer end paren
+ * @param {string} text
+ * @param {number} start
+ * @return {number}
+ */
+
+function findMatchingParen(text, start) {
+  let level = 0;
+
+  for (let i = start, l = text.length; i < l; i++) {
+    if (text[i] === '(') {
+      level++;
+    } else if (text[i] === ')') {
+      if (--level === 0) {
+        return i;
+      }
+    }
+  }
+
+  return -1;
+}
+/**
+ * @param {string} str
+ * @param {function(string, string, string, string)} callback
+ */
+
+function processVariableAndFallback(str, callback) {
+  // find 'var('
+  let start = str.indexOf('var(');
+
+  if (start === -1) {
+    // no var?, everything is prefix
+    return callback(str, '', '', '');
+  } //${prefix}var(${inner})${suffix}
+
+
+  let end = findMatchingParen(str, start + 3);
+  let inner = str.substring(start + 4, end);
+  let prefix = str.substring(0, start); // suffix may have other variables
+
+  let suffix = processVariableAndFallback(str.substring(end + 1), callback);
+  let comma = inner.indexOf(','); // value and fallback args should be trimmed to match in property lookup
+
+  if (comma === -1) {
+    // variable, no fallback
+    return callback(prefix, inner.trim(), '', suffix);
+  } // var(${value},${fallback})
+
+
+  let value = inner.substring(0, comma).trim();
+  let fallback = inner.substring(comma + 1).trim();
+  return callback(prefix, value, fallback, suffix);
+}
+/**
+ * @type {function(*):*}
+ */
+
+const wrap$1 = window['ShadyDOM'] && window['ShadyDOM']['wrap'] || (node => node);
+/**
+ * @param {Element | {is: string, extends: string}} element
+ * @return {{is: string, typeExtension: string}}
+ */
+
+function getIsExtends(element) {
+  let localName = element['localName'];
+  let is = '',
+      typeExtension = '';
+  /*
+  NOTE: technically, this can be wrong for certain svg elements
+  with `-` in the name like `<font-face>`
+  */
+
+  if (localName) {
+    if (localName.indexOf('-') > -1) {
+      is = localName;
+    } else {
+      typeExtension = localName;
+      is = element.getAttribute && element.getAttribute('is') || '';
+    }
+  } else {
+    is =
+    /** @type {?} */
+    element.is;
+    typeExtension =
+    /** @type {?} */
+    element.extends;
+  }
+
+  return {
+    is,
+    typeExtension
+  };
+}
+/**
+ * @param {Element|DocumentFragment} element
+ * @return {string}
+ */
+
+function gatherStyleText(element) {
+  /** @type {!Array<string>} */
+  const styleTextParts = [];
+  const styles =
+  /** @type {!NodeList<!HTMLStyleElement>} */
+  element.querySelectorAll('style');
+
+  for (let i = 0; i < styles.length; i++) {
+    const style = styles[i];
+
+    if (isUnscopedStyle(style)) {
+      if (!nativeShadow) {
+        processUnscopedStyle(style);
+        style.parentNode.removeChild(style);
+      }
+    } else {
+      styleTextParts.push(style.textContent);
+      style.parentNode.removeChild(style);
+    }
+  }
+
+  return styleTextParts.join('').trim();
+}
+const CSS_BUILD_ATTR = 'css-build';
+/**
+ * Return the polymer-css-build "build type" applied to this element
+ *
+ * @param {!HTMLElement} element
+ * @return {string} Can be "", "shady", or "shadow"
+ */
+
+function getCssBuild(element) {
+  if (cssBuild !== undefined) {
+    return (
+      /** @type {string} */
+      cssBuild
+    );
+  }
+
+  if (element.__cssBuild === undefined) {
+    // try attribute first, as it is the common case
+    const attrValue = element.getAttribute(CSS_BUILD_ATTR);
+
+    if (attrValue) {
+      element.__cssBuild = attrValue;
+    } else {
+      const buildComment = getBuildComment(element);
+
+      if (buildComment !== '') {
+        // remove build comment so it is not needlessly copied into every element instance
+        removeBuildComment(element);
+      }
+
+      element.__cssBuild = buildComment;
+    }
+  }
+
+  return element.__cssBuild || '';
+}
+/**
+ * Check if the given element, either a <template> or <style>, has been processed
+ * by polymer-css-build.
+ *
+ * If so, then we can make a number of optimizations:
+ * - polymer-css-build will decompose mixins into individual CSS Custom Properties,
+ * so the ApplyShim can be skipped entirely.
+ * - Under native ShadowDOM, the style text can just be copied into each instance
+ * without modification
+ * - If the build is "shady" and ShadyDOM is in use, the styling does not need
+ * scoping beyond the shimming of CSS Custom Properties
+ *
+ * @param {!HTMLElement} element
+ * @return {boolean}
+ */
+
+function elementHasBuiltCss(element) {
+  return getCssBuild(element) !== '';
+}
+/**
+ * For templates made with tagged template literals, polymer-css-build will
+ * insert a comment of the form `<!--css-build:shadow-->`
+ *
+ * @param {!HTMLElement} element
+ * @return {string}
+ */
+
+function getBuildComment(element) {
+  const buildComment = element.localName === 'template' ?
+  /** @type {!HTMLTemplateElement} */
+  element.content.firstChild : element.firstChild;
+
+  if (buildComment instanceof Comment) {
+    const commentParts = buildComment.textContent.trim().split(':');
+
+    if (commentParts[0] === CSS_BUILD_ATTR) {
+      return commentParts[1];
+    }
+  }
+
+  return '';
+}
+/**
+ * @param {!HTMLElement} element
+ */
+
+function removeBuildComment(element) {
+  const buildComment = element.localName === 'template' ?
+  /** @type {!HTMLTemplateElement} */
+  element.content.firstChild : element.firstChild;
+  buildComment.parentNode.removeChild(buildComment);
+}
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+
+const APPLY_NAME_CLEAN = /;\s*/m;
+const INITIAL_INHERIT = /^\s*(initial)|(inherit)\s*$/;
+const IMPORTANT = /\s*!important/; // separator used between mixin-name and mixin-property-name when producing properties
+// NOTE: plain '-' may cause collisions in user styles
+
+const MIXIN_VAR_SEP = '_-_';
+// map of mixin to property names
+// --foo: {border: 2px} -> {properties: {(--foo, ['border'])}, dependants: {'element-name': proto}}
+
+class MixinMap {
+  constructor() {
+    /** @type {!Object<string, !MixinMapEntry>} */
+    this._map = {};
+  }
+  /**
+   * @param {string} name
+   * @param {!PropertyEntry} props
+   */
+
+
+  set(name, props) {
+    name = name.trim();
+    this._map[name] = {
+      properties: props,
+      dependants: {}
+    };
+  }
+  /**
+   * @param {string} name
+   * @return {MixinMapEntry}
+   */
+
+
+  get(name) {
+    name = name.trim();
+    return this._map[name] || null;
+  }
+
+}
+/**
+ * Callback for when an element is marked invalid
+ * @type {?function(string)}
+ */
+
+
+let invalidCallback = null;
+/** @unrestricted */
+
+class ApplyShim {
+  constructor() {
+    /** @type {?string} */
+    this._currentElement = null;
+    /** @type {HTMLMetaElement} */
+
+    this._measureElement = null;
+    this._map = new MixinMap();
+  }
+  /**
+   * return true if `cssText` contains a mixin definition or consumption
+   * @param {string} cssText
+   * @return {boolean}
+   */
+
+
+  detectMixin(cssText) {
+    return detectMixin(cssText);
+  }
+  /**
+   * Gather styles into one style for easier processing
+   * @param {!HTMLTemplateElement} template
+   * @return {HTMLStyleElement}
+   */
+
+
+  gatherStyles(template) {
+    const styleText = gatherStyleText(template.content);
+
+    if (styleText) {
+      const style =
+      /** @type {!HTMLStyleElement} */
+      document.createElement('style');
+      style.textContent = styleText;
+      template.content.insertBefore(style, template.content.firstChild);
+      return style;
+    }
+
+    return null;
+  }
+  /**
+   * @param {!HTMLTemplateElement} template
+   * @param {string} elementName
+   * @return {StyleNode}
+   */
+
+
+  transformTemplate(template, elementName) {
+    if (template._gatheredStyle === undefined) {
+      template._gatheredStyle = this.gatherStyles(template);
+    }
+    /** @type {HTMLStyleElement} */
+
+
+    const style = template._gatheredStyle;
+    return style ? this.transformStyle(style, elementName) : null;
+  }
+  /**
+   * @param {!HTMLStyleElement} style
+   * @param {string} elementName
+   * @return {StyleNode}
+   */
+
+
+  transformStyle(style, elementName = '') {
+    let ast = rulesForStyle(style);
+    this.transformRules(ast, elementName);
+    style.textContent = toCssText(ast);
+    return ast;
+  }
+  /**
+   * @param {!HTMLStyleElement} style
+   * @return {StyleNode}
+   */
+
+
+  transformCustomStyle(style) {
+    let ast = rulesForStyle(style);
+    forEachRule(ast, rule => {
+      if (rule['selector'] === ':root') {
+        rule['selector'] = 'html';
+      }
+
+      this.transformRule(rule);
+    });
+    style.textContent = toCssText(ast);
+    return ast;
+  }
+  /**
+   * @param {StyleNode} rules
+   * @param {string} elementName
+   */
+
+
+  transformRules(rules, elementName) {
+    this._currentElement = elementName;
+    forEachRule(rules, r => {
+      this.transformRule(r);
+    });
+    this._currentElement = null;
+  }
+  /**
+   * @param {!StyleNode} rule
+   */
+
+
+  transformRule(rule) {
+    rule['cssText'] = this.transformCssText(rule['parsedCssText'], rule); // :root was only used for variable assignment in property shim,
+    // but generates invalid selectors with real properties.
+    // replace with `:host > *`, which serves the same effect
+
+    if (rule['selector'] === ':root') {
+      rule['selector'] = ':host > *';
+    }
+  }
+  /**
+   * @param {string} cssText
+   * @param {!StyleNode} rule
+   * @return {string}
+   */
+
+
+  transformCssText(cssText, rule) {
+    // produce variables
+    cssText = cssText.replace(VAR_ASSIGN, (matchText, propertyName, valueProperty, valueMixin) => this._produceCssProperties(matchText, propertyName, valueProperty, valueMixin, rule)); // consume mixins
+
+    return this._consumeCssProperties(cssText, rule);
+  }
+  /**
+   * @param {string} property
+   * @return {string}
+   */
+
+
+  _getInitialValueForProperty(property) {
+    if (!this._measureElement) {
+      this._measureElement =
+      /** @type {HTMLMetaElement} */
+      document.createElement('meta');
+
+      this._measureElement.setAttribute('apply-shim-measure', '');
+
+      this._measureElement.style.all = 'initial';
+      document.head.appendChild(this._measureElement);
+    }
+
+    return window.getComputedStyle(this._measureElement).getPropertyValue(property);
+  }
+  /**
+   * Walk over all rules before this rule to find fallbacks for mixins
+   *
+   * @param {!StyleNode} startRule
+   * @return {!Object}
+   */
+
+
+  _fallbacksFromPreviousRules(startRule) {
+    // find the "top" rule
+    let topRule = startRule;
+
+    while (topRule['parent']) {
+      topRule = topRule['parent'];
+    }
+
+    const fallbacks = {};
+    let seenStartRule = false;
+    forEachRule(topRule, r => {
+      // stop when we hit the input rule
+      seenStartRule = seenStartRule || r === startRule;
+
+      if (seenStartRule) {
+        return;
+      } // NOTE: Only matching selectors are "safe" for this fallback processing
+      // It would be prohibitive to run `matchesSelector()` on each selector,
+      // so we cheat and only check if the same selector string is used, which
+      // guarantees things like specificity matching
+
+
+      if (r['selector'] === startRule['selector']) {
+        Object.assign(fallbacks, this._cssTextToMap(r['parsedCssText']));
+      }
+    });
+    return fallbacks;
+  }
+  /**
+   * replace mixin consumption with variable consumption
+   * @param {string} text
+   * @param {!StyleNode=} rule
+   * @return {string}
+   */
+
+
+  _consumeCssProperties(text, rule) {
+    /** @type {Array} */
+    let m = null; // loop over text until all mixins with defintions have been applied
+
+    while (m = MIXIN_MATCH.exec(text)) {
+      let matchText = m[0];
+      let mixinName = m[1];
+      let idx = m.index; // collect properties before apply to be "defaults" if mixin might override them
+      // match includes a "prefix", so find the start and end positions of @apply
+
+      let applyPos = idx + matchText.indexOf('@apply');
+      let afterApplyPos = idx + matchText.length; // find props defined before this @apply
+
+      let textBeforeApply = text.slice(0, applyPos);
+      let textAfterApply = text.slice(afterApplyPos);
+      let defaults = rule ? this._fallbacksFromPreviousRules(rule) : {};
+      Object.assign(defaults, this._cssTextToMap(textBeforeApply));
+
+      let replacement = this._atApplyToCssProperties(mixinName, defaults); // use regex match position to replace mixin, keep linear processing time
+
+
+      text = `${textBeforeApply}${replacement}${textAfterApply}`; // move regex search to _after_ replacement
+
+      MIXIN_MATCH.lastIndex = idx + replacement.length;
+    }
+
+    return text;
+  }
+  /**
+   * produce variable consumption at the site of mixin consumption
+   * `@apply` --foo; -> for all props (${propname}: var(--foo_-_${propname}, ${fallback[propname]}}))
+   * Example:
+   *  border: var(--foo_-_border); padding: var(--foo_-_padding, 2px)
+   *
+   * @param {string} mixinName
+   * @param {Object} fallbacks
+   * @return {string}
+   */
+
+
+  _atApplyToCssProperties(mixinName, fallbacks) {
+    mixinName = mixinName.replace(APPLY_NAME_CLEAN, '');
+    let vars = [];
+
+    let mixinEntry = this._map.get(mixinName); // if we depend on a mixin before it is created
+    // make a sentinel entry in the map to add this element as a dependency for when it is defined.
+
+
+    if (!mixinEntry) {
+      this._map.set(mixinName, {});
+
+      mixinEntry = this._map.get(mixinName);
+    }
+
+    if (mixinEntry) {
+      if (this._currentElement) {
+        mixinEntry.dependants[this._currentElement] = true;
+      }
+
+      let p, parts, f;
+      const properties = mixinEntry.properties;
+
+      for (p in properties) {
+        f = fallbacks && fallbacks[p];
+        parts = [p, ': var(', mixinName, MIXIN_VAR_SEP, p];
+
+        if (f) {
+          parts.push(',', f.replace(IMPORTANT, ''));
+        }
+
+        parts.push(')');
+
+        if (IMPORTANT.test(properties[p])) {
+          parts.push(' !important');
+        }
+
+        vars.push(parts.join(''));
+      }
+    }
+
+    return vars.join('; ');
+  }
+  /**
+   * @param {string} property
+   * @param {string} value
+   * @return {string}
+   */
+
+
+  _replaceInitialOrInherit(property, value) {
+    let match = INITIAL_INHERIT.exec(value);
+
+    if (match) {
+      if (match[1]) {
+        // initial
+        // replace `initial` with the concrete initial value for this property
+        value = this._getInitialValueForProperty(property);
+      } else {
+        // inherit
+        // with this purposfully illegal value, the variable will be invalid at
+        // compute time (https://www.w3.org/TR/css-variables/#invalid-at-computed-value-time)
+        // and for inheriting values, will behave similarly
+        // we cannot support the same behavior for non inheriting values like 'border'
+        value = 'apply-shim-inherit';
+      }
+    }
+
+    return value;
+  }
+  /**
+   * "parse" a mixin definition into a map of properties and values
+   * cssTextToMap('border: 2px solid black') -> ('border', '2px solid black')
+   * @param {string} text
+   * @param {boolean=} replaceInitialOrInherit
+   * @return {!Object<string, string>}
+   */
+
+
+  _cssTextToMap(text, replaceInitialOrInherit = false) {
+    let props = text.split(';');
+    let property, value;
+    let out = {};
+
+    for (let i = 0, p, sp; i < props.length; i++) {
+      p = props[i];
+
+      if (p) {
+        sp = p.split(':'); // ignore lines that aren't definitions like @media
+
+        if (sp.length > 1) {
+          property = sp[0].trim(); // some properties may have ':' in the value, like data urls
+
+          value = sp.slice(1).join(':');
+
+          if (replaceInitialOrInherit) {
+            value = this._replaceInitialOrInherit(property, value);
+          }
+
+          out[property] = value;
+        }
+      }
+    }
+
+    return out;
+  }
+  /**
+   * @param {MixinMapEntry} mixinEntry
+   */
+
+
+  _invalidateMixinEntry(mixinEntry) {
+    if (!invalidCallback) {
+      return;
+    }
+
+    for (let elementName in mixinEntry.dependants) {
+      if (elementName !== this._currentElement) {
+        invalidCallback(elementName);
+      }
+    }
+  }
+  /**
+   * @param {string} matchText
+   * @param {string} propertyName
+   * @param {?string} valueProperty
+   * @param {?string} valueMixin
+   * @param {!StyleNode} rule
+   * @return {string}
+   */
+
+
+  _produceCssProperties(matchText, propertyName, valueProperty, valueMixin, rule) {
+    // handle case where property value is a mixin
+    if (valueProperty) {
+      // form: --mixin2: var(--mixin1), where --mixin1 is in the map
+      processVariableAndFallback(valueProperty, (prefix, value) => {
+        if (value && this._map.get(value)) {
+          valueMixin = `@apply ${value};`;
+        }
+      });
+    }
+
+    if (!valueMixin) {
+      return matchText;
+    }
+
+    let mixinAsProperties = this._consumeCssProperties('' + valueMixin, rule);
+
+    let prefix = matchText.slice(0, matchText.indexOf('--')); // `initial` and `inherit` as properties in a map should be replaced because
+    // these keywords are eagerly evaluated when the mixin becomes CSS Custom Properties,
+    // and would set the variable value, rather than carry the keyword to the `var()` usage.
+
+    let mixinValues = this._cssTextToMap(mixinAsProperties, true);
+
+    let combinedProps = mixinValues;
+
+    let mixinEntry = this._map.get(propertyName);
+
+    let oldProps = mixinEntry && mixinEntry.properties;
+
+    if (oldProps) {
+      // NOTE: since we use mixin, the map of properties is updated here
+      // and this is what we want.
+      combinedProps = Object.assign(Object.create(oldProps), mixinValues);
+    } else {
+      this._map.set(propertyName, combinedProps);
+    }
+
+    let out = [];
+    let p, v; // set variables defined by current mixin
+
+    let needToInvalidate = false;
+
+    for (p in combinedProps) {
+      v = mixinValues[p]; // if property not defined by current mixin, set initial
+
+      if (v === undefined) {
+        v = 'initial';
+      }
+
+      if (oldProps && !(p in oldProps)) {
+        needToInvalidate = true;
+      }
+
+      out.push(`${propertyName}${MIXIN_VAR_SEP}${p}: ${v}`);
+    }
+
+    if (needToInvalidate) {
+      this._invalidateMixinEntry(mixinEntry);
+    }
+
+    if (mixinEntry) {
+      mixinEntry.properties = combinedProps;
+    } // because the mixinMap is global, the mixin might conflict with
+    // a different scope's simple variable definition:
+    // Example:
+    // some style somewhere:
+    // --mixin1:{ ... }
+    // --mixin2: var(--mixin1);
+    // some other element:
+    // --mixin1: 10px solid red;
+    // --foo: var(--mixin1);
+    // In this case, we leave the original variable definition in place.
+
+
+    if (valueProperty) {
+      prefix = `${matchText};${prefix}`;
+    }
+
+    return `${prefix}${out.join('; ')};`;
+  }
+
+}
+/* exports */
+
+/* eslint-disable no-self-assign */
+
+
+ApplyShim.prototype['detectMixin'] = ApplyShim.prototype.detectMixin;
+ApplyShim.prototype['transformStyle'] = ApplyShim.prototype.transformStyle;
+ApplyShim.prototype['transformCustomStyle'] = ApplyShim.prototype.transformCustomStyle;
+ApplyShim.prototype['transformRules'] = ApplyShim.prototype.transformRules;
+ApplyShim.prototype['transformRule'] = ApplyShim.prototype.transformRule;
+ApplyShim.prototype['transformTemplate'] = ApplyShim.prototype.transformTemplate;
+ApplyShim.prototype['_separator'] = MIXIN_VAR_SEP;
+/* eslint-enable no-self-assign */
+
+Object.defineProperty(ApplyShim.prototype, 'invalidCallback', {
+  /** @return {?function(string)} */
+  get() {
+    return invalidCallback;
+  },
+
+  /** @param {?function(string)} cb */
+  set(cb) {
+    invalidCallback = cb;
+  }
+
+});
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/**
+ * @const {!Object<string, !HTMLTemplateElement>}
+ */
+
+const templateMap = {};
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+
+/*
+ * Utilities for handling invalidating apply-shim mixins for a given template.
+ *
+ * The invalidation strategy involves keeping track of the "current" version of a template's mixins, and updating that count when a mixin is invalidated.
+ * The template
+ */
+
+/** @const {string} */
+
+const CURRENT_VERSION = '_applyShimCurrentVersion';
+/** @const {string} */
+
+const NEXT_VERSION = '_applyShimNextVersion';
+/** @const {string} */
+
+const VALIDATING_VERSION = '_applyShimValidatingVersion';
+/**
+ * @const {Promise<void>}
+ */
+
+const promise = Promise.resolve();
+/**
+ * @param {string} elementName
+ */
+
+function invalidate(elementName) {
+  let template = templateMap[elementName];
+
+  if (template) {
+    invalidateTemplate(template);
+  }
+}
+/**
+ * This function can be called multiple times to mark a template invalid
+ * and signal that the style inside must be regenerated.
+ *
+ * Use `startValidatingTemplate` to begin an asynchronous validation cycle.
+ * During that cycle, call `templateIsValidating` to see if the template must
+ * be revalidated
+ * @param {HTMLTemplateElement} template
+ */
+
+function invalidateTemplate(template) {
+  // default the current version to 0
+  template[CURRENT_VERSION] = template[CURRENT_VERSION] || 0; // ensure the "validating for" flag exists
+
+  template[VALIDATING_VERSION] = template[VALIDATING_VERSION] || 0; // increment the next version
+
+  template[NEXT_VERSION] = (template[NEXT_VERSION] || 0) + 1;
+}
+/**
+ * @param {HTMLTemplateElement} template
+ * @return {boolean}
+ */
+
+function templateIsValid(template) {
+  return template[CURRENT_VERSION] === template[NEXT_VERSION];
+}
+/**
+ * Returns true if the template is currently invalid and `startValidating` has been called since the last invalidation.
+ * If false, the template must be validated.
+ * @param {HTMLTemplateElement} template
+ * @return {boolean}
+ */
+
+function templateIsValidating(template) {
+  return !templateIsValid(template) && template[VALIDATING_VERSION] === template[NEXT_VERSION];
+}
+/**
+ * Begin an asynchronous invalidation cycle.
+ * This should be called after every validation of a template
+ *
+ * After one microtask, the template will be marked as valid until the next call to `invalidateTemplate`
+ * @param {HTMLTemplateElement} template
+ */
+
+function startValidatingTemplate(template) {
+  // remember that the current "next version" is the reason for this validation cycle
+  template[VALIDATING_VERSION] = template[NEXT_VERSION]; // however, there only needs to be one async task to clear the counters
+
+  if (!template._validating) {
+    template._validating = true;
+    promise.then(function () {
+      // sync the current version to let future invalidations cause a refresh cycle
+      template[CURRENT_VERSION] = template[NEXT_VERSION];
+      template._validating = false;
+    });
+  }
+}
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/** @const {ApplyShim} */
+
+const applyShim = new ApplyShim();
+
+class ApplyShimInterface {
+  constructor() {
+    /** @type {?CustomStyleInterfaceInterface} */
+    this.customStyleInterface = null;
+    applyShim['invalidCallback'] = invalidate;
+  }
+
+  ensure() {
+    if (this.customStyleInterface) {
+      return;
+    }
+
+    if (window.ShadyCSS.CustomStyleInterface) {
+      this.customStyleInterface =
+      /** @type {!CustomStyleInterfaceInterface} */
+      window.ShadyCSS.CustomStyleInterface;
+
+      this.customStyleInterface['transformCallback'] = style => {
+        applyShim.transformCustomStyle(style);
+      };
+
+      this.customStyleInterface['validateCallback'] = () => {
+        requestAnimationFrame(() => {
+          if (this.customStyleInterface['enqueued']) {
+            this.flushCustomStyles();
+          }
+        });
+      };
+    }
+  }
+  /**
+   * @param {!HTMLTemplateElement} template
+   * @param {string} elementName
+   */
+
+
+  prepareTemplate(template, elementName) {
+    this.ensure();
+
+    if (elementHasBuiltCss(template)) {
+      return;
+    }
+
+    templateMap[elementName] = template;
+    let ast = applyShim.transformTemplate(template, elementName); // save original style ast to use for revalidating instances
+
+    template['_styleAst'] = ast;
+  }
+
+  flushCustomStyles() {
+    this.ensure();
+
+    if (!this.customStyleInterface) {
+      return;
+    }
+
+    let styles = this.customStyleInterface['processStyles']();
+
+    if (!this.customStyleInterface['enqueued']) {
+      return;
+    }
+
+    for (let i = 0; i < styles.length; i++) {
+      let cs = styles[i];
+      let style = this.customStyleInterface['getStyleForCustomStyle'](cs);
+
+      if (style) {
+        applyShim.transformCustomStyle(style);
+      }
+    }
+
+    this.customStyleInterface['enqueued'] = false;
+  }
+  /**
+   * @param {HTMLElement} element
+   * @param {Object=} properties
+   */
+
+
+  styleSubtree(element, properties) {
+    this.ensure();
+
+    if (properties) {
+      updateNativeProperties(element, properties);
+    }
+
+    if (element.shadowRoot) {
+      this.styleElement(element);
+      let shadowChildren =
+      /** @type {!ParentNode} */
+      element.shadowRoot.children || element.shadowRoot.childNodes;
+
+      for (let i = 0; i < shadowChildren.length; i++) {
+        this.styleSubtree(
+        /** @type {HTMLElement} */
+        shadowChildren[i]);
+      }
+    } else {
+      let children = element.children || element.childNodes;
+
+      for (let i = 0; i < children.length; i++) {
+        this.styleSubtree(
+        /** @type {HTMLElement} */
+        children[i]);
+      }
+    }
+  }
+  /**
+   * @param {HTMLElement} element
+   */
+
+
+  styleElement(element) {
+    this.ensure();
+    let {
+      is
+    } = getIsExtends(element);
+    let template = templateMap[is];
+
+    if (template && elementHasBuiltCss(template)) {
+      return;
+    }
+
+    if (template && !templateIsValid(template)) {
+      // only revalidate template once
+      if (!templateIsValidating(template)) {
+        this.prepareTemplate(template, is);
+        startValidatingTemplate(template);
+      } // update this element instance
+
+
+      let root = element.shadowRoot;
+
+      if (root) {
+        let style =
+        /** @type {HTMLStyleElement} */
+        root.querySelector('style');
+
+        if (style) {
+          // reuse the template's style ast, it has all the original css text
+          style['__cssRules'] = template['_styleAst'];
+          style.textContent = toCssText(template['_styleAst']);
+        }
+      }
+    }
+  }
+  /**
+   * @param {Object=} properties
+   */
+
+
+  styleDocument(properties) {
+    this.ensure();
+    this.styleSubtree(document.body, properties);
+  }
+
+}
+
+if (!window.ShadyCSS || !window.ShadyCSS.ScopingShim) {
+  const applyShimInterface = new ApplyShimInterface();
+  let CustomStyleInterface = window.ShadyCSS && window.ShadyCSS.CustomStyleInterface;
+  /** @suppress {duplicate} */
+
+  window.ShadyCSS = {
+    /**
+     * @param {!HTMLTemplateElement} template
+     * @param {string} elementName
+     * @param {string=} elementExtends
+     */
+    prepareTemplate(template, elementName, elementExtends) {
+      // eslint-disable-line no-unused-vars
+      applyShimInterface.flushCustomStyles();
+      applyShimInterface.prepareTemplate(template, elementName);
+    },
+
+    /**
+     * @param {!HTMLTemplateElement} template
+     * @param {string} elementName
+     * @param {string=} elementExtends
+     */
+    prepareTemplateStyles(template, elementName, elementExtends) {
+      window.ShadyCSS.prepareTemplate(template, elementName, elementExtends);
+    },
+
+    /**
+     * @param {!HTMLTemplateElement} template
+     * @param {string} elementName
+     */
+    prepareTemplateDom(template, elementName) {},
+
+    // eslint-disable-line no-unused-vars
+
+    /**
+     * @param {!HTMLElement} element
+     * @param {Object=} properties
+     */
+    styleSubtree(element, properties) {
+      applyShimInterface.flushCustomStyles();
+      applyShimInterface.styleSubtree(element, properties);
+    },
+
+    /**
+     * @param {!HTMLElement} element
+     */
+    styleElement(element) {
+      applyShimInterface.flushCustomStyles();
+      applyShimInterface.styleElement(element);
+    },
+
+    /**
+     * @param {Object=} properties
+     */
+    styleDocument(properties) {
+      applyShimInterface.flushCustomStyles();
+      applyShimInterface.styleDocument(properties);
+    },
+
+    /**
+     * @param {Element} element
+     * @param {string} property
+     * @return {string}
+     */
+    getComputedStyleValue(element, property) {
+      return getComputedStyleValue(element, property);
+    },
+
+    flushCustomStyles() {
+      applyShimInterface.flushCustomStyles();
+    },
+
+    nativeCss: nativeCssVariables,
+    nativeShadow: nativeShadow,
+    cssBuild: cssBuild,
+    disableRuntime: disableRuntime
+  };
+
+  if (CustomStyleInterface) {
+    window.ShadyCSS.CustomStyleInterface = CustomStyleInterface;
+  }
+}
+
+window.ShadyCSS.ApplyShim = applyShim;
+
+/**
+ * @fileoverview
+ * @suppress {checkPrototypalTypes}
+ * @license Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at
+ * http://polymer.github.io/LICENSE.txt The complete set of authors may be found
+ * at http://polymer.github.io/AUTHORS.txt The complete set of contributors may
+ * be found at http://polymer.github.io/CONTRIBUTORS.txt Code distributed by
+ * Google as part of the polymer project is also subject to an additional IP
+ * rights grant found at http://polymer.github.io/PATENTS.txt
+ */
+const HOST_DIR = /:host\(:dir\((ltr|rtl)\)\)/g;
+const HOST_DIR_REPLACMENT = ':host([dir="$1"])';
+const EL_DIR = /([\s\w-#\.\[\]\*]*):dir\((ltr|rtl)\)/g;
+const EL_DIR_REPLACMENT = ':host([dir="$2"]) $1';
+const DIR_CHECK = /:dir\((?:ltr|rtl)\)/;
+const SHIM_SHADOW = Boolean(window['ShadyDOM'] && window['ShadyDOM']['inUse']);
+/**
+ * @type {!Array<!Polymer_DirMixin>}
+ */
+
+const DIR_INSTANCES = [];
+/** @type {?MutationObserver} */
+
+let observer = null;
+let DOCUMENT_DIR = '';
+
+function getRTL() {
+  DOCUMENT_DIR = document.documentElement.getAttribute('dir');
+}
+/**
+ * @param {!Polymer_DirMixin} instance Instance to set RTL status on
+ */
+
+
+function setRTL(instance) {
+  if (!instance.__autoDirOptOut) {
+    const el =
+    /** @type {!HTMLElement} */
+    instance;
+    el.setAttribute('dir', DOCUMENT_DIR);
+  }
+}
+
+function updateDirection() {
+  getRTL();
+  DOCUMENT_DIR = document.documentElement.getAttribute('dir');
+
+  for (let i = 0; i < DIR_INSTANCES.length; i++) {
+    setRTL(DIR_INSTANCES[i]);
+  }
+}
+
+function takeRecords() {
+  if (observer && observer.takeRecords().length) {
+    updateDirection();
+  }
+}
+/**
+ * Element class mixin that allows elements to use the `:dir` CSS Selector to
+ * have text direction specific styling.
+ *
+ * With this mixin, any stylesheet provided in the template will transform
+ * `:dir` into `:host([dir])` and sync direction with the page via the
+ * element's `dir` attribute.
+ *
+ * Elements can opt out of the global page text direction by setting the `dir`
+ * attribute directly in `ready()` or in HTML.
+ *
+ * Caveats:
+ * - Applications must set `<html dir="ltr">` or `<html dir="rtl">` to sync
+ *   direction
+ * - Automatic left-to-right or right-to-left styling is sync'd with the
+ *   `<html>` element only.
+ * - Changing `dir` at runtime is supported.
+ * - Opting out of the global direction styling is permanent
+ *
+ * @mixinFunction
+ * @polymer
+ * @appliesMixin PropertyAccessors
+ * @template T
+ * @param {function(new:T)} superClass Class to apply mixin to.
+ * @return {function(new:T)} superClass with mixin applied.
+ */
+
+
+const DirMixin = dedupingMixin(base => {
+  if (!SHIM_SHADOW) {
+    if (!observer) {
+      getRTL();
+      observer = new MutationObserver(updateDirection);
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['dir']
+      });
+    }
+  }
+  /**
+   * @constructor
+   * @implements {Polymer_PropertyAccessors}
+   * @private
+   */
+
+
+  const elementBase = PropertyAccessors(base);
+  /**
+   * @polymer
+   * @mixinClass
+   * @implements {Polymer_DirMixin}
+   */
+
+  class Dir extends elementBase {
+    /**
+     * @param {string} cssText .
+     * @param {string} baseURI .
+     * @return {string} .
+     * @suppress {missingProperties} Interfaces in closure do not inherit statics, but classes do
+     * @nocollapse
+     */
+    static _processStyleText(cssText, baseURI) {
+      // TODO(https://github.com/google/closure-compiler/issues/3240):
+      //     Change back to just super.methodCall()
+      cssText = elementBase._processStyleText.call(this, cssText, baseURI);
+
+      if (!SHIM_SHADOW && DIR_CHECK.test(cssText)) {
+        cssText = this._replaceDirInCssText(cssText);
+        this.__activateDir = true;
+      }
+
+      return cssText;
+    }
+    /**
+     * Replace `:dir` in the given CSS text
+     *
+     * @param {string} text CSS text to replace DIR
+     * @return {string} Modified CSS
+     * @nocollapse
+     */
+
+
+    static _replaceDirInCssText(text) {
+      let replacedText = text;
+      replacedText = replacedText.replace(HOST_DIR, HOST_DIR_REPLACMENT);
+      replacedText = replacedText.replace(EL_DIR, EL_DIR_REPLACMENT);
+      return replacedText;
+    }
+
+    constructor() {
+      super();
+      /** @type {boolean} */
+
+      this.__autoDirOptOut = false;
+    }
+    /**
+     * @override
+     * @suppress {invalidCasts} Closure doesn't understand that `this` is an
+     *     HTMLElement
+     * @return {void}
+     */
+
+
+    ready() {
+      super.ready();
+      this.__autoDirOptOut =
+      /** @type {!HTMLElement} */
+      this.hasAttribute('dir');
+    }
+    /**
+     * @override
+     * @suppress {missingProperties} If it exists on elementBase, it can be
+     *   super'd
+     * @return {void}
+     */
+
+
+    connectedCallback() {
+      if (elementBase.prototype.connectedCallback) {
+        super.connectedCallback();
+      }
+
+      if (this.constructor.__activateDir) {
+        takeRecords();
+        DIR_INSTANCES.push(this);
+        setRTL(this);
+      }
+    }
+    /**
+     * @override
+     * @suppress {missingProperties} If it exists on elementBase, it can be
+     *   super'd
+     * @return {void}
+     */
+
+
+    disconnectedCallback() {
+      if (elementBase.prototype.disconnectedCallback) {
+        super.disconnectedCallback();
+      }
+
+      if (this.constructor.__activateDir) {
+        const idx = DIR_INSTANCES.indexOf(this);
+
+        if (idx > -1) {
+          DIR_INSTANCES.splice(idx, 1);
+        }
+      }
+    }
+
+  }
+
+  Dir.__activateDir = false;
+  return Dir;
+});
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+let scheduled = false;
+let beforeRenderQueue = [];
+let afterRenderQueue = [];
+
+function schedule() {
+  scheduled = true; // before next render
+
+  requestAnimationFrame(function () {
+    scheduled = false;
+    flushQueue(beforeRenderQueue); // after the render
+
+    setTimeout(function () {
+      runQueue(afterRenderQueue);
+    });
+  });
+}
+
+function flushQueue(queue) {
+  while (queue.length) {
+    callMethod(queue.shift());
+  }
+}
+
+function runQueue(queue) {
+  for (let i = 0, l = queue.length; i < l; i++) {
+    callMethod(queue.shift());
+  }
+}
+
+function callMethod(info) {
+  const context = info[0];
+  const callback = info[1];
+  const args = info[2];
+
+  try {
+    callback.apply(context, args);
+  } catch (e) {
+    setTimeout(() => {
+      throw e;
+    });
+  }
+}
+/**
+ * Enqueues a callback which will be run after the next render, equivalent
+ * to one task (`setTimeout`) after the next `requestAnimationFrame`.
+ *
+ * This method is useful for tuning the first-render performance of an
+ * element or application by deferring non-critical work until after the
+ * first paint.  Typical non-render-critical work may include adding UI
+ * event listeners and aria attributes.
+ *
+ * @param {*} context Context object the callback function will be bound to
+ * @param {function(...*):void} callback Callback function
+ * @param {!Array=} args An array of arguments to call the callback function with
+ * @return {void}
+ */
+
+function afterNextRender(context, callback, args) {
+  if (!scheduled) {
+    schedule();
+  }
+
+  afterRenderQueue.push([context, callback, args]);
+}
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+function resolve() {
+  document.body.removeAttribute('unresolved');
+}
+
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  resolve();
+} else {
+  window.addEventListener('DOMContentLoaded', resolve);
+}
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+
+/* eslint-enable no-unused-vars */
+
+const p = Element.prototype;
+/**
+ * @const {function(this:Node, string): boolean}
+ */
+
+const normalizedMatchesSelector = p.matches || p.matchesSelector || p.mozMatchesSelector || p.msMatchesSelector || p.oMatchesSelector || p.webkitMatchesSelector;
+/**
+ * Cross-platform `element.matches` shim.
+ *
+ * @function matchesSelector
+ * @param {!Node} node Node to check selector against
+ * @param {string} selector Selector to match
+ * @return {boolean} True if node matched selector
+ */
+
+const matchesSelector = function (node, selector) {
+  return normalizedMatchesSelector.call(node, selector);
+};
+/**
+ * Node API wrapper class returned from `Polymer.dom.(target)` when
+ * `target` is a `Node`.
+ * @implements {PolymerDomApi}
+ * @unrestricted
+ */
+
+class DomApiNative {
+  /**
+   * @param {Node} node Node for which to create a Polymer.dom helper object.
+   */
+  constructor(node) {
+    if (window['ShadyDOM'] && window['ShadyDOM']['inUse']) {
+      window['ShadyDOM']['patch'](node);
+    }
+
+    this.node = node;
+  }
+  /**
+   * Returns an instance of `FlattenedNodesObserver` that
+   * listens for node changes on this element.
+   *
+   * @param {function(this:HTMLElement, { target: !HTMLElement, addedNodes: !Array<!Element>, removedNodes: !Array<!Element> }):void} callback Called when direct or distributed children
+   *   of this element changes
+   * @return {!PolymerDomApi.ObserveHandle} Observer instance
+   * @override
+   */
+
+
+  observeNodes(callback) {
+    return new FlattenedNodesObserver(
+    /** @type {!HTMLElement} */
+    this.node, callback);
+  }
+  /**
+   * Disconnects an observer previously created via `observeNodes`
+   *
+   * @param {!PolymerDomApi.ObserveHandle} observerHandle Observer instance
+   *   to disconnect.
+   * @return {void}
+   * @override
+   */
+
+
+  unobserveNodes(observerHandle) {
+    observerHandle.disconnect();
+  }
+  /**
+   * Provided as a backwards-compatible API only.  This method does nothing.
+   * @return {void}
+   */
+
+
+  notifyObserver() {}
+  /**
+   * Returns true if the provided node is contained with this element's
+   * light-DOM children or shadow root, including any nested shadow roots
+   * of children therein.
+   *
+   * @param {Node} node Node to test
+   * @return {boolean} Returns true if the given `node` is contained within
+   *   this element's light or shadow DOM.
+   * @override
+   */
+
+
+  deepContains(node) {
+    if (wrap(this.node).contains(node)) {
+      return true;
+    }
+
+    let n = node;
+    let doc = node.ownerDocument; // walk from node to `this` or `document`
+
+    while (n && n !== doc && n !== this.node) {
+      // use logical parentnode, or native ShadowRoot host
+      n = wrap(n).parentNode || wrap(n).host;
+    }
+
+    return n === this.node;
+  }
+  /**
+   * Returns the root node of this node.  Equivalent to `getRootNode()`.
+   *
+   * @return {Node} Top most element in the dom tree in which the node
+   * exists. If the node is connected to a document this is either a
+   * shadowRoot or the document; otherwise, it may be the node
+   * itself or a node or document fragment containing it.
+   * @override
+   */
+
+
+  getOwnerRoot() {
+    return wrap(this.node).getRootNode();
+  }
+  /**
+   * For slot elements, returns the nodes assigned to the slot; otherwise
+   * an empty array. It is equivalent to `<slot>.addignedNodes({flatten:true})`.
+   *
+   * @return {!Array<!Node>} Array of assigned nodes
+   * @override
+   */
+
+
+  getDistributedNodes() {
+    return this.node.localName === 'slot' ? wrap(this.node).assignedNodes({
+      flatten: true
+    }) : [];
+  }
+  /**
+   * Returns an array of all slots this element was distributed to.
+   *
+   * @return {!Array<!HTMLSlotElement>} Description
+   * @override
+   */
+
+
+  getDestinationInsertionPoints() {
+    let ip$ = [];
+    let n = wrap(this.node).assignedSlot;
+
+    while (n) {
+      ip$.push(n);
+      n = wrap(n).assignedSlot;
+    }
+
+    return ip$;
+  }
+  /**
+   * Calls `importNode` on the `ownerDocument` for this node.
+   *
+   * @param {!Node} node Node to import
+   * @param {boolean} deep True if the node should be cloned deeply during
+   *   import
+   * @return {Node} Clone of given node imported to this owner document
+   */
+
+
+  importNode(node, deep) {
+    let doc = this.node instanceof Document ? this.node : this.node.ownerDocument;
+    return wrap(doc).importNode(node, deep);
+  }
+  /**
+   * @return {!Array<!Node>} Returns a flattened list of all child nodes and
+   * nodes assigned to child slots.
+   * @override
+   */
+
+
+  getEffectiveChildNodes() {
+    return FlattenedNodesObserver.getFlattenedNodes(
+    /** @type {!HTMLElement} */
+    this.node);
+  }
+  /**
+   * Returns a filtered list of flattened child elements for this element based
+   * on the given selector.
+   *
+   * @param {string} selector Selector to filter nodes against
+   * @return {!Array<!HTMLElement>} List of flattened child elements
+   * @override
+   */
+
+
+  queryDistributedElements(selector) {
+    let c$ = this.getEffectiveChildNodes();
+    let list = [];
+
+    for (let i = 0, l = c$.length, c; i < l && (c = c$[i]); i++) {
+      if (c.nodeType === Node.ELEMENT_NODE && matchesSelector(c, selector)) {
+        list.push(c);
+      }
+    }
+
+    return list;
+  }
+  /**
+   * For shadow roots, returns the currently focused element within this
+   * shadow root.
+   *
+   * return {Node|undefined} Currently focused element
+   * @override
+   */
+
+
+  get activeElement() {
+    let node = this.node;
+    return node._activeElement !== undefined ? node._activeElement : node.activeElement;
+  }
+
+}
+
+function forwardMethods(proto, methods) {
+  for (let i = 0; i < methods.length; i++) {
+    let method = methods[i];
+    /* eslint-disable valid-jsdoc */
+
+    proto[method] =
+    /** @this {DomApiNative} */
+    function () {
+      return this.node[method].apply(this.node, arguments);
+    };
+    /* eslint-enable */
+
+  }
+}
+
+function forwardReadOnlyProperties(proto, properties) {
+  for (let i = 0; i < properties.length; i++) {
+    let name = properties[i];
+    Object.defineProperty(proto, name, {
+      get: function () {
+        const domApi =
+        /** @type {DomApiNative} */
+        this;
+        return domApi.node[name];
+      },
+      configurable: true
+    });
+  }
+}
+
+function forwardProperties(proto, properties) {
+  for (let i = 0; i < properties.length; i++) {
+    let name = properties[i];
+    Object.defineProperty(proto, name, {
+      /**
+       * @this {DomApiNative}
+       * @return {*} .
+       */
+      get: function () {
+        return this.node[name];
+      },
+
+      /**
+       * @this {DomApiNative}
+       * @param {*} value .
+       */
+      set: function (value) {
+        this.node[name] = value;
+      },
+      configurable: true
+    });
+  }
+}
+/**
+ * Event API wrapper class returned from `dom.(target)` when
+ * `target` is an `Event`.
+ */
+
+
+class EventApi {
+  constructor(event) {
+    this.event = event;
+  }
+  /**
+   * Returns the first node on the `composedPath` of this event.
+   *
+   * @return {!EventTarget} The node this event was dispatched to
+   */
+
+
+  get rootTarget() {
+    return this.path[0];
+  }
+  /**
+   * Returns the local (re-targeted) target for this event.
+   *
+   * @return {!EventTarget} The local (re-targeted) target for this event.
+   */
+
+
+  get localTarget() {
+    return this.event.target;
+  }
+  /**
+   * Returns the `composedPath` for this event.
+   * @return {!Array<!EventTarget>} The nodes this event propagated through
+   */
+
+
+  get path() {
+    return this.event.composedPath();
+  }
+
+}
+/**
+ * @function
+ * @param {boolean=} deep
+ * @return {!Node}
+ */
+
+DomApiNative.prototype.cloneNode;
+/**
+ * @function
+ * @param {!Node} node
+ * @return {!Node}
+ */
+
+DomApiNative.prototype.appendChild;
+/**
+ * @function
+ * @param {!Node} newChild
+ * @param {Node} refChild
+ * @return {!Node}
+ */
+
+DomApiNative.prototype.insertBefore;
+/**
+ * @function
+ * @param {!Node} node
+ * @return {!Node}
+ */
+
+DomApiNative.prototype.removeChild;
+/**
+ * @function
+ * @param {!Node} oldChild
+ * @param {!Node} newChild
+ * @return {!Node}
+ */
+
+DomApiNative.prototype.replaceChild;
+/**
+ * @function
+ * @param {string} name
+ * @param {string} value
+ * @return {void}
+ */
+
+DomApiNative.prototype.setAttribute;
+/**
+ * @function
+ * @param {string} name
+ * @return {void}
+ */
+
+DomApiNative.prototype.removeAttribute;
+/**
+ * @function
+ * @param {string} selector
+ * @return {?Element}
+ */
+
+DomApiNative.prototype.querySelector;
+/**
+ * @function
+ * @param {string} selector
+ * @return {!NodeList<!Element>}
+ */
+
+DomApiNative.prototype.querySelectorAll;
+/** @type {?Node} */
+
+DomApiNative.prototype.parentNode;
+/** @type {?Node} */
+
+DomApiNative.prototype.firstChild;
+/** @type {?Node} */
+
+DomApiNative.prototype.lastChild;
+/** @type {?Node} */
+
+DomApiNative.prototype.nextSibling;
+/** @type {?Node} */
+
+DomApiNative.prototype.previousSibling;
+/** @type {?HTMLElement} */
+
+DomApiNative.prototype.firstElementChild;
+/** @type {?HTMLElement} */
+
+DomApiNative.prototype.lastElementChild;
+/** @type {?HTMLElement} */
+
+DomApiNative.prototype.nextElementSibling;
+/** @type {?HTMLElement} */
+
+DomApiNative.prototype.previousElementSibling;
+/** @type {!Array<!Node>} */
+
+DomApiNative.prototype.childNodes;
+/** @type {!Array<!HTMLElement>} */
+
+DomApiNative.prototype.children;
+/** @type {?DOMTokenList} */
+
+DomApiNative.prototype.classList;
+/** @type {string} */
+
+DomApiNative.prototype.textContent;
+/** @type {string} */
+
+DomApiNative.prototype.innerHTML;
+let DomApiImpl = DomApiNative;
+
+if (window['ShadyDOM'] && window['ShadyDOM']['inUse'] && window['ShadyDOM']['noPatch'] && window['ShadyDOM']['Wrapper']) {
+  /**
+   * @private
+   * @extends {HTMLElement}
+   */
+  class Wrapper extends window['ShadyDOM']['Wrapper'] {} // copy bespoke API onto wrapper
+
+
+  Object.getOwnPropertyNames(DomApiNative.prototype).forEach(prop => {
+    if (prop != 'activeElement') {
+      Wrapper.prototype[prop] = DomApiNative.prototype[prop];
+    }
+  }); // Note, `classList` is here only for legacy compatibility since it does not
+  // trigger distribution in v1 Shadow DOM.
+
+  forwardReadOnlyProperties(Wrapper.prototype, ['classList']);
+  DomApiImpl = Wrapper;
+  Object.defineProperties(EventApi.prototype, {
+    // Returns the "lowest" node in the same root as the event's currentTarget.
+    // When in `noPatch` mode, this must be calculated by walking the event's
+    // path.
+    localTarget: {
+      get() {
+        const current = this.event.currentTarget;
+        const currentRoot = current && dom(current).getOwnerRoot();
+        const p$ = this.path;
+
+        for (let i = 0; i < p$.length; i++) {
+          const e = p$[i];
+
+          if (dom(e).getOwnerRoot() === currentRoot) {
+            return e;
+          }
+        }
+      },
+
+      configurable: true
+    },
+    path: {
+      get() {
+        return window['ShadyDOM']['composedPath'](this.event);
+      },
+
+      configurable: true
+    }
+  });
+} else {
+  // Methods that can provoke distribution or must return the logical, not
+  // composed tree.
+  forwardMethods(DomApiNative.prototype, ['cloneNode', 'appendChild', 'insertBefore', 'removeChild', 'replaceChild', 'setAttribute', 'removeAttribute', 'querySelector', 'querySelectorAll']); // Properties that should return the logical, not composed tree. Note, `classList`
+  // is here only for legacy compatibility since it does not trigger distribution
+  // in v1 Shadow DOM.
+
+  forwardReadOnlyProperties(DomApiNative.prototype, ['parentNode', 'firstChild', 'lastChild', 'nextSibling', 'previousSibling', 'firstElementChild', 'lastElementChild', 'nextElementSibling', 'previousElementSibling', 'childNodes', 'children', 'classList']);
+  forwardProperties(DomApiNative.prototype, ['textContent', 'innerHTML', 'className']);
+}
+/**
+ * Legacy DOM and Event manipulation API wrapper factory used to abstract
+ * differences between native Shadow DOM and "Shady DOM" when polyfilling on
+ * older browsers.
+ *
+ * Note that in Polymer 2.x use of `Polymer.dom` is no longer required and
+ * in the majority of cases simply facades directly to the standard native
+ * API.
+ *
+ * @summary Legacy DOM and Event manipulation API wrapper factory used to
+ * abstract differences between native Shadow DOM and "Shady DOM."
+ * @param {(Node|Event|DomApiNative|EventApi)=} obj Node or event to operate on
+ * @return {!DomApiNative|!EventApi} Wrapper providing either node API or event API
+ */
+
+const dom = function (obj) {
+  obj = obj || document;
+
+  if (obj instanceof DomApiImpl) {
+    return (
+      /** @type {!DomApi} */
+      obj
+    );
+  }
+
+  if (obj instanceof EventApi) {
+    return (
+      /** @type {!EventApi} */
+      obj
+    );
+  }
+
+  let helper = obj['__domApi'];
+
+  if (!helper) {
+    if (obj instanceof Event) {
+      helper = new EventApi(obj);
+    } else {
+      helper = new DomApiImpl(
+      /** @type {Node} */
+      obj);
+    }
+
+    obj['__domApi'] = helper;
+  }
+
+  return helper;
+};
+
+/**
+@license
+Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+const ShadyDOM$1 = window.ShadyDOM;
+const ShadyCSS = window.ShadyCSS;
+/**
+ * Return true if node scope is correct.
+ *
+ * @param {!Element} node Node to check scope
+ * @param {!Node} scope Scope reference
+ * @return {boolean} True if node is in scope
+ */
+
+function sameScope(node, scope) {
+  return wrap(node).getRootNode() === scope;
+}
+/**
+ * Ensure that elements in a ShadowDOM container are scoped correctly.
+ * This function is only needed when ShadyDOM is used and unpatched DOM APIs are used in third party code.
+ * This can happen in noPatch mode or when specialized APIs like ranges or tables are used to mutate DOM.
+ *
+ * @param  {!Element} container Container element to scope
+ * @param  {boolean=} shouldObserve if true, start a mutation observer for added nodes to the container
+ * @return {?MutationObserver} Returns a new MutationObserver on `container` if `shouldObserve` is true.
+ */
+
+
+function scopeSubtree(container, shouldObserve = false) {
+  // If using native ShadowDOM, abort
+  if (!ShadyDOM$1 || !ShadyCSS) {
+    return null;
+  } // ShadyCSS handles DOM mutations when ShadyDOM does not handle scoping itself
+
+
+  if (!ShadyDOM$1['handlesDynamicScoping']) {
+    return null;
+  }
+
+  const ScopingShim = ShadyCSS['ScopingShim']; // if ScopingShim is not available, abort
+
+  if (!ScopingShim) {
+    return null;
+  } // capture correct scope for container
+
+
+  const containerScope = ScopingShim['scopeForNode'](container);
+  const root = wrap(container).getRootNode();
+
+  const scopify = node => {
+    if (!sameScope(node, root)) {
+      return;
+    } // NOTE: native qSA does not honor scoped DOM, but it is faster, and the same behavior as Polymer v1
+
+
+    const elements = Array.from(ShadyDOM$1['nativeMethods']['querySelectorAll'].call(node, '*'));
+    elements.push(node);
+
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
+
+      if (!sameScope(el, root)) {
+        continue;
+      }
+
+      const currentScope = ScopingShim['currentScopeForNode'](el);
+
+      if (currentScope !== containerScope) {
+        if (currentScope !== '') {
+          ScopingShim['unscopeNode'](el, currentScope);
+        }
+
+        ScopingShim['scopeNode'](el, containerScope);
+      }
+    }
+  }; // scope everything in container
+
+
+  scopify(container);
+
+  if (shouldObserve) {
+    const mo = new MutationObserver(mxns => {
+      for (let i = 0; i < mxns.length; i++) {
+        const mxn = mxns[i];
+
+        for (let j = 0; j < mxn.addedNodes.length; j++) {
+          const addedNode = mxn.addedNodes[j];
+
+          if (addedNode.nodeType === Node.ELEMENT_NODE) {
+            scopify(addedNode);
+          }
+        }
+      }
+    });
+    mo.observe(container, {
+      childList: true,
+      subtree: true
+    });
+    return mo;
+  } else {
+    return null;
+  }
+}
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+let styleInterface = window.ShadyCSS;
+/**
+ * Element class mixin that provides Polymer's "legacy" API intended to be
+ * backward-compatible to the greatest extent possible with the API
+ * found on the Polymer 1.x `Polymer.Base` prototype applied to all elements
+ * defined using the `Polymer({...})` function.
+ *
+ * @mixinFunction
+ * @polymer
+ * @appliesMixin ElementMixin
+ * @appliesMixin GestureEventListeners
+ * @property isAttached {boolean} Set to `true` in this element's
+ *   `connectedCallback` and `false` in `disconnectedCallback`
+ * @summary Element class mixin that provides Polymer's "legacy" API
+ */
+
+const LegacyElementMixin = dedupingMixin(base => {
+  /**
+   * @constructor
+   * @implements {Polymer_ElementMixin}
+   * @implements {Polymer_GestureEventListeners}
+   * @implements {Polymer_DirMixin}
+   * @extends {HTMLElement}
+   * @private
+   */
+  const legacyElementBase = DirMixin(GestureEventListeners(ElementMixin(base)));
+  /**
+   * Map of simple names to touch action names
+   * @dict
+   */
+
+  const DIRECTION_MAP = {
+    'x': 'pan-x',
+    'y': 'pan-y',
+    'none': 'none',
+    'all': 'auto'
+  };
+  /**
+   * @polymer
+   * @mixinClass
+   * @extends {legacyElementBase}
+   * @implements {Polymer_LegacyElementMixin}
+   * @unrestricted
+   */
+
+  class LegacyElement extends legacyElementBase {
+    constructor() {
+      super();
+      /** @type {boolean} */
+
+      this.isAttached;
+      /** @type {?WeakMap<!Element, !Object<string, !Function>>} */
+
+      this.__boundListeners;
+      /** @type {?Object<string, ?Function>} */
+
+      this._debouncers;
+    }
+    /**
+     * Forwards `importMeta` from the prototype (i.e. from the info object
+     * passed to `Polymer({...})`) to the static API.
+     *
+     * @return {!Object} The `import.meta` object set on the prototype
+     * @suppress {missingProperties} `this` is always in the instance in
+     *  closure for some reason even in a static method, rather than the class
+     * @nocollapse
+     */
+
+
+    static get importMeta() {
+      return this.prototype.importMeta;
+    }
+    /**
+     * Legacy callback called during the `constructor`, for overriding
+     * by the user.
+     * @override
+     * @return {void}
+     */
+
+
+    created() {}
+    /**
+     * Provides an implementation of `connectedCallback`
+     * which adds Polymer legacy API's `attached` method.
+     * @return {void}
+     * @override
+     */
+
+
+    connectedCallback() {
+      super.connectedCallback();
+      this.isAttached = true;
+      this.attached();
+    }
+    /**
+     * Legacy callback called during `connectedCallback`, for overriding
+     * by the user.
+     * @override
+     * @return {void}
+     */
+
+
+    attached() {}
+    /**
+     * Provides an implementation of `disconnectedCallback`
+     * which adds Polymer legacy API's `detached` method.
+     * @return {void}
+     * @override
+     */
+
+
+    disconnectedCallback() {
+      super.disconnectedCallback();
+      this.isAttached = false;
+      this.detached();
+    }
+    /**
+     * Legacy callback called during `disconnectedCallback`, for overriding
+     * by the user.
+     * @override
+     * @return {void}
+     */
+
+
+    detached() {}
+    /**
+     * Provides an override implementation of `attributeChangedCallback`
+     * which adds the Polymer legacy API's `attributeChanged` method.
+     * @param {string} name Name of attribute.
+     * @param {?string} old Old value of attribute.
+     * @param {?string} value Current value of attribute.
+     * @param {?string} namespace Attribute namespace.
+     * @return {void}
+     * @override
+     */
+
+
+    attributeChangedCallback(name, old, value, namespace) {
+      if (old !== value) {
+        super.attributeChangedCallback(name, old, value, namespace);
+        this.attributeChanged(name, old, value);
+      }
+    }
+    /**
+     * Legacy callback called during `attributeChangedChallback`, for overriding
+     * by the user.
+     * @param {string} name Name of attribute.
+     * @param {?string} old Old value of attribute.
+     * @param {?string} value Current value of attribute.
+     * @return {void}
+     * @override
+     */
+
+
+    attributeChanged(name, old, value) {} // eslint-disable-line no-unused-vars
+
+    /**
+     * Overrides the default `Polymer.PropertyEffects` implementation to
+     * add support for class initialization via the `_registered` callback.
+     * This is called only when the first instance of the element is created.
+     *
+     * @return {void}
+     * @override
+     * @suppress {invalidCasts}
+     */
+
+
+    _initializeProperties() {
+      let proto = Object.getPrototypeOf(this);
+
+      if (!proto.hasOwnProperty('__hasRegisterFinished')) {
+        this._registered(); // backstop in case the `_registered` implementation does not set this
+
+
+        proto.__hasRegisterFinished = true;
+      }
+
+      super._initializeProperties();
+
+      this.root =
+      /** @type {HTMLElement} */
+      this;
+      this.created(); // Ensure listeners are applied immediately so that they are
+      // added before declarative event listeners. This allows an element to
+      // decorate itself via an event prior to any declarative listeners
+      // seeing the event. Note, this ensures compatibility with 1.x ordering.
+
+      this._applyListeners();
+    }
+    /**
+     * Called automatically when an element is initializing.
+     * Users may override this method to perform class registration time
+     * work. The implementation should ensure the work is performed
+     * only once for the class.
+     * @protected
+     * @return {void}
+     * @override
+     */
+
+
+    _registered() {}
+    /**
+     * Overrides the default `Polymer.PropertyEffects` implementation to
+     * add support for installing `hostAttributes` and `listeners`.
+     *
+     * @return {void}
+     * @override
+     */
+
+
+    ready() {
+      this._ensureAttributes();
+
+      super.ready();
+    }
+    /**
+     * Ensures an element has required attributes. Called when the element
+     * is being readied via `ready`. Users should override to set the
+     * element's required attributes. The implementation should be sure
+     * to check and not override existing attributes added by
+     * the user of the element. Typically, setting attributes should be left
+     * to the element user and not done here; reasonable exceptions include
+     * setting aria roles and focusability.
+     * @protected
+     * @return {void}
+     * @override
+     */
+
+
+    _ensureAttributes() {}
+    /**
+     * Adds element event listeners. Called when the element
+     * is being readied via `ready`. Users should override to
+     * add any required element event listeners.
+     * In performance critical elements, the work done here should be kept
+     * to a minimum since it is done before the element is rendered. In
+     * these elements, consider adding listeners asynchronously so as not to
+     * block render.
+     * @protected
+     * @return {void}
+     * @override
+     */
+
+
+    _applyListeners() {}
+    /**
+     * Converts a typed JavaScript value to a string.
+     *
+     * Note this method is provided as backward-compatible legacy API
+     * only.  It is not directly called by any Polymer features. To customize
+     * how properties are serialized to attributes for attribute bindings and
+     * `reflectToAttribute: true` properties as well as this method, override
+     * the `_serializeValue` method provided by `Polymer.PropertyAccessors`.
+     *
+     * @param {*} value Value to deserialize
+     * @return {string | undefined} Serialized value
+     * @override
+     */
+
+
+    serialize(value) {
+      return this._serializeValue(value);
+    }
+    /**
+     * Converts a string to a typed JavaScript value.
+     *
+     * Note this method is provided as backward-compatible legacy API
+     * only.  It is not directly called by any Polymer features.  To customize
+     * how attributes are deserialized to properties for in
+     * `attributeChangedCallback`, override `_deserializeValue` method
+     * provided by `Polymer.PropertyAccessors`.
+     *
+     * @param {string} value String to deserialize
+     * @param {*} type Type to deserialize the string to
+     * @return {*} Returns the deserialized value in the `type` given.
+     * @override
+     */
+
+
+    deserialize(value, type) {
+      return this._deserializeValue(value, type);
+    }
+    /**
+     * Serializes a property to its associated attribute.
+     *
+     * Note this method is provided as backward-compatible legacy API
+     * only.  It is not directly called by any Polymer features.
+     *
+     * @param {string} property Property name to reflect.
+     * @param {string=} attribute Attribute name to reflect.
+     * @param {*=} value Property value to reflect.
+     * @return {void}
+     * @override
+     */
+
+
+    reflectPropertyToAttribute(property, attribute, value) {
+      this._propertyToAttribute(property, attribute, value);
+    }
+    /**
+     * Sets a typed value to an HTML attribute on a node.
+     *
+     * Note this method is provided as backward-compatible legacy API
+     * only.  It is not directly called by any Polymer features.
+     *
+     * @param {*} value Value to serialize.
+     * @param {string} attribute Attribute name to serialize to.
+     * @param {Element} node Element to set attribute to.
+     * @return {void}
+     * @override
+     */
+
+
+    serializeValueToAttribute(value, attribute, node) {
+      this._valueToNodeAttribute(
+      /** @type {Element} */
+      node || this, value, attribute);
+    }
+    /**
+     * Copies own properties (including accessor descriptors) from a source
+     * object to a target object.
+     *
+     * @param {Object} prototype Target object to copy properties to.
+     * @param {Object} api Source object to copy properties from.
+     * @return {Object} prototype object that was passed as first argument.
+     * @override
+     */
+
+
+    extend(prototype, api) {
+      if (!(prototype && api)) {
+        return prototype || api;
+      }
+
+      let n$ = Object.getOwnPropertyNames(api);
+
+      for (let i = 0, n; i < n$.length && (n = n$[i]); i++) {
+        let pd = Object.getOwnPropertyDescriptor(api, n);
+
+        if (pd) {
+          Object.defineProperty(prototype, n, pd);
+        }
+      }
+
+      return prototype;
+    }
+    /**
+     * Copies props from a source object to a target object.
+     *
+     * Note, this method uses a simple `for...in` strategy for enumerating
+     * properties.  To ensure only `ownProperties` are copied from source
+     * to target and that accessor implementations are copied, use `extend`.
+     *
+     * @param {!Object} target Target object to copy properties to.
+     * @param {!Object} source Source object to copy properties from.
+     * @return {!Object} Target object that was passed as first argument.
+     * @override
+     */
+
+
+    mixin(target, source) {
+      for (let i in source) {
+        target[i] = source[i];
+      }
+
+      return target;
+    }
+    /**
+     * Sets the prototype of an object.
+     *
+     * Note this method is provided as backward-compatible legacy API
+     * only.  It is not directly called by any Polymer features.
+     * @param {Object} object The object on which to set the prototype.
+     * @param {Object} prototype The prototype that will be set on the given
+     * `object`.
+     * @return {Object} Returns the given `object` with its prototype set
+     * to the given `prototype` object.
+     * @override
+     */
+
+
+    chainObject(object, prototype) {
+      if (object && prototype && object !== prototype) {
+        object.__proto__ = prototype;
+      }
+
+      return object;
+    }
+    /* **** Begin Template **** */
+
+    /**
+     * Calls `importNode` on the `content` of the `template` specified and
+     * returns a document fragment containing the imported content.
+     *
+     * @param {HTMLTemplateElement} template HTML template element to instance.
+     * @return {!DocumentFragment} Document fragment containing the imported
+     *   template content.
+     * @override
+     * @suppress {missingProperties} go/missingfnprops
+     */
+
+
+    instanceTemplate(template) {
+      let content = this.constructor._contentForTemplate(template);
+
+      let dom =
+      /** @type {!DocumentFragment} */
+      document.importNode(content, true);
+      return dom;
+    }
+    /* **** Begin Events **** */
+
+    /**
+     * Dispatches a custom event with an optional detail value.
+     *
+     * @param {string} type Name of event type.
+     * @param {*=} detail Detail value containing event-specific
+     *   payload.
+     * @param {{ bubbles: (boolean|undefined), cancelable: (boolean|undefined),
+     *     composed: (boolean|undefined) }=}
+     *  options Object specifying options.  These may include:
+     *  `bubbles` (boolean, defaults to `true`),
+     *  `cancelable` (boolean, defaults to false), and
+     *  `node` on which to fire the event (HTMLElement, defaults to `this`).
+     * @return {!Event} The new event that was fired.
+     * @override
+     */
+
+
+    fire(type, detail, options) {
+      options = options || {};
+      detail = detail === null || detail === undefined ? {} : detail;
+      let event = new Event(type, {
+        bubbles: options.bubbles === undefined ? true : options.bubbles,
+        cancelable: Boolean(options.cancelable),
+        composed: options.composed === undefined ? true : options.composed
+      });
+      event.detail = detail;
+      let node = options.node || this;
+      wrap(node).dispatchEvent(event);
+      return event;
+    }
+    /**
+     * Convenience method to add an event listener on a given element,
+     * late bound to a named method on this element.
+     *
+     * @param {?EventTarget} node Element to add event listener to.
+     * @param {string} eventName Name of event to listen for.
+     * @param {string} methodName Name of handler method on `this` to call.
+     * @return {void}
+     * @override
+     */
+
+
+    listen(node, eventName, methodName) {
+      node =
+      /** @type {!EventTarget} */
+      node || this;
+      let hbl = this.__boundListeners || (this.__boundListeners = new WeakMap());
+      let bl = hbl.get(node);
+
+      if (!bl) {
+        bl = {};
+        hbl.set(node, bl);
+      }
+
+      let key = eventName + methodName;
+
+      if (!bl[key]) {
+        bl[key] = this._addMethodEventListenerToNode(
+        /** @type {!Node} */
+        node, eventName, methodName, this);
+      }
+    }
+    /**
+     * Convenience method to remove an event listener from a given element,
+     * late bound to a named method on this element.
+     *
+     * @param {?EventTarget} node Element to remove event listener from.
+     * @param {string} eventName Name of event to stop listening to.
+     * @param {string} methodName Name of handler method on `this` to not call
+     anymore.
+     * @return {void}
+     * @override
+     */
+
+
+    unlisten(node, eventName, methodName) {
+      node =
+      /** @type {!EventTarget} */
+      node || this;
+
+      let bl = this.__boundListeners && this.__boundListeners.get(
+      /** @type {!Element} */
+      node);
+
+      let key = eventName + methodName;
+      let handler = bl && bl[key];
+
+      if (handler) {
+        this._removeEventListenerFromNode(
+        /** @type {!Node} */
+        node, eventName, handler);
+
+        bl[key] =
+        /** @type {?} */
+        null;
+      }
+    }
+    /**
+     * Override scrolling behavior to all direction, one direction, or none.
+     *
+     * Valid scroll directions:
+     *   - 'all': scroll in any direction
+     *   - 'x': scroll only in the 'x' direction
+     *   - 'y': scroll only in the 'y' direction
+     *   - 'none': disable scrolling for this node
+     *
+     * @param {string=} direction Direction to allow scrolling
+     * Defaults to `all`.
+     * @param {Element=} node Element to apply scroll direction setting.
+     * Defaults to `this`.
+     * @return {void}
+     * @override
+     */
+
+
+    setScrollDirection(direction, node) {
+      setTouchAction(
+      /** @type {!Element} */
+      node || this, DIRECTION_MAP[direction] || 'auto');
+    }
+    /* **** End Events **** */
+
+    /**
+     * Convenience method to run `querySelector` on this local DOM scope.
+     *
+     * This function calls `Polymer.dom(this.root).querySelector(slctr)`.
+     *
+     * @param {string} slctr Selector to run on this local DOM scope
+     * @return {Element} Element found by the selector, or null if not found.
+     * @override
+     */
+
+
+    $$(slctr) {
+      // Note, no need to `wrap` this because root is always patched
+      return this.root.querySelector(slctr);
+    }
+    /**
+     * Return the element whose local dom within which this element
+     * is contained. This is a shorthand for
+     * `this.getRootNode().host`.
+     * @this {Element}
+     * @return {?Node} The element whose local dom within which this element is
+     * contained.
+     * @override
+     */
+
+
+    get domHost() {
+      let root = wrap(this).getRootNode();
+      return root instanceof DocumentFragment ?
+      /** @type {ShadowRoot} */
+      root.host : root;
+    }
+    /**
+     * Force this element to distribute its children to its local dom.
+     * This should not be necessary as of Polymer 2.0.2 and is provided only
+     * for backwards compatibility.
+     * @return {void}
+     * @override
+     */
+
+
+    distributeContent() {
+      const thisEl =
+      /** @type {Element} */
+      this;
+      const domApi =
+      /** @type {PolymerDomApi} */
+      dom(thisEl);
+
+      if (window.ShadyDOM && domApi.shadowRoot) {
+        ShadyDOM.flush();
+      }
+    }
+    /**
+     * Returns a list of nodes that are the effective childNodes. The effective
+     * childNodes list is the same as the element's childNodes except that
+     * any `<content>` elements are replaced with the list of nodes distributed
+     * to the `<content>`, the result of its `getDistributedNodes` method.
+     * @return {!Array<!Node>} List of effective child nodes.
+     * @suppress {invalidCasts} LegacyElementMixin must be applied to an
+     *     HTMLElement
+     * @override
+     */
+
+
+    getEffectiveChildNodes() {
+      const thisEl =
+      /** @type {Element} */
+      this;
+      const domApi =
+      /** @type {PolymerDomApi} */
+      dom(thisEl);
+      return domApi.getEffectiveChildNodes();
+    }
+    /**
+     * Returns a list of nodes distributed within this element that match
+     * `selector`. These can be dom children or elements distributed to
+     * children that are insertion points.
+     * @param {string} selector Selector to run.
+     * @return {!Array<!Node>} List of distributed elements that match selector.
+     * @suppress {invalidCasts} LegacyElementMixin must be applied to an
+     * HTMLElement
+     * @override
+     */
+
+
+    queryDistributedElements(selector) {
+      const thisEl =
+      /** @type {Element} */
+      this;
+      const domApi =
+      /** @type {PolymerDomApi} */
+      dom(thisEl);
+      return domApi.queryDistributedElements(selector);
+    }
+    /**
+     * Returns a list of elements that are the effective children. The effective
+     * children list is the same as the element's children except that
+     * any `<content>` elements are replaced with the list of elements
+     * distributed to the `<content>`.
+     *
+     * @return {!Array<!Node>} List of effective children.
+     * @override
+     */
+
+
+    getEffectiveChildren() {
+      let list = this.getEffectiveChildNodes();
+      return list.filter(function (
+      /** @type {!Node} */
+      n) {
+        return n.nodeType === Node.ELEMENT_NODE;
+      });
+    }
+    /**
+     * Returns a string of text content that is the concatenation of the
+     * text content's of the element's effective childNodes (the elements
+     * returned by <a href="#getEffectiveChildNodes>getEffectiveChildNodes</a>.
+     *
+     * @return {string} List of effective children.
+     * @override
+     */
+
+
+    getEffectiveTextContent() {
+      let cn = this.getEffectiveChildNodes();
+      let tc = [];
+
+      for (let i = 0, c; c = cn[i]; i++) {
+        if (c.nodeType !== Node.COMMENT_NODE) {
+          tc.push(c.textContent);
+        }
+      }
+
+      return tc.join('');
+    }
+    /**
+     * Returns the first effective childNode within this element that
+     * match `selector`. These can be dom child nodes or elements distributed
+     * to children that are insertion points.
+     * @param {string} selector Selector to run.
+     * @return {Node} First effective child node that matches selector.
+     * @override
+     */
+
+
+    queryEffectiveChildren(selector) {
+      let e$ = this.queryDistributedElements(selector);
+      return e$ && e$[0];
+    }
+    /**
+     * Returns a list of effective childNodes within this element that
+     * match `selector`. These can be dom child nodes or elements distributed
+     * to children that are insertion points.
+     * @param {string} selector Selector to run.
+     * @return {!Array<!Node>} List of effective child nodes that match
+     *     selector.
+     * @override
+     */
+
+
+    queryAllEffectiveChildren(selector) {
+      return this.queryDistributedElements(selector);
+    }
+    /**
+     * Returns a list of nodes distributed to this element's `<slot>`.
+     *
+     * If this element contains more than one `<slot>` in its local DOM,
+     * an optional selector may be passed to choose the desired content.
+     *
+     * @param {string=} slctr CSS selector to choose the desired
+     *   `<slot>`.  Defaults to `content`.
+     * @return {!Array<!Node>} List of distributed nodes for the `<slot>`.
+     * @override
+     */
+
+
+    getContentChildNodes(slctr) {
+      // Note, no need to `wrap` this because root is always
+      let content = this.root.querySelector(slctr || 'slot');
+      return content ?
+      /** @type {PolymerDomApi} */
+      dom(content).getDistributedNodes() : [];
+    }
+    /**
+     * Returns a list of element children distributed to this element's
+     * `<slot>`.
+     *
+     * If this element contains more than one `<slot>` in its
+     * local DOM, an optional selector may be passed to choose the desired
+     * content.  This method differs from `getContentChildNodes` in that only
+     * elements are returned.
+     *
+     * @param {string=} slctr CSS selector to choose the desired
+     *   `<content>`.  Defaults to `content`.
+     * @return {!Array<!HTMLElement>} List of distributed nodes for the
+     *   `<slot>`.
+     * @suppress {invalidCasts}
+     * @override
+     */
+
+
+    getContentChildren(slctr) {
+      let children =
+      /** @type {!Array<!HTMLElement>} */
+      this.getContentChildNodes(slctr).filter(function (n) {
+        return n.nodeType === Node.ELEMENT_NODE;
+      });
+      return children;
+    }
+    /**
+     * Checks whether an element is in this element's light DOM tree.
+     *
+     * @param {?Node} node The element to be checked.
+     * @return {boolean} true if node is in this element's light DOM tree.
+     * @suppress {invalidCasts} LegacyElementMixin must be applied to an
+     * HTMLElement
+     * @override
+     */
+
+
+    isLightDescendant(node) {
+      const thisNode =
+      /** @type {Node} */
+      this;
+      return thisNode !== node && wrap(thisNode).contains(node) && wrap(thisNode).getRootNode() === wrap(node).getRootNode();
+    }
+    /**
+     * Checks whether an element is in this element's local DOM tree.
+     *
+     * @param {!Element} node The element to be checked.
+     * @return {boolean} true if node is in this element's local DOM tree.
+     * @override
+     */
+
+
+    isLocalDescendant(node) {
+      return this.root === wrap(node).getRootNode();
+    }
+    /**
+     * No-op for backwards compatibility. This should now be handled by
+     * ShadyCss library.
+     * @param  {!Element} container Container element to scope
+     * @param  {boolean=} shouldObserve if true, start a mutation observer for added nodes to the container
+     * @return {?MutationObserver} Returns a new MutationObserver on `container` if `shouldObserve` is true.
+     * @override
+     */
+
+
+    scopeSubtree(container, shouldObserve = false) {
+      return scopeSubtree(container, shouldObserve);
+    }
+    /**
+     * Returns the computed style value for the given property.
+     * @param {string} property The css property name.
+     * @return {string} Returns the computed css property value for the given
+     * `property`.
+     * @suppress {invalidCasts} LegacyElementMixin must be applied to an
+     *     HTMLElement
+     * @override
+     */
+
+
+    getComputedStyleValue(property) {
+      return styleInterface.getComputedStyleValue(
+      /** @type {!Element} */
+      this, property);
+    } // debounce
+
+    /**
+     * Call `debounce` to collapse multiple requests for a named task into
+     * one invocation which is made after the wait time has elapsed with
+     * no new request.  If no wait time is given, the callback will be called
+     * at microtask timing (guaranteed before paint).
+     *
+     *     debouncedClickAction(e) {
+     *       // will not call `processClick` more than once per 100ms
+     *       this.debounce('click', function() {
+     *        this.processClick();
+     *       } 100);
+     *     }
+     *
+     * @param {string} jobName String to identify the debounce job.
+     * @param {function():void} callback Function that is called (with `this`
+     *   context) when the wait time elapses.
+     * @param {number=} wait Optional wait time in milliseconds (ms) after the
+     *   last signal that must elapse before invoking `callback`
+     * @return {!Object} Returns a debouncer object on which exists the
+     * following methods: `isActive()` returns true if the debouncer is
+     * active; `cancel()` cancels the debouncer if it is active;
+     * `flush()` immediately invokes the debounced callback if the debouncer
+     * is active.
+     * @override
+     */
+
+
+    debounce(jobName, callback, wait) {
+      this._debouncers = this._debouncers || {};
+      return this._debouncers[jobName] = Debouncer.debounce(this._debouncers[jobName], wait > 0 ? timeOut.after(wait) : microTask, callback.bind(this));
+    }
+    /**
+     * Returns whether a named debouncer is active.
+     *
+     * @param {string} jobName The name of the debouncer started with `debounce`
+     * @return {boolean} Whether the debouncer is active (has not yet fired).
+     * @override
+     */
+
+
+    isDebouncerActive(jobName) {
+      this._debouncers = this._debouncers || {};
+      let debouncer = this._debouncers[jobName];
+      return !!(debouncer && debouncer.isActive());
+    }
+    /**
+     * Immediately calls the debouncer `callback` and inactivates it.
+     *
+     * @param {string} jobName The name of the debouncer started with `debounce`
+     * @return {void}
+     * @override
+     */
+
+
+    flushDebouncer(jobName) {
+      this._debouncers = this._debouncers || {};
+      let debouncer = this._debouncers[jobName];
+
+      if (debouncer) {
+        debouncer.flush();
+      }
+    }
+    /**
+     * Cancels an active debouncer.  The `callback` will not be called.
+     *
+     * @param {string} jobName The name of the debouncer started with `debounce`
+     * @return {void}
+     * @override
+     */
+
+
+    cancelDebouncer(jobName) {
+      this._debouncers = this._debouncers || {};
+      let debouncer = this._debouncers[jobName];
+
+      if (debouncer) {
+        debouncer.cancel();
+      }
+    }
+    /**
+     * Runs a callback function asynchronously.
+     *
+     * By default (if no waitTime is specified), async callbacks are run at
+     * microtask timing, which will occur before paint.
+     *
+     * @param {!Function} callback The callback function to run, bound to
+     *     `this`.
+     * @param {number=} waitTime Time to wait before calling the
+     *   `callback`.  If unspecified or 0, the callback will be run at microtask
+     *   timing (before paint).
+     * @return {number} Handle that may be used to cancel the async job.
+     * @override
+     */
+
+
+    async(callback, waitTime) {
+      return waitTime > 0 ? timeOut.run(callback.bind(this), waitTime) : ~microTask.run(callback.bind(this));
+    }
+    /**
+     * Cancels an async operation started with `async`.
+     *
+     * @param {number} handle Handle returned from original `async` call to
+     *   cancel.
+     * @return {void}
+     * @override
+     */
+
+
+    cancelAsync(handle) {
+      handle < 0 ? microTask.cancel(~handle) : timeOut.cancel(handle);
+    } // other
+
+    /**
+     * Convenience method for creating an element and configuring it.
+     *
+     * @param {string} tag HTML element tag to create.
+     * @param {Object=} props Object of properties to configure on the
+     *    instance.
+     * @return {!Element} Newly created and configured element.
+     * @override
+     */
+
+
+    create(tag, props) {
+      let elt = document.createElement(tag);
+
+      if (props) {
+        if (elt.setProperties) {
+          elt.setProperties(props);
+        } else {
+          for (let n in props) {
+            elt[n] = props[n];
+          }
+        }
+      }
+
+      return elt;
+    }
+    /**
+     * Polyfill for Element.prototype.matches, which is sometimes still
+     * prefixed.
+     *
+     * @param {string} selector Selector to test.
+     * @param {!Element=} node Element to test the selector against.
+     * @return {boolean} Whether the element matches the selector.
+     * @override
+     */
+
+
+    elementMatches(selector, node) {
+      return matchesSelector(node || this, selector);
+    }
+    /**
+     * Toggles an HTML attribute on or off.
+     *
+     * @param {string} name HTML attribute name
+     * @param {boolean=} bool Boolean to force the attribute on or off.
+     *    When unspecified, the state of the attribute will be reversed.
+     * @return {boolean} true if the attribute now exists
+     * @override
+     */
+
+
+    toggleAttribute(name, bool) {
+      let node =
+      /** @type {Element} */
+      this;
+
+      if (arguments.length === 3) {
+        node =
+        /** @type {Element} */
+        arguments[2];
+      }
+
+      if (arguments.length == 1) {
+        bool = !node.hasAttribute(name);
+      }
+
+      if (bool) {
+        wrap(node).setAttribute(name, '');
+        return true;
+      } else {
+        wrap(node).removeAttribute(name);
+        return false;
+      }
+    }
+    /**
+     * Toggles a CSS class on or off.
+     *
+     * @param {string} name CSS class name
+     * @param {boolean=} bool Boolean to force the class on or off.
+     *    When unspecified, the state of the class will be reversed.
+     * @param {Element=} node Node to target.  Defaults to `this`.
+     * @return {void}
+     * @override
+     */
+
+
+    toggleClass(name, bool, node) {
+      node =
+      /** @type {Element} */
+      node || this;
+
+      if (arguments.length == 1) {
+        bool = !node.classList.contains(name);
+      }
+
+      if (bool) {
+        node.classList.add(name);
+      } else {
+        node.classList.remove(name);
+      }
+    }
+    /**
+     * Cross-platform helper for setting an element's CSS `transform` property.
+     *
+     * @param {string} transformText Transform setting.
+     * @param {Element=} node Element to apply the transform to.
+     * Defaults to `this`
+     * @return {void}
+     * @override
+     */
+
+
+    transform(transformText, node) {
+      node =
+      /** @type {Element} */
+      node || this;
+      node.style.webkitTransform = transformText;
+      node.style.transform = transformText;
+    }
+    /**
+     * Cross-platform helper for setting an element's CSS `translate3d`
+     * property.
+     *
+     * @param {number|string} x X offset.
+     * @param {number|string} y Y offset.
+     * @param {number|string} z Z offset.
+     * @param {Element=} node Element to apply the transform to.
+     * Defaults to `this`.
+     * @return {void}
+     * @override
+     */
+
+
+    translate3d(x, y, z, node) {
+      node =
+      /** @type {Element} */
+      node || this;
+      this.transform('translate3d(' + x + ',' + y + ',' + z + ')', node);
+    }
+    /**
+     * Removes an item from an array, if it exists.
+     *
+     * If the array is specified by path, a change notification is
+     * generated, so that observers, data bindings and computed
+     * properties watching that path can update.
+     *
+     * If the array is passed directly, **no change
+     * notification is generated**.
+     *
+     * @param {string | !Array<number|string>} arrayOrPath Path to array from
+     *     which to remove the item
+     *   (or the array itself).
+     * @param {*} item Item to remove.
+     * @return {Array} Array containing item removed.
+     * @override
+     */
+
+
+    arrayDelete(arrayOrPath, item) {
+      let index;
+
+      if (Array.isArray(arrayOrPath)) {
+        index = arrayOrPath.indexOf(item);
+
+        if (index >= 0) {
+          return arrayOrPath.splice(index, 1);
+        }
+      } else {
+        let arr = get(this, arrayOrPath);
+        index = arr.indexOf(item);
+
+        if (index >= 0) {
+          return this.splice(arrayOrPath, index, 1);
+        }
+      }
+
+      return null;
+    } // logging
+
+    /**
+     * Facades `console.log`/`warn`/`error` as override point.
+     *
+     * @param {string} level One of 'log', 'warn', 'error'
+     * @param {Array} args Array of strings or objects to log
+     * @return {void}
+     * @override
+     */
+
+
+    _logger(level, args) {
+      // accept ['foo', 'bar'] and [['foo', 'bar']]
+      if (Array.isArray(args) && args.length === 1 && Array.isArray(args[0])) {
+        args = args[0];
+      }
+
+      switch (level) {
+        case 'log':
+        case 'warn':
+        case 'error':
+          console[level](...args);
+      }
+    }
+    /**
+     * Facades `console.log` as an override point.
+     *
+     * @param {...*} args Array of strings or objects to log
+     * @return {void}
+     * @override
+     */
+
+
+    _log(...args) {
+      this._logger('log', args);
+    }
+    /**
+     * Facades `console.warn` as an override point.
+     *
+     * @param {...*} args Array of strings or objects to log
+     * @return {void}
+     * @override
+     */
+
+
+    _warn(...args) {
+      this._logger('warn', args);
+    }
+    /**
+     * Facades `console.error` as an override point.
+     *
+     * @param {...*} args Array of strings or objects to log
+     * @return {void}
+     * @override
+     */
+
+
+    _error(...args) {
+      this._logger('error', args);
+    }
+    /**
+     * Formats a message using the element type an a method name.
+     *
+     * @param {string} methodName Method name to associate with message
+     * @param {...*} args Array of strings or objects to log
+     * @return {Array} Array with formatting information for `console`
+     *   logging.
+     * @override
+     */
+
+
+    _logf(methodName, ...args) {
+      return ['[%s::%s]', this.is, methodName, ...args];
+    }
+
+  }
+
+  LegacyElement.prototype.is = '';
+  return LegacyElement;
+});
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+const lifecycleProps = {
+  attached: true,
+  detached: true,
+  ready: true,
+  created: true,
+  beforeRegister: true,
+  registered: true,
+  attributeChanged: true,
+  listeners: true,
+  hostAttributes: true
+};
+const excludeOnInfo = {
+  attached: true,
+  detached: true,
+  ready: true,
+  created: true,
+  beforeRegister: true,
+  registered: true,
+  attributeChanged: true,
+  behaviors: true,
+  _noAccessors: true
+};
+const excludeOnBehaviors = Object.assign({
+  listeners: true,
+  hostAttributes: true,
+  properties: true,
+  observers: true
+}, excludeOnInfo);
+
+function copyProperties(source, target, excludeProps) {
+  const noAccessors = source._noAccessors;
+  const propertyNames = Object.getOwnPropertyNames(source);
+
+  for (let i = 0; i < propertyNames.length; i++) {
+    let p = propertyNames[i];
+
+    if (p in excludeProps) {
+      continue;
+    }
+
+    if (noAccessors) {
+      target[p] = source[p];
+    } else {
+      let pd = Object.getOwnPropertyDescriptor(source, p);
+
+      if (pd) {
+        // ensure property is configurable so that a later behavior can
+        // re-configure it.
+        pd.configurable = true;
+        Object.defineProperty(target, p, pd);
+      }
+    }
+  }
+}
+/**
+ * Applies a "legacy" behavior or array of behaviors to the provided class.
+ *
+ * Note: this method will automatically also apply the `LegacyElementMixin`
+ * to ensure that any legacy behaviors can rely on legacy Polymer API on
+ * the underlying element.
+ *
+ * @function
+ * @template T
+ * @param {!Object|!Array<!Object>} behaviors Behavior object or array of behaviors.
+ * @param {function(new:T)} klass Element class.
+ * @return {?} Returns a new Element class extended by the
+ * passed in `behaviors` and also by `LegacyElementMixin`.
+ * @suppress {invalidCasts, checkTypes}
+ */
+
+
+function mixinBehaviors(behaviors, klass) {
+  return GenerateClassFromInfo({}, LegacyElementMixin(klass), behaviors);
+} // NOTE:
+// 1.x
+// Behaviors were mixed in *in reverse order* and de-duped on the fly.
+// The rule was that behavior properties were copied onto the element
+// prototype if and only if the property did not already exist.
+// Given: Polymer{ behaviors: [A, B, C, A, B]}, property copy order was:
+// (1), B, (2), A, (3) C. This means prototype properties win over
+// B properties win over A win over C. This mirrors what would happen
+// with inheritance if element extended B extended A extended C.
+//
+// Again given, Polymer{ behaviors: [A, B, C, A, B]}, the resulting
+// `behaviors` array was [C, A, B].
+// Behavior lifecycle methods were called in behavior array order
+// followed by the element, e.g. (1) C.created, (2) A.created,
+// (3) B.created, (4) element.created. There was no support for
+// super, and "super-behavior" methods were callable only by name).
+//
+// 2.x
+// Behaviors are made into proper mixins which live in the
+// element's prototype chain. Behaviors are placed in the element prototype
+// eldest to youngest and de-duped youngest to oldest:
+// So, first [A, B, C, A, B] becomes [C, A, B] then,
+// the element prototype becomes (oldest) (1) PolymerElement, (2) class(C),
+// (3) class(A), (4) class(B), (5) class(Polymer({...})).
+// Result:
+// This means element properties win over B properties win over A win
+// over C. (same as 1.x)
+// If lifecycle is called (super then me), order is
+// (1) C.created, (2) A.created, (3) B.created, (4) element.created
+// (again same as 1.x)
+
+function applyBehaviors(proto, behaviors, lifecycle) {
+  for (let i = 0; i < behaviors.length; i++) {
+    applyInfo(proto, behaviors[i], lifecycle, excludeOnBehaviors);
+  }
+}
+
+function applyInfo(proto, info, lifecycle, excludeProps) {
+  copyProperties(info, proto, excludeProps);
+
+  for (let p in lifecycleProps) {
+    if (info[p]) {
+      lifecycle[p] = lifecycle[p] || [];
+      lifecycle[p].push(info[p]);
+    }
+  }
+}
+/**
+ * @param {Array} behaviors List of behaviors to flatten.
+ * @param {Array=} list Target list to flatten behaviors into.
+ * @param {Array=} exclude List of behaviors to exclude from the list.
+ * @return {!Array} Returns the list of flattened behaviors.
+ */
+
+
+function flattenBehaviors(behaviors, list, exclude) {
+  list = list || [];
+
+  for (let i = behaviors.length - 1; i >= 0; i--) {
+    let b = behaviors[i];
+
+    if (b) {
+      if (Array.isArray(b)) {
+        flattenBehaviors(b, list);
+      } else {
+        // dedup
+        if (list.indexOf(b) < 0 && (!exclude || exclude.indexOf(b) < 0)) {
+          list.unshift(b);
+        }
+      }
+    } else {
+      console.warn('behavior is null, check for missing or 404 import');
+    }
+  }
+
+  return list;
+}
+/**
+ * Copies property descriptors from source to target, overwriting all fields
+ * of any previous descriptor for a property *except* for `value`, which is
+ * merged in from the target if it does not exist on the source.
+ *
+ * @param {*} target Target properties object
+ * @param {*} source Source properties object
+ */
+
+
+function mergeProperties(target, source) {
+  for (const p in source) {
+    const targetInfo = target[p];
+    const sourceInfo = source[p];
+
+    if (!('value' in sourceInfo) && targetInfo && 'value' in targetInfo) {
+      target[p] = Object.assign({
+        value: targetInfo.value
+      }, sourceInfo);
+    } else {
+      target[p] = sourceInfo;
+    }
+  }
+}
+/* Note about construction and extension of legacy classes.
+  [Changed in Q4 2018 to optimize performance.]
+
+  When calling `Polymer` or `mixinBehaviors`, the generated class below is
+  made. The list of behaviors was previously made into one generated class per
+  behavior, but this is no longer the case as behaviors are now called
+  manually. Note, there may *still* be multiple generated classes in the
+  element's prototype chain if extension is used with `mixinBehaviors`.
+
+  The generated class is directly tied to the info object and behaviors
+  used to create it. That list of behaviors is filtered so it's only the
+  behaviors not active on the superclass. In order to call through to the
+  entire list of lifecycle methods, it's important to call `super`.
+
+  The element's `properties` and `observers` are controlled via the finalization
+  mechanism provided by `PropertiesMixin`. `Properties` and `observers` are
+  collected by manually traversing the prototype chain and merging.
+
+  To limit changes, the `_registered` method is called via `_initializeProperties`
+  and not `_finalizeClass`.
+
+*/
+
+/**
+ * @param {!PolymerInit} info Polymer info object
+ * @param {function(new:HTMLElement)} Base base class to extend with info object
+ * @param {Object=} behaviors behaviors to copy into the element
+ * @return {function(new:HTMLElement)} Generated class
+ * @suppress {checkTypes}
+ * @private
+ */
+
+
+function GenerateClassFromInfo(info, Base, behaviors) {
+  // manages behavior and lifecycle processing (filled in after class definition)
+  let behaviorList;
+  const lifecycle = {};
+  /** @private */
+
+  class PolymerGenerated extends Base {
+    // explicitly not calling super._finalizeClass
+
+    /** @nocollapse */
+    static _finalizeClass() {
+      // if calling via a subclass that hasn't been generated, pass through to super
+      if (!this.hasOwnProperty(JSCompiler_renameProperty('generatedFrom', this))) {
+        // TODO(https://github.com/google/closure-compiler/issues/3240):
+        //     Change back to just super.methodCall()
+        Base._finalizeClass.call(this);
+      } else {
+        // interleave properties and observers per behavior and `info`
+        if (behaviorList) {
+          for (let i = 0, b; i < behaviorList.length; i++) {
+            b = behaviorList[i];
+
+            if (b.properties) {
+              this.createProperties(b.properties);
+            }
+
+            if (b.observers) {
+              this.createObservers(b.observers, b.properties);
+            }
+          }
+        }
+
+        if (info.properties) {
+          this.createProperties(info.properties);
+        }
+
+        if (info.observers) {
+          this.createObservers(info.observers, info.properties);
+        } // make sure to prepare the element template
+
+
+        this._prepareTemplate();
+      }
+    }
+    /** @nocollapse */
+
+
+    static get properties() {
+      const properties = {};
+
+      if (behaviorList) {
+        for (let i = 0; i < behaviorList.length; i++) {
+          mergeProperties(properties, behaviorList[i].properties);
+        }
+      }
+
+      mergeProperties(properties, info.properties);
+      return properties;
+    }
+    /** @nocollapse */
+
+
+    static get observers() {
+      let observers = [];
+
+      if (behaviorList) {
+        for (let i = 0, b; i < behaviorList.length; i++) {
+          b = behaviorList[i];
+
+          if (b.observers) {
+            observers = observers.concat(b.observers);
+          }
+        }
+      }
+
+      if (info.observers) {
+        observers = observers.concat(info.observers);
+      }
+
+      return observers;
+    }
+    /**
+     * @return {void}
+     */
+
+
+    created() {
+      super.created();
+      const list = lifecycle.created;
+
+      if (list) {
+        for (let i = 0; i < list.length; i++) {
+          list[i].call(this);
+        }
+      }
+    }
+    /**
+     * @return {void}
+     */
+
+
+    _registered() {
+      /* NOTE: `beforeRegister` is called here for bc, but the behavior
+        is different than in 1.x. In 1.0, the method was called *after*
+        mixing prototypes together but *before* processing of meta-objects.
+        However, dynamic effects can still be set here and can be done either
+        in `beforeRegister` or `registered`. It is no longer possible to set
+        `is` in `beforeRegister` as you could in 1.x.
+      */
+      // only proceed if the generated class' prototype has not been registered.
+      const generatedProto = PolymerGenerated.prototype;
+
+      if (!generatedProto.hasOwnProperty('__hasRegisterFinished')) {
+        generatedProto.__hasRegisterFinished = true; // ensure superclass is registered first.
+
+        super._registered(); // copy properties onto the generated class lazily if we're optimizing,
+
+
+        if (legacyOptimizations) {
+          copyPropertiesToProto(generatedProto);
+        } // make sure legacy lifecycle is called on the *element*'s prototype
+        // and not the generated class prototype; if the element has been
+        // extended, these are *not* the same.
+
+
+        const proto = Object.getPrototypeOf(this);
+        let list = lifecycle.beforeRegister;
+
+        if (list) {
+          for (let i = 0; i < list.length; i++) {
+            list[i].call(proto);
+          }
+        }
+
+        list = lifecycle.registered;
+
+        if (list) {
+          for (let i = 0; i < list.length; i++) {
+            list[i].call(proto);
+          }
+        }
+      }
+    }
+    /**
+     * @return {void}
+     */
+
+
+    _applyListeners() {
+      super._applyListeners();
+
+      const list = lifecycle.listeners;
+
+      if (list) {
+        for (let i = 0; i < list.length; i++) {
+          const listeners = list[i];
+
+          if (listeners) {
+            for (let l in listeners) {
+              this._addMethodEventListenerToNode(this, l, listeners[l]);
+            }
+          }
+        }
+      }
+    } // note: exception to "super then me" rule;
+    // do work before calling super so that super attributes
+    // only apply if not already set.
+
+    /**
+     * @return {void}
+     */
+
+
+    _ensureAttributes() {
+      const list = lifecycle.hostAttributes;
+
+      if (list) {
+        for (let i = list.length - 1; i >= 0; i--) {
+          const hostAttributes = list[i];
+
+          for (let a in hostAttributes) {
+            this._ensureAttribute(a, hostAttributes[a]);
+          }
+        }
+      }
+
+      super._ensureAttributes();
+    }
+    /**
+     * @return {void}
+     */
+
+
+    ready() {
+      super.ready();
+      let list = lifecycle.ready;
+
+      if (list) {
+        for (let i = 0; i < list.length; i++) {
+          list[i].call(this);
+        }
+      }
+    }
+    /**
+     * @return {void}
+     */
+
+
+    attached() {
+      super.attached();
+      let list = lifecycle.attached;
+
+      if (list) {
+        for (let i = 0; i < list.length; i++) {
+          list[i].call(this);
+        }
+      }
+    }
+    /**
+     * @return {void}
+     */
+
+
+    detached() {
+      super.detached();
+      let list = lifecycle.detached;
+
+      if (list) {
+        for (let i = 0; i < list.length; i++) {
+          list[i].call(this);
+        }
+      }
+    }
+    /**
+     * Implements native Custom Elements `attributeChangedCallback` to
+     * set an attribute value to a property via `_attributeToProperty`.
+     *
+     * @param {string} name Name of attribute that changed
+     * @param {?string} old Old attribute value
+     * @param {?string} value New attribute value
+     * @return {void}
+     */
+
+
+    attributeChanged(name, old, value) {
+      super.attributeChanged();
+      let list = lifecycle.attributeChanged;
+
+      if (list) {
+        for (let i = 0; i < list.length; i++) {
+          list[i].call(this, name, old, value);
+        }
+      }
+    }
+
+  } // apply behaviors, note actual copying is done lazily at first instance creation
+
+
+  if (behaviors) {
+    // NOTE: ensure the behavior is extending a class with
+    // legacy element api. This is necessary since behaviors expect to be able
+    // to access 1.x legacy api.
+    if (!Array.isArray(behaviors)) {
+      behaviors = [behaviors];
+    }
+
+    let superBehaviors = Base.prototype.behaviors; // get flattened, deduped list of behaviors *not* already on super class
+
+    behaviorList = flattenBehaviors(behaviors, null, superBehaviors);
+    PolymerGenerated.prototype.behaviors = superBehaviors ? superBehaviors.concat(behaviors) : behaviorList;
+  }
+
+  const copyPropertiesToProto = proto => {
+    if (behaviorList) {
+      applyBehaviors(proto, behaviorList, lifecycle);
+    }
+
+    applyInfo(proto, info, lifecycle, excludeOnInfo);
+  }; // copy properties if we're not optimizing
+
+
+  if (!legacyOptimizations) {
+    copyPropertiesToProto(PolymerGenerated.prototype);
+  }
+
+  PolymerGenerated.generatedFrom = info;
+  return PolymerGenerated;
+}
+/**
+ * Generates a class that extends `LegacyElement` based on the
+ * provided info object.  Metadata objects on the `info` object
+ * (`properties`, `observers`, `listeners`, `behaviors`, `is`) are used
+ * for Polymer's meta-programming systems, and any functions are copied
+ * to the generated class.
+ *
+ * Valid "metadata" values are as follows:
+ *
+ * `is`: String providing the tag name to register the element under. In
+ * addition, if a `dom-module` with the same id exists, the first template
+ * in that `dom-module` will be stamped into the shadow root of this element,
+ * with support for declarative event listeners (`on-...`), Polymer data
+ * bindings (`[[...]]` and `{{...}}`), and id-based node finding into
+ * `this.$`.
+ *
+ * `properties`: Object describing property-related metadata used by Polymer
+ * features (key: property names, value: object containing property metadata).
+ * Valid keys in per-property metadata include:
+ * - `type` (String|Number|Object|Array|...): Used by
+ *   `attributeChangedCallback` to determine how string-based attributes
+ *   are deserialized to JavaScript property values.
+ * - `notify` (boolean): Causes a change in the property to fire a
+ *   non-bubbling event called `<property>-changed`. Elements that have
+ *   enabled two-way binding to the property use this event to observe changes.
+ * - `readOnly` (boolean): Creates a getter for the property, but no setter.
+ *   To set a read-only property, use the private setter method
+ *   `_setProperty(property, value)`.
+ * - `observer` (string): Observer method name that will be called when
+ *   the property changes. The arguments of the method are
+ *   `(value, previousValue)`.
+ * - `computed` (string): String describing method and dependent properties
+ *   for computing the value of this property (e.g. `'computeFoo(bar, zot)'`).
+ *   Computed properties are read-only by default and can only be changed
+ *   via the return value of the computing method.
+ *
+ * `observers`: Array of strings describing multi-property observer methods
+ *  and their dependent properties (e.g. `'observeABC(a, b, c)'`).
+ *
+ * `listeners`: Object describing event listeners to be added to each
+ *  instance of this element (key: event name, value: method name).
+ *
+ * `behaviors`: Array of additional `info` objects containing metadata
+ * and callbacks in the same format as the `info` object here which are
+ * merged into this element.
+ *
+ * `hostAttributes`: Object listing attributes to be applied to the host
+ *  once created (key: attribute name, value: attribute value).  Values
+ *  are serialized based on the type of the value.  Host attributes should
+ *  generally be limited to attributes such as `tabIndex` and `aria-...`.
+ *  Attributes in `hostAttributes` are only applied if a user-supplied
+ *  attribute is not already present (attributes in markup override
+ *  `hostAttributes`).
+ *
+ * In addition, the following Polymer-specific callbacks may be provided:
+ * - `registered`: called after first instance of this element,
+ * - `created`: called during `constructor`
+ * - `attached`: called during `connectedCallback`
+ * - `detached`: called during `disconnectedCallback`
+ * - `ready`: called before first `attached`, after all properties of
+ *   this element have been propagated to its template and all observers
+ *   have run
+ *
+ * @param {!PolymerInit} info Object containing Polymer metadata and functions
+ *   to become class methods.
+ * @template T
+ * @param {function(T):T} mixin Optional mixin to apply to legacy base class
+ *   before extending with Polymer metaprogramming.
+ * @return {function(new:HTMLElement)} Generated class
+ */
+
+
+const Class = function (info, mixin) {
+  if (!info) {
+    console.warn('Polymer.Class requires `info` argument');
+  }
+
+  let klass = mixin ? mixin(LegacyElementMixin(HTMLElement)) : LegacyElementMixin(HTMLElement);
+  klass = GenerateClassFromInfo(info, klass, info.behaviors); // decorate klass with registration info
+
+  klass.is = klass.prototype.is = info.is;
+  return klass;
+};
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/**
+ * Legacy class factory and registration helper for defining Polymer
+ * elements.
+ *
+ * This method is equivalent to
+ *
+ *     import {Class} from '@polymer/polymer/lib/legacy/class.js';
+ *     customElements.define(info.is, Class(info));
+ *
+ * See `Class` for details on valid legacy metadata format for `info`.
+ *
+ * @global
+ * @override
+ * @function
+ * @param {!PolymerInit} info Object containing Polymer metadata and functions
+ *   to become class methods.
+ * @return {function(new: HTMLElement)} Generated class
+ * @suppress {duplicate, invalidCasts, checkTypes}
+ */
+
+const Polymer = function (info) {
+  // if input is a `class` (aka a function with a prototype), use the prototype
+  // remember that the `constructor` will never be called
+  let klass;
+
+  if (typeof info === 'function') {
+    klass = info;
+  } else {
+    klass = Polymer.Class(info);
+  }
+
+  customElements.define(klass.is,
+  /** @type {!HTMLElement} */
+  klass);
+  return klass;
+};
+
+Polymer.Class = Class;
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+
+function mutablePropertyChange(inst, property, value, old, mutableData) {
+  let isObject;
+
+  if (mutableData) {
+    isObject = typeof value === 'object' && value !== null; // Pull `old` for Objects from temp cache, but treat `null` as a primitive
+
+    if (isObject) {
+      old = inst.__dataTemp[property];
+    }
+  } // Strict equality check, but return false for NaN===NaN
+
+
+  let shouldChange = old !== value && (old === old || value === value); // Objects are stored in temporary cache (cleared at end of
+  // turn), which is used for dirty-checking
+
+  if (isObject && shouldChange) {
+    inst.__dataTemp[property] = value;
+  }
+
+  return shouldChange;
+}
+/**
+ * Element class mixin to skip strict dirty-checking for objects and arrays
+ * (always consider them to be "dirty"), for use on elements utilizing
+ * `PropertyEffects`
+ *
+ * By default, `PropertyEffects` performs strict dirty checking on
+ * objects, which means that any deep modifications to an object or array will
+ * not be propagated unless "immutable" data patterns are used (i.e. all object
+ * references from the root to the mutation were changed).
+ *
+ * Polymer also provides a proprietary data mutation and path notification API
+ * (e.g. `notifyPath`, `set`, and array mutation API's) that allow efficient
+ * mutation and notification of deep changes in an object graph to all elements
+ * bound to the same object graph.
+ *
+ * In cases where neither immutable patterns nor the data mutation API can be
+ * used, applying this mixin will cause Polymer to skip dirty checking for
+ * objects and arrays (always consider them to be "dirty").  This allows a
+ * user to make a deep modification to a bound object graph, and then either
+ * simply re-set the object (e.g. `this.items = this.items`) or call `notifyPath`
+ * (e.g. `this.notifyPath('items')`) to update the tree.  Note that all
+ * elements that wish to be updated based on deep mutations must apply this
+ * mixin or otherwise skip strict dirty checking for objects/arrays.
+ * Specifically, any elements in the binding tree between the source of a
+ * mutation and the consumption of it must apply this mixin or enable the
+ * `OptionalMutableData` mixin.
+ *
+ * In order to make the dirty check strategy configurable, see
+ * `OptionalMutableData`.
+ *
+ * Note, the performance characteristics of propagating large object graphs
+ * will be worse as opposed to using strict dirty checking with immutable
+ * patterns or Polymer's path notification API.
+ *
+ * @mixinFunction
+ * @polymer
+ * @summary Element class mixin to skip strict dirty-checking for objects
+ *   and arrays
+ * @template T
+ * @param {function(new:T)} superClass Class to apply mixin to.
+ * @return {function(new:T)} superClass with mixin applied.
+ */
+
+
+const MutableData = dedupingMixin(superClass => {
+  /**
+   * @polymer
+   * @mixinClass
+   * @implements {Polymer_MutableData}
+   */
+  class MutableData extends superClass {
+    /**
+     * Overrides `PropertyEffects` to provide option for skipping
+     * strict equality checking for Objects and Arrays.
+     *
+     * This method pulls the value to dirty check against from the `__dataTemp`
+     * cache (rather than the normal `__data` cache) for Objects.  Since the temp
+     * cache is cleared at the end of a turn, this implementation allows
+     * side-effects of deep object changes to be processed by re-setting the
+     * same object (using the temp cache as an in-turn backstop to prevent
+     * cycles due to 2-way notification).
+     *
+     * @param {string} property Property name
+     * @param {*} value New property value
+     * @param {*} old Previous property value
+     * @return {boolean} Whether the property should be considered a change
+     * @protected
+     */
+    _shouldPropertyChange(property, value, old) {
+      return mutablePropertyChange(this, property, value, old, true);
+    }
+
+  }
+
+  return MutableData;
+});
+/**
+ * Element class mixin to add the optional ability to skip strict
+ * dirty-checking for objects and arrays (always consider them to be
+ * "dirty") by setting a `mutable-data` attribute on an element instance.
+ *
+ * By default, `PropertyEffects` performs strict dirty checking on
+ * objects, which means that any deep modifications to an object or array will
+ * not be propagated unless "immutable" data patterns are used (i.e. all object
+ * references from the root to the mutation were changed).
+ *
+ * Polymer also provides a proprietary data mutation and path notification API
+ * (e.g. `notifyPath`, `set`, and array mutation API's) that allow efficient
+ * mutation and notification of deep changes in an object graph to all elements
+ * bound to the same object graph.
+ *
+ * In cases where neither immutable patterns nor the data mutation API can be
+ * used, applying this mixin will allow Polymer to skip dirty checking for
+ * objects and arrays (always consider them to be "dirty").  This allows a
+ * user to make a deep modification to a bound object graph, and then either
+ * simply re-set the object (e.g. `this.items = this.items`) or call `notifyPath`
+ * (e.g. `this.notifyPath('items')`) to update the tree.  Note that all
+ * elements that wish to be updated based on deep mutations must apply this
+ * mixin or otherwise skip strict dirty checking for objects/arrays.
+ * Specifically, any elements in the binding tree between the source of a
+ * mutation and the consumption of it must enable this mixin or apply the
+ * `MutableData` mixin.
+ *
+ * While this mixin adds the ability to forgo Object/Array dirty checking,
+ * the `mutableData` flag defaults to false and must be set on the instance.
+ *
+ * Note, the performance characteristics of propagating large object graphs
+ * will be worse by relying on `mutableData: true` as opposed to using
+ * strict dirty checking with immutable patterns or Polymer's path notification
+ * API.
+ *
+ * @mixinFunction
+ * @polymer
+ * @summary Element class mixin to optionally skip strict dirty-checking
+ *   for objects and arrays
+ */
+
+const OptionalMutableData = dedupingMixin(superClass => {
+  /**
+   * @mixinClass
+   * @polymer
+   * @implements {Polymer_OptionalMutableData}
+   */
+  class OptionalMutableData extends superClass {
+    /** @nocollapse */
+    static get properties() {
+      return {
+        /**
+         * Instance-level flag for configuring the dirty-checking strategy
+         * for this element.  When true, Objects and Arrays will skip dirty
+         * checking, otherwise strict equality checking will be used.
+         */
+        mutableData: Boolean
+      };
+    }
+    /**
+     * Overrides `PropertyEffects` to provide option for skipping
+     * strict equality checking for Objects and Arrays.
+     *
+     * When `this.mutableData` is true on this instance, this method
+     * pulls the value to dirty check against from the `__dataTemp` cache
+     * (rather than the normal `__data` cache) for Objects.  Since the temp
+     * cache is cleared at the end of a turn, this implementation allows
+     * side-effects of deep object changes to be processed by re-setting the
+     * same object (using the temp cache as an in-turn backstop to prevent
+     * cycles due to 2-way notification).
+     *
+     * @param {string} property Property name
+     * @param {*} value New property value
+     * @param {*} old Previous property value
+     * @return {boolean} Whether the property should be considered a change
+     * @protected
+     */
+
+
+    _shouldPropertyChange(property, value, old) {
+      return mutablePropertyChange(this, property, value, old, this.mutableData);
+    }
+
+  }
+
+  return OptionalMutableData;
+}); // Export for use by legacy behavior
+
+MutableData._mutablePropertyChange = mutablePropertyChange;
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+// machinery for propagating host properties to children. This is an ES5
+// class only because Babel (incorrectly) requires super() in the class
+// constructor even though no `this` is used and it returns an instance.
+
+let newInstance = null;
+/**
+ * @constructor
+ * @extends {HTMLTemplateElement}
+ * @private
+ */
+
+function HTMLTemplateElementExtension() {
+  return newInstance;
+}
+
+HTMLTemplateElementExtension.prototype = Object.create(HTMLTemplateElement.prototype, {
+  constructor: {
+    value: HTMLTemplateElementExtension,
+    writable: true
+  }
+});
+/**
+ * @constructor
+ * @implements {Polymer_PropertyEffects}
+ * @extends {HTMLTemplateElementExtension}
+ * @private
+ */
+
+const DataTemplate = PropertyEffects(HTMLTemplateElementExtension);
+/**
+ * @constructor
+ * @implements {Polymer_MutableData}
+ * @extends {DataTemplate}
+ * @private
+ */
+
+const MutableDataTemplate = MutableData(DataTemplate); // Applies a DataTemplate subclass to a <template> instance
+
+function upgradeTemplate(template, constructor) {
+  newInstance = template;
+  Object.setPrototypeOf(template, constructor.prototype);
+  new constructor();
+  newInstance = null;
+}
+/**
+ * Base class for TemplateInstance.
+ * @constructor
+ * @extends {HTMLElement}
+ * @implements {Polymer_PropertyEffects}
+ * @private
+ */
+
+
+const templateInstanceBase = PropertyEffects( // This cast shouldn't be neccessary, but Closure doesn't understand that
+// "class {}" is a constructor function.
+
+/** @type {function(new:Object)} */
+class {});
+/**
+ * @polymer
+ * @customElement
+ * @appliesMixin PropertyEffects
+ * @unrestricted
+ */
+
+class TemplateInstanceBase extends templateInstanceBase {
+  constructor(props) {
+    super();
+
+    this._configureProperties(props);
+    /** @type {!StampedTemplate} */
+
+
+    this.root = this._stampTemplate(this.__dataHost); // Save list of stamped children
+
+    let children = [];
+    /** @suppress {invalidCasts} */
+
+    this.children =
+    /** @type {!NodeList} */
+    children; // Polymer 1.x did not use `Polymer.dom` here so not bothering.
+
+    for (let n = this.root.firstChild; n; n = n.nextSibling) {
+      children.push(n);
+      n.__templatizeInstance = this;
+    }
+
+    if (this.__templatizeOwner && this.__templatizeOwner.__hideTemplateChildren__) {
+      this._showHideChildren(true);
+    } // Flush props only when props are passed if instance props exist
+    // or when there isn't instance props.
+
+
+    let options = this.__templatizeOptions;
+
+    if (props && options.instanceProps || !options.instanceProps) {
+      this._enableProperties();
+    }
+  }
+  /**
+   * Configure the given `props` by calling `_setPendingProperty`. Also
+   * sets any properties stored in `__hostProps`.
+   * @private
+   * @param {Object} props Object of property name-value pairs to set.
+   * @return {void}
+   */
+
+
+  _configureProperties(props) {
+    let options = this.__templatizeOptions;
+
+    if (options.forwardHostProp) {
+      for (let hprop in this.__hostProps) {
+        this._setPendingProperty(hprop, this.__dataHost['_host_' + hprop]);
+      }
+    } // Any instance props passed in the constructor will overwrite host props;
+    // normally this would be a user error but we don't specifically filter them
+
+
+    for (let iprop in props) {
+      this._setPendingProperty(iprop, props[iprop]);
+    }
+  }
+  /**
+   * Forwards a host property to this instance.  This method should be
+   * called on instances from the `options.forwardHostProp` callback
+   * to propagate changes of host properties to each instance.
+   *
+   * Note this method enqueues the change, which are flushed as a batch.
+   *
+   * @param {string} prop Property or path name
+   * @param {*} value Value of the property to forward
+   * @return {void}
+   */
+
+
+  forwardHostProp(prop, value) {
+    if (this._setPendingPropertyOrPath(prop, value, false, true)) {
+      this.__dataHost._enqueueClient(this);
+    }
+  }
+  /**
+   * Override point for adding custom or simulated event handling.
+   *
+   * @override
+   * @param {!Node} node Node to add event listener to
+   * @param {string} eventName Name of event
+   * @param {function(!Event):void} handler Listener function to add
+   * @return {void}
+   */
+
+
+  _addEventListenerToNode(node, eventName, handler) {
+    if (this._methodHost && this.__templatizeOptions.parentModel) {
+      // If this instance should be considered a parent model, decorate
+      // events this template instance as `model`
+      this._methodHost._addEventListenerToNode(node, eventName, e => {
+        e.model = this;
+        handler(e);
+      });
+    } else {
+      // Otherwise delegate to the template's host (which could be)
+      // another template instance
+      let templateHost = this.__dataHost.__dataHost;
+
+      if (templateHost) {
+        templateHost._addEventListenerToNode(node, eventName, handler);
+      }
+    }
+  }
+  /**
+   * Shows or hides the template instance top level child elements. For
+   * text nodes, `textContent` is removed while "hidden" and replaced when
+   * "shown."
+   * @param {boolean} hide Set to true to hide the children;
+   * set to false to show them.
+   * @return {void}
+   * @protected
+   */
+
+
+  _showHideChildren(hide) {
+    let c = this.children;
+
+    for (let i = 0; i < c.length; i++) {
+      let n = c[i]; // Ignore non-changes
+
+      if (Boolean(hide) != Boolean(n.__hideTemplateChildren__)) {
+        if (n.nodeType === Node.TEXT_NODE) {
+          if (hide) {
+            n.__polymerTextContent__ = n.textContent;
+            n.textContent = '';
+          } else {
+            n.textContent = n.__polymerTextContent__;
+          } // remove and replace slot
+
+        } else if (n.localName === 'slot') {
+          if (hide) {
+            n.__polymerReplaced__ = document.createComment('hidden-slot');
+            wrap(wrap(n).parentNode).replaceChild(n.__polymerReplaced__, n);
+          } else {
+            const replace = n.__polymerReplaced__;
+
+            if (replace) {
+              wrap(wrap(replace).parentNode).replaceChild(n, replace);
+            }
+          }
+        } else if (n.style) {
+          if (hide) {
+            n.__polymerDisplay__ = n.style.display;
+            n.style.display = 'none';
+          } else {
+            n.style.display = n.__polymerDisplay__;
+          }
+        }
+      }
+
+      n.__hideTemplateChildren__ = hide;
+
+      if (n._showHideChildren) {
+        n._showHideChildren(hide);
+      }
+    }
+  }
+  /**
+   * Overrides default property-effects implementation to intercept
+   * textContent bindings while children are "hidden" and cache in
+   * private storage for later retrieval.
+   *
+   * @override
+   * @param {!Node} node The node to set a property on
+   * @param {string} prop The property to set
+   * @param {*} value The value to set
+   * @return {void}
+   * @protected
+   */
+
+
+  _setUnmanagedPropertyToNode(node, prop, value) {
+    if (node.__hideTemplateChildren__ && node.nodeType == Node.TEXT_NODE && prop == 'textContent') {
+      node.__polymerTextContent__ = value;
+    } else {
+      super._setUnmanagedPropertyToNode(node, prop, value);
+    }
+  }
+  /**
+   * Find the parent model of this template instance.  The parent model
+   * is either another templatize instance that had option `parentModel: true`,
+   * or else the host element.
+   *
+   * @return {!Polymer_PropertyEffects} The parent model of this instance
+   */
+
+
+  get parentModel() {
+    let model = this.__parentModel;
+
+    if (!model) {
+      let options;
+      model = this;
+
+      do {
+        // A template instance's `__dataHost` is a <template>
+        // `model.__dataHost.__dataHost` is the template's host
+        model = model.__dataHost.__dataHost;
+      } while ((options = model.__templatizeOptions) && !options.parentModel);
+
+      this.__parentModel = model;
+    }
+
+    return model;
+  }
+  /**
+   * Stub of HTMLElement's `dispatchEvent`, so that effects that may
+   * dispatch events safely no-op.
+   *
+   * @param {Event} event Event to dispatch
+   * @return {boolean} Always true.
+   * @override
+   */
+
+
+  dispatchEvent(event) {
+    // eslint-disable-line no-unused-vars
+    return true;
+  }
+
+}
+/** @type {!DataTemplate} */
+
+
+TemplateInstanceBase.prototype.__dataHost;
+/** @type {!TemplatizeOptions} */
+
+TemplateInstanceBase.prototype.__templatizeOptions;
+/** @type {!Polymer_PropertyEffects} */
+
+TemplateInstanceBase.prototype._methodHost;
+/** @type {!Object} */
+
+TemplateInstanceBase.prototype.__templatizeOwner;
+/** @type {!Object} */
+
+TemplateInstanceBase.prototype.__hostProps;
+/**
+ * @constructor
+ * @extends {TemplateInstanceBase}
+ * @implements {Polymer_MutableData}
+ * @private
+ */
+
+const MutableTemplateInstanceBase = MutableData( // This cast shouldn't be necessary, but Closure doesn't seem to understand
+// this constructor.
+
+/** @type {function(new:TemplateInstanceBase)} */
+TemplateInstanceBase);
+
+function findMethodHost(template) {
+  // Technically this should be the owner of the outermost template.
+  // In shadow dom, this is always getRootNode().host, but we can
+  // approximate this via cooperation with our dataHost always setting
+  // `_methodHost` as long as there were bindings (or id's) on this
+  // instance causing it to get a dataHost.
+  let templateHost = template.__dataHost;
+  return templateHost && templateHost._methodHost || templateHost;
+}
+/* eslint-disable valid-jsdoc */
+
+/**
+ * @suppress {missingProperties} class.prototype is not defined for some reason
+ */
+
+
+function createTemplatizerClass(template, templateInfo, options) {
+  /**
+   * @constructor
+   * @extends {TemplateInstanceBase}
+   */
+  let templatizerBase = options.mutableData ? MutableTemplateInstanceBase : TemplateInstanceBase; // Affordance for global mixins onto TemplatizeInstance
+
+  if (templatize.mixin) {
+    templatizerBase = templatize.mixin(templatizerBase);
+  }
+  /**
+   * Anonymous class created by the templatize
+   * @constructor
+   * @private
+   */
+
+
+  let klass = class extends templatizerBase {};
+  /** @override */
+
+  klass.prototype.__templatizeOptions = options;
+
+  klass.prototype._bindTemplate(template);
+
+  addNotifyEffects(klass, template, templateInfo, options);
+  return klass;
+}
+/**
+ * Adds propagate effects from the template to the template instance for
+ * properties that the host binds to the template using the `_host_` prefix.
+ * 
+ * @suppress {missingProperties} class.prototype is not defined for some reason
+ */
+
+
+function addPropagateEffects(template, templateInfo, options) {
+  let userForwardHostProp = options.forwardHostProp;
+
+  if (userForwardHostProp && templateInfo.hasHostProps) {
+    // Provide data API and property effects on memoized template class
+    let klass = templateInfo.templatizeTemplateClass;
+
+    if (!klass) {
+      /**
+       * @constructor
+       * @extends {DataTemplate}
+       */
+      let templatizedBase = options.mutableData ? MutableDataTemplate : DataTemplate;
+      /** @private */
+
+      klass = templateInfo.templatizeTemplateClass = class TemplatizedTemplate extends templatizedBase {}; // Add template - >instances effects
+      // and host <- template effects
+
+      let hostProps = templateInfo.hostProps;
+
+      for (let prop in hostProps) {
+        klass.prototype._addPropertyEffect('_host_' + prop, klass.prototype.PROPERTY_EFFECT_TYPES.PROPAGATE, {
+          fn: createForwardHostPropEffect(prop, userForwardHostProp)
+        });
+
+        klass.prototype._createNotifyingProperty('_host_' + prop);
+      }
+    }
+
+    upgradeTemplate(template, klass); // Mix any pre-bound data into __data; no need to flush this to
+    // instances since they pull from the template at instance-time
+
+    if (template.__dataProto) {
+      // Note, generally `__dataProto` could be chained, but it's guaranteed
+      // to not be since this is a vanilla template we just added effects to
+      Object.assign(template.__data, template.__dataProto);
+    } // Clear any pending data for performance
+
+
+    template.__dataTemp = {};
+    template.__dataPending = null;
+    template.__dataOld = null;
+
+    template._enableProperties();
+  }
+}
+/* eslint-enable valid-jsdoc */
+
+
+function createForwardHostPropEffect(hostProp, userForwardHostProp) {
+  return function forwardHostProp(template, prop, props) {
+    userForwardHostProp.call(template.__templatizeOwner, prop.substring('_host_'.length), props[prop]);
+  };
+}
+
+function addNotifyEffects(klass, template, templateInfo, options) {
+  let hostProps = templateInfo.hostProps || {};
+
+  for (let iprop in options.instanceProps) {
+    delete hostProps[iprop];
+    let userNotifyInstanceProp = options.notifyInstanceProp;
+
+    if (userNotifyInstanceProp) {
+      klass.prototype._addPropertyEffect(iprop, klass.prototype.PROPERTY_EFFECT_TYPES.NOTIFY, {
+        fn: createNotifyInstancePropEffect(iprop, userNotifyInstanceProp)
+      });
+    }
+  }
+
+  if (options.forwardHostProp && template.__dataHost) {
+    for (let hprop in hostProps) {
+      // As we're iterating hostProps in this function, note whether
+      // there were any, for an optimization in addPropagateEffects
+      if (!templateInfo.hasHostProps) {
+        templateInfo.hasHostProps = true;
+      }
+
+      klass.prototype._addPropertyEffect(hprop, klass.prototype.PROPERTY_EFFECT_TYPES.NOTIFY, {
+        fn: createNotifyHostPropEffect()
+      });
+    }
+  }
+}
+
+function createNotifyInstancePropEffect(instProp, userNotifyInstanceProp) {
+  return function notifyInstanceProp(inst, prop, props) {
+    userNotifyInstanceProp.call(inst.__templatizeOwner, inst, prop, props[prop]);
+  };
+}
+
+function createNotifyHostPropEffect() {
+  return function notifyHostProp(inst, prop, props) {
+    inst.__dataHost._setPendingPropertyOrPath('_host_' + prop, props[prop], true, true);
+  };
+}
+/**
+ * Returns an anonymous `PropertyEffects` class bound to the
+ * `<template>` provided.  Instancing the class will result in the
+ * template being stamped into a document fragment stored as the instance's
+ * `root` property, after which it can be appended to the DOM.
+ *
+ * Templates may utilize all Polymer data-binding features as well as
+ * declarative event listeners.  Event listeners and inline computing
+ * functions in the template will be called on the host of the template.
+ *
+ * The constructor returned takes a single argument dictionary of initial
+ * property values to propagate into template bindings.  Additionally
+ * host properties can be forwarded in, and instance properties can be
+ * notified out by providing optional callbacks in the `options` dictionary.
+ *
+ * Valid configuration in `options` are as follows:
+ *
+ * - `forwardHostProp(property, value)`: Called when a property referenced
+ *   in the template changed on the template's host. As this library does
+ *   not retain references to templates instanced by the user, it is the
+ *   templatize owner's responsibility to forward host property changes into
+ *   user-stamped instances.  The `instance.forwardHostProp(property, value)`
+ *    method on the generated class should be called to forward host
+ *   properties into the template to prevent unnecessary property-changed
+ *   notifications. Any properties referenced in the template that are not
+ *   defined in `instanceProps` will be notified up to the template's host
+ *   automatically.
+ * - `instanceProps`: Dictionary of property names that will be added
+ *   to the instance by the templatize owner.  These properties shadow any
+ *   host properties, and changes within the template to these properties
+ *   will result in `notifyInstanceProp` being called.
+ * - `mutableData`: When `true`, the generated class will skip strict
+ *   dirty-checking for objects and arrays (always consider them to be
+ *   "dirty").
+ * - `notifyInstanceProp(instance, property, value)`: Called when
+ *   an instance property changes.  Users may choose to call `notifyPath`
+ *   on e.g. the owner to notify the change.
+ * - `parentModel`: When `true`, events handled by declarative event listeners
+ *   (`on-event="handler"`) will be decorated with a `model` property pointing
+ *   to the template instance that stamped it.  It will also be returned
+ *   from `instance.parentModel` in cases where template instance nesting
+ *   causes an inner model to shadow an outer model.
+ *
+ * All callbacks are called bound to the `owner`. Any context
+ * needed for the callbacks (such as references to `instances` stamped)
+ * should be stored on the `owner` such that they can be retrieved via
+ * `this`.
+ *
+ * When `options.forwardHostProp` is declared as an option, any properties
+ * referenced in the template will be automatically forwarded from the host of
+ * the `<template>` to instances, with the exception of any properties listed in
+ * the `options.instanceProps` object.  `instanceProps` are assumed to be
+ * managed by the owner of the instances, either passed into the constructor
+ * or set after the fact.  Note, any properties passed into the constructor will
+ * always be set to the instance (regardless of whether they would normally
+ * be forwarded from the host).
+ *
+ * Note that `templatize()` can be run only once for a given `<template>`.
+ * Further calls will result in an error. Also, there is a special
+ * behavior if the template was duplicated through a mechanism such as
+ * `<dom-repeat>` or `<test-fixture>`. In this case, all calls to
+ * `templatize()` return the same class for all duplicates of a template.
+ * The class returned from `templatize()` is generated only once using
+ * the `options` from the first call. This means that any `options`
+ * provided to subsequent calls will be ignored. Therefore, it is very
+ * important not to close over any variables inside the callbacks. Also,
+ * arrow functions must be avoided because they bind the outer `this`.
+ * Inside the callbacks, any contextual information can be accessed
+ * through `this`, which points to the `owner`.
+ *
+ * @param {!HTMLTemplateElement} template Template to templatize
+ * @param {Polymer_PropertyEffects=} owner Owner of the template instances;
+ *   any optional callbacks will be bound to this owner.
+ * @param {Object=} options Options dictionary (see summary for details)
+ * @return {function(new:TemplateInstanceBase, Object=)} Generated class bound
+ *   to the template provided
+ * @suppress {invalidCasts}
+ */
+
+
+function templatize(template, owner, options) {
+  // Under strictTemplatePolicy, the templatized element must be owned
+  // by a (trusted) Polymer element, indicated by existence of _methodHost;
+  // e.g. for dom-if & dom-repeat in main document, _methodHost is null
+  if (strictTemplatePolicy && !findMethodHost(template)) {
+    throw new Error('strictTemplatePolicy: template owner not trusted');
+  }
+
+  options =
+  /** @type {!TemplatizeOptions} */
+  options || {};
+
+  if (template.__templatizeOwner) {
+    throw new Error('A <template> can only be templatized once');
+  }
+
+  template.__templatizeOwner = owner;
+  const ctor = owner ? owner.constructor : TemplateInstanceBase;
+
+  let templateInfo = ctor._parseTemplate(template); // Get memoized base class for the prototypical template, which
+  // includes property effects for binding template & forwarding
+
+  /**
+   * @constructor
+   * @extends {TemplateInstanceBase}
+   */
+
+
+  let baseClass = templateInfo.templatizeInstanceClass;
+
+  if (!baseClass) {
+    baseClass = createTemplatizerClass(template, templateInfo, options);
+    templateInfo.templatizeInstanceClass = baseClass;
+  } // Host property forwarding must be installed onto template instance
+
+
+  addPropagateEffects(template, templateInfo, options); // Subclass base class and add reference for this specific template
+
+  /** @private */
+
+  let klass = class TemplateInstance extends baseClass {};
+  /** @override */
+
+  klass.prototype._methodHost = findMethodHost(template);
+  /** @override */
+
+  klass.prototype.__dataHost =
+  /** @type {!DataTemplate} */
+  template;
+  /** @override */
+
+  klass.prototype.__templatizeOwner =
+  /** @type {!Object} */
+  owner;
+  /** @override */
+
+  klass.prototype.__hostProps = templateInfo.hostProps;
+  klass =
+  /** @type {function(new:TemplateInstanceBase)} */
+  klass; //eslint-disable-line no-self-assign
+
+  return klass;
+}
+/**
+ * Returns the template "model" associated with a given element, which
+ * serves as the binding scope for the template instance the element is
+ * contained in. A template model is an instance of
+ * `TemplateInstanceBase`, and should be used to manipulate data
+ * associated with this template instance.
+ *
+ * Example:
+ *
+ *   let model = modelForElement(el);
+ *   if (model.index < 10) {
+ *     model.set('item.checked', true);
+ *   }
+ *
+ * @param {HTMLTemplateElement} template The model will be returned for
+ *   elements stamped from this template
+ * @param {Node=} node Node for which to return a template model.
+ * @return {TemplateInstanceBase} Template instance representing the
+ *   binding scope for the element
+ */
+
+function modelForElement(template, node) {
+  let model;
+
+  while (node) {
+    // An element with a __templatizeInstance marks the top boundary
+    // of a scope; walk up until we find one, and then ensure that
+    // its __dataHost matches `this`, meaning this dom-repeat stamped it
+    if (model = node.__templatizeInstance) {
+      // Found an element stamped by another template; keep walking up
+      // from its __dataHost
+      if (model.__dataHost != template) {
+        node = model.__dataHost;
+      } else {
+        return model;
+      }
+    } else {
+      // Still in a template scope, keep going up until
+      // a __templatizeInstance is found
+      node = wrap(node).parentNode;
+    }
+  }
+
+  return null;
+}
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+let elementsHidden = false;
+/**
+ * @return {boolean} True if elements will be hidden globally
+ */
+
+function hideElementsGlobally() {
+  if (legacyOptimizations && !useShadow) {
+    if (!elementsHidden) {
+      elementsHidden = true;
+      const style = document.createElement('style');
+      style.textContent = 'dom-bind,dom-if,dom-repeat{display:none;}';
+      document.head.appendChild(style);
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/**
+ * @constructor
+ * @extends {HTMLElement}
+ * @implements {Polymer_PropertyEffects}
+ * @implements {Polymer_OptionalMutableData}
+ * @implements {Polymer_GestureEventListeners}
+ * @private
+ */
+
+const domBindBase = GestureEventListeners(OptionalMutableData(PropertyEffects(HTMLElement)));
+/**
+ * Custom element to allow using Polymer's template features (data binding,
+ * declarative event listeners, etc.) in the main document without defining
+ * a new custom element.
+ *
+ * `<template>` tags utilizing bindings may be wrapped with the `<dom-bind>`
+ * element, which will immediately stamp the wrapped template into the main
+ * document and bind elements to the `dom-bind` element itself as the
+ * binding scope.
+ *
+ * @polymer
+ * @customElement
+ * @appliesMixin PropertyEffects
+ * @appliesMixin OptionalMutableData
+ * @appliesMixin GestureEventListeners
+ * @extends {domBindBase}
+ * @summary Custom element to allow using Polymer's template features (data
+ *   binding, declarative event listeners, etc.) in the main document.
+ */
+
+class DomBind extends domBindBase {
+  static get observedAttributes() {
+    return ['mutable-data'];
+  }
+
+  constructor() {
+    super();
+
+    if (strictTemplatePolicy) {
+      throw new Error(`strictTemplatePolicy: dom-bind not allowed`);
+    }
+
+    this.root = null;
+    this.$ = null;
+    this.__children = null;
+  }
+  /* eslint-disable no-unused-vars */
+
+  /**
+   * @override
+   * @param {string} name Name of attribute that changed
+   * @param {?string} old Old attribute value
+   * @param {?string} value New attribute value
+   * @param {?string} namespace Attribute namespace.
+   * @return {void}
+   */
+
+
+  attributeChangedCallback(name, old, value, namespace) {
+    // assumes only one observed attribute
+    this.mutableData = true;
+  }
+  /**
+   * @override
+   * @return {void}
+   */
+
+
+  connectedCallback() {
+    if (!hideElementsGlobally()) {
+      this.style.display = 'none';
+    }
+
+    this.render();
+  }
+  /**
+   * @override
+   * @return {void}
+   */
+
+
+  disconnectedCallback() {
+    this.__removeChildren();
+  }
+
+  __insertChildren() {
+    wrap(wrap(this).parentNode).insertBefore(this.root, this);
+  }
+
+  __removeChildren() {
+    if (this.__children) {
+      for (let i = 0; i < this.__children.length; i++) {
+        this.root.appendChild(this.__children[i]);
+      }
+    }
+  }
+  /**
+   * Forces the element to render its content. This is typically only
+   * necessary to call if HTMLImports with the async attribute are used.
+   * @return {void}
+   */
+
+
+  render() {
+    let template;
+
+    if (!this.__children) {
+      template =
+      /** @type {HTMLTemplateElement} */
+      template || this.querySelector('template');
+
+      if (!template) {
+        // Wait until childList changes and template should be there by then
+        let observer = new MutationObserver(() => {
+          template =
+          /** @type {HTMLTemplateElement} */
+          this.querySelector('template');
+
+          if (template) {
+            observer.disconnect();
+            this.render();
+          } else {
+            throw new Error('dom-bind requires a <template> child');
+          }
+        });
+        observer.observe(this, {
+          childList: true
+        });
+        return;
+      }
+
+      this.root = this._stampTemplate(
+      /** @type {!HTMLTemplateElement} */
+      template);
+      this.$ = this.root.$;
+      this.__children = [];
+
+      for (let n = this.root.firstChild; n; n = n.nextSibling) {
+        this.__children[this.__children.length] = n;
+      }
+
+      this._enableProperties();
+    }
+
+    this.__insertChildren();
+
+    this.dispatchEvent(new CustomEvent('dom-change', {
+      bubbles: true,
+      composed: true
+    }));
+  }
+
+}
+customElements.define('dom-bind', DomBind);
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/**
+ * @constructor
+ * @implements {Polymer_OptionalMutableData}
+ * @extends {PolymerElement}
+ * @private
+ */
+
+const domRepeatBase = OptionalMutableData(PolymerElement);
+/**
+ * The `<dom-repeat>` element will automatically stamp and binds one instance
+ * of template content to each object in a user-provided array.
+ * `dom-repeat` accepts an `items` property, and one instance of the template
+ * is stamped for each item into the DOM at the location of the `dom-repeat`
+ * element.  The `item` property will be set on each instance's binding
+ * scope, thus templates should bind to sub-properties of `item`.
+ *
+ * Example:
+ *
+ * ```html
+ * <dom-module id="employee-list">
+ *
+ *   <template>
+ *
+ *     <div> Employee list: </div>
+ *     <dom-repeat items="{{employees}}">
+ *       <template>
+ *         <div>First name: <span>{{item.first}}</span></div>
+ *         <div>Last name: <span>{{item.last}}</span></div>
+ *       </template>
+ *     </dom-repeat>
+ *
+ *   </template>
+ *
+ * </dom-module>
+ * ```
+ *
+ * With the following custom element definition:
+ *
+ * ```js
+ * class EmployeeList extends PolymerElement {
+ *   static get is() { return 'employee-list'; }
+ *   static get properties() {
+ *     return {
+ *       employees: {
+ *         value() {
+ *           return [
+ *             {first: 'Bob', last: 'Smith'},
+ *             {first: 'Sally', last: 'Johnson'},
+ *             ...
+ *           ];
+ *         }
+ *       }
+ *     };
+ *   }
+ * }
+ * ```
+ *
+ * Notifications for changes to items sub-properties will be forwarded to template
+ * instances, which will update via the normal structured data notification system.
+ *
+ * Mutations to the `items` array itself should be made using the Array
+ * mutation API's on the PropertyEffects mixin (`push`, `pop`, `splice`,
+ * `shift`, `unshift`), and template instances will be kept in sync with the
+ * data in the array.
+ *
+ * Events caught by event handlers within the `dom-repeat` template will be
+ * decorated with a `model` property, which represents the binding scope for
+ * each template instance.  The model should be used to manipulate data on the
+ * instance, for example `event.model.set('item.checked', true);`.
+ *
+ * Alternatively, the model for a template instance for an element stamped by
+ * a `dom-repeat` can be obtained using the `modelForElement` API on the
+ * `dom-repeat` that stamped it, for example
+ * `this.$.domRepeat.modelForElement(event.target).set('item.checked', true);`.
+ * This may be useful for manipulating instance data of event targets obtained
+ * by event handlers on parents of the `dom-repeat` (event delegation).
+ *
+ * A view-specific filter/sort may be applied to each `dom-repeat` by supplying a
+ * `filter` and/or `sort` property.  This may be a string that names a function on
+ * the host, or a function may be assigned to the property directly.  The functions
+ * should implemented following the standard `Array` filter/sort API.
+ *
+ * In order to re-run the filter or sort functions based on changes to sub-fields
+ * of `items`, the `observe` property may be set as a space-separated list of
+ * `item` sub-fields that should cause a re-filter/sort when modified.  If
+ * the filter or sort function depends on properties not contained in `items`,
+ * the user should observe changes to those properties and call `render` to update
+ * the view based on the dependency change.
+ *
+ * For example, for an `dom-repeat` with a filter of the following:
+ *
+ * ```js
+ * isEngineer(item) {
+ *   return item.type == 'engineer' || item.manager.type == 'engineer';
+ * }
+ * ```
+ *
+ * Then the `observe` property should be configured as follows:
+ *
+ * ```html
+ * <dom-repeat items="{{employees}}" filter="isEngineer" observe="type manager.type">
+ * ```
+ *
+ * @customElement
+ * @polymer
+ * @extends {domRepeatBase}
+ * @appliesMixin OptionalMutableData
+ * @summary Custom element for stamping instance of a template bound to
+ *   items in an array.
+ */
+
+class DomRepeat extends domRepeatBase {
+  // Not needed to find template; can be removed once the analyzer
+  // can find the tag name from customElements.define call
+  static get is() {
+    return 'dom-repeat';
+  }
+
+  static get template() {
+    return null;
+  }
+
+  static get properties() {
+    /**
+     * Fired whenever DOM is added or removed by this template (by
+     * default, rendering occurs lazily).  To force immediate rendering, call
+     * `render`.
+     *
+     * @event dom-change
+     */
+    return {
+      /**
+       * An array containing items determining how many instances of the template
+       * to stamp and that that each template instance should bind to.
+       */
+      items: {
+        type: Array
+      },
+
+      /**
+       * The name of the variable to add to the binding scope for the array
+       * element associated with a given template instance.
+       */
+      as: {
+        type: String,
+        value: 'item'
+      },
+
+      /**
+       * The name of the variable to add to the binding scope with the index
+       * of the instance in the sorted and filtered list of rendered items.
+       * Note, for the index in the `this.items` array, use the value of the
+       * `itemsIndexAs` property.
+       */
+      indexAs: {
+        type: String,
+        value: 'index'
+      },
+
+      /**
+       * The name of the variable to add to the binding scope with the index
+       * of the instance in the `this.items` array. Note, for the index of
+       * this instance in the sorted and filtered list of rendered items,
+       * use the value of the `indexAs` property.
+       */
+      itemsIndexAs: {
+        type: String,
+        value: 'itemsIndex'
+      },
+
+      /**
+       * A function that should determine the sort order of the items.  This
+       * property should either be provided as a string, indicating a method
+       * name on the element's host, or else be an actual function.  The
+       * function should match the sort function passed to `Array.sort`.
+       * Using a sort function has no effect on the underlying `items` array.
+       */
+      sort: {
+        type: Function,
+        observer: '__sortChanged'
+      },
+
+      /**
+       * A function that can be used to filter items out of the view.  This
+       * property should either be provided as a string, indicating a method
+       * name on the element's host, or else be an actual function.  The
+       * function should match the sort function passed to `Array.filter`.
+       * Using a filter function has no effect on the underlying `items` array.
+       */
+      filter: {
+        type: Function,
+        observer: '__filterChanged'
+      },
+
+      /**
+       * When using a `filter` or `sort` function, the `observe` property
+       * should be set to a space-separated list of the names of item
+       * sub-fields that should trigger a re-sort or re-filter when changed.
+       * These should generally be fields of `item` that the sort or filter
+       * function depends on.
+       */
+      observe: {
+        type: String,
+        observer: '__observeChanged'
+      },
+
+      /**
+       * When using a `filter` or `sort` function, the `delay` property
+       * determines a debounce time in ms after a change to observed item
+       * properties that must pass before the filter or sort is re-run.
+       * This is useful in rate-limiting shuffling of the view when
+       * item changes may be frequent.
+       */
+      delay: Number,
+
+      /**
+       * Count of currently rendered items after `filter` (if any) has been applied.
+       * If "chunking mode" is enabled, `renderedItemCount` is updated each time a
+       * set of template instances is rendered.
+       *
+       */
+      renderedItemCount: {
+        type: Number,
+        notify: true,
+        readOnly: true
+      },
+
+      /**
+       * Defines an initial count of template instances to render after setting
+       * the `items` array, before the next paint, and puts the `dom-repeat`
+       * into "chunking mode".  The remaining items will be created and rendered
+       * incrementally at each animation frame therof until all instances have
+       * been rendered.
+       */
+      initialCount: {
+        type: Number,
+        observer: '__initializeChunking'
+      },
+
+      /**
+       * When `initialCount` is used, this property defines a frame rate (in
+       * fps) to target by throttling the number of instances rendered each
+       * frame to not exceed the budget for the target frame rate.  The
+       * framerate is effectively the number of `requestAnimationFrame`s that
+       * it tries to allow to actually fire in a given second. It does this
+       * by measuring the time between `rAF`s and continuously adjusting the
+       * number of items created each `rAF` to maintain the target framerate.
+       * Setting this to a higher number allows lower latency and higher
+       * throughput for event handlers and other tasks, but results in a
+       * longer time for the remaining items to complete rendering.
+       */
+      targetFramerate: {
+        type: Number,
+        value: 20
+      },
+      _targetFrameTime: {
+        type: Number,
+        computed: '__computeFrameTime(targetFramerate)'
+      }
+    };
+  }
+
+  static get observers() {
+    return ['__itemsChanged(items.*)'];
+  }
+
+  constructor() {
+    super();
+    this.__instances = [];
+    this.__limit = Infinity;
+    this.__pool = [];
+    this.__renderDebouncer = null;
+    this.__itemsIdxToInstIdx = {};
+    this.__chunkCount = null;
+    this.__lastChunkTime = null;
+    this.__sortFn = null;
+    this.__filterFn = null;
+    this.__observePaths = null;
+    /** @type {?function(new:TemplateInstanceBase, Object=)} */
+
+    this.__ctor = null;
+    this.__isDetached = true;
+    this.template = null;
+  }
+  /**
+   * @override
+   * @return {void}
+   */
+
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.__isDetached = true;
+
+    for (let i = 0; i < this.__instances.length; i++) {
+      this.__detachInstance(i);
+    }
+  }
+  /**
+   * @override
+   * @return {void}
+   */
+
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    if (!hideElementsGlobally()) {
+      this.style.display = 'none';
+    } // only perform attachment if the element was previously detached.
+
+
+    if (this.__isDetached) {
+      this.__isDetached = false;
+      let wrappedParent = wrap(wrap(this).parentNode);
+
+      for (let i = 0; i < this.__instances.length; i++) {
+        this.__attachInstance(i, wrappedParent);
+      }
+    }
+  }
+
+  __ensureTemplatized() {
+    // Templatizing (generating the instance constructor) needs to wait
+    // until ready, since won't have its template content handed back to
+    // it until then
+    if (!this.__ctor) {
+      let template = this.template =
+      /** @type {HTMLTemplateElement} */
+      this.querySelector('template');
+
+      if (!template) {
+        // // Wait until childList changes and template should be there by then
+        let observer = new MutationObserver(() => {
+          if (this.querySelector('template')) {
+            observer.disconnect();
+
+            this.__render();
+          } else {
+            throw new Error('dom-repeat requires a <template> child');
+          }
+        });
+        observer.observe(this, {
+          childList: true
+        });
+        return false;
+      } // Template instance props that should be excluded from forwarding
+
+
+      let instanceProps = {};
+      instanceProps[this.as] = true;
+      instanceProps[this.indexAs] = true;
+      instanceProps[this.itemsIndexAs] = true;
+      this.__ctor = templatize(template, this, {
+        mutableData: this.mutableData,
+        parentModel: true,
+        instanceProps: instanceProps,
+
+        /**
+         * @this {DomRepeat}
+         * @param {string} prop Property to set
+         * @param {*} value Value to set property to
+         */
+        forwardHostProp: function (prop, value) {
+          let i$ = this.__instances;
+
+          for (let i = 0, inst; i < i$.length && (inst = i$[i]); i++) {
+            inst.forwardHostProp(prop, value);
+          }
+        },
+
+        /**
+         * @this {DomRepeat}
+         * @param {Object} inst Instance to notify
+         * @param {string} prop Property to notify
+         * @param {*} value Value to notify
+         */
+        notifyInstanceProp: function (inst, prop, value) {
+          if (matches(this.as, prop)) {
+            let idx = inst[this.itemsIndexAs];
+
+            if (prop == this.as) {
+              this.items[idx] = value;
+            }
+
+            let path = translate(this.as, `${JSCompiler_renameProperty('items', this)}.${idx}`, prop);
+            this.notifyPath(path, value);
+          }
+        }
+      });
+    }
+
+    return true;
+  }
+
+  __getMethodHost() {
+    // Technically this should be the owner of the outermost template.
+    // In shadow dom, this is always getRootNode().host, but we can
+    // approximate this via cooperation with our dataHost always setting
+    // `_methodHost` as long as there were bindings (or id's) on this
+    // instance causing it to get a dataHost.
+    return this.__dataHost._methodHost || this.__dataHost;
+  }
+
+  __functionFromPropertyValue(functionOrMethodName) {
+    if (typeof functionOrMethodName === 'string') {
+      let methodName = functionOrMethodName;
+
+      let obj = this.__getMethodHost();
+
+      return function () {
+        return obj[methodName].apply(obj, arguments);
+      };
+    }
+
+    return functionOrMethodName;
+  }
+
+  __sortChanged(sort) {
+    this.__sortFn = this.__functionFromPropertyValue(sort);
+
+    if (this.items) {
+      this.__debounceRender(this.__render);
+    }
+  }
+
+  __filterChanged(filter) {
+    this.__filterFn = this.__functionFromPropertyValue(filter);
+
+    if (this.items) {
+      this.__debounceRender(this.__render);
+    }
+  }
+
+  __computeFrameTime(rate) {
+    return Math.ceil(1000 / rate);
+  }
+
+  __initializeChunking() {
+    if (this.initialCount) {
+      this.__limit = this.initialCount;
+      this.__chunkCount = this.initialCount;
+      this.__lastChunkTime = performance.now();
+    }
+  }
+
+  __tryRenderChunk() {
+    // Debounced so that multiple calls through `_render` between animation
+    // frames only queue one new rAF (e.g. array mutation & chunked render)
+    if (this.items && this.__limit < this.items.length) {
+      this.__debounceRender(this.__requestRenderChunk);
+    }
+  }
+
+  __requestRenderChunk() {
+    requestAnimationFrame(() => this.__renderChunk());
+  }
+
+  __renderChunk() {
+    // Simple auto chunkSize throttling algorithm based on feedback loop:
+    // measure actual time between frames and scale chunk count by ratio
+    // of target/actual frame time
+    let currChunkTime = performance.now();
+    let ratio = this._targetFrameTime / (currChunkTime - this.__lastChunkTime);
+    this.__chunkCount = Math.round(this.__chunkCount * ratio) || 1;
+    this.__limit += this.__chunkCount;
+    this.__lastChunkTime = currChunkTime;
+
+    this.__debounceRender(this.__render);
+  }
+
+  __observeChanged() {
+    this.__observePaths = this.observe && this.observe.replace('.*', '.').split(' ');
+  }
+
+  __itemsChanged(change) {
+    if (this.items && !Array.isArray(this.items)) {
+      console.warn('dom-repeat expected array for `items`, found', this.items);
+    } // If path was to an item (e.g. 'items.3' or 'items.3.foo'), forward the
+    // path to that instance synchronously (returns false for non-item paths)
+
+
+    if (!this.__handleItemPath(change.path, change.value)) {
+      // Otherwise, the array was reset ('items') or spliced ('items.splices'),
+      // so queue a full refresh
+      this.__initializeChunking();
+
+      this.__debounceRender(this.__render);
+    }
+  }
+
+  __handleObservedPaths(path) {
+    // Handle cases where path changes should cause a re-sort/filter
+    if (this.__sortFn || this.__filterFn) {
+      if (!path) {
+        // Always re-render if the item itself changed
+        this.__debounceRender(this.__render, this.delay);
+      } else if (this.__observePaths) {
+        // Otherwise, re-render if the path changed matches an observed path
+        let paths = this.__observePaths;
+
+        for (let i = 0; i < paths.length; i++) {
+          if (path.indexOf(paths[i]) === 0) {
+            this.__debounceRender(this.__render, this.delay);
+          }
+        }
+      }
+    }
+  }
+  /**
+   * @param {function(this:DomRepeat)} fn Function to debounce.
+   * @param {number=} delay Delay in ms to debounce by.
+   */
+
+
+  __debounceRender(fn, delay = 0) {
+    this.__renderDebouncer = Debouncer.debounce(this.__renderDebouncer, delay > 0 ? timeOut.after(delay) : microTask, fn.bind(this));
+    enqueueDebouncer(this.__renderDebouncer);
+  }
+  /**
+   * Forces the element to render its content. Normally rendering is
+   * asynchronous to a provoking change. This is done for efficiency so
+   * that multiple changes trigger only a single render. The render method
+   * should be called if, for example, template rendering is required to
+   * validate application state.
+   * @return {void}
+   */
+
+
+  render() {
+    // Queue this repeater, then flush all in order
+    this.__debounceRender(this.__render);
+
+    flush();
+  }
+
+  __render() {
+    if (!this.__ensureTemplatized()) {
+      // No template found yet
+      return;
+    }
+
+    this.__applyFullRefresh(); // Reset the pool
+    // TODO(kschaaf): Reuse pool across turns and nested templates
+    // Now that objects/arrays are re-evaluated when set, we can safely
+    // reuse pooled instances across turns, however we still need to decide
+    // semantics regarding how long to hold, how many to hold, etc.
+
+
+    this.__pool.length = 0; // Set rendered item count
+
+    this._setRenderedItemCount(this.__instances.length); // Notify users
+
+
+    this.dispatchEvent(new CustomEvent('dom-change', {
+      bubbles: true,
+      composed: true
+    })); // Check to see if we need to render more items
+
+    this.__tryRenderChunk();
+  }
+
+  __applyFullRefresh() {
+    let items = this.items || [];
+    let isntIdxToItemsIdx = new Array(items.length);
+
+    for (let i = 0; i < items.length; i++) {
+      isntIdxToItemsIdx[i] = i;
+    } // Apply user filter
+
+
+    if (this.__filterFn) {
+      isntIdxToItemsIdx = isntIdxToItemsIdx.filter((i, idx, array) => this.__filterFn(items[i], idx, array));
+    } // Apply user sort
+
+
+    if (this.__sortFn) {
+      isntIdxToItemsIdx.sort((a, b) => this.__sortFn(items[a], items[b]));
+    } // items->inst map kept for item path forwarding
+
+
+    const itemsIdxToInstIdx = this.__itemsIdxToInstIdx = {};
+    let instIdx = 0; // Generate instances and assign items
+
+    const limit = Math.min(isntIdxToItemsIdx.length, this.__limit);
+
+    for (; instIdx < limit; instIdx++) {
+      let inst = this.__instances[instIdx];
+      let itemIdx = isntIdxToItemsIdx[instIdx];
+      let item = items[itemIdx];
+      itemsIdxToInstIdx[itemIdx] = instIdx;
+
+      if (inst) {
+        inst._setPendingProperty(this.as, item);
+
+        inst._setPendingProperty(this.indexAs, instIdx);
+
+        inst._setPendingProperty(this.itemsIndexAs, itemIdx);
+
+        inst._flushProperties();
+      } else {
+        this.__insertInstance(item, instIdx, itemIdx);
+      }
+    } // Remove any extra instances from previous state
+
+
+    for (let i = this.__instances.length - 1; i >= instIdx; i--) {
+      this.__detachAndRemoveInstance(i);
+    }
+  }
+
+  __detachInstance(idx) {
+    let inst = this.__instances[idx];
+    const wrappedRoot = wrap(inst.root);
+
+    for (let i = 0; i < inst.children.length; i++) {
+      let el = inst.children[i];
+      wrappedRoot.appendChild(el);
+    }
+
+    return inst;
+  }
+
+  __attachInstance(idx, parent) {
+    let inst = this.__instances[idx]; // Note, this is pre-wrapped as an optimization
+
+    parent.insertBefore(inst.root, this);
+  }
+
+  __detachAndRemoveInstance(idx) {
+    let inst = this.__detachInstance(idx);
+
+    if (inst) {
+      this.__pool.push(inst);
+    }
+
+    this.__instances.splice(idx, 1);
+  }
+
+  __stampInstance(item, instIdx, itemIdx) {
+    let model = {};
+    model[this.as] = item;
+    model[this.indexAs] = instIdx;
+    model[this.itemsIndexAs] = itemIdx;
+    return new this.__ctor(model);
+  }
+
+  __insertInstance(item, instIdx, itemIdx) {
+    let inst = this.__pool.pop();
+
+    if (inst) {
+      // TODO(kschaaf): If the pool is shared across turns, hostProps
+      // need to be re-set to reused instances in addition to item
+      inst._setPendingProperty(this.as, item);
+
+      inst._setPendingProperty(this.indexAs, instIdx);
+
+      inst._setPendingProperty(this.itemsIndexAs, itemIdx);
+
+      inst._flushProperties();
+    } else {
+      inst = this.__stampInstance(item, instIdx, itemIdx);
+    }
+
+    let beforeRow = this.__instances[instIdx + 1];
+    let beforeNode = beforeRow ? beforeRow.children[0] : this;
+    wrap(wrap(this).parentNode).insertBefore(inst.root, beforeNode);
+    this.__instances[instIdx] = inst;
+    return inst;
+  } // Implements extension point from Templatize mixin
+
+  /**
+   * Shows or hides the template instance top level child elements. For
+   * text nodes, `textContent` is removed while "hidden" and replaced when
+   * "shown."
+   * @param {boolean} hidden Set to true to hide the children;
+   * set to false to show them.
+   * @return {void}
+   * @protected
+   */
+
+
+  _showHideChildren(hidden) {
+    for (let i = 0; i < this.__instances.length; i++) {
+      this.__instances[i]._showHideChildren(hidden);
+    }
+  } // Called as a side effect of a host items.<key>.<path> path change,
+  // responsible for notifying item.<path> changes to inst for key
+
+
+  __handleItemPath(path, value) {
+    let itemsPath = path.slice(6); // 'items.'.length == 6
+
+    let dot = itemsPath.indexOf('.');
+    let itemsIdx = dot < 0 ? itemsPath : itemsPath.substring(0, dot); // If path was index into array...
+
+    if (itemsIdx == parseInt(itemsIdx, 10)) {
+      let itemSubPath = dot < 0 ? '' : itemsPath.substring(dot + 1); // If the path is observed, it will trigger a full refresh
+
+      this.__handleObservedPaths(itemSubPath); // Note, even if a rull refresh is triggered, always do the path
+      // notification because unless mutableData is used for dom-repeat
+      // and all elements in the instance subtree, a full refresh may
+      // not trigger the proper update.
+
+
+      let instIdx = this.__itemsIdxToInstIdx[itemsIdx];
+      let inst = this.__instances[instIdx];
+
+      if (inst) {
+        let itemPath = this.as + (itemSubPath ? '.' + itemSubPath : ''); // This is effectively `notifyPath`, but avoids some of the overhead
+        // of the public API
+
+        inst._setPendingPropertyOrPath(itemPath, value, false, true);
+
+        inst._flushProperties();
+      }
+
+      return true;
+    }
+  }
+  /**
+   * Returns the item associated with a given element stamped by
+   * this `dom-repeat`.
+   *
+   * Note, to modify sub-properties of the item,
+   * `modelForElement(el).set('item.<sub-prop>', value)`
+   * should be used.
+   *
+   * @param {!HTMLElement} el Element for which to return the item.
+   * @return {*} Item associated with the element.
+   */
+
+
+  itemForElement(el) {
+    let instance = this.modelForElement(el);
+    return instance && instance[this.as];
+  }
+  /**
+   * Returns the inst index for a given element stamped by this `dom-repeat`.
+   * If `sort` is provided, the index will reflect the sorted order (rather
+   * than the original array order).
+   *
+   * @param {!HTMLElement} el Element for which to return the index.
+   * @return {?number} Row index associated with the element (note this may
+   *   not correspond to the array index if a user `sort` is applied).
+   */
+
+
+  indexForElement(el) {
+    let instance = this.modelForElement(el);
+    return instance && instance[this.indexAs];
+  }
+  /**
+   * Returns the template "model" associated with a given element, which
+   * serves as the binding scope for the template instance the element is
+   * contained in. A template model
+   * should be used to manipulate data associated with this template instance.
+   *
+   * Example:
+   *
+   *   let model = modelForElement(el);
+   *   if (model.index < 10) {
+   *     model.set('item.checked', true);
+   *   }
+   *
+   * @param {!HTMLElement} el Element for which to return a template model.
+   * @return {TemplateInstanceBase} Model representing the binding scope for
+   *   the element.
+   */
+
+
+  modelForElement(el) {
+    return modelForElement(this.template, el);
+  }
+
+}
+customElements.define(DomRepeat.is, DomRepeat);
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/**
+ * The `<dom-if>` element will stamp a light-dom `<template>` child when
+ * the `if` property becomes truthy, and the template can use Polymer
+ * data-binding and declarative event features when used in the context of
+ * a Polymer element's template.
+ *
+ * When `if` becomes falsy, the stamped content is hidden but not
+ * removed from dom. When `if` subsequently becomes truthy again, the content
+ * is simply re-shown. This approach is used due to its favorable performance
+ * characteristics: the expense of creating template content is paid only
+ * once and lazily.
+ *
+ * Set the `restamp` property to true to force the stamped content to be
+ * created / destroyed when the `if` condition changes.
+ *
+ * @customElement
+ * @polymer
+ * @extends PolymerElement
+ * @summary Custom element that conditionally stamps and hides or removes
+ *   template content based on a boolean flag.
+ */
+
+class DomIf extends PolymerElement {
+  // Not needed to find template; can be removed once the analyzer
+  // can find the tag name from customElements.define call
+  static get is() {
+    return 'dom-if';
+  }
+
+  static get template() {
+    return null;
+  }
+
+  static get properties() {
+    return {
+      /**
+       * Fired whenever DOM is added or removed/hidden by this template (by
+       * default, rendering occurs lazily).  To force immediate rendering, call
+       * `render`.
+       *
+       * @event dom-change
+       */
+
+      /**
+       * A boolean indicating whether this template should stamp.
+       */
+      if: {
+        type: Boolean,
+        observer: '__debounceRender'
+      },
+
+      /**
+       * When true, elements will be removed from DOM and discarded when `if`
+       * becomes false and re-created and added back to the DOM when `if`
+       * becomes true.  By default, stamped elements will be hidden but left
+       * in the DOM when `if` becomes false, which is generally results
+       * in better performance.
+       */
+      restamp: {
+        type: Boolean,
+        observer: '__debounceRender'
+      }
+    };
+  }
+
+  constructor() {
+    super();
+    this.__renderDebouncer = null;
+    this.__invalidProps = null;
+    this.__instance = null;
+    this._lastIf = false;
+    this.__ctor = null;
+    this.__hideTemplateChildren__ = false;
+  }
+
+  __debounceRender() {
+    // Render is async for 2 reasons:
+    // 1. To eliminate dom creation trashing if user code thrashes `if` in the
+    //    same turn. This was more common in 1.x where a compound computed
+    //    property could result in the result changing multiple times, but is
+    //    mitigated to a large extent by batched property processing in 2.x.
+    // 2. To avoid double object propagation when a bag including values bound
+    //    to the `if` property as well as one or more hostProps could enqueue
+    //    the <dom-if> to flush before the <template>'s host property
+    //    forwarding. In that scenario creating an instance would result in
+    //    the host props being set once, and then the enqueued changes on the
+    //    template would set properties a second time, potentially causing an
+    //    object to be set to an instance more than once.  Creating the
+    //    instance async from flushing data ensures this doesn't happen. If
+    //    we wanted a sync option in the future, simply having <dom-if> flush
+    //    (or clear) its template's pending host properties before creating
+    //    the instance would also avoid the problem.
+    this.__renderDebouncer = Debouncer.debounce(this.__renderDebouncer, microTask, () => this.__render());
+    enqueueDebouncer(this.__renderDebouncer);
+  }
+  /**
+   * @override
+   * @return {void}
+   */
+
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    const parent = wrap(this).parentNode;
+
+    if (!parent || parent.nodeType == Node.DOCUMENT_FRAGMENT_NODE && !wrap(parent).host) {
+      this.__teardownInstance();
+    }
+  }
+  /**
+   * @override
+   * @return {void}
+   */
+
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    if (!hideElementsGlobally()) {
+      this.style.display = 'none';
+    }
+
+    if (this.if) {
+      this.__debounceRender();
+    }
+  }
+  /**
+   * Forces the element to render its content. Normally rendering is
+   * asynchronous to a provoking change. This is done for efficiency so
+   * that multiple changes trigger only a single render. The render method
+   * should be called if, for example, template rendering is required to
+   * validate application state.
+   * @return {void}
+   */
+
+
+  render() {
+    flush();
+  }
+
+  __render() {
+    if (this.if) {
+      if (!this.__ensureInstance()) {
+        // No template found yet
+        return;
+      }
+
+      this._showHideChildren();
+    } else if (this.restamp) {
+      this.__teardownInstance();
+    }
+
+    if (!this.restamp && this.__instance) {
+      this._showHideChildren();
+    }
+
+    if (this.if != this._lastIf) {
+      this.dispatchEvent(new CustomEvent('dom-change', {
+        bubbles: true,
+        composed: true
+      }));
+      this._lastIf = this.if;
+    }
+  }
+
+  __ensureInstance() {
+    let parentNode = wrap(this).parentNode; // Guard against element being detached while render was queued
+
+    if (parentNode) {
+      if (!this.__ctor) {
+        let template =
+        /** @type {HTMLTemplateElement} */
+        wrap(this).querySelector('template');
+
+        if (!template) {
+          // Wait until childList changes and template should be there by then
+          let observer = new MutationObserver(() => {
+            if (wrap(this).querySelector('template')) {
+              observer.disconnect();
+
+              this.__render();
+            } else {
+              throw new Error('dom-if requires a <template> child');
+            }
+          });
+          observer.observe(this, {
+            childList: true
+          });
+          return false;
+        }
+
+        this.__ctor = templatize(template, this, {
+          // dom-if templatizer instances require `mutable: true`, as
+          // `__syncHostProperties` relies on that behavior to sync objects
+          mutableData: true,
+
+          /**
+           * @param {string} prop Property to forward
+           * @param {*} value Value of property
+           * @this {DomIf}
+           */
+          forwardHostProp: function (prop, value) {
+            if (this.__instance) {
+              if (this.if) {
+                this.__instance.forwardHostProp(prop, value);
+              } else {
+                // If we have an instance but are squelching host property
+                // forwarding due to if being false, note the invalidated
+                // properties so `__syncHostProperties` can sync them the next
+                // time `if` becomes true
+                this.__invalidProps = this.__invalidProps || Object.create(null);
+                this.__invalidProps[root(prop)] = true;
+              }
+            }
+          }
+        });
+      }
+
+      if (!this.__instance) {
+        this.__instance = new this.__ctor();
+        wrap(parentNode).insertBefore(this.__instance.root, this);
+      } else {
+        this.__syncHostProperties();
+
+        let c$ = this.__instance.children;
+
+        if (c$ && c$.length) {
+          // Detect case where dom-if was re-attached in new position
+          let lastChild = wrap(this).previousSibling;
+
+          if (lastChild !== c$[c$.length - 1]) {
+            for (let i = 0, n; i < c$.length && (n = c$[i]); i++) {
+              wrap(parentNode).insertBefore(n, this);
+            }
+          }
+        }
+      }
+    }
+
+    return true;
+  }
+
+  __syncHostProperties() {
+    let props = this.__invalidProps;
+
+    if (props) {
+      for (let prop in props) {
+        this.__instance._setPendingProperty(prop, this.__dataHost[prop]);
+      }
+
+      this.__invalidProps = null;
+
+      this.__instance._flushProperties();
+    }
+  }
+
+  __teardownInstance() {
+    if (this.__instance) {
+      let c$ = this.__instance.children;
+
+      if (c$ && c$.length) {
+        // use first child parent, for case when dom-if may have been detached
+        let parent = wrap(c$[0]).parentNode; // Instance children may be disconnected from parents when dom-if
+        // detaches if a tree was innerHTML'ed
+
+        if (parent) {
+          parent = wrap(parent);
+
+          for (let i = 0, n; i < c$.length && (n = c$[i]); i++) {
+            parent.removeChild(n);
+          }
+        }
+      }
+
+      this.__instance = null;
+      this.__invalidProps = null;
+    }
+  }
+  /**
+   * Shows or hides the template instance top level child elements. For
+   * text nodes, `textContent` is removed while "hidden" and replaced when
+   * "shown."
+   * @return {void}
+   * @protected
+   * @suppress {visibility}
+   */
+
+
+  _showHideChildren() {
+    let hidden = this.__hideTemplateChildren__ || !this.if;
+
+    if (this.__instance) {
+      this.__instance._showHideChildren(hidden);
+    }
+  }
+
+}
+customElements.define(DomIf.is, DomIf);
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+/**
+ * Element mixin for recording dynamic associations between item paths in a
+ * master `items` array and a `selected` array such that path changes to the
+ * master array (at the host) element or elsewhere via data-binding) are
+ * correctly propagated to items in the selected array and vice-versa.
+ *
+ * The `items` property accepts an array of user data, and via the
+ * `select(item)` and `deselect(item)` API, updates the `selected` property
+ * which may be bound to other parts of the application, and any changes to
+ * sub-fields of `selected` item(s) will be kept in sync with items in the
+ * `items` array.  When `multi` is false, `selected` is a property
+ * representing the last selected item.  When `multi` is true, `selected`
+ * is an array of multiply selected items.
+ *
+ * @polymer
+ * @mixinFunction
+ * @appliesMixin ElementMixin
+ * @summary Element mixin for recording dynamic associations between item paths in a
+ * master `items` array and a `selected` array
+ */
+
+let ArraySelectorMixin = dedupingMixin(superClass => {
+  /**
+   * @constructor
+   * @implements {Polymer_ElementMixin}
+   * @private
+   */
+  let elementBase = ElementMixin(superClass);
+  /**
+   * @polymer
+   * @mixinClass
+   * @implements {Polymer_ArraySelectorMixin}
+   * @unrestricted
+   */
+
+  class ArraySelectorMixin extends elementBase {
+    static get properties() {
+      return {
+        /**
+         * An array containing items from which selection will be made.
+         */
+        items: {
+          type: Array
+        },
+
+        /**
+         * When `true`, multiple items may be selected at once (in this case,
+         * `selected` is an array of currently selected items).  When `false`,
+         * only one item may be selected at a time.
+         */
+        multi: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * When `multi` is true, this is an array that contains any selected.
+         * When `multi` is false, this is the currently selected item, or `null`
+         * if no item is selected.
+         * @type {?Object|?Array<!Object>}
+         */
+        selected: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * When `multi` is false, this is the currently selected item, or `null`
+         * if no item is selected.
+         * @type {?Object}
+         */
+        selectedItem: {
+          type: Object,
+          notify: true
+        },
+
+        /**
+         * When `true`, calling `select` on an item that is already selected
+         * will deselect the item.
+         */
+        toggle: {
+          type: Boolean,
+          value: false
+        }
+      };
+    }
+
+    static get observers() {
+      return ['__updateSelection(multi, items.*)'];
+    }
+
+    constructor() {
+      super();
+      this.__lastItems = null;
+      this.__lastMulti = null;
+      this.__selectedMap = null;
+    }
+
+    __updateSelection(multi, itemsInfo) {
+      let path = itemsInfo.path;
+
+      if (path == JSCompiler_renameProperty('items', this)) {
+        // Case 1 - items array changed, so diff against previous array and
+        // deselect any removed items and adjust selected indices
+        let newItems = itemsInfo.base || [];
+        let lastItems = this.__lastItems;
+        let lastMulti = this.__lastMulti;
+
+        if (multi !== lastMulti) {
+          this.clearSelection();
+        }
+
+        if (lastItems) {
+          let splices = calculateSplices(newItems, lastItems);
+
+          this.__applySplices(splices);
+        }
+
+        this.__lastItems = newItems;
+        this.__lastMulti = multi;
+      } else if (itemsInfo.path == `${JSCompiler_renameProperty('items', this)}.splices`) {
+        // Case 2 - got specific splice information describing the array mutation:
+        // deselect any removed items and adjust selected indices
+        this.__applySplices(itemsInfo.value.indexSplices);
+      } else {
+        // Case 3 - an array element was changed, so deselect the previous
+        // item for that index if it was previously selected
+        let part = path.slice(`${JSCompiler_renameProperty('items', this)}.`.length);
+        let idx = parseInt(part, 10);
+
+        if (part.indexOf('.') < 0 && part == idx) {
+          this.__deselectChangedIdx(idx);
+        }
+      }
+    }
+
+    __applySplices(splices) {
+      let selected = this.__selectedMap; // Adjust selected indices and mark removals
+
+      for (let i = 0; i < splices.length; i++) {
+        let s = splices[i];
+        selected.forEach((idx, item) => {
+          if (idx < s.index) ; else if (idx >= s.index + s.removed.length) {
+            // adjust index
+            selected.set(item, idx + s.addedCount - s.removed.length);
+          } else {
+            // remove index
+            selected.set(item, -1);
+          }
+        });
+
+        for (let j = 0; j < s.addedCount; j++) {
+          let idx = s.index + j;
+
+          if (selected.has(this.items[idx])) {
+            selected.set(this.items[idx], idx);
+          }
+        }
+      } // Update linked paths
+
+
+      this.__updateLinks(); // Remove selected items that were removed from the items array
+
+
+      let sidx = 0;
+      selected.forEach((idx, item) => {
+        if (idx < 0) {
+          if (this.multi) {
+            this.splice(JSCompiler_renameProperty('selected', this), sidx, 1);
+          } else {
+            this.selected = this.selectedItem = null;
+          }
+
+          selected.delete(item);
+        } else {
+          sidx++;
+        }
+      });
+    }
+
+    __updateLinks() {
+      this.__dataLinkedPaths = {};
+
+      if (this.multi) {
+        let sidx = 0;
+
+        this.__selectedMap.forEach(idx => {
+          if (idx >= 0) {
+            this.linkPaths(`${JSCompiler_renameProperty('items', this)}.${idx}`, `${JSCompiler_renameProperty('selected', this)}.${sidx++}`);
+          }
+        });
+      } else {
+        this.__selectedMap.forEach(idx => {
+          this.linkPaths(JSCompiler_renameProperty('selected', this), `${JSCompiler_renameProperty('items', this)}.${idx}`);
+          this.linkPaths(JSCompiler_renameProperty('selectedItem', this), `${JSCompiler_renameProperty('items', this)}.${idx}`);
+        });
+      }
+    }
+    /**
+     * Clears the selection state.
+     * @override
+     * @return {void}
+     */
+
+
+    clearSelection() {
+      // Unbind previous selection
+      this.__dataLinkedPaths = {}; // The selected map stores 3 pieces of information:
+      // key: items array object
+      // value: items array index
+      // order: selected array index
+
+      this.__selectedMap = new Map(); // Initialize selection
+
+      this.selected = this.multi ? [] : null;
+      this.selectedItem = null;
+    }
+    /**
+     * Returns whether the item is currently selected.
+     *
+     * @override
+     * @param {*} item Item from `items` array to test
+     * @return {boolean} Whether the item is selected
+     */
+
+
+    isSelected(item) {
+      return this.__selectedMap.has(item);
+    }
+    /**
+     * Returns whether the item is currently selected.
+     *
+     * @override
+     * @param {number} idx Index from `items` array to test
+     * @return {boolean} Whether the item is selected
+     */
+
+
+    isIndexSelected(idx) {
+      return this.isSelected(this.items[idx]);
+    }
+
+    __deselectChangedIdx(idx) {
+      let sidx = this.__selectedIndexForItemIndex(idx);
+
+      if (sidx >= 0) {
+        let i = 0;
+
+        this.__selectedMap.forEach((idx, item) => {
+          if (sidx == i++) {
+            this.deselect(item);
+          }
+        });
+      }
+    }
+
+    __selectedIndexForItemIndex(idx) {
+      let selected = this.__dataLinkedPaths[`${JSCompiler_renameProperty('items', this)}.${idx}`];
+
+      if (selected) {
+        return parseInt(selected.slice(`${JSCompiler_renameProperty('selected', this)}.`.length), 10);
+      }
+    }
+    /**
+     * Deselects the given item if it is already selected.
+     *
+     * @override
+     * @param {*} item Item from `items` array to deselect
+     * @return {void}
+     */
+
+
+    deselect(item) {
+      let idx = this.__selectedMap.get(item);
+
+      if (idx >= 0) {
+        this.__selectedMap.delete(item);
+
+        let sidx;
+
+        if (this.multi) {
+          sidx = this.__selectedIndexForItemIndex(idx);
+        }
+
+        this.__updateLinks();
+
+        if (this.multi) {
+          this.splice(JSCompiler_renameProperty('selected', this), sidx, 1);
+        } else {
+          this.selected = this.selectedItem = null;
+        }
+      }
+    }
+    /**
+     * Deselects the given index if it is already selected.
+     *
+     * @override
+     * @param {number} idx Index from `items` array to deselect
+     * @return {void}
+     */
+
+
+    deselectIndex(idx) {
+      this.deselect(this.items[idx]);
+    }
+    /**
+     * Selects the given item.  When `toggle` is true, this will automatically
+     * deselect the item if already selected.
+     *
+     * @override
+     * @param {*} item Item from `items` array to select
+     * @return {void}
+     */
+
+
+    select(item) {
+      this.selectIndex(this.items.indexOf(item));
+    }
+    /**
+     * Selects the given index.  When `toggle` is true, this will automatically
+     * deselect the item if already selected.
+     *
+     * @override
+     * @param {number} idx Index from `items` array to select
+     * @return {void}
+     */
+
+
+    selectIndex(idx) {
+      let item = this.items[idx];
+
+      if (!this.isSelected(item)) {
+        if (!this.multi) {
+          this.__selectedMap.clear();
+        }
+
+        this.__selectedMap.set(item, idx);
+
+        this.__updateLinks();
+
+        if (this.multi) {
+          this.push(JSCompiler_renameProperty('selected', this), item);
+        } else {
+          this.selected = this.selectedItem = item;
+        }
+      } else if (this.toggle) {
+        this.deselectIndex(idx);
+      }
+    }
+
+  }
+
+  return ArraySelectorMixin;
+}); // export mixin
+/**
+ * @constructor
+ * @extends {PolymerElement}
+ * @implements {Polymer_ArraySelectorMixin}
+ * @private
+ */
+
+let baseArraySelector = ArraySelectorMixin(PolymerElement);
+/**
+ * Element implementing the `ArraySelector` mixin, which records
+ * dynamic associations between item paths in a master `items` array and a
+ * `selected` array such that path changes to the master array (at the host)
+ * element or elsewhere via data-binding) are correctly propagated to items
+ * in the selected array and vice-versa.
+ *
+ * The `items` property accepts an array of user data, and via the
+ * `select(item)` and `deselect(item)` API, updates the `selected` property
+ * which may be bound to other parts of the application, and any changes to
+ * sub-fields of `selected` item(s) will be kept in sync with items in the
+ * `items` array.  When `multi` is false, `selected` is a property
+ * representing the last selected item.  When `multi` is true, `selected`
+ * is an array of multiply selected items.
+ *
+ * Example:
+ *
+ * ```js
+ * import {PolymerElement} from '@polymer/polymer';
+ * import '@polymer/polymer/lib/elements/array-selector.js';
+ *
+ * class EmployeeList extends PolymerElement {
+ *   static get _template() {
+ *     return html`
+ *         <div> Employee list: </div>
+ *         <dom-repeat id="employeeList" items="{{employees}}">
+ *           <template>
+ *             <div>First name: <span>{{item.first}}</span></div>
+ *               <div>Last name: <span>{{item.last}}</span></div>
+ *               <button on-click="toggleSelection">Select</button>
+ *           </template>
+ *         </dom-repeat>
+ *
+ *         <array-selector id="selector"
+ *                         items="{{employees}}"
+ *                         selected="{{selected}}"
+ *                         multi toggle></array-selector>
+ *
+ *         <div> Selected employees: </div>
+ *         <dom-repeat items="{{selected}}">
+ *           <template>
+ *             <div>First name: <span>{{item.first}}</span></div>
+ *             <div>Last name: <span>{{item.last}}</span></div>
+ *           </template>
+ *         </dom-repeat>`;
+ *   }
+ *   static get is() { return 'employee-list'; }
+ *   static get properties() {
+ *     return {
+ *       employees: {
+ *         value() {
+ *           return [
+ *             {first: 'Bob', last: 'Smith'},
+ *             {first: 'Sally', last: 'Johnson'},
+ *             ...
+ *           ];
+ *         }
+ *       }
+ *     };
+ *   }
+ *   toggleSelection(e) {
+ *     const item = this.$.employeeList.itemForElement(e.target);
+ *     this.$.selector.select(item);
+ *   }
+ * }
+ * ```
+ *
+ * @polymer
+ * @customElement
+ * @extends {baseArraySelector}
+ * @appliesMixin ArraySelectorMixin
+ * @summary Custom element that links paths between an input `items` array and
+ *   an output `selected` item or array based on calls to its selection API.
+ */
+
+class ArraySelector extends baseArraySelector {
+  // Not needed to find template; can be removed once the analyzer
+  // can find the tag name from customElements.define call
+  static get is() {
+    return 'array-selector';
+  }
+
+  static get template() {
+    return null;
+  }
+
+}
+
+customElements.define(ArraySelector.is, ArraySelector);
+
+/**
+@license
+Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+*/
+
+const Base = LegacyElementMixin(HTMLElement).prototype;
+
+/**
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at
+http://polymer.github.io/LICENSE.txt The complete set of authors may be found at
+http://polymer.github.io/AUTHORS.txt The complete set of contributors may be
+found at http://polymer.github.io/CONTRIBUTORS.txt Code distributed by Google as
+part of the polymer project is also subject to an additional IP rights grant
+found at http://polymer.github.io/PATENTS.txt
+*/
+
+var ORPHANS = new Set();
+/**
+ * `IronResizableBehavior` is a behavior that can be used in Polymer elements to
+ * coordinate the flow of resize events between "resizers" (elements that
+ *control the size or hidden state of their children) and "resizables" (elements
+ *that need to be notified when they are resized or un-hidden by their parents
+ *in order to take action on their new measurements).
+ *
+ * Elements that perform measurement should add the `IronResizableBehavior`
+ *behavior to their element definition and listen for the `iron-resize` event on
+ *themselves. This event will be fired when they become showing after having
+ *been hidden, when they are resized explicitly by another resizable, or when
+ *the window has been resized.
+ *
+ * Note, the `iron-resize` event is non-bubbling.
+ *
+ * @polymerBehavior
+ * @demo demo/index.html
+ **/
+
+const IronResizableBehavior = {
+  properties: {
+    /**
+     * The closest ancestor element that implements `IronResizableBehavior`.
+     */
+    _parentResizable: {
+      type: Object,
+      observer: '_parentResizableChanged'
+    },
+
+    /**
+     * True if this element is currently notifying its descendant elements of
+     * resize.
+     */
+    _notifyingDescendant: {
+      type: Boolean,
+      value: false
+    }
+  },
+  listeners: {
+    'iron-request-resize-notifications': '_onIronRequestResizeNotifications'
+  },
+  created: function () {
+    // We don't really need property effects on these, and also we want them
+    // to be created before the `_parentResizable` observer fires:
+    this._interestedResizables = [];
+    this._boundNotifyResize = this.notifyResize.bind(this);
+    this._boundOnDescendantIronResize = this._onDescendantIronResize.bind(this);
+  },
+  attached: function () {
+    this._requestResizeNotifications();
+  },
+  detached: function () {
+    if (this._parentResizable) {
+      this._parentResizable.stopResizeNotificationsFor(this);
+    } else {
+      ORPHANS.delete(this);
+      window.removeEventListener('resize', this._boundNotifyResize);
+    }
+
+    this._parentResizable = null;
+  },
+
+  /**
+   * Can be called to manually notify a resizable and its descendant
+   * resizables of a resize change.
+   */
+  notifyResize: function () {
+    if (!this.isAttached) {
+      return;
+    }
+
+    this._interestedResizables.forEach(function (resizable) {
+      if (this.resizerShouldNotify(resizable)) {
+        this._notifyDescendant(resizable);
+      }
+    }, this);
+
+    this._fireResize();
+  },
+
+  /**
+   * Used to assign the closest resizable ancestor to this resizable
+   * if the ancestor detects a request for notifications.
+   */
+  assignParentResizable: function (parentResizable) {
+    if (this._parentResizable) {
+      this._parentResizable.stopResizeNotificationsFor(this);
+    }
+
+    this._parentResizable = parentResizable;
+
+    if (parentResizable && parentResizable._interestedResizables.indexOf(this) === -1) {
+      parentResizable._interestedResizables.push(this);
+
+      parentResizable._subscribeIronResize(this);
+    }
+  },
+
+  /**
+   * Used to remove a resizable descendant from the list of descendants
+   * that should be notified of a resize change.
+   */
+  stopResizeNotificationsFor: function (target) {
+    var index = this._interestedResizables.indexOf(target);
+
+    if (index > -1) {
+      this._interestedResizables.splice(index, 1);
+
+      this._unsubscribeIronResize(target);
+    }
+  },
+
+  /**
+   * Subscribe this element to listen to iron-resize events on the given target.
+   *
+   * Preferred over target.listen because the property renamer does not
+   * understand to rename when the target is not specifically "this"
+   *
+   * @param {!HTMLElement} target Element to listen to for iron-resize events.
+   */
+  _subscribeIronResize: function (target) {
+    target.addEventListener('iron-resize', this._boundOnDescendantIronResize);
+  },
+
+  /**
+   * Unsubscribe this element from listening to to iron-resize events on the
+   * given target.
+   *
+   * Preferred over target.unlisten because the property renamer does not
+   * understand to rename when the target is not specifically "this"
+   *
+   * @param {!HTMLElement} target Element to listen to for iron-resize events.
+   */
+  _unsubscribeIronResize: function (target) {
+    target.removeEventListener('iron-resize', this._boundOnDescendantIronResize);
+  },
+
+  /**
+   * This method can be overridden to filter nested elements that should or
+   * should not be notified by the current element. Return true if an element
+   * should be notified, or false if it should not be notified.
+   *
+   * @param {HTMLElement} element A candidate descendant element that
+   * implements `IronResizableBehavior`.
+   * @return {boolean} True if the `element` should be notified of resize.
+   */
+  resizerShouldNotify: function (element) {
+    return true;
+  },
+  _onDescendantIronResize: function (event) {
+    if (this._notifyingDescendant) {
+      event.stopPropagation();
+      return;
+    } // no need to use this during shadow dom because of event retargeting
+
+
+    if (!useShadow) {
+      this._fireResize();
+    }
+  },
+  _fireResize: function () {
+    this.fire('iron-resize', null, {
+      node: this,
+      bubbles: false
+    });
+  },
+  _onIronRequestResizeNotifications: function (event) {
+    var target =
+    /** @type {!EventTarget} */
+    dom(event).rootTarget;
+
+    if (target === this) {
+      return;
+    }
+
+    target.assignParentResizable(this);
+
+    this._notifyDescendant(target);
+
+    event.stopPropagation();
+  },
+  _parentResizableChanged: function (parentResizable) {
+    if (parentResizable) {
+      window.removeEventListener('resize', this._boundNotifyResize);
+    }
+  },
+  _notifyDescendant: function (descendant) {
+    // NOTE(cdata): In IE10, attached is fired on children first, so it's
+    // important not to notify them if the parent is not attached yet (or
+    // else they will get redundantly notified when the parent attaches).
+    if (!this.isAttached) {
+      return;
+    }
+
+    this._notifyingDescendant = true;
+    descendant.notifyResize();
+    this._notifyingDescendant = false;
+  },
+  _requestResizeNotifications: function () {
+    if (!this.isAttached) {
+      return;
+    }
+
+    if (document.readyState === 'loading') {
+      var _requestResizeNotifications = this._requestResizeNotifications.bind(this);
+
+      document.addEventListener('readystatechange', function readystatechanged() {
+        document.removeEventListener('readystatechange', readystatechanged);
+
+        _requestResizeNotifications();
+      });
+    } else {
+      this._findParent();
+
+      if (!this._parentResizable) {
+        // If this resizable is an orphan, tell other orphans to try to find
+        // their parent again, in case it's this resizable.
+        ORPHANS.forEach(function (orphan) {
+          if (orphan !== this) {
+            orphan._findParent();
+          }
+        }, this);
+        window.addEventListener('resize', this._boundNotifyResize);
+        this.notifyResize();
+      } else {
+        // If this resizable has a parent, tell other child resizables of
+        // that parent to try finding their parent again, in case it's this
+        // resizable.
+        this._parentResizable._interestedResizables.forEach(function (resizable) {
+          if (resizable !== this) {
+            resizable._findParent();
+          }
+        }, this);
+      }
+    }
+  },
+  _findParent: function () {
+    this.assignParentResizable(null);
+    this.fire('iron-request-resize-notifications', null, {
+      node: this,
+      bubbles: true,
+      cancelable: true
+    });
+
+    if (!this._parentResizable) {
+      ORPHANS.add(this);
+    } else {
+      ORPHANS.delete(this);
+    }
+  }
+};
+
+/**
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at
+http://polymer.github.io/LICENSE.txt The complete set of authors may be found at
+http://polymer.github.io/AUTHORS.txt The complete set of contributors may be
+found at http://polymer.github.io/CONTRIBUTORS.txt Code distributed by Google as
+part of the polymer project is also subject to an additional IP rights grant
+found at http://polymer.github.io/PATENTS.txt
+*/
+/**
+`iron-media-query` can be used to data bind to a CSS media query.
+The `query` property is a bare CSS media query.
+The `query-matches` property is a boolean representing whether the page matches
+that media query.
+
+Example:
+
+```html
+<iron-media-query query="(min-width: 600px)" query-matches="{{queryMatches}}">
+</iron-media-query>
+```
+
+@group Iron Elements
+@demo demo/index.html
+@hero hero.svg
+@element iron-media-query
+*/
+
+Polymer({
+  is: 'iron-media-query',
+  properties: {
+    /**
+     * The Boolean return value of the media query.
+     */
+    queryMatches: {
+      type: Boolean,
+      value: false,
+      readOnly: true,
+      notify: true
+    },
+
+    /**
+     * The CSS media query to evaluate.
+     */
+    query: {
+      type: String,
+      observer: 'queryChanged'
+    },
+
+    /**
+     * If true, the query attribute is assumed to be a complete media query
+     * string rather than a single media feature.
+     */
+    full: {
+      type: Boolean,
+      value: false
+    },
+
+    /**
+     * @type {function(MediaQueryList)}
+     */
+    _boundMQHandler: {
+      value: function () {
+        return this.queryHandler.bind(this);
+      }
+    },
+
+    /**
+     * @type {MediaQueryList}
+     */
+    _mq: {
+      value: null
+    }
+  },
+  attached: function () {
+    this.style.display = 'none';
+    this.queryChanged();
+  },
+  detached: function () {
+    this._remove();
+  },
+  _add: function () {
+    if (this._mq) {
+      this._mq.addListener(this._boundMQHandler);
+    }
+  },
+  _remove: function () {
+    if (this._mq) {
+      this._mq.removeListener(this._boundMQHandler);
+    }
+
+    this._mq = null;
+  },
+  queryChanged: function () {
+    this._remove();
+
+    var query = this.query;
+
+    if (!query) {
+      return;
+    }
+
+    if (!this.full && query[0] !== '(') {
+      query = '(' + query + ')';
+    }
+
+    this._mq = window.matchMedia(query);
+
+    this._add();
+
+    this.queryHandler(this._mq);
+  },
+  queryHandler: function (mq) {
+    this._setQueryMatches(mq.matches);
+  }
+});
+
+const p$1 = Element.prototype;
+const matches$1 = p$1.matches || p$1.matchesSelector || p$1.mozMatchesSelector || p$1.msMatchesSelector || p$1.oMatchesSelector || p$1.webkitMatchesSelector;
+/**
+ * `Polymer.IronFocusablesHelper` relies on some Polymer-specific legacy API,
+ * especially the `root` property which does not exist for native shadow DOM.
+ * That's why we have this helper here.
+ * See https://github.com/PolymerElements/iron-overlay-behavior/issues/282
+ */
+
+const FocusablesHelper = {
+  /**
+   * Returns a sorted array of tabbable nodes, including the root node.
+   * It searches the tabbable nodes in the light and shadow dom of the children,
+   * sorting the result by tabindex.
+   * @param {!Node} node
+   * @return {!Array<!HTMLElement>}
+   */
+  getTabbableNodes: function (node) {
+    const result = []; // If there is at least one element with tabindex > 0, we need to sort
+    // the final array by tabindex.
+
+    const needsSortByTabIndex = this._collectTabbableNodes(node, result);
+
+    if (needsSortByTabIndex) {
+      return this._sortByTabIndex(result);
+    }
+
+    return result;
+  },
+
+  /**
+   * Returns if a element is focusable.
+   * @param {!HTMLElement} element
+   * @return {boolean}
+   */
+  isFocusable: function (element) {
+    // From http://stackoverflow.com/a/1600194/4228703:
+    // There isn't a definite list, it's up to the browser. The only
+    // standard we have is DOM Level 2 HTML
+    // https://www.w3.org/TR/DOM-Level-2-HTML/html.html, according to which the
+    // only elements that have a focus() method are HTMLInputElement,
+    // HTMLSelectElement, HTMLTextAreaElement and HTMLAnchorElement. This
+    // notably omits HTMLButtonElement and HTMLAreaElement. Referring to these
+    // tests with tabbables in different browsers
+    // http://allyjs.io/data-tables/focusable.html
+    // Elements that cannot be focused if they have [disabled] attribute.
+    if (matches$1.call(element, 'input, select, textarea, button, object')) {
+      return matches$1.call(element, ':not([disabled])');
+    } // Elements that can be focused even if they have [disabled] attribute.
+
+
+    return matches$1.call(element, 'a[href], area[href], iframe, [tabindex], [contentEditable]');
+  },
+
+  /**
+   * Returns if a element is tabbable. To be tabbable, a element must be
+   * focusable, visible, and with a tabindex !== -1.
+   * @param {!HTMLElement} element
+   * @return {boolean}
+   */
+  isTabbable: function (element) {
+    return this.isFocusable(element) && matches$1.call(element, ':not([tabindex="-1"])') && this._isVisible(element);
+  },
+
+  /**
+   * Returns the normalized element tabindex. If not focusable, returns -1.
+   * It checks for the attribute "tabindex" instead of the element property
+   * `tabIndex` since browsers assign different values to it.
+   * e.g. in Firefox `<div contenteditable>` has `tabIndex = -1`
+   * @param {!HTMLElement} element
+   * @return {!number}
+   * @private
+   */
+  _normalizedTabIndex: function (element) {
+    if (this.isFocusable(element)) {
+      const tabIndex = element.getAttribute('tabindex') || 0;
+      return Number(tabIndex);
+    }
+
+    return -1;
+  },
+
+  /**
+   * Searches for nodes that are tabbable and adds them to the `result` array.
+   * Returns if the `result` array needs to be sorted by tabindex.
+   * @param {!Node} node The starting point for the search; added to `result` if tabbable.
+   * @param {!Array<!HTMLElement>} result
+   * @return {boolean}
+   * @private
+   */
+  _collectTabbableNodes: function (node, result) {
+    // If not an element or not visible, no need to explore children.
+    if (node.nodeType !== Node.ELEMENT_NODE || !this._isVisible(node)) {
+      return false;
+    }
+
+    const element =
+    /** @type {!HTMLElement} */
+    node;
+
+    const tabIndex = this._normalizedTabIndex(element);
+
+    let needsSort = tabIndex > 0;
+
+    if (tabIndex >= 0) {
+      result.push(element);
+    } // In ShadowDOM v1, tab order is affected by the order of distribution.
+    // E.g. getTabbableNodes(#root) in ShadowDOM v1 should return [#A, #B];
+    // in ShadowDOM v0 tab order is not affected by the distribution order,
+    // in fact getTabbableNodes(#root) returns [#B, #A].
+    //  <div id="root">
+    //   <!-- shadow -->
+    //     <slot name="a">
+    //     <slot name="b">
+    //   <!-- /shadow -->
+    //   <input id="A" slot="a">
+    //   <input id="B" slot="b" tabindex="1">
+    //  </div>
+
+
+    let children;
+
+    if (element.localName === 'slot') {
+      children = element.assignedNodes({
+        flatten: true
+      });
+    } else {
+      // Use shadow root if possible, will check for distributed nodes.
+      children = (element.shadowRoot || element).children;
+    }
+
+    if (children) {
+      for (let i = 0; i < children.length; i++) {
+        // Ensure method is always invoked to collect tabbable children.
+        needsSort = this._collectTabbableNodes(children[i], result) || needsSort;
+      }
+    }
+
+    return needsSort;
+  },
+
+  /**
+   * Returns false if the element has `visibility: hidden` or `display: none`
+   * @param {!HTMLElement} element
+   * @return {boolean}
+   * @private
+   */
+  _isVisible: function (element) {
+    // Check inline style first to save a re-flow. If looks good, check also
+    // computed style.
+    let style = element.style;
+
+    if (style.visibility !== 'hidden' && style.display !== 'none') {
+      style = window.getComputedStyle(element);
+      return style.visibility !== 'hidden' && style.display !== 'none';
+    }
+
+    return false;
+  },
+
+  /**
+   * Sorts an array of tabbable elements by tabindex. Returns a new array.
+   * @param {!Array<!HTMLElement>} tabbables
+   * @return {!Array<!HTMLElement>}
+   * @private
+   */
+  _sortByTabIndex: function (tabbables) {
+    // Implement a merge sort as Array.prototype.sort does a non-stable sort
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
+    const len = tabbables.length;
+
+    if (len < 2) {
+      return tabbables;
+    }
+
+    const pivot = Math.ceil(len / 2);
+
+    const left = this._sortByTabIndex(tabbables.slice(0, pivot));
+
+    const right = this._sortByTabIndex(tabbables.slice(pivot));
+
+    return this._mergeSortByTabIndex(left, right);
+  },
+
+  /**
+   * Merge sort iterator, merges the two arrays into one, sorted by tab index.
+   * @param {!Array<!HTMLElement>} left
+   * @param {!Array<!HTMLElement>} right
+   * @return {!Array<!HTMLElement>}
+   * @private
+   */
+  _mergeSortByTabIndex: function (left, right) {
+    const result = [];
+
+    while (left.length > 0 && right.length > 0) {
+      if (this._hasLowerTabOrder(left[0], right[0])) {
+        result.push(right.shift());
+      } else {
+        result.push(left.shift());
+      }
+    }
+
+    return result.concat(left, right);
+  },
+
+  /**
+   * Returns if element `a` has lower tab order compared to element `b`
+   * (both elements are assumed to be focusable and tabbable).
+   * Elements with tabindex = 0 have lower tab order compared to elements
+   * with tabindex > 0.
+   * If both have same tabindex, it returns false.
+   * @param {!HTMLElement} a
+   * @param {!HTMLElement} b
+   * @return {boolean}
+   * @private
+   */
+  _hasLowerTabOrder: function (a, b) {
+    // Normalize tabIndexes
+    // e.g. in Firefox `<div contenteditable>` has `tabIndex = -1`
+    const ati = Math.max(a.tabIndex, 0);
+    const bti = Math.max(b.tabIndex, 0);
+    return ati === 0 || bti === 0 ? bti > ati : ati > bti;
+  }
+};
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+let overlayContentCounter = 0;
+const overlayContentCache = {};
+
+const createOverlayContent = cssText => {
+  const is = overlayContentCache[cssText] || processOverlayStyles(cssText);
+  return document.createElement(is);
+};
+
+const processOverlayStyles = cssText => {
+  overlayContentCounter++;
+  const is = `vaadin-overlay-content-${overlayContentCounter}`;
+  const styledTemplate = document.createElement('template');
+  const style = document.createElement('style');
+  style.textContent = ':host { display: block; }' + cssText;
+  styledTemplate.content.appendChild(style);
+
+  if (window.ShadyCSS) {
+    window.ShadyCSS.prepareTemplate(styledTemplate, is);
+  } // NOTE(platosha): Have to use an awkward IIFE returning class here
+  // to prevent this class from showing up in analysis.json & API docs.
+
+  /** @private */
+
+
+  const klass = (() => class extends HTMLElement {
+    static get is() {
+      return is;
+    }
+
+    constructor() {
+      super();
+
+      if (!this.shadowRoot) {
+        this.attachShadow({
+          mode: 'open'
+        });
+        this.shadowRoot.appendChild(document.importNode(styledTemplate.content, true));
+      }
+    }
+
+    connectedCallback() {
+      if (window.ShadyCSS) {
+        window.ShadyCSS.styleElement(this);
+      }
+    }
+
+  })();
+
+  customElements.define(klass.is, klass);
+  overlayContentCache[cssText] = is;
+  return is;
+};
+/**
+ *
+ * `<vaadin-overlay>` is a Web Component for creating overlays. The content of the overlay
+ * can be populated in two ways: imperatively by using renderer callback function and
+ * declaratively by using Polymer's Templates.
+ *
+ * ### Rendering
+ *
+ * By default, the overlay uses the content provided by using the renderer callback function.
+ *
+ * The renderer function provides `root`, `owner`, `model` arguments when applicable.
+ * Generate DOM content by using `model` object properties if needed, append it to the `root`
+ * element and control the state of the host element by accessing `owner`. Before generating new
+ * content, users are able to check if there is already content in `root` for reusing it.
+ *
+ * ```html
+ * <vaadin-overlay id="overlay"></vaadin-overlay>
+ * ```
+ * ```js
+ * const overlay = document.querySelector('#overlay');
+ * overlay.renderer = function(root) {
+ *  root.textContent = "Overlay content";
+ * };
+ * ```
+ *
+ * Renderer is called on the opening of the overlay and each time the related model is updated.
+ * DOM generated during the renderer call can be reused
+ * in the next renderer call and will be provided with the `root` argument.
+ * On first call it will be empty.
+ *
+ * **NOTE:** when the renderer property is defined, the `<template>` content is not used.
+ *
+ * ### Templating
+ *
+ * Alternatively, the content can be provided with Polymer Template.
+ * Overlay finds the first child template and uses that in case renderer callback function
+ * is not provided. You can also set a custom template using the `template` property.
+ *
+ * After the content from the template is stamped, the `content` property
+ * points to the content container.
+ *
+ * The overlay provides `forwardHostProp` when calling
+ * `Polymer.Templatize.templatize` for the template, so that the bindings
+ * from the parent scope propagate to the content.  You can also pass
+ * custom `instanceProps` object using the `instanceProps` property.
+ *
+ * ```html
+ * <vaadin-overlay>
+ *   <template>Overlay content</template>
+ * </vaadin-overlay>
+ * ```
+ *
+ * **NOTE:** when using `instanceProps`: because of the Polymer limitation,
+ * every template can only be templatized once, so it is important
+ * to set `instanceProps` before the `template` is assigned to the overlay.
+ *
+ * ### Styling
+ *
+ * To style the overlay content, use styles in the parent scope:
+ *
+ * - If the overlay is used in a component, then the component styles
+ *   apply the overlay content.
+ * - If the overlay is used in the global DOM scope, then global styles
+ *   apply to the overlay content.
+ *
+ * See examples for styling the overlay content in the live demos.
+ *
+ * The following Shadow DOM parts are available for styling the overlay component itself:
+ *
+ * Part name  | Description
+ * -----------|---------------------------------------------------------|
+ * `backdrop` | Backdrop of the overlay
+ * `overlay`  | Container for position/sizing/alignment of the content
+ * `content`  | Content of the overlay
+ *
+ * The following state attributes are available for styling:
+ *
+ * Attribute | Description | Part
+ * ---|---|---
+ * `opening` | Applied just after the overlay is attached to the DOM. You can apply a CSS @keyframe animation for this state. | `:host`
+ * `closing` | Applied just before the overlay is detached from the DOM. You can apply a CSS @keyframe animation for this state. | `:host`
+ *
+ * The following custom CSS properties are available for styling:
+ *
+ * Custom CSS property | Description | Default value
+ * ---|---|---
+ * `--vaadin-overlay-viewport-bottom` | Bottom offset of the visible viewport area | `0` or detected offset
+ *
+ * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
+ *
+ * @memberof Vaadin
+ * @mixes Vaadin.ThemableMixin
+ * @demo demo/index.html
+ */
+
+
+class OverlayElement extends ThemableMixin(PolymerElement) {
+  static get template() {
+    return html$1`
+    <style>
+      :host {
+        z-index: 200;
+        position: fixed;
+
+        /*
+          Despite of what the names say, <vaadin-overlay> is just a container
+          for position/sizing/alignment. The actual overlay is the overlay part.
+        */
+
+        /*
+          Default position constraints: the entire viewport. Note: themes can
+          override this to introduce gaps between the overlay and the viewport.
+        */
+        top: 0;
+        right: 0;
+        bottom: var(--vaadin-overlay-viewport-bottom);
+        left: 0;
+
+        /* Use flexbox alignment for the overlay part. */
+        display: flex;
+        flex-direction: column; /* makes dropdowns sizing easier */
+        /* Align to center by default. */
+        align-items: center;
+        justify-content: center;
+
+        /* Allow centering when max-width/max-height applies. */
+        margin: auto;
+
+        /* The host is not clickable, only the overlay part is. */
+        pointer-events: none;
+
+        /* Remove tap highlight on touch devices. */
+        -webkit-tap-highlight-color: transparent;
+
+        /* CSS API for host */
+        --vaadin-overlay-viewport-bottom: 0;
+      }
+
+      :host([hidden]),
+      :host(:not([opened]):not([closing])) {
+        display: none !important;
+      }
+
+      [part="overlay"] {
+        -webkit-overflow-scrolling: touch;
+        overflow: auto;
+        pointer-events: auto;
+
+        /* Prevent overflowing the host in MSIE 11 */
+        max-width: 100%;
+        box-sizing: border-box;
+
+        -webkit-tap-highlight-color: initial; /* reenable tap highlight inside */
+      }
+
+      [part="backdrop"] {
+        z-index: -1;
+        content: "";
+        background: rgba(0, 0, 0, 0.5);
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        pointer-events: auto;
+      }
+    </style>
+
+    <div id="backdrop" part="backdrop" hidden\$="{{!withBackdrop}}"></div>
+    <div part="overlay" id="overlay" tabindex="0">
+      <div part="content" id="content">
+        <slot></slot>
+      </div>
+    </div>
+`;
+  }
+
+  static get is() {
+    return 'vaadin-overlay';
+  }
+
+  static get properties() {
+    return {
+      opened: {
+        type: Boolean,
+        notify: true,
+        observer: '_openedChanged',
+        reflectToAttribute: true
+      },
+
+      /**
+       * Owner element passed with renderer function
+       */
+      owner: Element,
+
+      /**
+       * Custom function for rendering the content of the overlay.
+       * Receives three arguments:
+       *
+       * - `root` The root container DOM element. Append your content to it.
+       * - `owner` The host element of the renderer function.
+       * - `model` The object with the properties related with rendering.
+       */
+      renderer: Function,
+
+      /**
+       * The template of the overlay content.
+       */
+      template: {
+        type: Object,
+        notify: true
+      },
+
+      /**
+       * Optional argument for `Polymer.Templatize.templatize`.
+       */
+      instanceProps: {
+        type: Object
+      },
+
+      /**
+       * References the content container after the template is stamped.
+       */
+      content: {
+        type: Object,
+        notify: true
+      },
+      withBackdrop: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true
+      },
+
+      /**
+       * Object with properties that is passed to `renderer` function
+       */
+      model: Object,
+
+      /**
+       * When true the overlay won't disable the main content, showing
+       * it doesn’t change the functionality of the user interface.
+       */
+      modeless: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true,
+        observer: '_modelessChanged'
+      },
+
+      /**
+       * When set to true, the overlay is hidden. This also closes the overlay
+       * immediately in case there is a closing animation in progress.
+       */
+      hidden: {
+        type: Boolean,
+        reflectToAttribute: true,
+        observer: '_hiddenChanged'
+      },
+
+      /**
+       * When true move focus to the first focusable element in the overlay,
+       * or to the overlay if there are no focusable elements.
+       */
+      focusTrap: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Set to true to enable restoring of focus when overlay is closed.
+       */
+      restoreFocusOnClose: {
+        type: Boolean,
+        value: false
+      },
+      _mouseDownInside: {
+        type: Boolean
+      },
+      _mouseUpInside: {
+        type: Boolean
+      },
+      _instance: {
+        type: Object
+      },
+      _originalContentPart: Object,
+      _contentNodes: Array,
+      _oldOwner: Element,
+      _oldModel: Object,
+      _oldTemplate: Object,
+      _oldInstanceProps: Object,
+      _oldRenderer: Object,
+      _oldOpened: Boolean
+    };
+  }
+
+  static get observers() {
+    return ['_templateOrRendererChanged(template, renderer, owner, model, instanceProps, opened)'];
+  }
+
+  constructor() {
+    super();
+    this._boundMouseDownListener = this._mouseDownListener.bind(this);
+    this._boundMouseUpListener = this._mouseUpListener.bind(this);
+    this._boundOutsideClickListener = this._outsideClickListener.bind(this);
+    this._boundKeydownListener = this._keydownListener.bind(this);
+    this._observer = new FlattenedNodesObserver(this, info => {
+      this._setTemplateFromNodes(info.addedNodes);
+    }); // Listener for preventing closing of the paper-dialog and all components extending `iron-overlay-behavior`.
+
+    this._boundIronOverlayCanceledListener = this._ironOverlayCanceled.bind(this);
+
+    if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      this._boundIosResizeListener = () => this._detectIosNavbar();
+    }
+  }
+
+  ready() {
+    super.ready();
+
+    this._observer.flush(); // Need to add dummy click listeners to this and the backdrop or else
+    // the document click event listener (_outsideClickListener) may never
+    // get invoked on iOS Safari (reproducible in <vaadin-dialog>
+    // and <vaadin-context-menu>).
+
+
+    this.addEventListener('click', () => {});
+    this.$.backdrop.addEventListener('click', () => {});
+  }
+
+  _detectIosNavbar() {
+    if (!this.opened) {
+      return;
+    }
+
+    const innerHeight = window.innerHeight;
+    const innerWidth = window.innerWidth;
+    const landscape = innerWidth > innerHeight;
+    const clientHeight = document.documentElement.clientHeight;
+
+    if (landscape && clientHeight > innerHeight) {
+      this.style.setProperty('--vaadin-overlay-viewport-bottom', clientHeight - innerHeight + 'px');
+    } else {
+      this.style.setProperty('--vaadin-overlay-viewport-bottom', '0');
+    }
+  }
+
+  _setTemplateFromNodes(nodes) {
+    this.template = nodes.filter(node => node.localName && node.localName === 'template')[0] || this.template;
+  }
+  /**
+   * @event vaadin-overlay-close
+   * fired before the `vaadin-overlay` will be closed. If canceled the closing of the overlay is canceled as well.
+   */
+
+
+  close(sourceEvent) {
+    var evt = new CustomEvent('vaadin-overlay-close', {
+      bubbles: true,
+      cancelable: true,
+      detail: {
+        sourceEvent: sourceEvent
+      }
+    });
+    this.dispatchEvent(evt);
+
+    if (!evt.defaultPrevented) {
+      this.opened = false;
+    }
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+
+    if (this._boundIosResizeListener) {
+      this._detectIosNavbar();
+
+      window.addEventListener('resize', this._boundIosResizeListener);
+    }
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._boundIosResizeListener && window.removeEventListener('resize', this._boundIosResizeListener);
+  }
+
+  _ironOverlayCanceled(event) {
+    event.preventDefault();
+  }
+
+  _mouseDownListener(event) {
+    this._mouseDownInside = event.composedPath().indexOf(this.$.overlay) >= 0;
+  }
+
+  _mouseUpListener(event) {
+    this._mouseUpInside = event.composedPath().indexOf(this.$.overlay) >= 0;
+  }
+  /**
+   * We need to listen on 'click' / 'tap' event and capture it and close the overlay before
+   * propagating the event to the listener in the button. Otherwise, if the clicked button would call
+   * open(), this would happen: https://www.youtube.com/watch?v=Z86V_ICUCD4
+   *
+   * @event vaadin-overlay-outside-click
+   * fired before the `vaadin-overlay` will be closed on outside click. If canceled the closing of the overlay is canceled as well.
+   */
+
+
+  _outsideClickListener(event) {
+    if (event.composedPath().indexOf(this.$.overlay) !== -1 || this._mouseDownInside || this._mouseUpInside) {
+      this._mouseDownInside = false;
+      this._mouseUpInside = false;
+      return;
+    }
+
+    if (!this._last) {
+      return;
+    }
+
+    const evt = new CustomEvent('vaadin-overlay-outside-click', {
+      bubbles: true,
+      cancelable: true,
+      detail: {
+        sourceEvent: event
+      }
+    });
+    this.dispatchEvent(evt);
+
+    if (this.opened && !evt.defaultPrevented) {
+      this.close(event);
+    }
+  }
+  /**
+   * @event vaadin-overlay-escape-press
+   * fired before the `vaadin-overlay` will be closed on ESC button press. If canceled the closing of the overlay is canceled as well.
+   */
+
+
+  _keydownListener(event) {
+    if (!this._last) {
+      return;
+    } // TAB
+
+
+    if (event.key === 'Tab' && this.focusTrap) {
+      // if only tab key is pressed, cycle forward, else cycle backwards.
+      this._cycleTab(event.shiftKey ? -1 : 1);
+
+      event.preventDefault(); // ESC
+    } else if (event.key === 'Escape' || event.key === 'Esc') {
+      const evt = new CustomEvent('vaadin-overlay-escape-press', {
+        bubbles: true,
+        cancelable: true,
+        detail: {
+          sourceEvent: event
+        }
+      });
+      this.dispatchEvent(evt);
+
+      if (this.opened && !evt.defaultPrevented) {
+        this.close(event);
+      }
+    }
+  }
+
+  _ensureTemplatized() {
+    this._setTemplateFromNodes(Array.from(this.children));
+  }
+  /**
+   * @event vaadin-overlay-open
+   * fired after the `vaadin-overlay` is opened.
+   */
+
+
+  _openedChanged(opened, wasOpened) {
+    if (!this._instance) {
+      this._ensureTemplatized();
+    }
+
+    if (opened) {
+      // Store focused node.
+      this.__restoreFocusNode = this._getActiveElement();
+
+      this._animatedOpening();
+
+      afterNextRender(this, () => {
+        if (this.focusTrap && !this.contains(document._activeElement || document.activeElement)) {
+          this._cycleTab(0, 0);
+        }
+
+        const evt = new CustomEvent('vaadin-overlay-open', {
+          bubbles: true
+        });
+        this.dispatchEvent(evt);
+      });
+
+      if (!this.modeless) {
+        this._addGlobalListeners();
+      }
+    } else if (wasOpened) {
+      this._animatedClosing();
+
+      if (!this.modeless) {
+        this._removeGlobalListeners();
+      }
+    }
+  }
+
+  _hiddenChanged(hidden) {
+    if (hidden && this.hasAttribute('closing')) {
+      this._flushAnimation('closing');
+    }
+  }
+
+  _shouldAnimate() {
+    const name = getComputedStyle(this).getPropertyValue('animation-name');
+    const hidden = getComputedStyle(this).getPropertyValue('display') === 'none';
+    return !hidden && name && name != 'none';
+  }
+
+  _enqueueAnimation(type, callback) {
+    const handler = `__${type}Handler`;
+
+    const listener = () => {
+      callback();
+      this.removeEventListener('animationend', listener);
+      delete this[handler];
+    };
+
+    this[handler] = listener;
+    this.addEventListener('animationend', listener);
+  }
+
+  _flushAnimation(type) {
+    const handler = `__${type}Handler`;
+
+    if (typeof this[handler] === 'function') {
+      this[handler]();
+    }
+  }
+
+  _animatedOpening() {
+    if (this.parentNode === document.body && this.hasAttribute('closing')) {
+      this._flushAnimation('closing');
+    }
+
+    this._attachOverlay();
+
+    this.setAttribute('opening', '');
+
+    const finishOpening = () => {
+      this.removeAttribute('opening');
+      document.addEventListener('iron-overlay-canceled', this._boundIronOverlayCanceledListener);
+
+      if (!this.modeless) {
+        this._enterModalState();
+      }
+    };
+
+    if (this._shouldAnimate()) {
+      this._enqueueAnimation('opening', finishOpening);
+    } else {
+      finishOpening();
+    }
+  }
+
+  _attachOverlay() {
+    this._placeholder = document.createComment('vaadin-overlay-placeholder');
+    this.parentNode.insertBefore(this._placeholder, this);
+    document.body.appendChild(this);
+  }
+
+  _animatedClosing() {
+    if (this.hasAttribute('opening')) {
+      this._flushAnimation('opening');
+    }
+
+    if (this._placeholder) {
+      this.setAttribute('closing', '');
+
+      const finishClosing = () => {
+        this.shadowRoot.querySelector('[part="overlay"]').style.removeProperty('pointer-events');
+
+        this._exitModalState();
+
+        document.removeEventListener('iron-overlay-canceled', this._boundIronOverlayCanceledListener);
+
+        this._detachOverlay();
+
+        this.removeAttribute('closing');
+
+        if (this.restoreFocusOnClose && this.__restoreFocusNode) {
+          // If the activeElement is `<body>` or inside the overlay,
+          // we are allowed to restore the focus. In all the other
+          // cases focus might have been moved elsewhere by another
+          // component or by the user interaction (e.g. click on a
+          // button outside the overlay).
+          const activeElement = this._getActiveElement();
+
+          if (activeElement === document.body || this._deepContains(activeElement)) {
+            this.__restoreFocusNode.focus();
+          }
+
+          this.__restoreFocusNode = null;
+        }
+      };
+
+      if (this._shouldAnimate()) {
+        this._enqueueAnimation('closing', finishClosing);
+      } else {
+        finishClosing();
+      }
+    }
+  }
+
+  _detachOverlay() {
+    this._placeholder.parentNode.insertBefore(this, this._placeholder);
+
+    this._placeholder.parentNode.removeChild(this._placeholder);
+  }
+  /**
+   * Returns all attached overlays.
+   */
+
+
+  static get __attachedInstances() {
+    return Array.from(document.body.children).filter(el => el instanceof OverlayElement);
+  }
+  /**
+   * returns true if this is the last one in the opened overlays stack
+   */
+
+
+  get _last() {
+    return this === OverlayElement.__attachedInstances.pop();
+  }
+
+  _modelessChanged(modeless) {
+    if (!modeless) {
+      if (this.opened) {
+        this._addGlobalListeners();
+
+        this._enterModalState();
+      }
+    } else {
+      this._removeGlobalListeners();
+
+      this._exitModalState();
+    }
+  }
+
+  _addGlobalListeners() {
+    document.addEventListener('mousedown', this._boundMouseDownListener);
+    document.addEventListener('mouseup', this._boundMouseUpListener); // Firefox leaks click to document on contextmenu even if prevented
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=990614
+
+    document.documentElement.addEventListener('click', this._boundOutsideClickListener, true);
+    document.addEventListener('keydown', this._boundKeydownListener);
+  }
+
+  _enterModalState() {
+    if (document.body.style.pointerEvents !== 'none') {
+      // Set body pointer-events to 'none' to disable mouse interactions with
+      // other document nodes.
+      this._previousDocumentPointerEvents = document.body.style.pointerEvents;
+      document.body.style.pointerEvents = 'none';
+    } // Disable pointer events in other attached overlays
+
+
+    OverlayElement.__attachedInstances.forEach(el => {
+      if (el !== this && !el.hasAttribute('opening') && !el.hasAttribute('closing')) {
+        el.shadowRoot.querySelector('[part="overlay"]').style.pointerEvents = 'none';
+      }
+    });
+  }
+
+  _removeGlobalListeners() {
+    document.removeEventListener('mousedown', this._boundMouseDownListener);
+    document.removeEventListener('mouseup', this._boundMouseUpListener);
+    document.documentElement.removeEventListener('click', this._boundOutsideClickListener, true);
+    document.removeEventListener('keydown', this._boundKeydownListener);
+  }
+
+  _exitModalState() {
+    if (this._previousDocumentPointerEvents !== undefined) {
+      // Restore body pointer-events
+      document.body.style.pointerEvents = this._previousDocumentPointerEvents;
+      delete this._previousDocumentPointerEvents;
+    } // Restore pointer events in the previous overlay(s)
+
+
+    const instances = OverlayElement.__attachedInstances;
+    let el; // Use instances.pop() to ensure the reverse order
+
+    while (el = instances.pop()) {
+      if (el === this) {
+        // Skip the current instance
+        continue;
+      }
+
+      el.shadowRoot.querySelector('[part="overlay"]').style.removeProperty('pointer-events');
+
+      if (!el.modeless) {
+        // Stop after the last modal
+        break;
+      }
+    }
+  }
+
+  _removeOldContent() {
+    if (!this.content || !this._contentNodes) {
+      return;
+    }
+
+    this._observer.disconnect();
+
+    this._contentNodes.forEach(node => {
+      if (node.parentNode === this.content) {
+        this.content.removeChild(node);
+      }
+    });
+
+    if (this._originalContentPart) {
+      // Restore the original <div part="content">
+      this.$.content.parentNode.replaceChild(this._originalContentPart, this.$.content);
+      this.$.content = this._originalContentPart;
+      this._originalContentPart = undefined;
+    }
+
+    this._observer.connect();
+
+    this._contentNodes = undefined;
+    this.content = undefined;
+  }
+
+  _stampOverlayTemplate(template, instanceProps) {
+    this._removeOldContent();
+
+    if (!template._Templatizer) {
+      template._Templatizer = templatize(template, this, {
+        instanceProps: instanceProps,
+        forwardHostProp: function (prop, value) {
+          if (this._instance) {
+            this._instance.forwardHostProp(prop, value);
+          }
+        }
+      });
+    }
+
+    this._instance = new template._Templatizer({});
+    this._contentNodes = Array.from(this._instance.root.childNodes);
+    const templateRoot = template._templateRoot || (template._templateRoot = template.getRootNode());
+
+    const _isScoped = templateRoot !== document;
+
+    if (_isScoped) {
+      const isShady = window.ShadyCSS && !window.ShadyCSS.nativeShadow;
+
+      if (!this.$.content.shadowRoot) {
+        this.$.content.attachShadow({
+          mode: 'open'
+        });
+      }
+
+      let scopeCssText = Array.from(templateRoot.querySelectorAll('style')).reduce((result, style) => result + style.textContent, '');
+
+      if (isShady) {
+        // NOTE(platosha): ShadyCSS removes <style>’s from templates, so
+        // we have to use these protected APIs to get their contents back
+        const styleInfo = window.ShadyCSS.ScopingShim._styleInfoForNode(templateRoot.host);
+
+        if (styleInfo) {
+          scopeCssText += styleInfo._getStyleRules().parsedCssText;
+          scopeCssText += '}';
+        }
+      } // The overlay root’s :host styles should not apply inside the overlay
+
+
+      scopeCssText = scopeCssText.replace(/:host/g, ':host-nomatch');
+
+      if (scopeCssText) {
+        if (isShady) {
+          // ShadyDOM: replace the <div part="content"> with a generated
+          // styled custom element
+          const contentPart = createOverlayContent(scopeCssText);
+          contentPart.id = 'content';
+          contentPart.setAttribute('part', 'content');
+          this.$.content.parentNode.replaceChild(contentPart, this.$.content); // NOTE(platosha): carry the style scope of the content part
+
+          contentPart.className = this.$.content.className;
+          this._originalContentPart = this.$.content;
+          this.$.content = contentPart;
+        } else {
+          // Shadow DOM: append a style to the content shadowRoot
+          const style = document.createElement('style');
+          style.textContent = scopeCssText;
+          this.$.content.shadowRoot.appendChild(style);
+
+          this._contentNodes.unshift(style);
+        }
+      }
+
+      this.$.content.shadowRoot.appendChild(this._instance.root);
+      this.content = this.$.content.shadowRoot;
+    } else {
+      this.appendChild(this._instance.root);
+      this.content = this;
+    }
+  }
+
+  _removeNewRendererOrTemplate(template, oldTemplate, renderer, oldRenderer) {
+    if (template !== oldTemplate) {
+      this.template = undefined;
+    } else if (renderer !== oldRenderer) {
+      this.renderer = undefined;
+    }
+  }
+  /**
+   * Manually invoke existing renderer.
+   */
+
+
+  render() {
+    if (this.renderer) {
+      this.renderer.call(this.owner, this.content, this.owner, this.model);
+    }
+  }
+
+  _templateOrRendererChanged(template, renderer, owner, model, instanceProps, opened) {
+    if (template && renderer) {
+      this._removeNewRendererOrTemplate(template, this._oldTemplate, renderer, this._oldRenderer);
+
+      throw new Error('You should only use either a renderer or a template for overlay content');
+    }
+
+    const ownerOrModelChanged = this._oldOwner !== owner || this._oldModel !== model;
+    this._oldModel = model;
+    this._oldOwner = owner;
+    const templateOrInstancePropsChanged = this._oldInstanceProps !== instanceProps || this._oldTemplate !== template;
+    this._oldInstanceProps = instanceProps;
+    this._oldTemplate = template;
+    const rendererChanged = this._oldRenderer !== renderer;
+    this._oldRenderer = renderer;
+    const openedChanged = this._oldOpened !== opened;
+    this._oldOpened = opened;
+
+    if (template && templateOrInstancePropsChanged) {
+      this._stampOverlayTemplate(template, instanceProps);
+    } else if (renderer && (rendererChanged || openedChanged || ownerOrModelChanged)) {
+      this.content = this;
+
+      if (rendererChanged) {
+        while (this.content.firstChild) {
+          this.content.removeChild(this.content.firstChild);
+        }
+      }
+
+      if (opened) {
+        this.render();
+      }
+    }
+  }
+
+  _isFocused(element) {
+    return element && element.getRootNode().activeElement === element;
+  }
+
+  _focusedIndex(elements) {
+    elements = elements || this._getFocusableElements();
+    return elements.indexOf(elements.filter(this._isFocused).pop());
+  }
+
+  _cycleTab(increment, index) {
+    const focusableElements = this._getFocusableElements();
+
+    if (index === undefined) {
+      index = this._focusedIndex(focusableElements);
+    }
+
+    index += increment; // rollover to first item
+
+    if (index >= focusableElements.length) {
+      index = 0; // go to last item
+    } else if (index < 0) {
+      index = focusableElements.length - 1;
+    }
+
+    focusableElements[index].focus();
+  }
+
+  _getFocusableElements() {
+    // collect all focusable elements
+    return FocusablesHelper.getTabbableNodes(this.$.overlay);
+  }
+
+  _getActiveElement() {
+    let active = document._activeElement || document.activeElement; // document.activeElement can be null
+    // https://developer.mozilla.org/en-US/docs/Web/API/Document/activeElement
+    // In IE 11, it can also be an object when operating in iframes
+    // or document.documentElement (when overlay closed on outside click).
+    // In these cases, default it to document.body.
+
+    if (!active || active === document.documentElement || active instanceof Element === false) {
+      active = document.body;
+    }
+
+    while (active.shadowRoot && active.shadowRoot.activeElement) {
+      active = active.shadowRoot.activeElement;
+    }
+
+    return active;
+  }
+
+  _deepContains(node) {
+    if (this.contains(node)) {
+      return true;
+    }
+
+    let n = node;
+    const doc = node.ownerDocument; // walk from node to `this` or `document`
+
+    while (n && n !== doc && n !== this) {
+      n = n.parentNode || n.host;
+    }
+
+    return n === this;
+  }
+
+}
+
+customElements.define(OverlayElement.is, OverlayElement);
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+const $_documentContainer$g = document.createElement('template');
+$_documentContainer$g.innerHTML = `<dom-module id="vaadin-select-overlay-styles" theme-for="vaadin-select-overlay">
+  <template>
+    <style>
+      :host {
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$g.content);
+/**
+  * The overlay element.
+  *
+  * ### Styling
+  *
+  * See [`<vaadin-overlay>` documentation](https://github.com/vaadin/vaadin-overlay/blob/master/src/vaadin-overlay.html)
+  * for `<vaadin-select-overlay>` parts.
+  *
+  * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
+  *
+  * @memberof Vaadin
+  * @extends Vaadin.OverlayElement
+  */
+
+class SelectOverlayElement extends OverlayElement {
+  static get is() {
+    return 'vaadin-select-overlay';
+  }
+
+}
+
+customElements.define(SelectOverlayElement.is, SelectOverlayElement);
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+let memoizedTemplate;
+/**
+  * The text-field element.
+  *
+  * ### Styling
+  *
+  * See [`<vaadin-text-field>` documentation](https://github.com/vaadin/vaadin-text-field/blob/master/src/vaadin-text-field.html)
+  * for `<vaadin-select-text-field>` parts and available slots (prefix, suffix etc.)
+  *
+  * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
+  *
+  * @memberof Vaadin
+  * @extends Vaadin.TextFieldElement
+  */
+
+class SelectTextFieldElement extends TextFieldElement {
+  static get is() {
+    return 'vaadin-select-text-field';
+  }
+
+  static get template() {
+    // Check if text-field is using slotted input
+    if (super.template.content.querySelector('slot[name="input"]')) {
+      return super.template;
+    }
+
+    if (!memoizedTemplate) {
+      // Clone the superclass template
+      memoizedTemplate = super.template.cloneNode(true); // Create a slot for the value element
+
+      const slot = document.createElement('slot');
+      slot.setAttribute('name', 'value'); // Insert the slot before the text-field
+
+      const input = memoizedTemplate.content.querySelector('input');
+      input.parentElement.replaceChild(slot, input);
+      slot.appendChild(input);
+    }
+
+    return memoizedTemplate;
+  }
+
+  get focusElement() {
+    return this.shadowRoot.querySelector('[part=input-field]');
+  }
+
+  get inputElement() {
+    return this.shadowRoot.querySelector('input');
+  }
+
+}
+
+customElements.define(SelectTextFieldElement.is, SelectTextFieldElement);
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+const $_documentContainer$h = document.createElement('template');
+$_documentContainer$h.innerHTML = `<custom-style>
+  <style>
+    @font-face {
+      font-family: "vaadin-select-icons";
+      src: url(data:application/font-woff;charset=utf-8;base64,d09GRgABAAAAAASEAAsAAAAABDgAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABPUy8yAAABCAAAAGAAAABgDxIGKmNtYXAAAAFoAAAAVAAAAFQXVtKHZ2FzcAAAAbwAAAAIAAAACAAAABBnbHlmAAABxAAAAHwAAAB8CohkJ2hlYWQAAAJAAAAANgAAADYOavgEaGhlYQAAAngAAAAkAAAAJAarA8ZobXR4AAACnAAAABQAAAAUCAABP2xvY2EAAAKwAAAADAAAAAwAKABSbWF4cAAAArwAAAAgAAAAIAAHABduYW1lAAAC3AAAAYYAAAGGmUoJ+3Bvc3QAAARkAAAAIAAAACAAAwAAAAMEAAGQAAUAAAKZAswAAACPApkCzAAAAesAMwEJAAAAAAAAAAAAAAAAAAAAARAAAAAAAAAAAAAAAAAAAAAAQAAA6QADwP/AAEADwABAAAAAAQAAAAAAAAAAAAAAIAAAAAAAAwAAAAMAAAAcAAEAAwAAABwAAwABAAAAHAAEADgAAAAKAAgAAgACAAEAIOkA//3//wAAAAAAIOkA//3//wAB/+MXBAADAAEAAAAAAAAAAAAAAAEAAf//AA8AAQAAAAAAAAAAAAIAADc5AQAAAAABAAAAAAAAAAAAAgAANzkBAAAAAAEAAAAAAAAAAAACAAA3OQEAAAAAAQE/AUAC6QIVABQAAAEwFx4BFxYxMDc+ATc2MTAjKgEjIgE/ISJPIiEhIk8iIUNCoEJDAhUhIk8iISEiTyIhAAEAAAABAABvL5bdXw889QALBAAAAAAA1jHaeQAAAADWMdp5AAAAAALpAhUAAAAIAAIAAAAAAAAAAQAAA8D/wAAABAAAAAAAAukAAQAAAAAAAAAAAAAAAAAAAAUEAAAAAAAAAAAAAAAAAAAABAABPwAAAAAACgAUAB4APgABAAAABQAVAAEAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAADgCuAAEAAAAAAAEABwAAAAEAAAAAAAIABwBgAAEAAAAAAAMABwA2AAEAAAAAAAQABwB1AAEAAAAAAAUACwAVAAEAAAAAAAYABwBLAAEAAAAAAAoAGgCKAAMAAQQJAAEADgAHAAMAAQQJAAIADgBnAAMAAQQJAAMADgA9AAMAAQQJAAQADgB8AAMAAQQJAAUAFgAgAAMAAQQJAAYADgBSAAMAAQQJAAoANACkaWNvbW9vbgBpAGMAbwBtAG8AbwBuVmVyc2lvbiAxLjAAVgBlAHIAcwBpAG8AbgAgADEALgAwaWNvbW9vbgBpAGMAbwBtAG8AbwBuaWNvbW9vbgBpAGMAbwBtAG8AbwBuUmVndWxhcgBSAGUAZwB1AGwAYQByaWNvbW9vbgBpAGMAbwBtAG8AbwBuRm9udCBnZW5lcmF0ZWQgYnkgSWNvTW9vbi4ARgBvAG4AdAAgAGcAZQBuAGUAcgBhAHQAZQBkACAAYgB5ACAASQBjAG8ATQBvAG8AbgAuAAAAAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==) format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+  </style>
+</custom-style>`;
+document.head.appendChild($_documentContainer$h.content);
+/**
+ *
+ * `<vaadin-select>` is a Web Component for selecting values from a list of items. The content of the
+ * the select can be populated in two ways: imperatively by using renderer callback function and
+ * declaratively by using Polymer's Templates.
+ *
+ * ### Rendering
+ *
+ * By default, the select uses the content provided by using the renderer callback function.
+ *
+ * The renderer function provides `root`, `select` arguments.
+ * Generate DOM content, append it to the `root` element and control the state
+ * of the host element by accessing `select`.
+ *
+ * ```html
+ * <vaadin-select id="select"></vaadin-select>
+ * ```
+ * ```js
+ * const select = document.querySelector('#select');
+ * select.renderer = function(root, select) {
+ *   const listBox = document.createElement('vaadin-list-box');
+ *   // append 3 <vaadin-item> elements
+ *   ['Jose', 'Manolo', 'Pedro'].forEach(function(name) {
+ *     const item = document.createElement('vaadin-item');
+ *     item.textContent = name;
+ *     listBox.appendChild(item);
+ *   });
+ *
+ *   // update the content
+ *   root.appendChild(listBox);
+ * };
+ * ```
+ *
+ * Renderer is called on initialization of new select and on its opening.
+ * DOM generated during the renderer call can be reused
+ * in the next renderer call and will be provided with the `root` argument.
+ * On first call it will be empty.
+ *
+ * ### Polymer Templates
+ *
+ * Alternatively, the content can be provided with Polymer's Template.
+ * Select finds the first child template and uses that in case renderer callback function
+ * is not provided. You can also set a custom template using the `template` property.
+ *
+ * ```
+ * <vaadin-select>
+ *   <template>
+ *     <vaadin-list-box>
+ *       <vaadin-item label="foo">Foo</vaadin-item>
+ *       <vaadin-item>Bar</vaadin-item>
+ *       <vaadin-item>Baz</vaadin-item>
+ *     </vaadin-list-box>
+ *   </template>
+ * </vaadin-select>
+ * ```
+ *
+ * Hint: By setting the `label` property of inner vaadin-items you will
+ * be able to change the visual representation of the selected value in the input part.
+ *
+ * ### Styling
+ *
+ * The following shadow DOM parts are available for styling:
+ *
+ * Part name | Description
+ * ----------------|----------------
+ * `toggle-button` | The toggle button
+ *
+ * The following state attributes are available for styling:
+ *
+ * Attribute    | Description | Part name
+ * -------------|-------------|------------
+ * `opened` | Set when the select is open | :host
+ * `invalid` | Set when the element is invalid | :host
+ * `focused` | Set when the element is focused | :host
+ * `focus-ring` | Set when the element is keyboard focused | :host
+ * `readonly` | Set when the select is read only | :host
+ *
+ * `<vaadin-select>` element sets these custom CSS properties:
+ *
+ * Property name | Description | Theme for element
+ * --- | --- | ---
+ * `--vaadin-select-text-field-width` | Width of the select text field | `vaadin-select-overlay`
+ *
+ * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
+ *
+ * In addition to `<vaadin-select>` itself, the following internal
+ * components are themable:
+ *
+ * - `<vaadin-select-text-field>`
+ * - `<vaadin-select-overlay>`
+ *
+ * Note: the `theme` attribute value set on `<vaadin-select>` is
+ * propagated to the internal themable components listed above.
+ *
+ * @memberof Vaadin
+ * @mixes Vaadin.ElementMixin
+ * @mixes Vaadin.ControlStateMixin
+ * @mixes Vaadin.ThemableMixin
+ * @mixes Vaadin.ThemePropertyMixin
+ * @demo demo/index.html
+ */
+
+class SelectElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(ThemePropertyMixin(mixinBehaviors(IronResizableBehavior, PolymerElement))))) {
+  static get template() {
+    return html$1`
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      vaadin-select-text-field {
+        width: 100%;
+        min-width: 0;
+      }
+
+      :host([hidden]) {
+        display: none !important;
+      }
+
+      [part="toggle-button"] {
+        font-family: "vaadin-select-icons";
+      }
+
+      [part="toggle-button"]::before {
+        content: "\\e900";
+      }
+    </style>
+
+    <vaadin-select-text-field placeholder="[[placeholder]]" label="[[label]]" required="[[required]]" invalid="[[invalid]]" error-message="[[errorMessage]]" readonly\$="[[readonly]]" theme\$="[[theme]]">
+      <slot name="prefix" slot="prefix"></slot>
+      <div part="value"></div>
+      <div part="toggle-button" slot="suffix" role="button" aria-haspopup="listbox" aria-label="Toggle"></div>
+    </vaadin-select-text-field>
+    <vaadin-select-overlay opened="{{opened}}" with-backdrop="[[_phone]]" phone\$="[[_phone]]" theme\$="[[theme]]"></vaadin-select-overlay>
+
+    <iron-media-query query="[[_phoneMediaQuery]]" query-matches="{{_phone}}"></iron-media-query>
+`;
+  }
+
+  static get is() {
+    return 'vaadin-select';
+  }
+
+  static get version() {
+    return '2.1.5';
+  }
+
+  static get properties() {
+    return {
+      /**
+       * Set when the select is open
+       */
+      opened: {
+        type: Boolean,
+        value: false,
+        notify: true,
+        reflectToAttribute: true,
+        observer: '_openedChanged'
+      },
+
+      /**
+       * Custom function for rendering the content of the `<vaadin-select>`.
+       * Receives two arguments:
+       *
+       * - `root` The `<vaadin-select-overlay>` internal container
+       *   DOM element. Append your content to it.
+       * - `select` The reference to the `<vaadin-select>` element.
+       */
+      renderer: Function,
+
+      /**
+       * The error message to display when the select value is invalid
+       */
+      errorMessage: {
+        type: String,
+        value: ''
+      },
+
+      /**
+       * String used for the label element.
+       */
+      label: {
+        type: String
+      },
+
+      /**
+       * It stores the the `value` property of the selected item, providing the
+       * value for iron-form.
+       * When there’s an item selected, it's the value of that item, otherwise
+       * it's an empty string.
+       * On change or initialization, the component finds the item which matches the
+       * value and displays it.
+       * If no value is provided to the component, it selects the first item without
+       * value or empty value.
+       * Hint: If you do not want to select any item by default, you can either set all
+       * the values of inner vaadin-items, or set the vaadin-select value to
+       * an inexistent value in the items list.
+       */
+      value: {
+        type: String,
+        value: '',
+        notify: true,
+        observer: '_valueChanged'
+      },
+
+      /**
+       * The current required state of the select. True if required.
+       */
+      required: {
+        type: Boolean,
+        reflectToAttribute: true,
+        observer: '_requiredChanged'
+      },
+
+      /**
+       * Set to true if the value is invalid.
+       */
+      invalid: {
+        type: Boolean,
+        reflectToAttribute: true,
+        notify: true,
+        value: false
+      },
+
+      /**
+       * The name of this element.
+       */
+      name: {
+        type: String,
+        reflectToAttribute: true
+      },
+
+      /**
+       * A hint to the user of what can be entered in the control.
+       * The placeholder will be displayed in the case that there
+       * is no item selected, or the selected item has an empty
+       * string label, or the selected item has no label and it's
+       * DOM content is empty.
+       */
+      placeholder: {
+        type: String
+      },
+
+      /**
+       * When present, it specifies that the element is read-only.
+       */
+      readonly: {
+        type: Boolean,
+        value: false,
+        reflectToAttribute: true
+      },
+      _phone: Boolean,
+      _phoneMediaQuery: {
+        value: '(max-width: 420px), (max-height: 420px)'
+      },
+      _overlayElement: Object,
+      _inputElement: Object,
+      _toggleElement: Object,
+      _items: Object,
+      _contentTemplate: Object,
+      _oldTemplate: Object,
+      _oldRenderer: Object
+    };
+  }
+
+  static get observers() {
+    return ['_updateSelectedItem(value, _items)', '_updateAriaExpanded(opened, _toggleElement, _inputElement)', '_templateOrRendererChanged(_contentTemplate, renderer, _overlayElement)'];
+  }
+  /** @private */
+
+
+  constructor() {
+    super();
+    this._boundSetPosition = this._setPosition.bind(this);
+  }
+  /** @private */
+
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addEventListener('iron-resize', this._boundSetPosition);
+  }
+
+  ready() {
+    super.ready();
+    this._overlayElement = this.shadowRoot.querySelector('vaadin-select-overlay');
+    this._valueElement = this.shadowRoot.querySelector('[part="value"]');
+    this._toggleElement = this.shadowRoot.querySelector('[part="toggle-button"]');
+    this._nativeInput = this.focusElement.shadowRoot.querySelector('input');
+
+    this._nativeInput.setAttribute('aria-hidden', true);
+
+    this._nativeInput.setAttribute('tabindex', -1);
+
+    this._nativeInput.style.pointerEvents = 'none';
+    this.focusElement.addEventListener('click', e => this.opened = !this.readonly);
+    this.focusElement.addEventListener('keydown', e => this._onKeyDown(e));
+    this._observer = new FlattenedNodesObserver(this, info => this._setTemplateFromNodes(info.addedNodes));
+
+    this._observer.flush();
+  }
+
+  _setTemplateFromNodes(nodes) {
+    const template = Array.from(nodes).filter(node => node.localName && node.localName === 'template')[0] || this._contentTemplate;
+
+    this._overlayElement.template = this._contentTemplate = template;
+
+    this._setForwardHostProps();
+  }
+
+  _setForwardHostProps() {
+    if (this._overlayElement.content) {
+      const origForwardHostProp = this._overlayElement._instance && this._overlayElement._instance.forwardHostProp;
+
+      if (this._overlayElement._instance) {
+        this._overlayElement._instance.forwardHostProp = (...args) => {
+          origForwardHostProp.apply(this._overlayElement._instance, args);
+          setTimeout(() => {
+            this._updateValueSlot();
+          });
+        };
+
+        this._assignMenuElement();
+      }
+    }
+  }
+  /**
+   * Manually invoke existing renderer.
+   */
+
+
+  render() {
+    this._overlayElement.render();
+
+    if (this._menuElement && this._menuElement.items) {
+      this._updateSelectedItem(this.value, this._menuElement.items);
+    }
+  }
+
+  _removeNewRendererOrTemplate(template, oldTemplate, renderer, oldRenderer) {
+    if (template !== oldTemplate) {
+      this._contentTemplate = undefined;
+    } else if (renderer !== oldRenderer) {
+      this.renderer = undefined;
+    }
+  }
+
+  _templateOrRendererChanged(template, renderer, overlay) {
+    if (!overlay) {
+      return;
+    }
+
+    if (template && renderer) {
+      this._removeNewRendererOrTemplate(template, this._oldTemplate, renderer, this._oldRenderer);
+
+      throw new Error('You should only use either a renderer or a template for select content');
+    }
+
+    this._oldTemplate = template;
+    this._oldRenderer = renderer;
+
+    if (renderer) {
+      overlay.setProperties({
+        owner: this,
+        renderer: renderer
+      });
+      this.render();
+
+      if (overlay.content.firstChild) {
+        this._assignMenuElement();
+      }
+    }
+  }
+
+  _assignMenuElement() {
+    this._menuElement = Array.from(this._overlayElement.content.children).filter(element => element.localName !== 'style')[0];
+
+    if (this._menuElement) {
+      this._menuElement.addEventListener('items-changed', e => {
+        this._items = this._menuElement.items;
+
+        this._items.forEach(item => item.setAttribute('role', 'option'));
+      });
+
+      this._menuElement.addEventListener('selected-changed', e => this._updateValueSlot());
+
+      this._menuElement.addEventListener('keydown', e => this._onKeyDownInside(e));
+
+      this._menuElement.addEventListener('click', e => {
+        this.__userInteraction = true;
+        this.opened = false;
+      }, true);
+
+      this._menuElement.setAttribute('role', 'listbox');
+    }
+  }
+  /** @protected */
+
+
+  get focusElement() {
+    return this._inputElement || (this._inputElement = this.shadowRoot.querySelector('vaadin-select-text-field'));
+  }
+  /** @private */
+
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeEventListener('iron-resize', this._boundSetPosition); // Making sure the select is closed and removed from DOM after detaching the select.
+
+    this.opened = false;
+  }
+  /** @private */
+
+
+  notifyResize() {
+    super.notifyResize();
+
+    if (this.positionTarget && this.opened) {
+      this._setPosition(); // Schedule another position update (to cover virtual keyboard opening for example)
+
+
+      requestAnimationFrame(this._setPosition.bind(this));
+    }
+  }
+
+  _requiredChanged(required) {
+    this.setAttribute('aria-required', required);
+  }
+
+  _valueChanged(value, oldValue) {
+    if (value === '') {
+      this.focusElement.removeAttribute('has-value');
+    } else {
+      this.focusElement.setAttribute('has-value', '');
+    } // Skip validation for the initial empty string value
+
+
+    if (value === '' && oldValue === undefined) {
+      return;
+    }
+
+    this.validate();
+  }
+
+  _onKeyDown(e) {
+    if (!this.readonly && !this.opened) {
+      if (/^(Enter|SpaceBar|\s|ArrowDown|Down|ArrowUp|Up)$/.test(e.key)) {
+        e.preventDefault();
+        this.opened = true;
+      } else if (/[a-zA-Z0-9]/.test(e.key) && e.key.length === 1) {
+        const selected = this._menuElement.selected;
+        const currentIdx = selected !== undefined ? selected : -1;
+
+        const newIdx = this._menuElement._searchKey(currentIdx, e.key);
+
+        if (newIdx >= 0) {
+          this.__userInteraction = true;
+
+          this._updateSelectedItem(this._items[newIdx].value, this._items);
+        }
+      }
+    }
+  }
+
+  _onKeyDownInside(e) {
+    if (/^(Tab)$/.test(e.key)) {
+      this.opened = false;
+    }
+  }
+
+  _openedChanged(opened, wasOpened) {
+    if (opened) {
+      if (!this._overlayElement || !this._menuElement || !this._toggleElement || !this.focusElement || this.disabled || this.readonly) {
+        this.opened = false;
+        return;
+      }
+
+      this._openedWithFocusRing = this.hasAttribute('focus-ring') || this.focusElement.hasAttribute('focus-ring');
+
+      this._menuElement.focus();
+
+      this._setPosition();
+
+      window.addEventListener('scroll', this._boundSetPosition, true);
+    } else if (wasOpened) {
+      if (this._phone) {
+        this._setFocused(false);
+      } else {
+        this.focusElement.focus();
+
+        if (this._openedWithFocusRing) {
+          this.focusElement.setAttribute('focus-ring', '');
+        }
+      }
+
+      this.validate();
+      window.removeEventListener('scroll', this._boundSetPosition, true);
+    }
+  }
+
+  _hasContent(selected) {
+    if (!selected) {
+      return false;
+    }
+
+    return Boolean(selected.hasAttribute('label') ? selected.getAttribute('label') : selected.textContent.trim() || selected.children.length);
+  }
+
+  _attachSelectedItem(selected) {
+    if (!selected) {
+      return;
+    }
+
+    let labelItem;
+
+    if (selected.hasAttribute('label')) {
+      labelItem = document.createElement('vaadin-item');
+      labelItem.textContent = selected.getAttribute('label');
+    } else {
+      labelItem = selected.cloneNode(true);
+    } // store reference to the original item
+
+
+    labelItem._sourceItem = selected;
+    labelItem.removeAttribute('tabindex');
+
+    this._valueElement.appendChild(labelItem);
+
+    labelItem.selected = true;
+  }
+
+  _updateAriaExpanded(opened, toggleElement, inputElement) {
+    toggleElement && toggleElement.setAttribute('aria-expanded', opened);
+
+    if (inputElement && inputElement.focusElement) {
+      inputElement.focusElement.setAttribute('aria-expanded', opened);
+    }
+  }
+
+  _updateValueSlot() {
+    this.opened = false;
+    this._valueElement.innerHTML = '';
+    const selected = this._items[this._menuElement.selected];
+
+    const hasContent = this._hasContent(selected); // Check if text-field is using slotted input
+
+
+    const slotName = this._inputElement.shadowRoot.querySelector('slot[name="input"]') ? 'input' : 'value'; // Toggle visibility of _valueElement vs fallback input with placeholder
+
+    this._valueElement.slot = hasContent ? slotName : ''; // Ensure the slot distribution to apply correct style scope for cloned item
+
+    if (hasContent && window.ShadyDOM) {
+      window.ShadyDOM.flush();
+    }
+
+    this._attachSelectedItem(selected);
+
+    if (!this._valueChanging && selected) {
+      this._selectedChanging = true;
+      this.value = selected.value || '';
+
+      if (this.__userInteraction) {
+        this.dispatchEvent(new CustomEvent('change', {
+          bubbles: true
+        }));
+        this.__userInteraction = false;
+      }
+
+      delete this._selectedChanging;
+    }
+  }
+
+  _updateSelectedItem(value, items) {
+    if (items) {
+      this._menuElement.selected = items.reduce((prev, item, idx) => {
+        return prev === undefined && item.value === value ? idx : prev;
+      }, undefined);
+
+      if (!this._selectedChanging) {
+        this._valueChanging = true;
+
+        this._updateValueSlot();
+
+        delete this._valueChanging;
+      }
+    }
+  }
+  /** @override */
+
+
+  _setFocused(focused) {
+    // Keep `focused` state when opening the overlay for styling purpose.
+    super._setFocused(this.opened || focused);
+
+    this.focusElement._setFocused(this.hasAttribute('focused'));
+
+    !this.hasAttribute('focused') && this.validate();
+  }
+
+  _setPosition() {
+    const inputRect = this._inputElement.shadowRoot.querySelector('[part~="input-field"]').getBoundingClientRect();
+
+    const viewportHeight = Math.min(window.innerHeight, document.documentElement.clientHeight);
+    const bottomAlign = inputRect.top > (viewportHeight - inputRect.height) / 2;
+    this._overlayElement.style.left = inputRect.left + 'px';
+
+    if (bottomAlign) {
+      this._overlayElement.setAttribute('bottom-aligned', '');
+
+      this._overlayElement.style.removeProperty('top');
+
+      this._overlayElement.style.bottom = viewportHeight - inputRect.bottom + 'px';
+    } else {
+      this._overlayElement.removeAttribute('bottom-aligned');
+
+      this._overlayElement.style.removeProperty('bottom');
+
+      this._overlayElement.style.top = inputRect.top + 'px';
+    }
+
+    this._overlayElement.updateStyles({
+      '--vaadin-select-text-field-width': inputRect.width + 'px'
+    });
+  }
+  /**
+   * Returns true if `value` is valid, and sets the `invalid` flag appropriately.
+   *
+   * @return {boolean} True if the value is valid and sets the `invalid` flag appropriately
+   */
+
+
+  validate() {
+    return !(this.invalid = !(this.disabled || !this.required || this.value));
+  }
+  /**
+   * Fired when the user commits a value change.
+   *
+   * @event change
+   */
+
+
+}
+
+customElements.define(SelectElement.is, SelectElement);
+
 /**
  *
  * @param {any} self
@@ -22914,8 +35363,10 @@ customElements.define(ButtonElement.is, ButtonElement);
 const template$7 = self => function () {
   // @ts-ignore
   const {
-    crowdID
+    crowdID,
+    topics
   } = this;
+  console.log(topics);
   return html`
     <style>
       ${styles$7}
@@ -22924,31 +35375,51 @@ const template$7 = self => function () {
     </style>
 
     <h1>Micro Review</h1>
-    <h3>Crowd name : ${crowdID}</h3>
+    <h3>Crowd name: ${crowdID}</h3>
     <br>
-    <div class = "user-part">
-      <div class = "user-label">User</div>
-      <vaadin-button
-        theme= "primary"
-        class = "user-say"
-        @click = "$this.addLabel"> User said!
-      </vaadin-button>
+    <div class="feed feed__right">
+      <div>
+        <div class="label">User</div>
+        <vaadin-button
+          theme= "primary"
+          class = "user-say"
+          @click = "$this.addLabel"> User said!
+        </vaadin-button>
+        <div class="button-container button-container__right">
+          <vaadin-select class="topic-select">
+              <template>
+                <vaadin-list-box>
+                  <!-- wanna put topic here -->
+                  <vaadin-item>Jose</vaadin-item>
+                  <vaadin-item>Manolo</vaadin-item>
+                  <vaadin-item>Pedro</vaadin-item>
+                </vaadin-list-box>
+              </template>
+            </vaadin-select>
+        </div>
+      </div>
     </div>
     <br>
-    <div class = "bot-part">
-      <div class = "bot-label">Bot</div>
-      <vaadin-button
-        theme= "contrast primary"
-        class= "bot-say"
-        @click="$this.addLabel"> Bot said!
-      </vaadin-button>
+    <div class="feed">
+      <div>
+        <div class="label">Bot</div>
+        <!-- ${topics.map(item => html`${item}`)} -->
+        <vaadin-button
+          theme= "contrast primary"
+          class= "bot-say"> Bot said!
+        </vaadin-button>
+        <div class="select-container">
+          <vaadin-select class="topic-select">
+            <template>
+              <vaadin-list-box>
+                <!-- wanna put topic here -->
+              </vaadin-list-box>
+            </template>
+          </vaadin-select>
+        </div>
+      </div>
     </div>
-    <div class = "topic">
-      <vaadin-button>
-        <iron-icon icon="lumo:edit" slot="prefix"></iron-icon>
-        topic
-      </vaadin-button>
-    </div>
+
 
   `;
 }.bind(self)();
@@ -22980,6 +35451,11 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
       key: "addLabel",
       value: function addLabel() {
         if (this.click) ;
+      }
+    }, {
+      kind: "method",
+      key: "addToUtterance",
+      value: function addToUtterance() {// if there's utterance, then automatically generate this button a lot
       }
     }]
   };
@@ -23120,6 +35596,9 @@ const template$a = self => function () {
       <div class="right">
         ${page === 'authoring' || !page ? html`
           <protobot-authoring-sidebar></protobot-authoring-sidebar>
+        ` : ''}
+        ${page === 'micro' ? html`
+          <protobot-micro-sidebar></protobot-micro-sidebar>
         ` : ''}
       </div>
     ` : html`

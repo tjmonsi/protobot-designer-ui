@@ -1,5 +1,16 @@
+h2 {
+  margin-left: 20px;
+}
+
+.topic-list {
+  font-size: 20px;
+}
+
 .button {
-  background: green;
+  margin-left: 20px;
+  background: black;
   color: white;
+  font-size: 20px;
   padding: 12px;
+  border-radius: 10px;
 }

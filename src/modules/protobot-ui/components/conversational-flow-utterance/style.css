@@ -7,5 +7,6 @@
 }
 
 .text-area {
-  width: 100%
+  width: 100%;
+  font-size: 15px;
 }

@@ -1,0 +1,74 @@
+h1 {
+    text-align: center;
+    font-family: 'Raleway', sans-serif;
+}
+
+h3 {
+    text-align: right;
+    font-family: 'Noto Sans', sans-serif;
+}
+
+.feed{
+    display:flex;
+}
+.feed.feed__right{
+    flex-direction: row-reverse;
+}
+
+
+.label{
+    font-weight: bold;
+    font-family: 'Noto Sans', sans-serif;
+}
+
+.feed.feed__right .label{
+    text-align: right;
+}
+
+.feed.feed__right .button-container{
+    flex-direction: row-reverse;
+}
+
+
+
+
+.user-label{
+    font-weight: bold;
+    text-align: right;
+    padding-right: 20px;
+    font-family: 'Noto Sans', sans-serif;
+}
+
+.user-say{
+    border-radius: 15px;
+    /*background: cornflowerblue;*/
+    width: 300px;
+    height: 70px;
+    font-family: 'Noto Sans', sans-serif;
+}
+
+.bot-part {
+    float:left;
+    clear:both;
+}
+
+.bot-label{
+    font-weight: bold;
+    margin-left: 10px;
+    font-family: 'Noto Sans', sans-serif;
+
+}
+
+.bot-say{
+    border-radius: 15px;
+    /*background: #73AD21;*/
+    padding: 20px;
+    width: 300px;
+    height: 70px;
+    font-family: 'Noto Sans', sans-serif;
+
+}
+
+.button-container{
+    display: flex;
+}

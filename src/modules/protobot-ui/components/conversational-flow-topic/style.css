@@ -1,26 +1,32 @@
 .flex-area {
+  overflow:hidden;
   display: flex;
-
-  margin: 20px auto;
+  margin: 20px;
   max-width: 800px;
+  border-radius: 10px;
 }
 
 .flex-1 {
   flex: 1;
-  background: purple;
+  background:hsl(242, 46%, 66%);
   padding: 12px;
 }
 
 .flex-2 {
   flex: 3;
-  background: purple;
+  background:hsl(242, 46%, 66%);
   padding: 12px
 }
 
 .text-area {
   width: 100%;
+  font-size : 15px;
 }
 
 .sub {
-  padding-left: 80px
+  margin-left: 80px;
+}
+
+.sub div {
+  background:skyblue;
 }

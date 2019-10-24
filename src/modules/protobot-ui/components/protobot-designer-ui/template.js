@@ -47,6 +47,9 @@ export const template = self => function () {
         ${page === 'authoring' || !page ? html`
           <protobot-authoring-sidebar></protobot-authoring-sidebar>
         ` : ''}
+        ${page === 'micro' ? html`
+          <protobot-micro-sidebar></protobot-micro-sidebar>
+        ` : ''}
       </div>
     ` : html`
       <div style="background: white"></div>

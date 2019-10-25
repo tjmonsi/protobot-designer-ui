@@ -11,6 +11,7 @@ h3 {
 .feed{
     display:flex;
 }
+
 .feed.feed__right{
     flex-direction: row-reverse;
 }

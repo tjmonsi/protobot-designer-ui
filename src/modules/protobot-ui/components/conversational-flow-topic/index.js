@@ -44,7 +44,7 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
     const snap = await database.ref(`domains/data/${domain}`).once('value');
     const { topics } = snap.val() || { topics: {} };
     const array = [];
-    for (let topic in topics) {
+    for (const topic in topics) {
       array.push({ topic, order: topics[topic] });
     }
     const topicArray = array.sort((i, j) => (i.order - j.order)).map(i => i.topic);
@@ -73,7 +73,7 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
 
     const newTopics = {};
 
-    for (let i in topicArray) {
+    for (const i in topicArray) {
       newTopics[topicArray[i]] = parseInt(i);
     }
 
@@ -81,6 +81,7 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
     updates[`utterances/data/${utteranceId}`] = utterance;
     updates[`domains/data/${domain}/topics`] = newTopics;
     updates[`domains/data/${domain}/subs/${topicId}`] = sub || false;
+    updates[`domains/data/${domain}/topicList/${topicId}`] = true;
 
     await database.ref().update(updates);
   }
@@ -92,7 +93,7 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
     const snap = await database.ref(`domains/data/${domain}`).once('value');
     const { topics } = snap.val() || { topics: {} };
     const array = [];
-    for (let topic in topics) {
+    for (const topic in topics) {
       array.push({ topic, order: topics[topic] });
     }
     const topicArray = array.sort((i, j) => (i.order - j.order)).map(i => i.topic);
@@ -101,16 +102,15 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
 
     const newTopics = {};
 
-    for (let i in topicArray) {
+    for (const i in topicArray) {
       newTopics[topicArray[i]] = parseInt(i);
     }
 
     updates[`labels/data/${topicId}`] = null;
     updates[`domains/data/${domain}/topics`] = newTopics;
+    updates[`domains/data/${domain}/topicList/${topicId}`] = null;
 
     await database.ref().update(updates);
-
-    this.dispatchEvent(new window.CustomEvent('refresh-list'));
   }
 }
 

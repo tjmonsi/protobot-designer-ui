@@ -35414,6 +35414,7 @@ const template$7 = self => function () {
                 <!-- wanna put topic here -->
                   ${["topic1", "topic2"].map(item => html`<vaadin-item>${item}</vaadin-item>`)}
                 </vaadin-item>
+                <vaadin-item class="new-item-input">Add new topic</vaadin-item>
               </vaadin-list-box>
               <!-- <vaadin-list-box>
                 ${["topic4", "topic5"].map(item => html`${item}`)}

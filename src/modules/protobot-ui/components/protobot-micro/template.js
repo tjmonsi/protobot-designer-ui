@@ -2,7 +2,8 @@ import { html } from 'lit-element';
 // @ts-ignore
 import styles from './style.css';
 import '@vaadin/vaadin-button';
-import '@vaadin/vaadin-select'
+import '@vaadin/vaadin-select';
+import 'listbox-combobox';
 import '../topic-list-item';
 /**
  *
@@ -10,8 +11,12 @@ import '../topic-list-item';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { crowdID, topics } = this;
-  console.log(topics)
+  const { crowdID, topics, selectedTopic } = this;
+  console.log(topics);
+  const t = [];
+  for (const i in topics) {
+    t.push(html`<vaadin-item>${topics[i].id}</vaadin-item>`);
+  }
   return html`
     <style>
       ${styles}
@@ -30,17 +35,12 @@ export const template = self => function () {
           class = "user-say"
           @click = "$this.addLabel"> User said!
         </vaadin-button>
+
         <div class="button-container button-container__right">
-          <vaadin-select class="topic-select">
-              <template>
-                <vaadin-list-box>
-                  <!-- wanna put topic here -->
-                  <vaadin-item>Jose</vaadin-item>
-                  <vaadin-item>Manolo</vaadin-item>
-                  <vaadin-item>Pedro</vaadin-item>
-                </vaadin-list-box>
-              </template>
-            </vaadin-select>
+          <select @change=${selectedTopic.bind(this)}>
+            ${topics ? topics.map(item => html`<option value="${item.id}">${item.id}</option>`) : ''}
+            <option value="new-topic">New Topic</option>
+          </select>
         </div>
       </div>
     </div>
@@ -57,7 +57,6 @@ export const template = self => function () {
           <vaadin-select class="topic-select">
             <template>
               <vaadin-list-box>
-                <!-- wanna put topic here -->
               </vaadin-list-box>
             </template>
           </vaadin-select>
@@ -68,3 +67,5 @@ export const template = self => function () {
 
   `;
 }.bind(self)();
+
+// ${[ t[0], t[1], t[2], t[3], t[4], t[5] ].map(item => html`<vaadin-item>${item.id}</vaadin-item>`)}

@@ -13,13 +13,17 @@ class ProtobotMicro extends GetDomainMixin(LitElement) {
     return template(this);
   }
 
-  addLabel() {
+  addLabel () {
     if (this.click) {
     }
   }
 
-  addToUtterance() {
+  addToUtterance () {
     // if there's utterance, then automatically generate this button a lot
+  }
+
+  selectedTopic (event) {
+    console.log(event.target.value);
   }
 }
 

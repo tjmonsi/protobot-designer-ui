@@ -45,6 +45,8 @@ export const GetDomainMixin = (base) => (class extends GetPathMixin(base) {
   }
 
   disconnectRef () {
+    if (super.disconnectRef) super.disconnectRef();
+
     if (this.domainRef) {
       this.domainRef.off('value', this.boundSaveDomain);
     }

@@ -4,7 +4,7 @@ import html from 'rollup-plugin-html-minifier';
 import babel from 'rollup-plugin-babel';
 import analyze from 'rollup-plugin-analyzer';
 import { string } from 'rollup-plugin-string';
-import { terser as uglify } from 'rollup-plugin-terser';
+// import { terser as uglify } from 'rollup-plugin-terser';
 
 const output = [];
 
@@ -16,6 +16,9 @@ output.push({
   },
   cache: true,
   plugins: [
+    // resolve({
+    //   dedupe: [ '@vaadin/vaadin-button' ]
+    // }),
     resolve(),
     string({
       // Required to be specified

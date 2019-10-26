@@ -45,6 +45,8 @@ export const GetDomainMixin = (base) => (class extends GetPathMixin(base) {
   }
 
   disconnectRef () {
+    if (super.disconnectRef) super.disconnectRef();
+
     if (this.domainRef) {
       this.domainRef.off('value', this.boundSaveDomain);
     }
@@ -65,10 +67,10 @@ export const GetDomainMixin = (base) => (class extends GetPathMixin(base) {
 
   saveDomain (snap) {
     this.domainId = snap.key;
-    this.domain = snap.val() || null;
+    this.domain = snap.val() || { topics: {}, subs: [] };
     const { topics, subs } = this.domain;
     const array = [];
-    for (let topic in topics) {
+    for (const topic in topics) {
       array.push({ topic, order: topics[topic], sub: subs[topic] || false });
     }
     this.topics = array.sort((i, j) => (i.order - j.order)).map(i => ({ id: i.topic, sub: i.sub }));

@@ -12,11 +12,11 @@ class ProtobotMicroSidebar extends GetDomainMixin(LitElement) {
     return template(this);
   }
 
-  async deploy () {
+  async save () {
     const updates = {};
-    updates[`last-deployed/data/${this.domainId}/`] = this.domain;
-    updates[`domains/data/${this.domainId}/deployed`] = false;
-    await database.ref().update(updates);
+    // updates[`last-deployed/data/${this.domainId}/`] = this.domain;
+    // updates[`domains/data/${this.domainId}/deployed`] = false;
+    // await database.ref().update(updates);
   }
 }
 

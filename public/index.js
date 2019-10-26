@@ -11781,7 +11781,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   };
 }, GetDomainMixin(LitElement));
 
-var styles$7 = "h1 {\n    text-align: center;\n    font-family: 'Raleway', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.feed{\n    display:flex;\n}\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n\n.label{\n    font-weight: bold;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n}\n\n\n\n\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.user-say{\n    border-radius: 15px;\n    /*background: cornflowerblue;*/\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.bot-part {\n    float:left;\n    clear:both;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;*/\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.button-container{\n    display: flex;\n}";
+var styles$7 = "h1 {\n    text-align: center;\n    font-family: 'Raleway', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n\n.label{\n    font-weight: bold;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n}\n\n\n\n\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.user-say{\n    border-radius: 15px;\n    /*background: cornflowerblue;*/\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.bot-part {\n    float:left;\n    clear:both;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;*/\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.button-container{\n    display: flex;\n}";
 
 class Lumo extends HTMLElement {
   static get version() {
@@ -35382,8 +35382,7 @@ const template$7 = self => function () {
         <div class="label">User</div>
         <vaadin-button
           theme= "primary"
-          class = "user-say"
-          @click = "$this.addLabel"> User said!
+          class = "user-say"> User said!
         </vaadin-button>
         <div class="button-container button-container__right">
           <vaadin-select class="topic-select">
@@ -35413,7 +35412,12 @@ const template$7 = self => function () {
             <template>
               <vaadin-list-box>
                 <!-- wanna put topic here -->
+                  ${["topic1", "topic2"].map(item => html`<vaadin-item>${item}</vaadin-item>`)}
+                </vaadin-item>
               </vaadin-list-box>
+              <!-- <vaadin-list-box>
+                ${["topic4", "topic5"].map(item => html`${item}`)}
+              </vaadin-list-box> -->
             </template>
           </vaadin-select>
         </div>
@@ -35454,8 +35458,8 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
       }
     }, {
       kind: "method",
-      key: "addToUtterance",
-      value: function addToUtterance() {// if there's utterance, then automatically generate this button a lot
+      key: "showUtterance",
+      value: function showUtterance() {// if there's utterance, then automatically generate this button a lot
       }
     }]
   };
@@ -35551,7 +35555,7 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
   };
 }, GetDomainMixin(LitElement));
 
-var styles$a = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: #888888;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #888888;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$a = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Noto Sans', sans-serif;\n}\n\np {\n  font-size: 20px;\n}\n\n.topic-list {\n  font-size: 20px;\n}\n\n.button-container .button-save {\n  background: black;\n  color: white;\n  font-size: 20px;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n";
 
 /**
  *
@@ -35559,6 +35563,78 @@ var styles$a = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-t
  */
 
 const template$a = self => function () {
+  // @ts-ignore
+  const {
+    topics,
+    save
+  } = this;
+  return html`
+    <style>
+      ${styles$a}
+    </style>
+    <div class = "instruction">
+      <h2>Instruction</h2>
+      <p>In this stage, you can label the topic for each utterance.
+        Please click the select-box to label the topic.</p>
+    </div>
+    <br>
+    <h2>Current Topic List</h2>
+    <ul class ="topic-list">
+    ${topics.map(topic => html`
+      <li>
+        <topic-list-item class="item" topicId="${topic.id}">
+        </topic-list-item>
+      </li>
+    `)}
+    </ul>
+    <div class="button-container">
+      <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
+        Done with Labeling
+      </vaadin-button>
+    </div>
+
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], function (_initialize, _GetDomainMixin) {
+  class ProtobotMicroSidebar extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotMicroSidebar,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$a(this);
+      }
+    }, {
+      kind: "method",
+      key: "save",
+      value: async function save() {
+        // updates[`domains/data/${this.domainId}/deployed`] = false;
+        // await database.ref().update(updates);
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$b = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: #888888;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #888888;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$b = self => function () {
   // @ts-ignore
   const {
     queryObject
@@ -35569,7 +35645,7 @@ const template$a = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$a}
+      ${styles$b}
     </style>
 
     ${domain ? html`
@@ -35598,7 +35674,7 @@ const template$a = self => function () {
           <protobot-authoring-sidebar></protobot-authoring-sidebar>
         ` : ''}
         ${page === 'micro' ? html`
-          <protobot-micro-sidebar></protobot-micro-sidebar>
+          <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
         ` : ''}
       </div>
     ` : html`
@@ -35627,7 +35703,7 @@ let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], func
       kind: "method",
       key: "render",
       value: function render() {
-        return template$a(this);
+        return template$b(this);
       }
     }]
   };

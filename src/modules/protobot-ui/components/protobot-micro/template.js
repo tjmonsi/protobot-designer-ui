@@ -27,8 +27,7 @@ export const template = self => function () {
         <div class="label">User</div>
         <vaadin-button
           theme= "primary"
-          class = "user-say"
-          @click = "$this.addLabel"> User said!
+          class = "user-say"> User said!
         </vaadin-button>
         <div class="button-container button-container__right">
           <vaadin-select class="topic-select">
@@ -58,7 +57,12 @@ export const template = self => function () {
             <template>
               <vaadin-list-box>
                 <!-- wanna put topic here -->
+                  ${["topic1", "topic2"].map(item => html`<vaadin-item>${item}</vaadin-item>`)}
+                </vaadin-item>
               </vaadin-list-box>
+              <!-- <vaadin-list-box>
+                ${["topic4", "topic5"].map(item=> html`${item}`)}
+              </vaadin-list-box> -->
             </template>
           </vaadin-select>
         </div>

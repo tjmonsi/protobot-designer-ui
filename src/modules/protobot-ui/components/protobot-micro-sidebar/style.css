@@ -1,16 +1,32 @@
 h2 {
-  margin-left: 20px;
+  /* margin-left: 20px; */
+  font-family: 'Noto Sans', sans-serif;
+}
+
+p {
+  font-size: 20px;
 }
 
 .topic-list {
   font-size: 20px;
 }
 
-.button {
-  margin-left: 20px;
+.button-container .button-save {
   background: black;
   color: white;
   font-size: 20px;
   padding: 12px;
   border-radius: 10px;
+  margin: 40px;
+}
+
+.button-container {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: flex-end;
+  /* flex-direction: column;
+  height: 100vh;
+  display: flex; */
+
 }

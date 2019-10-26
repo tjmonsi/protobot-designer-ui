@@ -6,6 +6,7 @@ import '../protobot-authoring-sidebar';
 import '../protobot-micro';
 import '../protobot-macro';
 import '../protobot-history';
+import '../protobot-micro-sidebar';
 // @ts-ignore
 import styles from './style.css';
 /**
@@ -48,7 +49,7 @@ export const template = self => function () {
           <protobot-authoring-sidebar></protobot-authoring-sidebar>
         ` : ''}
         ${page === 'micro' ? html`
-          <protobot-micro-sidebar></protobot-micro-sidebar>
+          <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
         ` : ''}
       </div>
     ` : html`

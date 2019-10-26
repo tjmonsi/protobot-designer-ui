@@ -18,7 +18,7 @@ class ProtobotMicro extends GetDomainMixin(LitElement) {
     }
   }
 
-  addToUtterance() {
+  showUtterance() {
     // if there's utterance, then automatically generate this button a lot
   }
 }

@@ -10,16 +10,22 @@ import { database } from '../../../firebase';
 // @ts-ignore
 @customElement('utterance-review-item')
 class UtteranceReviewItem extends GetUtteranceMixin(GetDomainMixin(LitElement)) {
+  textInputVisible = false;
+
   render () {
     return template(this);
   }
 
   selectedTopic ({ target }) {
+
     const { value } = target;
     const updates = {};
-
     if (value === 'new-topic') {
-
+      this.textInputVisible = true;
+      console.log("new topic selected")
+    }
+    else {
+      this.textInputVisible = false;
     }
   }
 

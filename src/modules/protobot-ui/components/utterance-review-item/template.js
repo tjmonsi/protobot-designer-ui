@@ -10,8 +10,7 @@ import '@vaadin/vaadin-button';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { utterance, topics, selectedTopic, gettingTopic } = this;
-
+  const { utterance, topics, selectedTopic, gettingTopic, textInputVisible } = this;
   const { text, bot } = utterance || {};
 
   return html`
@@ -23,19 +22,24 @@ export const template = self => function () {
       <div class="feed ${!bot ? 'feed__right' : ''}">
         <div>
           <div class="label">${bot ? 'Bot' : 'User'}</div>
-          <vaadin-button
-            theme= "${bot ? 'contrast' : ''} primary"
-            class = "user-say"> ${text}
-          </vaadin-button>
+          <div class ="utterance ${!bot ? 'utterance__right' : ''}"> ${text}</div>
 
-          <div class="button-container ${!bot ? 'button-container__right' : ''}">
-            <select placeholder="Topic" @change=${selectedTopic.bind(this)}>
-              <option value="none"></option>
-              ${topics ? topics.map(item => html`<option value="${item.id}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
-              <option value="new-topic">New Topic</option>
-            </select>
-            <!--  -->
+          <div class="select-container ${!bot ? 'select-container__right' : ''}">
+            <div class = "select-topic">
+              <select class="select-box" placeholder="Topic" @change=${selectedTopic.bind(this)}>
+                <option value="none">Choose the topic</option>
+                ${topics ? topics.map(item => html`<option value="${item.id}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
+                <option value="new-topic">New Topic</option>
+              </select>
+            </div>
+            ${textInputVisible ? html`
+              <div class="new-topic-input">
+                <input type="text" class="input-box"  value="new label">
+              </div>
+              ` : ''}
           </div>
+
+
         </div>
       </div>
     ` : ''}
@@ -50,3 +54,5 @@ export const template = self => function () {
             <option value="new-topic">New Topic</option>
           </select>
  */
+
+// theme= "${bot ? 'contrast' : ''} primary"

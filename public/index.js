@@ -3284,7 +3284,7 @@ LitElement['finalized'] = true;
 
 LitElement.render = render$1;
 
-var styles = ":host {\n  margin: 40px;\n}\n\n.left-side-text {\n  font-size: 20px;\n}\n\n.review-link {\n  font-size: 20px;\n}";
+var styles = ":host {\n  margin: 40px;\n}\n\n.left-side-text {\n  font-size: 20px;\n}\n\n.review-link {\n  font-size: 20px;\n}\n\na {\n  color: coral;\n}\n\n/* a:visited {\n  color: white;\n} */";
 
 /**
  *
@@ -11835,7 +11835,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
 
 var styles$7 = "h1 {\n    text-align: center;\n    font-family: 'Raleway', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n\n.label{\n    font-weight: bold;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n}\n\n\n\n\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.user-say{\n    border-radius: 15px;\n    /*background: cornflowerblue;*/\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n}\n\n.bot-part {\n    float:left;\n    clear:both;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;*/\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n\n}\n\n.button-container{\n    display: flex;\n}";
 
-var styles$8 = "\n.feed{\n  display:flex;\n}\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n\n.label{\n  font-weight: bold;\n  font-family: 'Noto Sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.feed.feed__right .button-container{\n  flex-direction: row-reverse;\n}\n\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Noto Sans', sans-serif;\n}\n\n.user-say{\n  border-radius: 15px;\n  /*background: cornflowerblue;*/\n  width: 300px;\n  height: 70px;\n  font-family: 'Noto Sans', sans-serif;\n}\n\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Noto Sans', sans-serif;\n\n}\n\n.bot-say{\n  border-radius: 15px;\n  /*background: #73AD21;*/\n  padding: 20px;\n  width: 300px;\n  height: 70px;\n  font-family: 'Noto Sans', sans-serif;\n\n}\n\n.button-container{\n  display: flex;\n}\n";
+var styles$8 = "\n\n.feed{\n  display:flex;\n}\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  font-weight: bold;\n  font-family: 'Noto Sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Noto Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Noto Sans', sans-serif;\n}\n\n.utterance{\n  font-family: 'Raleway', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: bold;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  background:black;\n\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
 
 /**
  * @license
@@ -23064,7 +23064,8 @@ const template$7 = self => function () {
     utterance,
     topics,
     selectedTopic,
-    gettingTopic
+    gettingTopic,
+    textInputVisible
   } = this;
   const {
     text,
@@ -23079,19 +23080,24 @@ const template$7 = self => function () {
       <div class="feed ${!bot ? 'feed__right' : ''}">
         <div>
           <div class="label">${bot ? 'Bot' : 'User'}</div>
-          <vaadin-button
-            theme= "${bot ? 'contrast' : ''} primary"
-            class = "user-say"> ${text}
-          </vaadin-button>
+          <div class ="utterance ${!bot ? 'utterance__right' : ''}"> ${text}</div>
 
-          <div class="button-container ${!bot ? 'button-container__right' : ''}">
-            <select placeholder="Topic" @change=${selectedTopic.bind(this)}>
-              <option value="none"></option>
-              ${topics ? topics.map(item => html`<option value="${item.id}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
-              <option value="new-topic">New Topic</option>
-            </select>
-            <!--  -->
+          <div class="select-container ${!bot ? 'select-container__right' : ''}">
+            <div class = "select-topic">
+              <select class="select-box" placeholder="Topic" @change=${selectedTopic.bind(this)}>
+                <option value="none">Choose the topic</option>
+                ${topics ? topics.map(item => html`<option value="${item.id}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
+                <option value="new-topic">New Topic</option>
+              </select>
+            </div>
+            ${textInputVisible ? html`
+              <div class="new-topic-input">
+                <input type="text" class="input-box"  value="new label">
+              </div>
+              ` : ''}
           </div>
+
+
         </div>
       </div>
     ` : ''}
@@ -23105,6 +23111,7 @@ const template$7 = self => function () {
             <option value="new-topic">New Topic</option>
           </select>
  */
+// theme= "${bot ? 'contrast' : ''} primary"
 
 // @ts-ignore
 
@@ -23121,6 +23128,14 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
   return {
     F: UtteranceReviewItem,
     d: [{
+      kind: "field",
+      key: "textInputVisible",
+
+      value() {
+        return false;
+      }
+
+    }, {
       kind: "method",
       key: "render",
       value: function render() {
@@ -23132,6 +23147,16 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
       value: function selectedTopic({
         target
       }) {
+        const {
+          value
+        } = target;
+
+        if (value === 'new-topic') {
+          this.textInputVisible = true;
+          console.log("new topic selected");
+        } else {
+          this.textInputVisible = false;
+        }
       }
       /**
        *
@@ -23177,57 +23202,6 @@ const template$8 = self => function () {
     <h1>Micro Review</h1>
     <h3>Crowd name: ${crowdID}</h3>
     <br>
-<<<<<<< HEAD
-    <div class="feed feed__right">
-      <div>
-        <div class="label">User</div>
-        <vaadin-button
-          theme= "primary"
-          class = "user-say"> User said!
-        </vaadin-button>
-        <div class="button-container button-container__right">
-          <vaadin-select class="topic-select">
-              <template>
-                <vaadin-list-box>
-                  <!-- wanna put topic here -->
-                  <vaadin-item>Jose</vaadin-item>
-                  <vaadin-item>Manolo</vaadin-item>
-                  <vaadin-item>Pedro</vaadin-item>
-                </vaadin-list-box>
-              </template>
-            </vaadin-select>
-        </div>
-      </div>
-    </div>
-    <br>
-    <div class="feed">
-      <div>
-        <div class="label">Bot</div>
-        <!-- ${topics.map(item => html`${item}`)} -->
-        <vaadin-button
-          theme= "contrast primary"
-          class= "bot-say"> Bot said!
-        </vaadin-button>
-        <div class="select-container">
-          <vaadin-select class="topic-select">
-            <template>
-              <vaadin-list-box>
-                <!-- wanna put topic here -->
-                  ${["topic1", "topic2"].map(item => html`<vaadin-item>${item}</vaadin-item>`)}
-                </vaadin-item>
-                <vaadin-item class="new-item-input">Add new topic</vaadin-item>
-              </vaadin-list-box>
-              <!-- <vaadin-list-box>
-                ${["topic4", "topic5"].map(item => html`${item}`)}
-              </vaadin-list-box> -->
-            </template>
-          </vaadin-select>
-        </div>
-      </div>
-    </div>
-
-=======
->>>>>>> 60e65de98a1d84eec0acebc3b8c697c2b0665c16
 
     ${utterances && utterances.length ? utterances.map(item => html`
       <utterance-review-item .utteranceId="${item.id}"></utterance-review-item>
@@ -23582,7 +23556,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   };
 }, GetDomainMixin(LitElement));
 
-var styles$c = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: #888888;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #888888;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$c = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background:rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
 
 /**
  *

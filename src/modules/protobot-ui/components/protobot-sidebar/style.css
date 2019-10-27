@@ -9,3 +9,11 @@
 .review-link {
   font-size: 20px;
 }
+
+a {
+  color: coral;
+}
+
+/* a:visited {
+  color: white;
+} */

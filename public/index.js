@@ -9504,7 +9504,7 @@ if(document.body){document.body.appendChild(iframe);try{// If document.domain ha
 var a=iframe.contentWindow.document;if(!a){// Apologies for the log-spam, I need to do something to keep closure from optimizing out the assignment above.
 log('No IE domain setting required');}}catch(e){var domain=document.domain;iframe.src="javascript:void((function(){document.open();document.domain='"+domain+"';document.close();})())";}}else{// LongPollConnection attempts to delay initialization until the document is ready, so hopefully this
 // never gets hit.
-throw 'Document body has not initialized. Wait to initialize Firebase until after the document is ready.';}// Get the document of the iframe in a browser-specific way.
+throw'Document body has not initialized. Wait to initialize Firebase until after the document is ready.';}// Get the document of the iframe in a browser-specific way.
 if(iframe.contentDocument){iframe.doc=iframe.contentDocument;// Firefox, Opera, Safari
 }else if(iframe.contentWindow){iframe.doc=iframe.contentWindow.document;// Internet Explorer
 }else if(iframe.document){iframe.doc=iframe.document;//others?
@@ -9800,7 +9800,7 @@ this.repoInfo_.internalHost=this.repoInfo_.host;}}else if(this.state_===1/* CONN
      * @private
      */Connection.prototype.onConnectionShutdown_=function(reason){this.log_('Connection shutdown command received. Shutting down...');if(this.onKill_){this.onKill_(reason);this.onKill_=null;}// We intentionally don't want to fire onDisconnect (kill is a different case),
 // so clear the callback.
-this.onDisconnect_=null;this.close();};Connection.prototype.sendData_=function(data){if(this.state_!==1/* CONNECTED */){throw 'Connection is not connected';}else{this.tx_.send(data);}};/**
+this.onDisconnect_=null;this.close();};Connection.prototype.sendData_=function(data){if(this.state_!==1/* CONNECTED */){throw'Connection is not connected';}else{this.tx_.send(data);}};/**
      * Cleans up this connection, calling the appropriate callbacks
      */Connection.prototype.close=function(){if(this.state_!==2/* DISCONNECTED */){this.log_('Closing realtime connection.');this.state_=2/* DISCONNECTED */;this.closeConnections_();if(this.onDisconnect_){this.onDisconnect_();this.onDisconnect_=null;}}};/**
      *
@@ -9915,7 +9915,7 @@ if(_this.outstandingPutCount_===0){_this.outstandingPuts_=[];}if(onComplete)onCo
      * @inheritDoc
      */PersistentConnection.prototype.reportStats=function(stats){var _this=this;// If we're not connected, we just drop the stats.
 if(this.connected_){var request={/*counters*/c:stats};this.log_('reportStats',request);this.sendRequest(/*stats*/'s',request,function(result){var status=result[/*status*/'s'];if(status!=='ok'){var errorReason=result[/* data */'d'];_this.log_('reportStats','Error sending stats: '+errorReason);}});}};PersistentConnection.prototype.onDataMessage_=function(message){if('r'in message){// this is a response
-this.log_('from server: '+stringify(message));var reqNum=message['r'];var onResponse=this.requestCBHash_[reqNum];if(onResponse){delete this.requestCBHash_[reqNum];onResponse(message[/*body*/'b']);}}else if('error'in message){throw 'A server-side error has occurred: '+message['error'];}else if('a'in message){// a and b are action and body, respectively
+this.log_('from server: '+stringify(message));var reqNum=message['r'];var onResponse=this.requestCBHash_[reqNum];if(onResponse){delete this.requestCBHash_[reqNum];onResponse(message[/*body*/'b']);}}else if('error'in message){throw'A server-side error has occurred: '+message['error'];}else if('a'in message){// a and b are action and body, respectively
 this.onDataPush_(message['a'],message['b']);}};PersistentConnection.prototype.onDataPush_=function(action,body){this.log_('handleServerMessage',action,body);if(action==='d')this.onDataUpdate_(body[/*path*/'p'],body[/*data*/'d'],/*isMerge*/false,body['t']);else if(action==='m')this.onDataUpdate_(body[/*path*/'p'],body[/*data*/'d'],/*isMerge=*/true,body['t']);else if(action==='c')this.onListenRevoked_(body[/*path*/'p'],body[/*query*/'q']);else if(action==='ac')this.onAuthRevoked_(body[/*status code*/'s'],body[/* explanation */'d']);else if(action==='sd')this.onSecurityDebugPacket_(body);else error('Unrecognized action received from server: '+stringify(action)+'\nAre you using the latest client?');};PersistentConnection.prototype.onReady_=function(timestamp,sessionId){this.log_('connection ready');this.connected_=true;this.lastConnectionEstablishedTime_=new Date().getTime();this.handleTimestamp_(timestamp);this.lastSessionId=sessionId;if(this.firstConnection_){this.sendConnectStats_();}this.restoreState_();this.firstConnection_=false;this.onConnectStatus_(true);};PersistentConnection.prototype.scheduleConnect_=function(timeout){var _this=this;assert(!this.realtime_,"Scheduling a connect when we're already connected/ing?");if(this.establishConnectionTimer_){clearTimeout(this.establishConnectionTimer_);}// NOTE: Even when timeout is 0, it's important to do a setTimeout to work around an infuriating "Security Error" in
 // Firefox when trying to write to our long-polling iframe in some scenarios (e.g. Forge or our unit tests).
 this.establishConnectionTimer_=setTimeout(function(){_this.establishConnectionTimer_=null;_this.establishConnection_();},Math.floor(timeout));};PersistentConnection.prototype.onVisible_=function(visible){// NOTE: Tabbing away and back to a window will defeat our reconnect backoff, but I think that's fine.
@@ -10289,7 +10289,7 @@ _this=_super.call(this,repo,path,QueryParams.DEFAULT,false)||this;return _this;}
      * @param {string|number|null} newPriority
      * @param {function(?Error)=} onComplete
      * @return {!Promise}
-     */Reference.prototype.setWithPriority=function(newVal,newPriority,onComplete){validateArgCount('Reference.setWithPriority',2,3,arguments.length);validateWritablePath('Reference.setWithPriority',this.path);validateFirebaseDataArg('Reference.setWithPriority',1,newVal,this.path,false);validatePriority('Reference.setWithPriority',2,newPriority,false);validateCallback('Reference.setWithPriority',3,onComplete,true);if(this.getKey()==='.length'||this.getKey()==='.keys')throw 'Reference.setWithPriority failed: '+this.getKey()+' is a read-only object.';var deferred=new Deferred();this.repo.setWithPriority(this.path,newVal,newPriority,deferred.wrapCallback(onComplete));return deferred.promise;};/**
+     */Reference.prototype.setWithPriority=function(newVal,newPriority,onComplete){validateArgCount('Reference.setWithPriority',2,3,arguments.length);validateWritablePath('Reference.setWithPriority',this.path);validateFirebaseDataArg('Reference.setWithPriority',1,newVal,this.path,false);validatePriority('Reference.setWithPriority',2,newPriority,false);validateCallback('Reference.setWithPriority',3,onComplete,true);if(this.getKey()==='.length'||this.getKey()==='.keys')throw'Reference.setWithPriority failed: '+this.getKey()+' is a read-only object.';var deferred=new Deferred();this.repo.setWithPriority(this.path,newVal,newPriority,deferred.wrapCallback(onComplete));return deferred.promise;};/**
      * @param {function(?Error)=} onComplete
      * @return {!Promise}
      */Reference.prototype.remove=function(onComplete){validateArgCount('Reference.remove',0,1,arguments.length);validateWritablePath('Reference.remove',this.path);validateCallback('Reference.remove',1,onComplete,true);return this.set(null,onComplete);};/**
@@ -10299,7 +10299,7 @@ _this=_super.call(this,repo,path,QueryParams.DEFAULT,false)||this;return _this;}
      * @return {!Promise}
      */Reference.prototype.transaction=function(transactionUpdate,onComplete,applyLocally){validateArgCount('Reference.transaction',1,3,arguments.length);validateWritablePath('Reference.transaction',this.path);validateCallback('Reference.transaction',1,transactionUpdate,false);validateCallback('Reference.transaction',2,onComplete,true);// NOTE: applyLocally is an internal-only option for now.  We need to decide if we want to keep it and how
 // to expose it.
-validateBoolean('Reference.transaction',3,applyLocally,true);if(this.getKey()==='.length'||this.getKey()==='.keys')throw 'Reference.transaction failed: '+this.getKey()+' is a read-only object.';if(applyLocally===undefined)applyLocally=true;var deferred=new Deferred();if(typeof onComplete==='function'){deferred.promise.catch(function(){});}var promiseComplete=function(error,committed,snapshot){if(error){deferred.reject(error);}else{deferred.resolve(new TransactionResult(committed,snapshot));}if(typeof onComplete==='function'){onComplete(error,committed,snapshot);}};this.repo.startTransaction(this.path,transactionUpdate,promiseComplete,applyLocally);return deferred.promise;};/**
+validateBoolean('Reference.transaction',3,applyLocally,true);if(this.getKey()==='.length'||this.getKey()==='.keys')throw'Reference.transaction failed: '+this.getKey()+' is a read-only object.';if(applyLocally===undefined)applyLocally=true;var deferred=new Deferred();if(typeof onComplete==='function'){deferred.promise.catch(function(){});}var promiseComplete=function(error,committed,snapshot){if(error){deferred.reject(error);}else{deferred.resolve(new TransactionResult(committed,snapshot));}if(typeof onComplete==='function'){onComplete(error,committed,snapshot);}};this.repo.startTransaction(this.path,transactionUpdate,promiseComplete,applyLocally);return deferred.promise;};/**
      * @param {string|number|null} priority
      * @param {function(?Error)=} onComplete
      * @return {!Promise}
@@ -23177,6 +23177,57 @@ const template$8 = self => function () {
     <h1>Micro Review</h1>
     <h3>Crowd name: ${crowdID}</h3>
     <br>
+<<<<<<< HEAD
+    <div class="feed feed__right">
+      <div>
+        <div class="label">User</div>
+        <vaadin-button
+          theme= "primary"
+          class = "user-say"> User said!
+        </vaadin-button>
+        <div class="button-container button-container__right">
+          <vaadin-select class="topic-select">
+              <template>
+                <vaadin-list-box>
+                  <!-- wanna put topic here -->
+                  <vaadin-item>Jose</vaadin-item>
+                  <vaadin-item>Manolo</vaadin-item>
+                  <vaadin-item>Pedro</vaadin-item>
+                </vaadin-list-box>
+              </template>
+            </vaadin-select>
+        </div>
+      </div>
+    </div>
+    <br>
+    <div class="feed">
+      <div>
+        <div class="label">Bot</div>
+        <!-- ${topics.map(item => html`${item}`)} -->
+        <vaadin-button
+          theme= "contrast primary"
+          class= "bot-say"> Bot said!
+        </vaadin-button>
+        <div class="select-container">
+          <vaadin-select class="topic-select">
+            <template>
+              <vaadin-list-box>
+                <!-- wanna put topic here -->
+                  ${["topic1", "topic2"].map(item => html`<vaadin-item>${item}</vaadin-item>`)}
+                </vaadin-item>
+                <vaadin-item class="new-item-input">Add new topic</vaadin-item>
+              </vaadin-list-box>
+              <!-- <vaadin-list-box>
+                ${["topic4", "topic5"].map(item => html`${item}`)}
+              </vaadin-list-box> -->
+            </template>
+          </vaadin-select>
+        </div>
+      </div>
+    </div>
+
+=======
+>>>>>>> 60e65de98a1d84eec0acebc3b8c697c2b0665c16
 
     ${utterances && utterances.length ? utterances.map(item => html`
       <utterance-review-item .utteranceId="${item.id}"></utterance-review-item>
@@ -23322,141 +23373,6 @@ const GetDomainUtterancesMixin = base => _decorate(null, function (_initialize, 
           this.domainUtterancesChanged(this.utterances);
         }
       }
-<<<<<<< HEAD
-    }
-  }
-  /** @override */
-
-
-  _setFocused(focused) {
-    // Keep `focused` state when opening the overlay for styling purpose.
-    super._setFocused(this.opened || focused);
-
-    this.focusElement._setFocused(this.hasAttribute('focused'));
-
-    !this.hasAttribute('focused') && this.validate();
-  }
-
-  _setPosition() {
-    const inputRect = this._inputElement.shadowRoot.querySelector('[part~="input-field"]').getBoundingClientRect();
-
-    const viewportHeight = Math.min(window.innerHeight, document.documentElement.clientHeight);
-    const bottomAlign = inputRect.top > (viewportHeight - inputRect.height) / 2;
-    this._overlayElement.style.left = inputRect.left + 'px';
-
-    if (bottomAlign) {
-      this._overlayElement.setAttribute('bottom-aligned', '');
-
-      this._overlayElement.style.removeProperty('top');
-
-      this._overlayElement.style.bottom = viewportHeight - inputRect.bottom + 'px';
-    } else {
-      this._overlayElement.removeAttribute('bottom-aligned');
-
-      this._overlayElement.style.removeProperty('bottom');
-
-      this._overlayElement.style.top = inputRect.top + 'px';
-    }
-
-    this._overlayElement.updateStyles({
-      '--vaadin-select-text-field-width': inputRect.width + 'px'
-    });
-  }
-  /**
-   * Returns true if `value` is valid, and sets the `invalid` flag appropriately.
-   *
-   * @return {boolean} True if the value is valid and sets the `invalid` flag appropriately
-   */
-
-
-  validate() {
-    return !(this.invalid = !(this.disabled || !this.required || this.value));
-  }
-  /**
-   * Fired when the user commits a value change.
-   *
-   * @event change
-   */
-
-
-}
-
-customElements.define(SelectElement.is, SelectElement);
-
-/**
- *
- * @param {any} self
- */
-
-const template$7 = self => function () {
-  // @ts-ignore
-  const {
-    crowdID,
-    topics
-  } = this;
-  console.log(topics);
-  return html`
-    <style>
-      ${styles$7}
-      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
-    </style>
-
-    <h1>Micro Review</h1>
-    <h3>Crowd name: ${crowdID}</h3>
-    <br>
-    <div class="feed feed__right">
-      <div>
-        <div class="label">User</div>
-        <vaadin-button
-          theme= "primary"
-          class = "user-say"> User said!
-        </vaadin-button>
-        <div class="button-container button-container__right">
-          <vaadin-select class="topic-select">
-              <template>
-                <vaadin-list-box>
-                  <!-- wanna put topic here -->
-                  <vaadin-item>Jose</vaadin-item>
-                  <vaadin-item>Manolo</vaadin-item>
-                  <vaadin-item>Pedro</vaadin-item>
-                </vaadin-list-box>
-              </template>
-            </vaadin-select>
-        </div>
-      </div>
-    </div>
-    <br>
-    <div class="feed">
-      <div>
-        <div class="label">Bot</div>
-        <!-- ${topics.map(item => html`${item}`)} -->
-        <vaadin-button
-          theme= "contrast primary"
-          class= "bot-say"> Bot said!
-        </vaadin-button>
-        <div class="select-container">
-          <vaadin-select class="topic-select">
-            <template>
-              <vaadin-list-box>
-                <!-- wanna put topic here -->
-                  ${["topic1", "topic2"].map(item => html`<vaadin-item>${item}</vaadin-item>`)}
-                </vaadin-item>
-                <vaadin-item class="new-item-input">Add new topic</vaadin-item>
-              </vaadin-list-box>
-              <!-- <vaadin-list-box>
-                ${["topic4", "topic5"].map(item => html`${item}`)}
-              </vaadin-list-box> -->
-            </template>
-          </vaadin-select>
-        </div>
-      </div>
-    </div>
-
-
-  `;
-}.bind(self)();
-=======
     }, {
       kind: "method",
       key: "domainUtterancesChanged",
@@ -23466,7 +23382,6 @@ const template$7 = self => function () {
     }]
   };
 }, GetPathMixin(base));
->>>>>>> 60e65de98a1d84eec0acebc3b8c697c2b0665c16
 
 // import { database } from '../../../firebase';
 // Extend the LitElement base class

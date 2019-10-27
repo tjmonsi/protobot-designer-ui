@@ -1,20 +1,17 @@
 import { html } from 'lit-element';
 // @ts-ignore
 import styles from './style.css';
+import '@vaadin/vaadin-button';
+import '@vaadin/vaadin-select'
 import '../topic-list-item';
-import '../utterance-review-item';
 /**
  *
  * @param {any} self
  */
 export const template = self => function () {
   // @ts-ignore
-  const { crowdID, topics, utterances } = this;
-  console.log(topics);
-  const t = [];
-  for (const i in topics) {
-    t.push(html`<vaadin-item>${topics[i].id}</vaadin-item>`);
-  }
+  const { crowdID, topics } = this;
+  console.log(topics)
   return html`
     <style>
       ${styles}
@@ -25,7 +22,6 @@ export const template = self => function () {
     <h1>Micro Review</h1>
     <h3>Crowd name: ${crowdID}</h3>
     <br>
-<<<<<<< HEAD
     <div class="feed feed__right">
       <div>
         <div class="label">User</div>
@@ -63,7 +59,11 @@ export const template = self => function () {
                 <!-- wanna put topic here -->
                   ${["topic1", "topic2"].map(item => html`<vaadin-item>${item}</vaadin-item>`)}
                 </vaadin-item>
-                <vaadin-item class="new-item-input">Add new topic</vaadin-item>
+                <vaadin-item
+                  class="new-item-input"
+                  @click= this.addLabel>
+                  Add new topic
+                </vaadin-item>
               </vaadin-list-box>
               <!-- <vaadin-list-box>
                 ${["topic4", "topic5"].map(item=> html`${item}`)}
@@ -74,13 +74,6 @@ export const template = self => function () {
       </div>
     </div>
 
-=======
->>>>>>> 60e65de98a1d84eec0acebc3b8c697c2b0665c16
 
-    ${utterances && utterances.length ? utterances.map(item => html`
-      <utterance-review-item .utteranceId="${item.id}"></utterance-review-item>
-    `) : ''}
   `;
 }.bind(self)();
-
-// ${[ t[0], t[1], t[2], t[3], t[4], t[5] ].map(item => html`<vaadin-item>${item.id}</vaadin-item>`)}

@@ -3,7 +3,7 @@ import { html } from 'lit-element';
 import styles from './style.css';
 import { until } from 'lit-html/directives/until';
 
-import '@vaadin/vaadin-button';
+// import '@vaadin/vaadin-button';
 /**
  *
  * @param {any} self
@@ -16,6 +16,9 @@ export const template = self => function () {
   return html`
     <style>
       ${styles}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
     ${utterance ? html`

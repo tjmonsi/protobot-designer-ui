@@ -1,15 +1,14 @@
-
-
 .feed{
   display:flex;
 }
+
 .feed.feed__right{
   flex-direction: row-reverse;
 }
 
 .label{
-  font-weight: bold;
-  font-family: 'Noto Sans', sans-serif;
+  /* font-weight: bold; */
+  font-family: 'Open sans', sans-serif;
 }
 
 .feed.feed__right .label{
@@ -23,25 +22,25 @@
 .feed.feed__right .select-container{
   flex-direction: row-reverse;
 }
-
+/*
 .user-label{
   font-weight: bold;
   text-align: right;
   padding-right: 20px;
-  font-family: 'Noto Sans', sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .bot-label{
   font-weight: bold;
   margin-left: 10px;
-  font-family: 'Noto Sans', sans-serif;
-}
+  font-family: 'Open Sans', sans-serif;
+} */
 
 .utterance{
-  font-family: 'Raleway', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   border-radius: 10px;
   font-size: 12pt;
-  font-weight: bold;
+  font-weight: 500;
   text-align: center;
   background: cornflowerblue;
   color: #fff;
@@ -53,10 +52,9 @@
 }
 
 .utterance.utterance__right{
+  background:black;
   /* border-radius: 10px;
   font-size: 15pt; */
-  background:black;
-
   /* color: #fff;
   width: 300px;
   padding: 20px;
@@ -79,7 +77,6 @@
   text-align: center;
   margin-left: 10px;
   margin-right: 10px;
-
 }
 
 .option {

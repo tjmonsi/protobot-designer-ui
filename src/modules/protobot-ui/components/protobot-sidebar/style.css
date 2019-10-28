@@ -2,12 +2,18 @@
   margin: 40px;
 }
 
+h2 {
+  font-family: 'Open Sans', sans-serif;
+}
+
 .left-side-text {
   font-size: 20px;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .review-link {
   font-size: 20px;
+  font-family: 'Open Sans', sans-serif;
 }
 
 a {

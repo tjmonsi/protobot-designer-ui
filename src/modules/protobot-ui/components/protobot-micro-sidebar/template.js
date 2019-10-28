@@ -14,7 +14,11 @@ export const template = self => function () {
   return html`
     <style>
       ${styles}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
+
     <div class = "instruction">
       <h2>Instruction</h2>
       <p>In this stage, you can label the topic for each utterance.

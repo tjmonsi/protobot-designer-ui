@@ -8,14 +8,21 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  // const { topic } = this;
-  console.log(this);
+  const { topics } = this;
+  // console.log(this);
 
   return html`
     <style>
       ${styles}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
-    Macro
+    <h1>Macro Review</h1>
+    <br>
+
+
+
   `;
 }.bind(self)();

@@ -14,14 +14,55 @@ class ProtobotMicro extends GetDomainUtterancesMixin(GetDomainMixin(LitElement))
     return template(this);
   }
 
-  addLabel () {
-    if (this.click) {
-    }
-  }
+  // async createTopic (sub) {
+  //   const { key: topicId } = database.ref('labels/data').push();
+  //   const { key: utteranceId } = database.ref('utterances/data').push();
+  //   const { domain } = this.topic;
+  //   const updates = {};
+  //   const snap = await database.ref(`domains/data/${domain}`).once('value');
+  //   const { topics } = snap.val() || { topics: {} };
+  //   const array = [];
+  //   for (const topic in topics) {
+  //     array.push({ topic, order: topics[topic] });
+  //   }
+  //   const topicArray = array.sort((i, j) => (i.order - j.order)).map(i => i.topic);
 
-  addToUtterance () {
-    // if there's utterance, then automatically generate this button a lot
-  }
+  //   const topic = {
+  //     domain,
+  //     name: 'Topic',
+  //     required: true,
+  //     mainUtterance: utteranceId,
+  //     utterances: {}
+  //   };
+
+  //   topic.utterances[utteranceId] = true;
+
+  //   const utterance = {
+  //     bot: true,
+  //     domain,
+  //     required: true,
+  //     text: 'Utterance',
+  //     topics: {}
+  //   };
+
+  //   utterance.topics[topicId] = true;
+
+  //   topicArray.splice(this.index + 1, 0, topicId);
+
+  //   const newTopics = {};
+
+  //   for (const i in topicArray) {
+  //     newTopics[topicArray[i]] = parseInt(i);
+  //   }
+
+  //   updates[`labels/data/${topicId}`] = topic;
+  //   updates[`utterances/data/${utteranceId}`] = utterance;
+  //   updates[`domains/data/${domain}/topics`] = newTopics;
+  //   updates[`domains/data/${domain}/subs/${topicId}`] = sub || false;
+  //   updates[`domains/data/${domain}/topicList/${topicId}`] = true;
+
+  //   await database.ref().update(updates);
+  // }
 }
 
 export { ProtobotMicro };

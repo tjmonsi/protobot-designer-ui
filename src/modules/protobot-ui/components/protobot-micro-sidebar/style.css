@@ -1,23 +1,28 @@
 h2 {
   /* margin-left: 20px; */
-  font-family: 'Noto Sans', sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
 p {
   font-size: 20px;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .topic-list {
   font-size: 20px;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .button-container .button-save {
-  background: black;
+  background: coral;
   color: white;
-  font-size: 20px;
+  font-size: 15px;
+  font-weight: bold;
   padding: 12px;
   border-radius: 10px;
   margin: 40px;
+  font-family: 'Open-sans', sans-serif;
+  text-align: center;
 }
 
 .button-container {

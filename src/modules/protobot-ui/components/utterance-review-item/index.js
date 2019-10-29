@@ -1,5 +1,5 @@
 // Import the LitElement base class and html helper function
-import { LitElement, customElement } from 'lit-element';
+import { LitElement, customElement, property } from 'lit-element';
 import { template } from './template.js';
 import { GetUtteranceMixin } from '../../mixins/get-utterance';
 import { GetDomainMixin } from '../../mixins/get-domain';
@@ -10,6 +10,7 @@ import { database } from '../../../firebase';
 // @ts-ignore
 @customElement('utterance-review-item')
 class UtteranceReviewItem extends GetUtteranceMixin(GetDomainMixin(LitElement)) {
+  @property({ type: Boolean })
   textInputVisible = false;
 
   render () {

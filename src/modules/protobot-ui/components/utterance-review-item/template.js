@@ -41,8 +41,6 @@ export const template = self => function () {
               </div>
               ` : ''}
           </div>
-
-
         </div>
       </div>
     ` : ''}

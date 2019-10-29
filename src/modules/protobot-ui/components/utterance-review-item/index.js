@@ -22,26 +22,23 @@ class UtteranceReviewItem extends GetUtteranceMixin(GetDomainMixin(LitElement)) 
     const updates = {};
     if (value === 'new-topic') {
       this.textInputVisible = true;
-      console.log("new topic selected")
     }
     else {
       this.textInputVisible = false;
     }
   }
 
-  async appendTopic () { // which can append topic by text-input
-    const { key: topicId } = database.ref('labels/data').push();
+  async appendTopic (event) {
+    const { target } = event;
+    const { value } = target;
     const { key: utteranceId } = database.ref('utterances/data').push();
-    const { domain } = this.topic;
-    const updates = {};
-    const topic = {
-      domain,
-      name: 'Topic',
-      required: true,
-      mainUtterance: utteranceId,
-      utterances: {}
-    };
+
+    if (value !== 'new label') {
+      await database.ref(`utterances/data/${utteranceId}/topics`).set(value);
+      console.log(value)
+    }
   }
+
 
   /**
    *

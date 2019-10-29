@@ -10,7 +10,7 @@ import { until } from 'lit-html/directives/until';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { utterance, topics, selectedTopic, gettingTopic, textInputVisible } = this;
+  const { utterance, topics, selectedTopic, gettingTopic, textInputVisible, appendTopic } = this;
   const { text, bot } = utterance || {};
 
   return html`
@@ -37,7 +37,7 @@ export const template = self => function () {
             </div>
             ${textInputVisible ? html`
               <div class="new-topic-input">
-                <input type="text" class="input-box"  value="new label">
+                <input type="text" class="input-box" value="new label" @change=${appendTopic.bind(this)}>
               </div>
               ` : ''}
           </div>
@@ -46,7 +46,6 @@ export const template = self => function () {
         </div>
       </div>
     ` : ''}
-
 
   `;
 }.bind(self)();

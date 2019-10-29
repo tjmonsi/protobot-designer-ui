@@ -11944,7 +11944,8 @@ const template$7 = self => function () {
     topics,
     selectedTopic,
     gettingTopic,
-    textInputVisible
+    textInputVisible,
+    appendTopic
   } = this;
   const {
     text,
@@ -11974,7 +11975,7 @@ const template$7 = self => function () {
             </div>
             ${textInputVisible ? html`
               <div class="new-topic-input">
-                <input type="text" class="input-box"  value="new label">
+                <input type="text" class="input-box" value="new label" @change=${appendTopic.bind(this)}>
               </div>
               ` : ''}
           </div>
@@ -11983,7 +11984,6 @@ const template$7 = self => function () {
         </div>
       </div>
     ` : ''}
-
 
   `;
 }.bind(self)();
@@ -12011,6 +12011,9 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
     F: UtteranceReviewItem,
     d: [{
       kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
       key: "textInputVisible",
 
       value() {
@@ -12026,7 +12029,7 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
     }, {
       kind: "method",
       key: "selectedTopic",
-      value: function selectedTopic({
+      value: async function selectedTopic({
         target
       }) {
         const {
@@ -12039,6 +12042,21 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
         } else {
           this.textInputVisible = false;
         }
+      }
+    }, {
+      kind: "method",
+      key: "appendTopic",
+      value: async function appendTopic() {
+        // which can append topic by text-input
+        const {
+          key: topicId
+        } = database.ref('labels/data').push();
+        const {
+          key: utteranceId
+        } = database.ref('utterances/data').push();
+        const {
+          domain
+        } = this.topic;
       }
       /**
        *

@@ -34,11 +34,15 @@ export const template = self => function () {
       </li>
     `)}
     </ul>
+    <br>
+    <br>
+    <protobot-memo></protobot-memo>
     <div class="button-container">
       <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
         Done with Labeling
       </vaadin-button>
     </div>
+
 
   `;
 }.bind(self)();

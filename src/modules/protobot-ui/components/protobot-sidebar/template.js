@@ -2,6 +2,7 @@ import { html } from 'lit-element';
 // @ts-ignore
 import styles from './style.css';
 import { until } from 'lit-html/directives/until';
+import '../protobot-memo';
 
 /**
  *

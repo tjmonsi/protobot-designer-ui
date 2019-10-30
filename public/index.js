@@ -3064,6 +3064,50 @@ part of the polymer project is also subject to an additional IP rights grant
 found at http://polymer.github.io/PATENTS.txt
 */
 const supportsAdoptingStyleSheets = 'adoptedStyleSheets' in Document.prototype && 'replace' in CSSStyleSheet.prototype;
+const constructionToken = Symbol();
+class CSSResult {
+  constructor(cssText, safeToken) {
+    if (safeToken !== constructionToken) {
+      throw new Error('CSSResult is not constructable. Use `unsafeCSS` or `css` instead.');
+    }
+
+    this.cssText = cssText;
+  } // Note, this is a getter so that it's lazy. In practice, this means
+  // stylesheets are not created until the first element instance is made.
+
+
+  get styleSheet() {
+    if (this._styleSheet === undefined) {
+      // Note, if `adoptedStyleSheets` is supported then we assume CSSStyleSheet
+      // is constructable.
+      if (supportsAdoptingStyleSheets) {
+        this._styleSheet = new CSSStyleSheet();
+
+        this._styleSheet.replaceSync(this.cssText);
+      } else {
+        this._styleSheet = null;
+      }
+    }
+
+    return this._styleSheet;
+  }
+
+  toString() {
+    return this.cssText;
+  }
+
+}
+/**
+ * Wrap a value for interpolation in a css tagged template literal.
+ *
+ * This is unsafe because untrusted CSS text can be used to phone home
+ * or exfiltrate data to an attacker controlled site. Take care to only use
+ * this with trusted input.
+ */
+
+const unsafeCSS = value => {
+  return new CSSResult(String(value), constructionToken);
+};
 
 /**
  * @license
@@ -3379,55 +3423,33 @@ const until = directive((...args) => part => {
   }
 });
 
-/**
- *
- * @param {any} self
- */
+var styles$1 = ".memo {\n  --input-bg: rgb(255, 187, 0);\n  --input-color:black;\n  --input-label-color: white;\n  --input-font-family: 'Open Sans', sans-serif;\n\n\n}";
 
-const template = self => function () {
-  // @ts-ignore
-  const {
-    domainName,
-    changeDomainName,
-    designerName,
-    changeDesignerName,
-    goMacro,
-    goMicro,
-    goHistory,
-    users,
-    gettingCrowdId
-  } = this;
-  return html`
-    <style>
-      ${styles}
-      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
-    </style>
+function cssResult(cssText) {
+  return unsafeCSS(cssText);
+}
 
-    <h2>Domain</h2>
-    <input class="left-side-text" type="text" value="${domainName}" @change="${changeDomainName.bind(this)}">
-    <h2>Designer</h2>
-    <input class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
-    <br>
-    <br>
-    <h2>Review pages</h2>
-    <ul class = "review-link">
-      <li><a href="/?domain=${this.domainId}&page=macro">Macro review</a></li>
-      <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
-      <li><a href="/?domain=${this.domainId}&page=history">History review</a></li>
-    </ul>
-    <br>
-    <br>
-    <h2>Crowd list</h2>
-    <ul class = "crowd-link">
-    ${users ? users.map(item => html`
-      <li>
-        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item.name), 'Loading...')}"</a>
-      </li>`) : ''}
-    </ul>
-  `;
-}.bind(self)();
+function renderAttributes(element, attrMap) {
+  for (const a in attrMap) {
+    const v = attrMap[a] === true ? '' : attrMap[a];
+
+    if (v || v === '' || v === 0) {
+      if (element.getAttribute(a) !== v) {
+        element.setAttribute(a, v.toString());
+      }
+    } else if (element.hasAttribute(a)) {
+      element.removeAttribute(a);
+    }
+  }
+}
+
+function isHidden($elem, style) {
+  if (style != null) {
+    return style.display === 'none';
+  }
+
+  return $elem.offsetParent === null;
+}
 
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation. All rights reserved.
@@ -3479,6 +3501,16 @@ var __assign = function () {
 
   return __assign.apply(this, arguments);
 };
+function __decorate(decorators, target, key, desc) {
+  var c = arguments.length,
+      r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc,
+      d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+function __metadata(metadataKey, metadataValue) {
+  if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+}
 function __awaiter(thisArg, _arguments, P, generator) {
   return new (P || (P = Promise))(function (resolve, reject) {
     function fulfilled(value) {
@@ -3657,6 +3689,478 @@ function __spread() {
 
   return ar;
 }
+
+/**
+ * @license
+ * Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at
+ * http://polymer.github.io/LICENSE.txt
+ * The complete set of authors may be found at
+ * http://polymer.github.io/AUTHORS.txt
+ * The complete set of contributors may be found at
+ * http://polymer.github.io/CONTRIBUTORS.txt
+ * Code distributed by Google as part of the polymer project is also
+ * subject to an additional IP rights grant found at
+ * http://polymer.github.io/PATENTS.txt
+ */
+/**
+ * For AttributeParts, sets the attribute if the value is defined and removes
+ * the attribute if the value is undefined.
+ *
+ * For other part types, this directive is a no-op.
+ */
+
+const ifDefined = directive(value => part => {
+  if (value === undefined && part instanceof AttributePart) {
+    if (value !== part.value) {
+      const name = part.committer.name;
+      part.committer.element.removeAttribute(name);
+    }
+  } else {
+    part.setValue(value);
+  }
+});
+
+function updateTabindex($elem, disabled) {
+  $elem.tabIndex = disabled ? -1 : $elem.tabIndex < 0 ? 0 : $elem.tabIndex;
+}
+
+let timeouts = new Map();
+/**
+ * Debounces a callback.
+ * @param cb
+ * @param ms
+ * @param id
+ */
+
+function debounce(cb, ms, id) {
+  // Clear current timeout for id
+  const timeout = timeouts.get(id);
+
+  if (timeout != null) {
+    window.clearTimeout(timeout);
+  } // Set new timeout
+
+
+  timeouts.set(id, window.setTimeout(() => {
+    cb();
+    timeouts.delete(id);
+  }, ms));
+}
+
+function addListener($target, type, listener, options, debounceMs) {
+  const types = Array.isArray(type) ? type : [type];
+  const debounceId = Math.random().toString();
+
+  const cb = e => debounceMs == null ? listener(e) : debounce(() => listener(e), debounceMs, debounceId);
+
+  types.forEach(t => $target.addEventListener(t, cb, options));
+  return () => types.forEach(t => $target.removeEventListener(t, cb, options));
+}
+
+function removeListeners(listeners) {
+  listeners.forEach(unsub => unsub());
+  listeners.length = 0;
+}
+
+function uniqueID(length = 10) {
+  return `_${Math.random().toString(36).substr(2, length)}`;
+}
+
+var styles$2 = `*{-webkit-tap-highlight-color:rgba(0,0,0,0);-webkit-tap-highlight-color:transparent;box-sizing:border-box}`;
+
+const sharedStyles = cssResult(styles$2);
+
+var styles$3 = ``;
+
+class FormElementBehavior extends LitElement {
+  constructor() {
+    super(...arguments);
+    this.disabled = false;
+    this.readonly = false;
+    this.required = false;
+    this.value = '';
+    this.formElementId = uniqueID();
+    this.listeners = [];
+  }
+
+  get validationMessage() {
+    return this.$formElement.validationMessage;
+  }
+
+  get valid() {
+    return this.validity != null ? this.validity.valid : true;
+  }
+
+  get validity() {
+    return this.$formElement.validity;
+  }
+
+  get willValidate() {
+    return this.$formElement.willValidate;
+  }
+
+  get form() {
+    return this.$formElement.form;
+  }
+
+  checkValidity() {
+    return this.$formElement.checkValidity();
+  }
+
+  setCustomValidity(error) {
+    return this.$formElement.setCustomValidity(error);
+  }
+
+  firstUpdated(props) {
+    super.firstUpdated(props);
+    this.$formElement = this.queryFormElement();
+    this.appendChild(this.$formElement);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    removeListeners(this.listeners);
+  }
+
+  updated(props) {
+    super.updated(props);
+
+    if (props.has('disabled')) {
+      renderAttributes(this, {
+        'aria-disabled': this.disabled.toString()
+      });
+    }
+
+    this.updateTabindex(props);
+  }
+
+  updateTabindex(props) {
+    if (props.has('disabled')) {
+      updateTabindex(this, this.disabled);
+    }
+  }
+
+  getFormItemValue() {
+    return this.$formElement != null ? this.$formElement.value : this.initialValue || '';
+  }
+
+  queryFormElement() {
+    return this.shadowRoot.querySelector(`#${this.formElementId}`);
+  }
+
+}
+
+FormElementBehavior.styles = [sharedStyles, cssResult(styles$3)];
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], FormElementBehavior.prototype, 'disabled', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], FormElementBehavior.prototype, 'readonly', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], FormElementBehavior.prototype, 'required', void 0);
+
+__decorate([property({
+  type: String
+}), __metadata('design:type', String)], FormElementBehavior.prototype, 'name', void 0);
+
+__decorate([property({
+  type: String
+}), __metadata('design:type', String)], FormElementBehavior.prototype, 'value', void 0);
+
+const ENTER = 'Enter';
+
+var styles$4 = `:host{--_input-state-color:var(--input-state-color-inactive,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));--_input-padding-left-right:var(--input-padding-left-right,0);--_input-bg:var(--input-bg,transparent);--_input-border-radius:0;--_input-color:var(--input-color,hsl(var(--foreground,var(--foreground-hue,230),var(--foreground-saturation,70%),var(--foreground-lightness,5%))));--_input-label-color:var(--input-label-color,hsl(var(--shade-600,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,35%))));--_input-border-style:var(--input-border-style,solid);transform:translateZ(0);display:block;outline:none}:host([disabled]){pointer-events:none;--_input-state-color:var(--input-state-color-disabled,hsl(var(--shade-300,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,75%))));--_input-label-color:var(--input-label-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));--_input-color:var(--input-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));--_input-border-style:var(--input-border-style-disabled,dashed)}#container{background:var(--_input-bg);color:var(--_input-color);border-radius:var(--_input-border-radius);font-size:var(--input-font-size,1rem);font-family:var(--input-font-family,var(--font-family-serif,"Roboto Slab",times,serif));border-bottom:var(--input-border-width,.0625rem) var(--_input-border-style) var(--_input-state-color);transition:var(--input-transition,border-color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));position:relative;display:flex;align-items:center;overflow:hidden}#wrapper{position:relative;flex-grow:1}#label{left:var(--_input-padding-left-right);color:var(--_input-label-color);transition:var(--input-label-transition,top var(--transition-duration-fast,.12s) var(--transition-timing-function-linear,linear),font-size var(--transition-duration-fast,.12s) var(--transition-timing-function-linear,linear),transform var(--transition-duration-fast,.12s) var(--transition-timing-function-linear,linear));font-family:var(--input-font-family,var(--font-family-serif,"Roboto Slab",times,serif));top:50%;transform:translateY(-50%);z-index:1;position:absolute;pointer-events:none;font-size:inherit;line-height:1;white-space:nowrap;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:hover){--_input-state-color:var(--input-state-border-color-hover,hsl(var(--shade-600,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,35%))))}:host([filled]),:host([outlined]){--_input-padding-left-right:var(--input-padding-left-right-outlined,0.75rem)}:host([filled]){--_input-border-radius:var(--input-border-radius-outlined,0.5rem 0.5rem 0 0);--_input-bg:var(--input-bg,hsl(var(--shade-200,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,85%))))}:host([filled]:hover){--_input-bg:var(--input-bg-filled-hover,hsla(var(--shade-200,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,85%)),0.5))}:host([outlined]){--_input-border-radius:var(--input-border-radius-outlined,0.5rem)}:host([outlined]) #container{border:var(--input-border-width,.0625rem) var(--_input-border-style) var(--_input-state-color)}:host(:focus-within){--_input-state-color:var(--input-state-color-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))))}:host(:focus-within) #label,:host([dirty]) #label,:host([type=color]) #label,:host([type=date]) #label,:host([type=file]) #label,:host([type=range]) #label{font-size:var(--input-label-font-size,.75rem);top:var(--input-padding-top-bottom,.5rem);transform:translateY(0)}#slot-wrapper,::slotted(input),::slotted(select),::slotted(textarea){caret-color:var(--_input-color-state);padding:var(--input-padding-top-bottom,.5rem) var(--_input-padding-left-right);font-family:var(--input-font-family,var(--font-family-serif,"Roboto Slab",times,serif));font-size:var(--input-font-size,1rem);-webkit-tap-highlight-color:rgba(0,0,0,0);-webkit-tap-highlight-color:transparent;box-sizing:border-box;display:block;color:inherit;-webkit-overflow-scrolling:touch;position:relative;-webkit-appearance:none;-moz-appearance:none;appearance:none;border:none;outline:none;margin:0;background:transparent;width:100%}:host([label]) #slot-wrapper,:host([label]) ::slotted(input),:host([label]) ::slotted(select),:host([label]) ::slotted(textarea){padding-top:calc(var(--input-label-space, .875rem) + var(--input-padding-top-bottom, .5rem))}:host([invalid]){--_input-state-color:var(--input-state-color-invalid,hsl(var(--error-500,var(--error-hue,3),var(--error-saturation,80%),var(--error-lightness,54%))))}::slotted(input[type=color]){height:3.75rem;cursor:pointer}::slotted([slot=after]),::slotted([slot=before]){color:var(--input-before-after-color,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))))}:host(:not([outlined]):not([filled])) ::slotted([slot=before]){margin-right:var(--input-padding-left-right-outlined,.75rem)}:host(:not([outlined]):not([filled])) ::slotted([slot=after]),:host([filled]) ::slotted([slot=before]),:host([outlined]) ::slotted([slot=before]){margin-left:var(--input-padding-left-right-outlined,.75rem)}:host([filled]) ::slotted([slot=after]),:host([outlined]) ::slotted([slot=after]){margin-right:var(--input-padding-left-right-outlined,.75rem)}`;
+
+var InputBehaviorEvent;
+
+(function (InputBehaviorEvent) {
+  InputBehaviorEvent['SUBMIT'] = 'submit';
+  InputBehaviorEvent['INVALID'] = 'invalid';
+})(InputBehaviorEvent || (InputBehaviorEvent = {}));
+
+class InputBehavior extends FormElementBehavior {
+  constructor() {
+    super(...arguments);
+    this.outlined = false;
+    this.filled = false;
+    this.role = 'textbox';
+    this._pristine = true;
+  }
+
+  set value(value) {
+    this.setValue(value);
+  }
+
+  get value() {
+    return this.getFormItemValue();
+  }
+
+  set valueAsNumber(value) {
+    this.setValue(value.toString());
+  }
+
+  get valueAsNumber() {
+    return parseFloat(this.getFormItemValue());
+  }
+
+  get $slot() {
+    return this.shadowRoot.querySelector('#slot');
+  }
+
+  get $interactiveElement() {
+    return this.$formElement;
+  }
+
+  get pristine() {
+    return this._pristine;
+  }
+
+  get dirty() {
+    return this.value != null && this.value !== '';
+  }
+
+  firstUpdated(props) {
+    super.firstUpdated(props);
+    this.listeners.push(addListener(this.$formElement, 'keydown', this.onKeyDown.bind(this), {
+      passive: true
+    }), addListener(this.$formElement, 'input', this.onInput.bind(this), {
+      passive: true
+    }), addListener(this.$formElement, 'focusout', this.onBlur.bind(this), {
+      passive: true
+    }), addListener(this.$formElement, 'invalid', this.onInvalid.bind(this), {
+      passive: true
+    }));
+
+    if (this.initialValue != null || this.hasAttribute('value')) {
+      this.value = this.initialValue || this.getAttribute('value') || '';
+    }
+  }
+
+  updated(props) {
+    super.updated(props);
+    this.refreshAttributes();
+  }
+
+  createRenderRoot() {
+    return this.attachShadow({
+      mode: 'open',
+      delegatesFocus: true
+    });
+  }
+
+  focus() {
+    this.$interactiveElement.focus();
+  }
+
+  setValue(value) {
+    if (this.$formElement != null) {
+      this.$formElement.value = value;
+      this.refreshAttributes();
+    } else {
+      this.initialValue = value;
+    }
+  }
+
+  onInput(e) {
+    this.refreshAttributes();
+  }
+
+  onInvalid(e) {
+    this.dispatchInputEvent(InputBehaviorEvent.INVALID);
+  }
+
+  onBlur() {
+    this._pristine = false;
+    this.refreshAttributes();
+  }
+
+  refreshAttributes() {
+    renderAttributes(this, {
+      dirty: this.dirty,
+      invalid: !this.valid && !this.pristine,
+      pristine: this.pristine
+    });
+  }
+
+  onKeyDown(e) {
+    switch (e.code) {
+      case ENTER:
+        if (e.ctrlKey || e.metaKey) {
+          this.dispatchInputEvent(InputBehaviorEvent.SUBMIT);
+        }
+
+        break;
+    }
+  }
+
+  dispatchInputEvent(e) {
+    this.dispatchEvent(new CustomEvent(e, {
+      composed: true
+    }));
+  }
+
+  render() {
+    return html` <div id="container"> <slot id="before" name="before"></slot> <div id="wrapper"> <div id="label">${this.label}</div> <slot id="slot"></slot> ${this.renderFormElement()} </div> <slot id="after" name="after"></slot> </div> `;
+  }
+
+}
+
+InputBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$4)];
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata('design:type', String)], InputBehavior.prototype, 'autocomplete', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], InputBehavior.prototype, 'outlined', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], InputBehavior.prototype, 'filled', void 0);
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata('design:type', String)], InputBehavior.prototype, 'role', void 0);
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata('design:type', String)], InputBehavior.prototype, 'label', void 0);
+
+__decorate([property({
+  type: String
+}), __metadata('design:type', String), __metadata('design:paramtypes', [String])], InputBehavior.prototype, 'value', null);
+
+__decorate([property({
+  type: Number
+}), __metadata('design:type', Number), __metadata('design:paramtypes', [Number])], InputBehavior.prototype, 'valueAsNumber', null);
+
+var styles$5 = ``;
+
+class TextfieldBehavior extends InputBehavior {}
+
+TextfieldBehavior.styles = [...InputBehavior.styles, cssResult(styles$5)];
+
+__decorate([property({
+  type: String
+}), __metadata('design:type', String)], TextfieldBehavior.prototype, 'pattern', void 0);
+
+__decorate([property({
+  type: Number
+}), __metadata('design:type', Number)], TextfieldBehavior.prototype, 'minLength', void 0);
+
+__decorate([property({
+  type: Number
+}), __metadata('design:type', Number)], TextfieldBehavior.prototype, 'maxLength', void 0);
+
+var styles$6 = ``;
+
+let Textfield = class Textfield extends TextfieldBehavior {
+  constructor() {
+    super(...arguments);
+    this.type = 'text';
+  }
+
+  renderFormElement() {
+    return html` <input id="${this.formElementId}" .value="${ifDefined(this.value)}" ?required="${this.required}" ?disabled="${this.disabled}" ?readonly="${this.readonly}" aria-label="${ifDefined(this.label)}" type="${ifDefined(this.type)}" name="${ifDefined(this.name)}" list="${ifDefined(this.list)}" pattern="${ifDefined(this.pattern)}" autocomplete="${ifDefined(this.autocomplete)}" minlength="${ifDefined(this.minLength)}" maxlength="${ifDefined(this.maxLength)}" min="${ifDefined(this.min)}" max="${ifDefined(this.max)}" tabindex="${this.disabled ? "-1" : "0"}" > `;
+  }
+
+};
+Textfield.styles = [...TextfieldBehavior.styles, cssResult(styles$6)];
+
+__decorate([property({
+  type: String
+}), __metadata('design:type', String)], Textfield.prototype, 'list', void 0);
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata('design:type', String)], Textfield.prototype, 'type', void 0);
+
+__decorate([property({
+  type: Number
+}), __metadata('design:type', Number)], Textfield.prototype, 'min', void 0);
+
+__decorate([property({
+  type: Number
+}), __metadata('design:type', Number)], Textfield.prototype, 'max', void 0);
+
+Textfield = __decorate([customElement('wl-textfield')], Textfield);
+
+var styles$7 = `::slotted(textarea){height:var(--textarea-height,var(--_textarea-height));min-height:var(--textarea-min-height,var(--textarea-height,var(--_textarea-height)));max-height:var(--textarea-max-height);resize:var(--textarea-resize,none)}:host(:focus) ::slotted(textarea),:host(:hover) ::slotted(textarea){will-change:height}`;
+
+let Textarea = class Textarea extends TextfieldBehavior {
+  connectedCallback() {
+    super.connectedCallback();
+    this.setAttribute('aria-multiline', 'true');
+  }
+
+  firstUpdated(props) {
+    super.firstUpdated(props);
+    this.refreshHeight();
+  }
+
+  onInput(e) {
+    super.onInput(e);
+    this.refreshHeight();
+  }
+
+  refreshHeight() {
+    if (isHidden(this)) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      this.setHeight(1);
+      const scrollHeight = this.$formElement.scrollHeight;
+      this.setHeight(scrollHeight);
+    });
+  }
+
+  setHeight(height) {
+    this.$formElement.style.setProperty(`--_textarea-height`, `${height == null ? `` : `${height}px`}`);
+  }
+
+  renderFormElement() {
+    return html` <textarea id="${this.formElementId}" ?required="${this.required}" ?disabled="${this.disabled}" ?readonly="${this.readonly}" aria-label="${ifDefined(this.label)}" name="${ifDefined(this.name)}" pattern="${ifDefined(this.pattern)}" autocomplete="${ifDefined(this.autocomplete)}" minlength="${ifDefined(this.minLength)}" maxlength="${ifDefined(this.maxLength)}" rows="1" tabindex="${this.disabled ? "-1" : "0"}" ></textarea> `;
+  }
+
+};
+Textarea.styles = [...Textfield.styles, cssResult(styles$7)];
+Textarea = __decorate([customElement('wl-textarea')], Textarea);
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template = self => function () {
+  return html`
+    <style>
+      ${styles$1}
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+
+    </style>
+
+    <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
+    label="Leave Memo Here" > </wl-textarea>
+
+  `;
+}.bind(self)();
 
 /**
  * @license
@@ -11099,6 +11603,78 @@ const GetDomainMixin = base => _decorate(null, function (_initialize, _GetPathMi
   };
 }, GetPathMixin(base));
 
+let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initialize, _GetDomainMixin) {
+  class ProtobotMemo extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotMemo,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template(this);
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$1 = self => function () {
+  // @ts-ignore
+  const {
+    domainName,
+    changeDomainName,
+    designerName,
+    changeDesignerName,
+    goMacro,
+    goMicro,
+    goHistory,
+    users,
+    gettingCrowdId
+  } = this;
+  return html`
+    <style>
+      ${styles}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+    </style>
+
+    <h2>Domain</h2>
+    <input class="left-side-text" type="text" value="${domainName}" @change="${changeDomainName.bind(this)}">
+    <h2>Designer</h2>
+    <input class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
+    <br>
+    <br>
+    <h2>Review pages</h2>
+    <ul class = "review-link">
+      <li><a href="/?domain=${this.domainId}&page=macro">Macro review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=history">History review</a></li>
+    </ul>
+    <br>
+    <br>
+    <h2>Crowd list</h2>
+    <ul class = "crowd-link">
+    ${users ? users.map(item => html`
+      <li>
+        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item.name), 'Loading...')}"</a>
+      </li>`) : ''}
+    </ul>
+  `;
+}.bind(self)();
+
 // @ts-ignore
 
 let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_initialize, _GetDomainMixin) {
@@ -11135,7 +11711,7 @@ let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_
       kind: "method",
       key: "render",
       value: function render() {
-        return template(this);
+        return template$1(this);
       }
     }, {
       kind: "method",
@@ -11187,27 +11763,28 @@ let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_
       kind: "method",
       key: "gettingCrowdId",
       value: async function gettingCrowdId(id) {
+        console.log("${id}");
         return (await database.ref(`users/data/${id}/name`).once('value')).val();
       }
     }]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$1 = "\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n}\n";
+var styles$8 = "\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$1 = self => function () {
+const template$2 = self => function () {
   // @ts-ignore
   const {
     submit
   } = this;
   return html`
     <style>
-      ${styles$1}
+      ${styles$8}
     </style>
 
     <div class="center-modal">
@@ -11260,7 +11837,7 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
       kind: "method",
       key: "render",
       value: function render() {
-        return template$1(this);
+        return template$2(this);
       }
     }, {
       kind: "method",
@@ -11282,16 +11859,16 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
   };
 }, GetPathMixin(LitElement));
 
-var styles$2 = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background:hsl(242, 46%, 66%);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:hsl(242, 46%, 66%);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background:skyblue;\n}\n";
+var styles$9 = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background:hsl(242, 46%, 66%);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:hsl(242, 46%, 66%);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background:skyblue;\n}\n";
 
-var styles$3 = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%;\n  font-size: 15px;\n}\n";
+var styles$a = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%;\n  font-size: 15px;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$2 = self => function () {
+const template$3 = self => function () {
   // @ts-ignore
   const {
     utterance,
@@ -11302,7 +11879,7 @@ const template$2 = self => function () {
   } = utterance || {};
   return html`
     <style>
-      ${styles$3}
+      ${styles$a}
     </style>
 
     <div class="flex-area">
@@ -11383,7 +11960,7 @@ let ConversationalFlowUtterance = _decorate([customElement('conversational-flow-
       kind: "method",
       key: "render",
       value: function render() {
-        return template$2(this);
+        return template$3(this);
       }
     }, {
       kind: "method",
@@ -11409,7 +11986,7 @@ let ConversationalFlowUtterance = _decorate([customElement('conversational-flow-
  * @param {any} self
  */
 
-const template$3 = self => function () {
+const template$4 = self => function () {
   // @ts-ignore
   const {
     topic,
@@ -11425,7 +12002,7 @@ const template$3 = self => function () {
   } = topic || {};
   return html`
     <style>
-      ${styles$2}
+      ${styles$9}
     </style>
 
     <div class="flex-area ${sub ? 'sub' : ''}">
@@ -11560,7 +12137,7 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
       key: "render",
       value: // @ts-ignore
       function render() {
-        return template$3(this);
+        return template$4(this);
       }
     }, {
       kind: "method",
@@ -11693,14 +12270,14 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
   };
 }, GetTopicMixin(LitElement));
 
-var styles$4 = "";
+var styles$b = "";
 
 /**
  *
  * @param {any} self
  */
 
-const template$4 = self => function () {
+const template$5 = self => function () {
   // @ts-ignore
   const {
     topics,
@@ -11708,7 +12285,7 @@ const template$4 = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$4}
+      ${styles$b}
     </style>
 
     <h1 style="text-align: center">
@@ -11745,7 +12322,7 @@ let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], functio
       kind: "method",
       key: "render",
       value: function render() {
-        return template$4(this);
+        return template$5(this);
       }
     }, {
       kind: "method",
@@ -11802,14 +12379,14 @@ let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], functio
   };
 }, GetDomainMixin(LitElement));
 
-var styles$5 = ".flex-area {\n  display: flex;\n\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n}\n";
+var styles$c = ".flex-area {\n  display: flex;\n\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$5 = self => function () {
+const template$6 = self => function () {
   // @ts-ignore
   const {
     topic
@@ -11819,7 +12396,7 @@ const template$5 = self => function () {
   } = topic || {};
   return html`
     <style>
-      ${styles$5}
+      ${styles$c}
     </style>
 
     ${name}
@@ -11863,7 +12440,7 @@ let TopicListItem = _decorate([customElement('topic-list-item')], function (_ini
       key: "render",
       value: // @ts-ignore
       function render() {
-        return template$5(this);
+        return template$6(this);
       }
     }, {
       kind: "method",
@@ -11884,14 +12461,14 @@ let TopicListItem = _decorate([customElement('topic-list-item')], function (_ini
   };
 }, GetTopicMixin(LitElement));
 
-var styles$6 = "h2 {\n  margin-left: 20px;\n}\n\n.topic-list {\n  font-size: 20px;\n}\n\n.button {\n  margin-left: 20px;\n  background: black;\n  color: white;\n  font-size: 20px;\n  padding: 12px;\n  border-radius: 10px;\n}\n";
+var styles$d = "h2 {\n  margin-left: 20px;\n}\n\n.topic-list {\n  font-size: 20px;\n}\n\n.button {\n  margin-left: 20px;\n  background: black;\n  color: white;\n  font-size: 20px;\n  padding: 12px;\n  border-radius: 10px;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$6 = self => function () {
+const template$7 = self => function () {
   // @ts-ignore
   const {
     topics,
@@ -11899,7 +12476,7 @@ const template$6 = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$6}
+      ${styles$d}
     </style>
     <h2>Topic list</h2>
 
@@ -11934,7 +12511,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       kind: "method",
       key: "render",
       value: function render() {
-        return template$6(this);
+        return template$7(this);
       }
     }, {
       kind: "method",
@@ -11949,9 +12526,9 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   };
 }, GetDomainMixin(LitElement));
 
-var styles$7 = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
+var styles$e = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
 
-var styles$8 = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n.utterance{\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
+var styles$f = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n.utterance{\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
 
 // import '@polymer/paper-item/paper-item.js';
 // import '@polymer/paper-listbox/paper-listbox.js';
@@ -11962,7 +12539,7 @@ var styles$8 = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-directi
  * @param {any} self
  */
 
-const template$7 = self => function () {
+const template$8 = self => function () {
   // @ts-ignore
   const {
     utterance,
@@ -11979,7 +12556,7 @@ const template$7 = self => function () {
   } = utterance || {};
   return html`
     <style>
-      ${styles$8}
+      ${styles$f}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -12053,7 +12630,7 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
       kind: "method",
       key: "render",
       value: function render() {
-        return template$7(this);
+        return template$8(this);
       }
     }, {
       kind: "method",
@@ -12144,7 +12721,7 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
  * @param {any} self
  */
 
-const template$8 = self => function () {
+const template$9 = self => function () {
   // @ts-ignore
   const {
     crowdID,
@@ -12158,7 +12735,7 @@ const template$8 = self => function () {
 
   return html`
     <style>
-      ${styles$7}
+      ${styles$e}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -12342,7 +12919,7 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
       kind: "method",
       key: "render",
       value: function render() {
-        return template$8(this);
+        return template$9(this);
       } // async createTopic (sub) {
       //   const { key: topicId } = database.ref('labels/data').push();
       //   const { key: utteranceId } = database.ref('utterances/data').push();
@@ -12388,18 +12965,18 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
   };
 }, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
 
-var styles$9 = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}";
+var styles$g = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$9 = self => function () {
+const template$a = self => function () {
 
   return html`
     <style>
-      ${styles$9}
+      ${styles$g}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -12432,26 +13009,26 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
       kind: "method",
       key: "render",
       value: function render() {
-        return template$9(this);
+        return template$a(this);
       }
     }]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$a = "";
+var styles$h = "";
 
 /**
  *
  * @param {any} self
  */
 
-const template$a = self => function () {
+const template$b = self => function () {
   // @ts-ignore
   // const { topic } = this;
   console.log(this);
   return html`
     <style>
-      ${styles$a}
+      ${styles$h}
     </style>
 
     History
@@ -12477,20 +13054,20 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
       kind: "method",
       key: "render",
       value: function render() {
-        return template$a(this);
+        return template$b(this);
       }
     }]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$b = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n";
+var styles$i = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$b = self => function () {
+const template$c = self => function () {
   // @ts-ignore
   const {
     topics,
@@ -12498,7 +13075,7 @@ const template$b = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$b}
+      ${styles$i}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -12519,11 +13096,15 @@ const template$b = self => function () {
       </li>
     `)}
     </ul>
+    <br>
+    <br>
+    <protobot-memo></protobot-memo>
     <div class="button-container">
       <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
         Done with Labeling
       </vaadin-button>
     </div>
+
 
   `;
 }.bind(self)();
@@ -12546,7 +13127,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
       kind: "method",
       key: "render",
       value: function render() {
-        return template$b(this);
+        return template$c(this);
       }
     }, {
       kind: "method",
@@ -12559,14 +13140,14 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   };
 }, GetDomainMixin(LitElement));
 
-var styles$c = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background:rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$j = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background:rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$c = self => function () {
+const template$d = self => function () {
   // @ts-ignore
   const {
     queryObject
@@ -12577,7 +13158,7 @@ const template$c = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$c}
+      ${styles$j}
     </style>
 
     ${domain ? html`
@@ -12635,7 +13216,7 @@ let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], func
       kind: "method",
       key: "render",
       value: function render() {
-        return template$c(this);
+        return template$d(this);
       }
     }]
   };

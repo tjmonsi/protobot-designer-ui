@@ -1,13 +1,15 @@
 import { html } from 'lit-element';
 // @ts-ignore
 import styles from './style.css';
+import { until } from 'lit-html/directives/until';
+
 /**
  *
  * @param {any} self
  */
 export const template = self => function () {
   // @ts-ignore
-  const { domainName, changeDomainName, designerName, changeDesignerName, goMacro, goMicro, goHistory } = this;
+  const { domainName, changeDomainName, designerName, changeDesignerName, goMacro, goMicro, goHistory, users, gettingCrowdId } = this;
 
   return html`
     <style>
@@ -23,12 +25,21 @@ export const template = self => function () {
     <input class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
     <br>
     <br>
-    <br>
     <h2>Review pages</h2>
     <ul class = "review-link">
       <li><a href="/?domain=${this.domainId}&page=macro">Macro review</a></li>
       <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
       <li><a href="/?domain=${this.domainId}&page=history">History review</a></li>
     </ul>
+    <br>
+    <br>
+    <h2>Crowd list</h2>
+    <ul class = "crowd-link">
+    ${users? users.map(item => html`
+      <li>
+        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item.name), 'Loading...')}"</a>
+      </li>`) : ''}
+    </ul>
   `;
 }.bind(self)();
+

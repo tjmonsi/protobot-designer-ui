@@ -3284,7 +3284,100 @@ LitElement['finalized'] = true;
 
 LitElement.render = render$1;
 
-var styles = ":host {\n  margin: 40px;\n}\n\nh2 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.left-side-text {\n  font-size: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.review-link {\n  font-size: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\na {\n  color: coral;\n}\n\n/* a:visited {\n  color: white;\n} */";
+var styles = ":host {\n  margin: 40px;\n}\n\nh2 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.left-side-text {\n  font-size: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.review-link {\n  font-size: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.crowd-link {\n  font-size: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\na {\n  color: coral;\n}\n\n/* a:visited {\n  color: white;\n} */";
+
+/**
+ * @license
+ * Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at
+ * http://polymer.github.io/LICENSE.txt
+ * The complete set of authors may be found at
+ * http://polymer.github.io/AUTHORS.txt
+ * The complete set of contributors may be found at
+ * http://polymer.github.io/CONTRIBUTORS.txt
+ * Code distributed by Google as part of the polymer project is also
+ * subject to an additional IP rights grant found at
+ * http://polymer.github.io/PATENTS.txt
+ */
+
+const _state = new WeakMap(); // Effectively infinity, but a SMI.
+
+
+const _infinity = 0x7fffffff;
+/**
+ * Renders one of a series of values, including Promises, to a Part.
+ *
+ * Values are rendered in priority order, with the first argument having the
+ * highest priority and the last argument having the lowest priority. If a
+ * value is a Promise, low-priority values will be rendered until it resolves.
+ *
+ * The priority of values can be used to create placeholder content for async
+ * data. For example, a Promise with pending content can be the first,
+ * highest-priority, argument, and a non_promise loading indicator template can
+ * be used as the second, lower-priority, argument. The loading indicator will
+ * render immediately, and the primary content will render when the Promise
+ * resolves.
+ *
+ * Example:
+ *
+ *     const content = fetch('./content.txt').then(r => r.text());
+ *     html`${until(content, html`<span>Loading...</span>`)}`
+ */
+
+const until = directive((...args) => part => {
+  let state = _state.get(part);
+
+  if (state === undefined) {
+    state = {
+      lastRenderedIndex: _infinity,
+      values: []
+    };
+
+    _state.set(part, state);
+  }
+
+  const previousValues = state.values;
+  let previousLength = previousValues.length;
+  state.values = args;
+
+  for (let i = 0; i < args.length; i++) {
+    // If we've rendered a higher-priority value already, stop.
+    if (i > state.lastRenderedIndex) {
+      break;
+    }
+
+    const value = args[i]; // Render non-Promise values immediately
+
+    if (isPrimitive(value) || typeof value.then !== 'function') {
+      part.setValue(value);
+      state.lastRenderedIndex = i; // Since a lower-priority value will never overwrite a higher-priority
+      // synchronous value, we can stop processsing now.
+
+      break;
+    } // If this is a Promise we've already handled, skip it.
+
+
+    if (i < previousLength && value === previousValues[i]) {
+      continue;
+    } // We have a Promise that we haven't seen before, so priorities may have
+    // changed. Forget what we rendered before.
+
+
+    state.lastRenderedIndex = _infinity;
+    previousLength = 0;
+    Promise.resolve(value).then(resolvedValue => {
+      const index = state.values.indexOf(value); // If state.values doesn't contain the value, we've re-rendered without
+      // the value, so don't render it. Then, only render if the value is
+      // higher-priority than what's already been rendered.
+
+      if (index > -1 && index < state.lastRenderedIndex) {
+        state.lastRenderedIndex = index;
+        part.setValue(resolvedValue);
+        part.commit();
+      }
+    });
+  }
+});
 
 /**
  *
@@ -3300,7 +3393,9 @@ const template = self => function () {
     changeDesignerName,
     goMacro,
     goMicro,
-    goHistory
+    goHistory,
+    users,
+    gettingCrowdId
   } = this;
   return html`
     <style>
@@ -3316,12 +3411,20 @@ const template = self => function () {
     <input class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
     <br>
     <br>
-    <br>
     <h2>Review pages</h2>
     <ul class = "review-link">
       <li><a href="/?domain=${this.domainId}&page=macro">Macro review</a></li>
       <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
       <li><a href="/?domain=${this.domainId}&page=history">History review</a></li>
+    </ul>
+    <br>
+    <br>
+    <h2>Crowd list</h2>
+    <ul class = "crowd-link">
+    ${users ? users.map(item => html`
+      <li>
+        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item.name), 'Loading...')}"</a>
+      </li>`) : ''}
     </ul>
   `;
 }.bind(self)();
@@ -11075,6 +11178,17 @@ let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_
           await database.ref(`domains/data/${this.domainId}/designer`).set(value);
         }
       }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingCrowdId",
+      value: async function gettingCrowdId(id) {
+        return (await database.ref(`users/data/${id}/name`).once('value')).val();
+      }
     }]
   };
 }, GetDomainMixin(LitElement));
@@ -11838,99 +11952,6 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
 var styles$7 = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
 
 var styles$8 = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n.utterance{\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
-
-/**
- * @license
- * Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
- * This code may only be used under the BSD style license found at
- * http://polymer.github.io/LICENSE.txt
- * The complete set of authors may be found at
- * http://polymer.github.io/AUTHORS.txt
- * The complete set of contributors may be found at
- * http://polymer.github.io/CONTRIBUTORS.txt
- * Code distributed by Google as part of the polymer project is also
- * subject to an additional IP rights grant found at
- * http://polymer.github.io/PATENTS.txt
- */
-
-const _state = new WeakMap(); // Effectively infinity, but a SMI.
-
-
-const _infinity = 0x7fffffff;
-/**
- * Renders one of a series of values, including Promises, to a Part.
- *
- * Values are rendered in priority order, with the first argument having the
- * highest priority and the last argument having the lowest priority. If a
- * value is a Promise, low-priority values will be rendered until it resolves.
- *
- * The priority of values can be used to create placeholder content for async
- * data. For example, a Promise with pending content can be the first,
- * highest-priority, argument, and a non_promise loading indicator template can
- * be used as the second, lower-priority, argument. The loading indicator will
- * render immediately, and the primary content will render when the Promise
- * resolves.
- *
- * Example:
- *
- *     const content = fetch('./content.txt').then(r => r.text());
- *     html`${until(content, html`<span>Loading...</span>`)}`
- */
-
-const until = directive((...args) => part => {
-  let state = _state.get(part);
-
-  if (state === undefined) {
-    state = {
-      lastRenderedIndex: _infinity,
-      values: []
-    };
-
-    _state.set(part, state);
-  }
-
-  const previousValues = state.values;
-  let previousLength = previousValues.length;
-  state.values = args;
-
-  for (let i = 0; i < args.length; i++) {
-    // If we've rendered a higher-priority value already, stop.
-    if (i > state.lastRenderedIndex) {
-      break;
-    }
-
-    const value = args[i]; // Render non-Promise values immediately
-
-    if (isPrimitive(value) || typeof value.then !== 'function') {
-      part.setValue(value);
-      state.lastRenderedIndex = i; // Since a lower-priority value will never overwrite a higher-priority
-      // synchronous value, we can stop processsing now.
-
-      break;
-    } // If this is a Promise we've already handled, skip it.
-
-
-    if (i < previousLength && value === previousValues[i]) {
-      continue;
-    } // We have a Promise that we haven't seen before, so priorities may have
-    // changed. Forget what we rendered before.
-
-
-    state.lastRenderedIndex = _infinity;
-    previousLength = 0;
-    Promise.resolve(value).then(resolvedValue => {
-      const index = state.values.indexOf(value); // If state.values doesn't contain the value, we've re-rendered without
-      // the value, so don't render it. Then, only render if the value is
-      // higher-priority than what's already been rendered.
-
-      if (index > -1 && index < state.lastRenderedIndex) {
-        state.lastRenderedIndex = index;
-        part.setValue(resolvedValue);
-        part.commit();
-      }
-    });
-  }
-});
 
 // import '@polymer/paper-item/paper-item.js';
 // import '@polymer/paper-listbox/paper-listbox.js';

@@ -44,6 +44,16 @@ class ProtobotSidebar extends GetDomainMixin(LitElement) {
       await database.ref(`domains/data/${this.domainId}/designer`).set(value);
     }
   }
+
+  /**
+   *
+   * @param {String} id
+   */
+  async gettingCrowdId (id) {
+    return (await database.ref(`users/data/${id}/name`).once('value')).val();
+  }
 }
 
 export { ProtobotSidebar };
+
+

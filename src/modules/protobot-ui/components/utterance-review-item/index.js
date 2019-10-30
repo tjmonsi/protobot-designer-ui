@@ -19,12 +19,24 @@ class UtteranceReviewItem extends GetUtteranceMixin(GetDomainMixin(LitElement)) 
 
   async selectedTopic ({ target }) {
     const { value } = target;
+    const { utteranceId, utterance } = this;
+    const { domain } = utterance;
     const updates = {};
+    this.textInputVisible = false;
     if (value === 'new-topic') {
       this.textInputVisible = true;
-    } else {
-      this.textInputVisible = false;
+      return;
     }
+
+    // topic.utterances[utteranceId] = true;
+
+    utterance.topics[value] = true;
+
+    updates[`labels/data/${value}/utterances/${utteranceId}`] = true;
+    updates[`utterances/data/${utteranceId}`] = utterance;
+    updates[`domains/data/${domain}/topicList/${value}`] = true;
+
+    await database.ref().update(updates);
   }
 
   async appendTopic (event) {

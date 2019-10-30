@@ -11953,7 +11953,8 @@ const template$7 = self => function () {
   } = this;
   const {
     text,
-    bot
+    bot,
+    topics: utteranceTopics
   } = utterance || {};
   return html`
     <style>
@@ -11968,6 +11969,11 @@ const template$7 = self => function () {
         <div>
           <div class="label">${bot ? 'Bot' : 'User'}</div>
           <div class ="utterance ${!bot ? 'utterance__right' : ''}"> ${text}</div>
+          <div>
+            ${utteranceTopics ? Object.keys(utteranceTopics).map(item => html`
+              <span>${until(gettingTopic(item), 'Loading...')}</span>
+            `) : ''}
+          </div>
 
           <div class="select-container ${!bot ? 'select-container__right' : ''}">
             <div class = "select-topic">
@@ -12037,12 +12043,27 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
         const {
           value
         } = target;
+        const {
+          utteranceId,
+          utterance
+        } = this;
+        const {
+          domain
+        } = utterance;
+        const updates = {};
+        this.textInputVisible = false;
 
         if (value === 'new-topic') {
           this.textInputVisible = true;
-        } else {
-          this.textInputVisible = false;
-        }
+          return;
+        } // topic.utterances[utteranceId] = true;
+
+
+        utterance.topics[value] = true;
+        updates[`labels/data/${value}/utterances/${utteranceId}`] = true;
+        updates[`utterances/data/${utteranceId}`] = utterance;
+        updates[`domains/data/${domain}/topicList/${value}`] = true;
+        await database.ref().update(updates);
       }
     }, {
       kind: "method",

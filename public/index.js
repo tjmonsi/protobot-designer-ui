@@ -12052,15 +12052,34 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
           target
         } = event;
         const {
-          value
+          value: name
         } = target;
         const {
-          key: utteranceId
-        } = database.ref('utterances/data').push();
+          utteranceId,
+          utterance
+        } = this;
+        const {
+          domain
+        } = utterance;
+        const updates = {};
 
-        if (value !== 'new label') {
-          await database.ref(`utterances/data/${utteranceId}/topics`).set(value);
-          console.log(value);
+        if (name && name !== 'new label') {
+          const {
+            key: topicId
+          } = database.ref('labels/data').push();
+          const topic = {
+            domain,
+            name,
+            required: false,
+            mainUtterance: utteranceId,
+            utterances: {}
+          };
+          topic.utterances[utteranceId] = true;
+          utterance.topics[topicId] = true;
+          updates[`labels/data/${topicId}`] = topic;
+          updates[`utterances/data/${utteranceId}`] = utterance;
+          updates[`domains/data/${domain}/topicList/${topicId}`] = true;
+          await database.ref().update(updates);
         }
       }
       /**

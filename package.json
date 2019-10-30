@@ -107,6 +107,7 @@
     ]
   },
   "dependencies": {
+    "@polymer/paper-dropdown-menu": "^3.0.1",
     "@vaadin/vaadin": "^14.0.10",
     "firebase": "^7.0.0",
     "listbox-combobox": "^1.1.1",

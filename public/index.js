@@ -9506,7 +9506,7 @@ if(document.body){document.body.appendChild(iframe);try{// If document.domain ha
 var a=iframe.contentWindow.document;if(!a){// Apologies for the log-spam, I need to do something to keep closure from optimizing out the assignment above.
 log('No IE domain setting required');}}catch(e){var domain=document.domain;iframe.src="javascript:void((function(){document.open();document.domain='"+domain+"';document.close();})())";}}else{// LongPollConnection attempts to delay initialization until the document is ready, so hopefully this
 // never gets hit.
-throw'Document body has not initialized. Wait to initialize Firebase until after the document is ready.';}// Get the document of the iframe in a browser-specific way.
+throw 'Document body has not initialized. Wait to initialize Firebase until after the document is ready.';}// Get the document of the iframe in a browser-specific way.
 if(iframe.contentDocument){iframe.doc=iframe.contentDocument;// Firefox, Opera, Safari
 }else if(iframe.contentWindow){iframe.doc=iframe.contentWindow.document;// Internet Explorer
 }else if(iframe.document){iframe.doc=iframe.document;//others?
@@ -9802,7 +9802,7 @@ this.repoInfo_.internalHost=this.repoInfo_.host;}}else if(this.state_===1/* CONN
      * @private
      */Connection.prototype.onConnectionShutdown_=function(reason){this.log_('Connection shutdown command received. Shutting down...');if(this.onKill_){this.onKill_(reason);this.onKill_=null;}// We intentionally don't want to fire onDisconnect (kill is a different case),
 // so clear the callback.
-this.onDisconnect_=null;this.close();};Connection.prototype.sendData_=function(data){if(this.state_!==1/* CONNECTED */){throw'Connection is not connected';}else{this.tx_.send(data);}};/**
+this.onDisconnect_=null;this.close();};Connection.prototype.sendData_=function(data){if(this.state_!==1/* CONNECTED */){throw 'Connection is not connected';}else{this.tx_.send(data);}};/**
      * Cleans up this connection, calling the appropriate callbacks
      */Connection.prototype.close=function(){if(this.state_!==2/* DISCONNECTED */){this.log_('Closing realtime connection.');this.state_=2/* DISCONNECTED */;this.closeConnections_();if(this.onDisconnect_){this.onDisconnect_();this.onDisconnect_=null;}}};/**
      *
@@ -9917,7 +9917,7 @@ if(_this.outstandingPutCount_===0){_this.outstandingPuts_=[];}if(onComplete)onCo
      * @inheritDoc
      */PersistentConnection.prototype.reportStats=function(stats){var _this=this;// If we're not connected, we just drop the stats.
 if(this.connected_){var request={/*counters*/c:stats};this.log_('reportStats',request);this.sendRequest(/*stats*/'s',request,function(result){var status=result[/*status*/'s'];if(status!=='ok'){var errorReason=result[/* data */'d'];_this.log_('reportStats','Error sending stats: '+errorReason);}});}};PersistentConnection.prototype.onDataMessage_=function(message){if('r'in message){// this is a response
-this.log_('from server: '+stringify(message));var reqNum=message['r'];var onResponse=this.requestCBHash_[reqNum];if(onResponse){delete this.requestCBHash_[reqNum];onResponse(message[/*body*/'b']);}}else if('error'in message){throw'A server-side error has occurred: '+message['error'];}else if('a'in message){// a and b are action and body, respectively
+this.log_('from server: '+stringify(message));var reqNum=message['r'];var onResponse=this.requestCBHash_[reqNum];if(onResponse){delete this.requestCBHash_[reqNum];onResponse(message[/*body*/'b']);}}else if('error'in message){throw 'A server-side error has occurred: '+message['error'];}else if('a'in message){// a and b are action and body, respectively
 this.onDataPush_(message['a'],message['b']);}};PersistentConnection.prototype.onDataPush_=function(action,body){this.log_('handleServerMessage',action,body);if(action==='d')this.onDataUpdate_(body[/*path*/'p'],body[/*data*/'d'],/*isMerge*/false,body['t']);else if(action==='m')this.onDataUpdate_(body[/*path*/'p'],body[/*data*/'d'],/*isMerge=*/true,body['t']);else if(action==='c')this.onListenRevoked_(body[/*path*/'p'],body[/*query*/'q']);else if(action==='ac')this.onAuthRevoked_(body[/*status code*/'s'],body[/* explanation */'d']);else if(action==='sd')this.onSecurityDebugPacket_(body);else error('Unrecognized action received from server: '+stringify(action)+'\nAre you using the latest client?');};PersistentConnection.prototype.onReady_=function(timestamp,sessionId){this.log_('connection ready');this.connected_=true;this.lastConnectionEstablishedTime_=new Date().getTime();this.handleTimestamp_(timestamp);this.lastSessionId=sessionId;if(this.firstConnection_){this.sendConnectStats_();}this.restoreState_();this.firstConnection_=false;this.onConnectStatus_(true);};PersistentConnection.prototype.scheduleConnect_=function(timeout){var _this=this;assert(!this.realtime_,"Scheduling a connect when we're already connected/ing?");if(this.establishConnectionTimer_){clearTimeout(this.establishConnectionTimer_);}// NOTE: Even when timeout is 0, it's important to do a setTimeout to work around an infuriating "Security Error" in
 // Firefox when trying to write to our long-polling iframe in some scenarios (e.g. Forge or our unit tests).
 this.establishConnectionTimer_=setTimeout(function(){_this.establishConnectionTimer_=null;_this.establishConnection_();},Math.floor(timeout));};PersistentConnection.prototype.onVisible_=function(visible){// NOTE: Tabbing away and back to a window will defeat our reconnect backoff, but I think that's fine.
@@ -10291,7 +10291,7 @@ _this=_super.call(this,repo,path,QueryParams.DEFAULT,false)||this;return _this;}
      * @param {string|number|null} newPriority
      * @param {function(?Error)=} onComplete
      * @return {!Promise}
-     */Reference.prototype.setWithPriority=function(newVal,newPriority,onComplete){validateArgCount('Reference.setWithPriority',2,3,arguments.length);validateWritablePath('Reference.setWithPriority',this.path);validateFirebaseDataArg('Reference.setWithPriority',1,newVal,this.path,false);validatePriority('Reference.setWithPriority',2,newPriority,false);validateCallback('Reference.setWithPriority',3,onComplete,true);if(this.getKey()==='.length'||this.getKey()==='.keys')throw'Reference.setWithPriority failed: '+this.getKey()+' is a read-only object.';var deferred=new Deferred();this.repo.setWithPriority(this.path,newVal,newPriority,deferred.wrapCallback(onComplete));return deferred.promise;};/**
+     */Reference.prototype.setWithPriority=function(newVal,newPriority,onComplete){validateArgCount('Reference.setWithPriority',2,3,arguments.length);validateWritablePath('Reference.setWithPriority',this.path);validateFirebaseDataArg('Reference.setWithPriority',1,newVal,this.path,false);validatePriority('Reference.setWithPriority',2,newPriority,false);validateCallback('Reference.setWithPriority',3,onComplete,true);if(this.getKey()==='.length'||this.getKey()==='.keys')throw 'Reference.setWithPriority failed: '+this.getKey()+' is a read-only object.';var deferred=new Deferred();this.repo.setWithPriority(this.path,newVal,newPriority,deferred.wrapCallback(onComplete));return deferred.promise;};/**
      * @param {function(?Error)=} onComplete
      * @return {!Promise}
      */Reference.prototype.remove=function(onComplete){validateArgCount('Reference.remove',0,1,arguments.length);validateWritablePath('Reference.remove',this.path);validateCallback('Reference.remove',1,onComplete,true);return this.set(null,onComplete);};/**
@@ -10301,7 +10301,7 @@ _this=_super.call(this,repo,path,QueryParams.DEFAULT,false)||this;return _this;}
      * @return {!Promise}
      */Reference.prototype.transaction=function(transactionUpdate,onComplete,applyLocally){validateArgCount('Reference.transaction',1,3,arguments.length);validateWritablePath('Reference.transaction',this.path);validateCallback('Reference.transaction',1,transactionUpdate,false);validateCallback('Reference.transaction',2,onComplete,true);// NOTE: applyLocally is an internal-only option for now.  We need to decide if we want to keep it and how
 // to expose it.
-validateBoolean('Reference.transaction',3,applyLocally,true);if(this.getKey()==='.length'||this.getKey()==='.keys')throw'Reference.transaction failed: '+this.getKey()+' is a read-only object.';if(applyLocally===undefined)applyLocally=true;var deferred=new Deferred();if(typeof onComplete==='function'){deferred.promise.catch(function(){});}var promiseComplete=function(error,committed,snapshot){if(error){deferred.reject(error);}else{deferred.resolve(new TransactionResult(committed,snapshot));}if(typeof onComplete==='function'){onComplete(error,committed,snapshot);}};this.repo.startTransaction(this.path,transactionUpdate,promiseComplete,applyLocally);return deferred.promise;};/**
+validateBoolean('Reference.transaction',3,applyLocally,true);if(this.getKey()==='.length'||this.getKey()==='.keys')throw 'Reference.transaction failed: '+this.getKey()+' is a read-only object.';if(applyLocally===undefined)applyLocally=true;var deferred=new Deferred();if(typeof onComplete==='function'){deferred.promise.catch(function(){});}var promiseComplete=function(error,committed,snapshot){if(error){deferred.reject(error);}else{deferred.resolve(new TransactionResult(committed,snapshot));}if(typeof onComplete==='function'){onComplete(error,committed,snapshot);}};this.repo.startTransaction(this.path,transactionUpdate,promiseComplete,applyLocally);return deferred.promise;};/**
      * @param {string|number|null} priority
      * @param {function(?Error)=} onComplete
      * @return {!Promise}
@@ -11931,6 +11931,10 @@ const until = directive((...args) => part => {
     });
   }
 });
+
+// import '@polymer/paper-item/paper-item.js';
+// import '@polymer/paper-listbox/paper-listbox.js';
+// import '@vaadin/vaadin-button';
 
 /**
  *

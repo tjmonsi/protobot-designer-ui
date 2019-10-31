@@ -38,7 +38,7 @@ export const template = self => function () {
     <ul class = "crowd-link">
       ${users ? users.map(item => html`
       <li>
-        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item), 'Loading...')}"</a>
+        <a href="/?domain=${this.domainId}&page=micro&crowdId=${item}&set=1">${until(gettingCrowdId(item), 'Loading...')}</a>
       </li>`) : ''}
     </ul>
   `;

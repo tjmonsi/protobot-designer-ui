@@ -11622,7 +11622,21 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
       key: "render",
       value: function render() {
         return template(this);
-      } // need function for
+      } // this is where you get the unique memo id
+      // const { key: memoId } = database.ref('memo/data').push();
+      // const memo = {
+      //   text,
+      //   domainId,
+      //   crowId, // can be null
+      //   page: // macro/micro
+      //   deployedVersion: // think how to add this one
+      // };
+      // updates[`memo/data/${memoId}`] = memo;
+      // updates[`memo/lists/domain-memo/${domainId}/${memoId}`] = true;
+      // this saves the memo in db
+      // await database.ref().update(updates);
+      // -------------------------
+      // need function for
       // link done with labeling button for auto save
       // cleanUp
       //
@@ -11672,7 +11686,7 @@ const template$1 = self => function () {
     <ul class = "crowd-link">
       ${users ? users.map(item => html`
       <li>
-        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item), 'Loading...')}"</a>
+        <a href="/?domain=${this.domainId}&page=micro&crowdId=${item}&set=1">${until(gettingCrowdId(item), 'Loading...')}</a>
       </li>`) : ''}
     </ul>
   `;

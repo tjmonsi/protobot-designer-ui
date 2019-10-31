@@ -11600,9 +11600,7 @@ const GetDomainMixin = base => _decorate(null, function (_initialize, _GetPathMi
     }, {
       kind: "method",
       key: "domainChanged",
-      value: function domainChanged(domain) {
-        console.log(domain);
-      }
+      value: function domainChanged(domain) {}
     }]
   };
 }, GetPathMixin(base));
@@ -11645,9 +11643,6 @@ const template$1 = self => function () {
     changeDomainName,
     designerName,
     changeDesignerName,
-    goMacro,
-    goMicro,
-    goHistory,
     users,
     gettingCrowdId
   } = this;
@@ -11675,23 +11670,125 @@ const template$1 = self => function () {
     <br>
     <h2>Crowd list</h2>
     <ul class = "crowd-link">
-    ${users ? users.map(item => html`
+      ${users ? users.map(item => html`
       <li>
-        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item.id), 'Loading...')}"</a>
+        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item), 'Loading...')}"</a>
       </li>`) : ''}
     </ul>
-    <select class="select-box" placeholder="Topic">
-    <option value="none">Choose the topic</option>
-    ${users ? users.map(item => html`<option value="${item.id}">${until(gettingCrowdId(item.id), 'Loading...')}</option>`) : ''}
-    <option value="new-topic">New Topic</option>
-    </select>
   `;
 }.bind(self)();
 
+/**
+ *
+ * @param {*} base
+ */
+
+const GetDomainUsersMixin = base => _decorate(null, function (_initialize, _GetDomainMixin) {
+  class _class extends _GetDomainMixin {
+    // @ts-ignore
+    constructor() {
+      super();
+
+      _initialize(this);
+
+      this.boundSaveDomainUsers = this.saveDomainUsers.bind(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "users",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "method",
+      key: "disconnectedCallback",
+      value: function disconnectedCallback() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
+          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
+        }
+
+        this.disconnectRef();
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: function domainChanged(data) {
+        _get(_getPrototypeOf(_class.prototype), "domainChanged", this).call(this, data);
+
+        if (data) {
+          this.getDomainUsers(data);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "disconnectRef",
+      value: function disconnectRef() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
+
+        if (this.domainUsersRef) {
+          this.domainUsersRef.off('value', this.boundSaveDomainUsers);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "getDomainUsers",
+      value: function getDomainUsers(id) {
+        this.disconnectRef();
+
+        if (id) {
+          this.domainUsersRef = database.ref('users/lists/domain-utterances/');
+          this.domainUsersRef.on('value', this.boundSaveDomainUsers);
+        } else {
+          console.log('No values for id-crowdId: ', id);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveDomainUsers",
+      value: function saveDomainUsers(snap) {
+        const data = snap.val() || null;
+        const array = [];
+
+        if (data) {
+          for (const user in data) {
+            if (data[user][this.domainId]) {
+              array.push(user);
+            }
+          }
+
+          this.users = array;
+          this.domainUsersChanged(this.users);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "domainUsersChanged",
+      value: function domainUsersChanged(data) {
+        console.log(data);
+      }
+    }]
+  };
+}, GetDomainMixin(base));
+
 // @ts-ignore
 
-let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_initialize, _GetDomainMixin) {
-  class ProtobotSidebar extends _GetDomainMixin {
+let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_initialize, _GetDomainUsersMixin) {
+  class ProtobotSidebar extends _GetDomainUsersMixin {
     constructor(...args) {
       super(...args);
 
@@ -11730,6 +11827,8 @@ let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_
       kind: "method",
       key: "domainChanged",
       value: function domainChanged(domain) {
+        _get(_getPrototypeOf(ProtobotSidebar.prototype), "domainChanged", this).call(this, domain);
+
         if (domain) {
           this.domainName = domain.name || '';
           this.designerName = domain.designer || '';
@@ -11776,12 +11875,12 @@ let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_
       kind: "method",
       key: "gettingCrowdId",
       value: async function gettingCrowdId(id) {
-        console.log("${id}");
+        console.log(`${id}`);
         return (await database.ref(`users/data/${id}/name`).once('value')).val();
       }
     }]
   };
-}, GetDomainMixin(LitElement));
+}, GetDomainUsersMixin(LitElement));
 
 var styles$8 = "\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n}\n";
 

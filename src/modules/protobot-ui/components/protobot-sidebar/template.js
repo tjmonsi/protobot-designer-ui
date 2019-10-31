@@ -10,7 +10,7 @@ import '../protobot-memo';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { domainName, changeDomainName, designerName, changeDesignerName, goMacro, goMicro, goHistory, users, gettingCrowdId } = this;
+  const { domainName, changeDomainName, designerName, changeDesignerName, users, gettingCrowdId } = this;
 
   return html`
     <style>
@@ -36,16 +36,10 @@ export const template = self => function () {
     <br>
     <h2>Crowd list</h2>
     <ul class = "crowd-link">
-    ${users? users.map(item => html`
+      ${users ? users.map(item => html`
       <li>
-        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item.id), 'Loading...')}"</a>
+        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item), 'Loading...')}"</a>
       </li>`) : ''}
     </ul>
-    <select class="select-box" placeholder="Topic">
-    <option value="none">Choose the topic</option>
-    ${users? users.map(item => html`<option value="${item.id}">${until(gettingCrowdId(item.id), 'Loading...')}</option>`) : ''}
-    <option value="new-topic">New Topic</option>
-    </select>
   `;
 }.bind(self)();
-

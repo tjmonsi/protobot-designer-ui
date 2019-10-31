@@ -77,5 +77,5 @@ export const GetDomainMixin = (base) => (class extends GetPathMixin(base) {
     this.domainChanged(this.domain);
   }
 
-  domainChanged (domain) { console.log(domain); }
+  domainChanged (domain) {}
 });

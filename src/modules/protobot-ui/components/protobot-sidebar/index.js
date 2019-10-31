@@ -1,13 +1,13 @@
 // Import the LitElement base class and html helper function
 import { LitElement, customElement, property } from 'lit-element';
 import { template } from './template.js';
-import { GetDomainMixin } from '../../mixins/get-domain';
+import { GetDomainUsersMixin } from '../../mixins/get-domain-users';
 import { database } from '../../../firebase';
 
 // Extend the LitElement base class
 // @ts-ignore
 @customElement('protobot-sidebar')
-class ProtobotSidebar extends GetDomainMixin(LitElement) {
+class ProtobotSidebar extends GetDomainUsersMixin(LitElement) {
   @property()
   domainName = '';
 
@@ -19,6 +19,8 @@ class ProtobotSidebar extends GetDomainMixin(LitElement) {
   }
 
   domainChanged (domain) {
+    super.domainChanged(domain);
+
     if (domain) {
       this.domainName = domain.name || '';
       this.designerName = domain.designer || '';
@@ -50,11 +52,9 @@ class ProtobotSidebar extends GetDomainMixin(LitElement) {
    * @param {String} id
    */
   async gettingCrowdId (id) {
-    console.log("${id}");
+    console.log(`${id}`);
     return (await database.ref(`users/data/${id}/name`).once('value')).val();
   }
 }
 
 export { ProtobotSidebar };
-
-

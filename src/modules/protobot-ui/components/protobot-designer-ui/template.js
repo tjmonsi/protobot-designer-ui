@@ -7,6 +7,8 @@ import '../protobot-micro';
 import '../protobot-macro';
 import '../protobot-history';
 import '../protobot-micro-sidebar';
+import '../protobot-history-sidebar';
+
 // @ts-ignore
 import styles from './style.css';
 /**
@@ -41,7 +43,7 @@ export const template = self => function () {
         ` : ''}
 
         ${page === 'history' ? html`
-          <protobot-history></protobot-history>
+          <protobot-authoring></protobot-authoring>
         ` : ''}
       </div>
       <div class="right">
@@ -50,6 +52,9 @@ export const template = self => function () {
         ` : ''}
         ${page === 'micro' ? html`
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
+        ` : ''}
+        ${page === 'history' ? html`
+          <protobot-history-sidebar></protobot-history-sidebar>
         ` : ''}
       </div>
     ` : html`

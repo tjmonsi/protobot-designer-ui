@@ -38,9 +38,14 @@ export const template = self => function () {
     <ul class = "crowd-link">
     ${users? users.map(item => html`
       <li>
-        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item.name), 'Loading...')}"</a>
+        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item.id), 'Loading...')}"</a>
       </li>`) : ''}
     </ul>
+    <select class="select-box" placeholder="Topic">
+    <option value="none">Choose the topic</option>
+    ${users? users.map(item => html`<option value="${item.id}">${until(gettingCrowdId(item.id), 'Loading...')}</option>`) : ''}
+    <option value="new-topic">New Topic</option>
+    </select>
   `;
 }.bind(self)();
 

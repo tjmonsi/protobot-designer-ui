@@ -4157,7 +4157,7 @@ const template = self => function () {
     </style>
 
     <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
-    label="Leave Memo Here" > </wl-textarea>
+    label="Leave Memo Here"></wl-textarea>
 
   `;
 }.bind(self)();
@@ -11620,7 +11620,11 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
       key: "render",
       value: function render() {
         return template(this);
-      }
+      } // need function for
+      // link done with labeling button for auto save
+      // cleanUp
+      //
+
     }]
   };
 }, GetDomainMixin(LitElement));
@@ -11669,9 +11673,14 @@ const template$1 = self => function () {
     <ul class = "crowd-link">
     ${users ? users.map(item => html`
       <li>
-        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item.name), 'Loading...')}"</a>
+        <a href="/?domain=${this.domainId}&page=micro">"${until(gettingCrowdId(item.id), 'Loading...')}"</a>
       </li>`) : ''}
     </ul>
+    <select class="select-box" placeholder="Topic">
+    <option value="none">Choose the topic</option>
+    ${users ? users.map(item => html`<option value="${item.id}">${until(gettingCrowdId(item.id), 'Loading...')}</option>`) : ''}
+    <option value="new-topic">New Topic</option>
+    </select>
   `;
 }.bind(self)();
 
@@ -13140,7 +13149,9 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   };
 }, GetDomainMixin(LitElement));
 
-var styles$j = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background:rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$j = "";
+
+var styles$k = "";
 
 /**
  *
@@ -13148,6 +13159,86 @@ var styles$j = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-t
  */
 
 const template$d = self => function () {
+  return html`
+  <style>
+    ${styles$k}
+  </style>
+
+  <h2>Planning for revision</h2>
+
+
+  `;
+}.bind(self)();
+
+let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _GetDomainMixin) {
+  class ToDoList extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ToDoList,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$d(this);
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$e = self => function () {
+  // const {} = this;
+  return html`
+    <style>
+      ${styles$j}
+    </style>
+
+    <to-do-list></to-do-list>
+
+  `;
+}.bind(self)();
+
+let ProtobotHistorySidebar = _decorate([customElement('protobot-history-sidebar')], function (_initialize, _GetDomainMixin) {
+  class ProtobotHistorySidebar extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotHistorySidebar,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$e(this);
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$l = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background:rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$f = self => function () {
   // @ts-ignore
   const {
     queryObject
@@ -13158,7 +13249,7 @@ const template$d = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$j}
+      ${styles$l}
     </style>
 
     ${domain ? html`
@@ -13179,7 +13270,7 @@ const template$d = self => function () {
         ` : ''}
 
         ${page === 'history' ? html`
-          <protobot-history></protobot-history>
+          <protobot-authoring></protobot-authoring>
         ` : ''}
       </div>
       <div class="right">
@@ -13188,6 +13279,9 @@ const template$d = self => function () {
         ` : ''}
         ${page === 'micro' ? html`
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
+        ` : ''}
+        ${page === 'history' ? html`
+          <protobot-history-sidebar></protobot-history-sidebar>
         ` : ''}
       </div>
     ` : html`
@@ -13216,7 +13310,7 @@ let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], func
       kind: "method",
       key: "render",
       value: function render() {
-        return template$d(this);
+        return template$f(this);
       }
     }]
   };

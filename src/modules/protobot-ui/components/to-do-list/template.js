@@ -1,7 +1,6 @@
-import { html } from "lit-element";
+import { html } from 'lit-element';
 // @ts-ignore
 import styles from './style.css';
-import '../to-do-list';
 
 /**
  *
@@ -10,13 +9,13 @@ import '../to-do-list';
 
 export const template = self => function () {
 
-  // const {} = this;
   return html`
-    <style>
-      ${styles}
-    </style>
+  <style>
+    ${styles}
+  </style>
 
-    <to-do-list></to-do-list>
+  <h2>Planning for revision</h2>
+
 
   `;
 }.bind(self)();

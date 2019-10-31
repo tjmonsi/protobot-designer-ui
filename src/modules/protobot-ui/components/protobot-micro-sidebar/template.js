@@ -1,5 +1,6 @@
 import { html } from 'lit-element';
 import '../topic-list-item';
+import '../protobot-memo';
 
 // @ts-ignore
 import styles from './style.css';

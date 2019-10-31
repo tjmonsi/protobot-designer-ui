@@ -4,11 +4,12 @@ import { GetDomainMixin } from '../../mixins/get-domain';
 import { database } from '../../../firebase';
 
 // @ts-ignore
-@customElement('protobot-history-sidebar')
-class ProtobotHistorySidebar extends GetDomainMixin(LitElement) {
+@customElement('to-do-list')
+class ToDoList extends GetDomainMixin(LitElement) {
+
   render () {
-    return template(this);
+    return template(this)
   }
 }
 
-export { ProtobotHistorySidebar };
+export { ToDoList };

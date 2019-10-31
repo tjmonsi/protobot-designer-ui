@@ -17,7 +17,7 @@ export const template = self => function () {
     </style>
 
     <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
-    label="Leave Memo Here" > </wl-textarea>
+    label="Leave Memo Here"></wl-textarea>
 
   `;
 }.bind(self)();

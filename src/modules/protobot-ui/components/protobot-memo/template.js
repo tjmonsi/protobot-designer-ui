@@ -2,6 +2,7 @@ import { html } from 'lit-element';
 // @ts-ignore
 import styles from './style.css';
 import 'weightless/textarea';
+// import 'weightless/button';
 /**
  *
  * @param {any} self
@@ -18,6 +19,10 @@ export const template = self => function () {
 
     <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
     label="Leave Memo Here"></wl-textarea>
+    <div class="add-container">
+      <button>+</button>
+      <!-- <button class="add-memo">+<button> -->
+    </div>
 
   `;
 }.bind(self)();

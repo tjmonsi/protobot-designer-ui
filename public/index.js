@@ -3423,7 +3423,7 @@ const until = directive((...args) => part => {
   }
 });
 
-var styles$1 = ".memo {\n  --input-bg: rgb(255, 187, 0);\n  --input-color:black;\n  --input-label-color: white;\n  --input-font-family: 'Open Sans', sans-serif;\n\n\n}";
+var styles$1 = ".memo {\n  --input-bg: rgb(255, 187, 0);\n  --input-color:black;\n  --input-label-color: white;\n  --input-font-family: 'Open Sans', sans-serif;\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;s\n  outline:none;\n}";
 
 function cssResult(cssText) {
   return unsafeCSS(cssText);
@@ -4158,6 +4158,10 @@ const template = self => function () {
 
     <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
     label="Leave Memo Here"></wl-textarea>
+    <div class="add-container">
+      <button>+</button>
+      <!-- <button class="add-memo">+<button> -->
+    </div>
 
   `;
 }.bind(self)();

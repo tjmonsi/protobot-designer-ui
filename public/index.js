@@ -3423,7 +3423,7 @@ const until = directive((...args) => part => {
   }
 });
 
-var styles$1 = ".memo {\n  --input-bg: rgb(255, 187, 0);\n  --input-color:black;\n  --input-label-color: white;\n  --input-font-family: 'Open Sans', sans-serif;\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;s\n  outline:none;\n}";
+var styles$1 = ".memo {\n  --input-bg: rgb(255, 187, 0);\n  --input-color:black;\n  --input-label-color: white;\n  --input-font-family: 'Open Sans', sans-serif;\n}\n";
 
 function cssResult(cssText) {
   return unsafeCSS(cssText);
@@ -4149,6 +4149,11 @@ Textarea = __decorate([customElement('wl-textarea')], Textarea);
  */
 
 const template = self => function () {
+  const {
+    memoContent,
+    handleMemo,
+    updateMemo
+  } = this;
   return html`
     <style>
       ${styles$1}
@@ -4157,11 +4162,7 @@ const template = self => function () {
     </style>
 
     <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
-    label="Leave Memo Here"></wl-textarea>
-    <div class="add-container">
-      <button>+</button>
-      <!-- <button class="add-memo">+<button> -->
-    </div>
+    label="Leave Memo Here" value="${memoContent}" @change="${handleMemo.bind(this)}"></wl-textarea>
 
   `;
 }.bind(self)();
@@ -11618,10 +11619,37 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
   return {
     F: ProtobotMemo,
     d: [{
+      kind: "field",
+      decorators: [property()],
+      key: "memoContent",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property()],
+      key: "updateMemo",
+      value: void 0
+    }, {
       kind: "method",
       key: "render",
       value: function render() {
+        // updateMemo(this, this.idx);
+        console.log(this.memoContent);
         return template(this);
+      }
+    }, {
+      kind: "method",
+      key: "handleMemo",
+      value: async function handleMemo(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target; // this.memoContent = value;
+        // console.log(this.memoContent);
+
+        console.log(this.updateMemo);
+        this.updateMemo(value);
       } // this is where you get the unique memo id
       // const { key: memoId } = database.ref('memo/data').push();
       // const memo = {
@@ -13186,7 +13214,7 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
   };
 }, GetDomainMixin(LitElement));
 
-var styles$i = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n";
+var styles$i = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;s\n  outline:none;\n}";
 
 /**
  *
@@ -13197,7 +13225,10 @@ const template$c = self => function () {
   // @ts-ignore
   const {
     topics,
-    save
+    save,
+    addMemo,
+    memos,
+    updateMemo
   } = this;
   return html`
     <style>
@@ -13224,17 +13255,23 @@ const template$c = self => function () {
     </ul>
     <br>
     <br>
-    <protobot-memo></protobot-memo>
-    <div class="button-container">
+    ${memos.map((memo, idx) => html`
+      <protobot-memo memoContent="${memo}" updateMemo="${updateMemo.bind(this, idx)}"></protobot-memo>
+    `)}
+    <div class="add-container">
+      <button class="add-button" @click="${addMemo.bind(this)}">+</button>
+    </div>
+    <!-- <div class="button-container">
       <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
         Done with Labeling
       </vaadin-button>
-    </div>
+    </div> -->
 
 
   `;
 }.bind(self)();
 
+// Extend the LitElement base class
 // @ts-ignore
 
 let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], function (_initialize, _GetDomainMixin) {
@@ -13250,9 +13287,21 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   return {
     F: ProtobotMicroSidebar,
     d: [{
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "memos",
+
+      value() {
+        return ["hello", "world", "???"];
+      }
+
+    }, {
       kind: "method",
       key: "render",
       value: function render() {
+        console.log(this.memos);
         return template$c(this);
       }
     }, {
@@ -13261,6 +13310,19 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
       value: async function save() {
         // updates[`domains/data/${this.domainId}/deployed`] = false;
         // await database.ref().update(updates);
+      }
+    }, {
+      kind: "method",
+      key: "addMemo",
+      value: async function addMemo(event) {
+        this.memos.push("");
+        this.requestUpdate(); // console.log(this.memos)
+      }
+    }, {
+      kind: "method",
+      key: "updateMemo",
+      value: async function updateMemo(idx, value) {
+        this.memos[idx] = value;
       }
     }]
   };

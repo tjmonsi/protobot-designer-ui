@@ -10,7 +10,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topics, save } = this;
+  const { topics, save, addMemo, memos, updateMemo } = this;
 
   return html`
     <style>
@@ -37,12 +37,17 @@ export const template = self => function () {
     </ul>
     <br>
     <br>
-    <protobot-memo></protobot-memo>
-    <div class="button-container">
+    ${memos.map((memo,idx) => html`
+      <protobot-memo memoContent="${memo}" updateMemo="${updateMemo.bind(this, idx)}"></protobot-memo>
+    `)}
+    <div class="add-container">
+      <button class="add-button" @click="${addMemo.bind(this)}">+</button>
+    </div>
+    <!-- <div class="button-container">
       <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
         Done with Labeling
       </vaadin-button>
-    </div>
+    </div> -->
 
 
   `;

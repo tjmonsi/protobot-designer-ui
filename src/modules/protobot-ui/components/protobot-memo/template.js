@@ -10,6 +10,8 @@ import 'weightless/textarea';
 
 export const template = self => function () {
 
+  const { memoContent, handleMemo, updateMemo } = this;
+
   return html`
     <style>
       ${styles}
@@ -18,11 +20,7 @@ export const template = self => function () {
     </style>
 
     <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
-    label="Leave Memo Here"></wl-textarea>
-    <div class="add-container">
-      <button>+</button>
-      <!-- <button class="add-memo">+<button> -->
-    </div>
+    label="Leave Memo Here" value="${memoContent}" @change="${handleMemo.bind(this)}"></wl-textarea>
 
   `;
 }.bind(self)();

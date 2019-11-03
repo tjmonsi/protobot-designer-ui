@@ -7,10 +7,28 @@ import { database } from '../../../firebase';
 // @ts-ignore
 @customElement('protobot-memo')
 class ProtobotMemo extends GetDomainMixin(LitElement) {
+  @property()
+  memoContent;
+
+  @property()
+  updateMemo;
 
   render () {
+    // updateMemo(this, this.idx);
+    console.log(this.memoContent)
     return template(this);
   }
+
+  async handleMemo (event) {
+    const { target } = event;
+    const { value } = target;
+
+    // this.memoContent = value;
+    // console.log(this.memoContent);
+    console.log(this.updateMemo);
+    this.updateMemo(value);
+  }
+
 
   // this is where you get the unique memo id
   // const { key: memoId } = database.ref('memo/data').push();

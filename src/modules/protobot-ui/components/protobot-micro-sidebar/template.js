@@ -30,15 +30,17 @@ export const template = self => function () {
     <ul class ="topic-list">
     ${topics.map(topic => html`
       <li>
-        <topic-list-item class="item" topicId="${topic.id}">
+        <topic-list-item class="item" .topicId="${topic.id}">
         </topic-list-item>
       </li>
     `)}
     </ul>
     <br>
     <br>
-    ${memos.map((memo,idx) => html`
-      <protobot-memo memoContent="${memo}" updateMemo="${updateMemo.bind(this, idx)}"></protobot-memo>
+    ${memos.map((memo, idx) => html`
+      <!-- see @update-memo when dispatched by protobot-memo, it will call updateMemo of protobot-micro-sidebar -->
+      <!-- no need to pass functions -->
+      <protobot-memo memoContent="${memo}" @update-memo="${updateMemo.bind(this, idx)}"></protobot-memo>
     `)}
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>

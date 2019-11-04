@@ -28,13 +28,14 @@ class ProtobotMicroSidebar extends GetDomainMixin(LitElement) {
     const { target } = event;
     const { value } = target;
 
-    this.memos.push("");
+    this.memos.push('');
     this.requestUpdate();
     // console.log(this.memos)
   }
 
-  async updateMemo(idx, value){
+  async updateMemo (idx, { detail: value }) {
     this.memos[idx] = value;
+    console.log(this.memos);
   }
 }
 

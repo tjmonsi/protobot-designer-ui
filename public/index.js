@@ -9654,12 +9654,12 @@ var error=errorForServerCode(status,query);return _this.removeEventRegistration(
      *
      * NOTES:
      * - Descendant SyncPoints will be visited first (since we raise events depth-first).
-  
+
      * - We call applyOperation() on each SyncPoint passing three things:
      *   1. A version of the Operation that has been made relative to the SyncPoint location.
      *   2. A WriteTreeRef of any writes we have cached at the SyncPoint location.
      *   3. A snapshot Node with cached server data, if we have it.
-  
+
      * - We concatenate all of the events returned by each SyncPoint and return the result.
      */SyncTree.prototype.applyOperationToSyncPoints_=function(operation){return this.applyOperationHelper_(operation,this.syncPointTree_,/*serverCache=*/null,this.pendingWriteTree_.childWrites(Path.Empty));};/**
      * Recursive helper for applyOperationToSyncPoints_
@@ -11606,6 +11606,8 @@ const GetDomainMixin = base => _decorate(null, function (_initialize, _GetPathMi
   };
 }, GetPathMixin(base));
 
+// @ts-ignore
+
 let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initialize, _GetDomainMixin) {
   class ProtobotMemo extends _GetDomainMixin {
     constructor(...args) {
@@ -11646,11 +11648,14 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
         } = event;
         const {
           value
-        } = target; // this.memoContent = value;
-        // console.log(this.memoContent);
+        } = target; // this dispatch event called update-memo
 
-        console.log(this.updateMemo);
-        this.updateMemo(value);
+        this.dispatchEvent(new window.CustomEvent('update-memo', {
+          detail: value
+        })); // this.memoContent = value;
+        // console.log(this.memoContent);
+        // console.log(this.updateMemo);
+        // this.updateMemo(value);
       } // this is where you get the unique memo id
       // const { key: memoId } = database.ref('memo/data').push();
       // const memo = {
@@ -13303,7 +13308,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
       key: "render",
       value: function render() {
         console.log(this.memos);
-        return template$c(this);
+        return template$d(this);
       }
     }, {
       kind: "method",
@@ -13363,7 +13368,7 @@ const template$d = self => function () {
     <ul class ="topic-list">
     ${topics.map(topic => html`
       <li>
-        <topic-list-item class="item" topicId="${topic.id}">
+        <topic-list-item class="item" .topicId="${topic.id}">
         </topic-list-item>
       </li>
     `)}
@@ -13371,7 +13376,9 @@ const template$d = self => function () {
     <br>
     <br>
     ${memos.map((memo, idx) => html`
-      <protobot-memo memoContent="${memo}" updateMemo="${updateMemo.bind(this, idx)}"></protobot-memo>
+      <!-- see @update-memo when dispatched by protobot-memo, it will call updateMemo of protobot-micro-sidebar -->
+      <!-- no need to pass functions -->
+      <protobot-memo memoContent="${memo}" @update-memo="${updateMemo.bind(this, idx)}"></protobot-memo>
     `)}
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
@@ -13430,14 +13437,17 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
       kind: "method",
       key: "addMemo",
       value: async function addMemo(event) {
-        this.memos.push("");
+        this.memos.push('');
         this.requestUpdate(); // console.log(this.memos)
       }
     }, {
       kind: "method",
       key: "updateMemo",
-      value: async function updateMemo(idx, value) {
+      value: async function updateMemo(idx, {
+        detail: value
+      }) {
         this.memos[idx] = value;
+        console.log(this.memos);
       }
     }]
   };

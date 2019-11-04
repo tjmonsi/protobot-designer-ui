@@ -1,7 +1,8 @@
 import { LitElement, customElement, property } from 'lit-element';
 import { template } from './template.js';
 import { GetDomainMixin } from '../../mixins/get-domain';
-import { database } from '../../../firebase';
+
+// import { database } from '../../../firebase';
 
 
 // @ts-ignore
@@ -23,12 +24,14 @@ class ProtobotMemo extends GetDomainMixin(LitElement) {
     const { target } = event;
     const { value } = target;
 
+    // this dispatch event called update-memo
+    this.dispatchEvent(new window.CustomEvent('update-memo', { detail: value }));
+
     // this.memoContent = value;
     // console.log(this.memoContent);
-    console.log(this.updateMemo);
-    this.updateMemo(value);
+    // console.log(this.updateMemo);
+    // this.updateMemo(value);
   }
-
 
   // this is where you get the unique memo id
   // const { key: memoId } = database.ref('memo/data').push();

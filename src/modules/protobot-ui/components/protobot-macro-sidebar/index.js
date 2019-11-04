@@ -10,7 +10,7 @@ import { database } from '../../../firebase';
 @customElement('protobot-macro-sidebar')
 class ProtobotMacroSidebar extends GetDomainMixin(LitElement) {
   @property({ type: Array })
-  memos = ["hello", "world", "???"];
+  memos = [''];
 
   render () {
     console.log(this.memos)
@@ -28,13 +28,14 @@ class ProtobotMacroSidebar extends GetDomainMixin(LitElement) {
     const { target } = event;
     const { value } = target;
 
-    this.memos.push("");
+    this.memos.push('');
     this.requestUpdate();
     // console.log(this.memos)
   }
 
-  async updateMemo(idx, value){
+  async updateMemo (idx, { detail: value }) {
     this.memos[idx] = value;
+    console.log(this.memos);
   }
 }
 

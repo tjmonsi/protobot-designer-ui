@@ -28,6 +28,8 @@ export const GetTopicMixin = (base) => (class extends base {
   async getTopic (topicId) {
     const snap = await database.ref(`labels/data/${topicId}`).once('value');
     this.topic = snap.val() || null;
+    // console.log('here!')
+    // console.log(this.topic)
     const { mainUtterance, utterances } = this.topic;
     let utteranceId;
     for (const utterance in utterances) {

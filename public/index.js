@@ -4163,7 +4163,7 @@ const template = self => function () {
 
     <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
     label="Leave Memo Here" value="${memoContent}" @change="${handleMemo.bind(this)}"></wl-textarea>
-
+    <br>
   `;
 }.bind(self)();
 
@@ -9654,12 +9654,12 @@ var error=errorForServerCode(status,query);return _this.removeEventRegistration(
      *
      * NOTES:
      * - Descendant SyncPoints will be visited first (since we raise events depth-first).
-
+  
      * - We call applyOperation() on each SyncPoint passing three things:
      *   1. A version of the Operation that has been made relative to the SyncPoint location.
      *   2. A WriteTreeRef of any writes we have cached at the SyncPoint location.
      *   3. A snapshot Node with cached server data, if we have it.
-
+  
      * - We concatenate all of the events returned by each SyncPoint and return the result.
      */SyncTree.prototype.applyOperationToSyncPoints_=function(operation){return this.applyOperationHelper_(operation,this.syncPointTree_,/*serverCache=*/null,this.pendingWriteTree_.childWrites(Path.Empty));};/**
      * Recursive helper for applyOperationToSyncPoints_
@@ -12242,7 +12242,9 @@ const GetTopicMixin = base => _decorate(null, function (_initialize, _base) {
       key: "getTopic",
       value: async function getTopic(topicId) {
         const snap = await database.ref(`labels/data/${topicId}`).once('value');
-        this.topic = snap.val() || null;
+        this.topic = snap.val() || null; // console.log('here!')
+        // console.log(this.topic)
+
         const {
           mainUtterance,
           utterances
@@ -13262,7 +13264,7 @@ const template$c = self => function () {
     <br>
     <br>
     ${memos.map((memo, idx) => html`
-      <protobot-memo memoContent="${memo}" updateMemo="${updateMemo.bind(this, idx)}"></protobot-memo>
+      <protobot-memo memoContent="${memo}" @update-memo="${updateMemo.bind(this, idx)}"></protobot-memo>
     `)}
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
@@ -13300,7 +13302,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
       key: "memos",
 
       value() {
-        return ["hello", "world", "???"];
+        return [''];
       }
 
     }, {
@@ -13308,7 +13310,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
       key: "render",
       value: function render() {
         console.log(this.memos);
-        return template$d(this);
+        return template$c(this);
       }
     }, {
       kind: "method",
@@ -13321,14 +13323,17 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
       kind: "method",
       key: "addMemo",
       value: async function addMemo(event) {
-        this.memos.push("");
+        this.memos.push('');
         this.requestUpdate(); // console.log(this.memos)
       }
     }, {
       kind: "method",
       key: "updateMemo",
-      value: async function updateMemo(idx, value) {
+      value: async function updateMemo(idx, {
+        detail: value
+      }) {
         this.memos[idx] = value;
+        console.log(this.memos);
       }
     }]
   };
@@ -13416,7 +13421,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
       key: "memos",
 
       value() {
-        return ["hello", "world", "???"];
+        return [''];
       }
 
     }, {

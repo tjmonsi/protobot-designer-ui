@@ -10,7 +10,7 @@ import { database } from '../../../firebase';
 @customElement('protobot-micro-sidebar')
 class ProtobotMicroSidebar extends GetDomainMixin(LitElement) {
   @property({ type: Array })
-  memos = ["hello", "world", "???"];
+  memos = [''];
 
   render () {
     console.log(this.memos)

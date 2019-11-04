@@ -21,6 +21,6 @@ export const template = self => function () {
 
     <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
     label="Leave Memo Here" value="${memoContent}" @change="${handleMemo.bind(this)}"></wl-textarea>
-
+    <br>
   `;
 }.bind(self)();

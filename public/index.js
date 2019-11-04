@@ -11631,7 +11631,8 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
     }, {
       kind: "method",
       key: "render",
-      value: function render() {
+      value: // need to be function call
+      function render() {
         // updateMemo(this, this.idx);
         console.log(this.memoContent);
         return template(this);

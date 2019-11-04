@@ -6,6 +6,7 @@ import '../protobot-authoring-sidebar';
 import '../protobot-micro';
 import '../protobot-macro';
 import '../protobot-history';
+import '../protobot-macro-sidebar';
 import '../protobot-micro-sidebar';
 import '../protobot-history-sidebar';
 
@@ -49,6 +50,9 @@ export const template = self => function () {
       <div class="right">
         ${page === 'authoring' || !page ? html`
           <protobot-authoring-sidebar></protobot-authoring-sidebar>
+        ` : ''}
+        ${page === 'macro' ? html`
+          <protobot-macro-sidebar></protobot-macro-sidebar>
         ` : ''}
         ${page === 'micro' ? html`
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>

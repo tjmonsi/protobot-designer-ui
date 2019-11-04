@@ -11,7 +11,7 @@ class ProtobotMemo extends GetDomainMixin(LitElement) {
   memoContent;
 
   @property()
-  updateMemo;
+  updateMemo; // need to be function call
 
   render () {
     // updateMemo(this, this.idx);

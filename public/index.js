@@ -13215,7 +13215,7 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
   };
 }, GetDomainMixin(LitElement));
 
-var styles$i = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;s\n  outline:none;\n}";
+var styles$i = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
@@ -13234,6 +13234,120 @@ const template$c = self => function () {
   return html`
     <style>
       ${styles$i}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+    </style>
+
+    <div class = "instruction">
+      <h2>Instruction</h2>
+      <p>In this stage, you can label the topic for each utterance.
+        Please click the select-box to label the topic.</p>
+    </div>
+    <br>
+    <h2>Current Topic List</h2>
+    <ul class ="topic-list">
+    ${topics.map(topic => html`
+      <li>
+        <topic-list-item class="item" topicId="${topic.id}">
+        </topic-list-item>
+      </li>
+    `)}
+    </ul>
+    <br>
+    <br>
+    ${memos.map((memo, idx) => html`
+      <protobot-memo memoContent="${memo}" updateMemo="${updateMemo.bind(this, idx)}"></protobot-memo>
+    `)}
+    <div class="add-container">
+      <button class="add-button" @click="${addMemo.bind(this)}">+</button>
+    </div>
+    <!-- <div class="button-container">
+      <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
+        Done with Labeling
+      </vaadin-button>
+    </div> -->
+
+
+  `;
+}.bind(self)();
+
+// Extend the LitElement base class
+// @ts-ignore
+
+let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], function (_initialize, _GetDomainMixin) {
+  class ProtobotMacroSidebar extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotMacroSidebar,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "memos",
+
+      value() {
+        return ["hello", "world", "???"];
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        console.log(this.memos);
+        return template$c(this);
+      }
+    }, {
+      kind: "method",
+      key: "save",
+      value: async function save() {
+        // updates[`domains/data/${this.domainId}/deployed`] = false;
+        // await database.ref().update(updates);
+      }
+    }, {
+      kind: "method",
+      key: "addMemo",
+      value: async function addMemo(event) {
+        this.memos.push("");
+        this.requestUpdate(); // console.log(this.memos)
+      }
+    }, {
+      kind: "method",
+      key: "updateMemo",
+      value: async function updateMemo(idx, value) {
+        this.memos[idx] = value;
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$j = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$d = self => function () {
+  // @ts-ignore
+  const {
+    topics,
+    save,
+    addMemo,
+    memos,
+    updateMemo
+  } = this;
+  return html`
+    <style>
+      ${styles$j}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -13303,7 +13417,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
       key: "render",
       value: function render() {
         console.log(this.memos);
-        return template$c(this);
+        return template$d(this);
       }
     }, {
       kind: "method",
@@ -13329,19 +13443,19 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   };
 }, GetDomainMixin(LitElement));
 
-var styles$j = "";
-
 var styles$k = "";
+
+var styles$l = "";
 
 /**
  *
  * @param {any} self
  */
 
-const template$d = self => function () {
+const template$e = self => function () {
   return html`
   <style>
-    ${styles$k}
+    ${styles$l}
   </style>
 
   <h2>Planning for revision</h2>
@@ -13366,7 +13480,7 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
       kind: "method",
       key: "render",
       value: function render() {
-        return template$d(this);
+        return template$e(this);
       }
     }]
   };
@@ -13377,11 +13491,11 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
  * @param {any} self
  */
 
-const template$e = self => function () {
+const template$f = self => function () {
   // const {} = this;
   return html`
     <style>
-      ${styles$j}
+      ${styles$k}
     </style>
 
     <to-do-list></to-do-list>
@@ -13405,20 +13519,20 @@ let ProtobotHistorySidebar = _decorate([customElement('protobot-history-sidebar'
       kind: "method",
       key: "render",
       value: function render() {
-        return template$e(this);
+        return template$f(this);
       }
     }]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$l = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background:rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$m = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 2fr 1fr;\n}\n\n.left {\n  background: rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background:rgb(94, 94, 94);\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$f = self => function () {
+const template$g = self => function () {
   // @ts-ignore
   const {
     queryObject
@@ -13429,7 +13543,7 @@ const template$f = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$l}
+      ${styles$m}
     </style>
 
     ${domain ? html`
@@ -13456,6 +13570,9 @@ const template$f = self => function () {
       <div class="right">
         ${page === 'authoring' || !page ? html`
           <protobot-authoring-sidebar></protobot-authoring-sidebar>
+        ` : ''}
+        ${page === 'macro' ? html`
+          <protobot-macro-sidebar></protobot-macro-sidebar>
         ` : ''}
         ${page === 'micro' ? html`
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
@@ -13490,7 +13607,7 @@ let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], func
       kind: "method",
       key: "render",
       value: function render() {
-        return template$f(this);
+        return template$g(this);
       }
     }]
   };

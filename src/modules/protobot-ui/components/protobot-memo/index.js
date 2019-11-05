@@ -14,7 +14,6 @@ class ProtobotMemo extends GetDomainMixin(LitElement) {
   updateMemo; // need to be function call
 
   render () {
-    console.log(this.memoContent)
     return template(this);
   }
 
@@ -25,11 +24,6 @@ class ProtobotMemo extends GetDomainMixin(LitElement) {
 
     // this dispatch event called update-memo
     this.dispatchEvent(new window.CustomEvent('update-memo', { detail: value }));
-
-    // this.memoContent = value;
-    // console.log(this.memoContent);
-    // console.log(this.updateMemo);
-    // this.updateMemo(values);
   }
 
   async saveMemo () {
@@ -45,12 +39,14 @@ class ProtobotMemo extends GetDomainMixin(LitElement) {
       // deployedVersion: // think how to add this one
     };
 
+    console.log(memo);
+    console.log(updates);
+
     updates[`memos/data/${memoId}`] = memo;
     updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = true;
 
     // this saves the memo in db
     await database.ref().update(updates);
-
   }
 }
 

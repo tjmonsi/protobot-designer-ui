@@ -11671,7 +11671,6 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
       key: "render",
       value: // need to be function call
       function render() {
-        console.log(this.memoContent);
         return template(this);
       }
     }, {
@@ -11688,10 +11687,7 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
 
         this.dispatchEvent(new window.CustomEvent('update-memo', {
           detail: value
-        })); // this.memoContent = value;
-        // console.log(this.memoContent);
-        // console.log(this.updateMemo);
-        // this.updateMemo(values);
+        }));
       }
     }, {
       kind: "method",
@@ -11711,6 +11707,8 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
           // deployedVersion: // think how to add this one
 
         };
+        console.log(memo);
+        console.log(updates);
         updates[`memos/data/${memoId}`] = memo;
         updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = true; // this saves the memo in db
 

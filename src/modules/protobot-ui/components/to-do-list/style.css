@@ -1,0 +1,25 @@
+h2 {
+  margin-left:10px;
+}
+.plan-input {
+  display: flex;
+  flex-direction: row;
+}
+
+.new-input {
+  margin: 10px;
+  --input-bg: white;
+  --input-bg-filled: white;
+
+}
+.button-input {
+  margin: 10px;
+
+}
+
+.plan-list {
+  display: flex;
+  flex-direction: column;
+  margin: 10px;
+}
+

@@ -11644,8 +11644,6 @@ const GetDomainMixin = base => _decorate(null, function (_initialize, _GetPathMi
   };
 }, GetPathMixin(base));
 
-// @ts-ignore
-
 let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initialize, _GetDomainMixin) {
   class ProtobotMemo extends _GetDomainMixin {
     constructor(...args) {
@@ -11673,7 +11671,6 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
       key: "render",
       value: // need to be function call
       function render() {
-        // updateMemo(this, this.idx);
         console.log(this.memoContent);
         return template(this);
       }
@@ -11681,6 +11678,7 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
       kind: "method",
       key: "handleMemo",
       value: async function handleMemo(event) {
+        this.saveMemo();
         const {
           target
         } = event;
@@ -11693,26 +11691,31 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
         })); // this.memoContent = value;
         // console.log(this.memoContent);
         // console.log(this.updateMemo);
-        // this.updateMemo(value);
-      } // this is where you get the unique memo id
-      // const { key: memoId } = database.ref('memo/data').push();
-      // const memo = {
-      //   text,
-      //   domainId,
-      //   crowId, // can be null
-      //   page: // macro/micro
-      //   deployedVersion: // think how to add this one
-      // };
-      // updates[`memo/data/${memoId}`] = memo;
-      // updates[`memo/lists/domain-memo/${domainId}/${memoId}`] = true;
-      // this saves the memo in db
-      // await database.ref().update(updates);
-      // -------------------------
-      // need function for
-      // link done with labeling button for auto save
-      // cleanUp
-      //
+        // this.updateMemo(values);
+      }
+    }, {
+      kind: "method",
+      key: "saveMemo",
+      value: async function saveMemo() {
+        console.log("saved!"); // this is where you get the unique memo id
 
+        const {
+          key: memoId
+        } = database.ref('memos/data').push();
+        const updates = {};
+        const memo = {
+          text: this.memoContent,
+          domainId: this.domainId,
+          crowdId: this.crowdId // can be null
+          // page: macro || micro// macro/micro
+          // deployedVersion: // think how to add this one
+
+        };
+        updates[`memos/data/${memoId}`] = memo;
+        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = true; // this saves the memo in db
+
+        await database.ref().update(updates);
+      }
     }]
   };
 }, GetDomainMixin(LitElement));

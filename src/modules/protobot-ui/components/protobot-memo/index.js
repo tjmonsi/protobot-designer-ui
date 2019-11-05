@@ -1,8 +1,7 @@
 import { LitElement, customElement, property } from 'lit-element';
 import { template } from './template.js';
 import { GetDomainMixin } from '../../mixins/get-domain';
-
-// import { database } from '../../../firebase';
+import { database } from '../../../firebase';
 
 
 // @ts-ignore
@@ -15,12 +14,12 @@ class ProtobotMemo extends GetDomainMixin(LitElement) {
   updateMemo; // need to be function call
 
   render () {
-    // updateMemo(this, this.idx);
     console.log(this.memoContent)
     return template(this);
   }
 
   async handleMemo (event) {
+    this.saveMemo();
     const { target } = event;
     const { value } = target;
 
@@ -30,32 +29,29 @@ class ProtobotMemo extends GetDomainMixin(LitElement) {
     // this.memoContent = value;
     // console.log(this.memoContent);
     // console.log(this.updateMemo);
-    // this.updateMemo(value);
+    // this.updateMemo(values);
   }
 
-  // this is where you get the unique memo id
-  // const { key: memoId } = database.ref('memo/data').push();
+  async saveMemo () {
+    console.log("saved!")
+    // this is where you get the unique memo id
+    const { key: memoId } = database.ref('memos/data').push();
+    const updates = {};
+    const memo = {
+      text: this.memoContent,
+      domainId: this.domainId,
+      crowdId: this.crowdId // can be null
+      // page: macro || micro// macro/micro
+      // deployedVersion: // think how to add this one
+    };
 
-  // const memo = {
-  //   text,
-  //   domainId,
-  //   crowId, // can be null
-  //   page: // macro/micro
-  //   deployedVersion: // think how to add this one
-  // };
+    updates[`memos/data/${memoId}`] = memo;
+    updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = true;
 
-  // updates[`memo/data/${memoId}`] = memo;
-  // updates[`memo/lists/domain-memo/${domainId}/${memoId}`] = true;
+    // this saves the memo in db
+    await database.ref().update(updates);
 
-  // this saves the memo in db
-  // await database.ref().update(updates);
-
-  // -------------------------
-
-  // need function for
-  // link done with labeling button for auto save
-  // cleanUp
-  //
+  }
 }
 
 export { ProtobotMemo };

@@ -2,3 +2,12 @@ h1 {
   text-align: center;
   font-family: 'Montserrat', sans-serif;
 }
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+.link:hover {
+  stroke-opacity: .5;
+}

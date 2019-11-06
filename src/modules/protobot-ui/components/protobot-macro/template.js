@@ -23,6 +23,6 @@ export const template = self => function () {
     <br>
 
 
-
+    <div class="sankey"></div>
   `;
 }.bind(self)();

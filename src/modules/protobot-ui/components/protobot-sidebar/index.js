@@ -52,7 +52,7 @@ class ProtobotSidebar extends GetDomainUsersMixin(LitElement) {
    * @param {String} id
    */
   async gettingCrowdId (id) {
-    console.log(`${id}`);
+    // console.log(`${id}`);
     return (await database.ref(`users/data/${id}/name`).once('value')).val();
   }
 }

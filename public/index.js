@@ -12768,11 +12768,11 @@ const template$8 = self => function () {
         <div>
           <div class="label">${bot ? 'Bot' : 'User'}</div>
           <div class ="utterance ${!bot ? 'utterance__right' : ''}"> ${text}</div>
-          <div>
+          <!-- <div>
             ${utteranceTopics ? Object.keys(utteranceTopics).map(item => html`
               <span>${until(gettingTopic(item), 'Loading...')}</span>
             `) : ''}
-          </div>
+          </div> -->
 
           <div class="select-container ${!bot ? 'select-container__right' : ''}">
             <div class = "select-topic">

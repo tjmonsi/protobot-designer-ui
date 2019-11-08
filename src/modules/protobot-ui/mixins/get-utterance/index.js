@@ -16,6 +16,7 @@ export const GetUtteranceMixin = (base) => (class extends base {
   utterance;
 
   updated (changedProps) {
+    if (super.updated) super.updated(changedProps);
     if (changedProps.has('utteranceId')) {
       this.getUtterance(this.utteranceId);
     }

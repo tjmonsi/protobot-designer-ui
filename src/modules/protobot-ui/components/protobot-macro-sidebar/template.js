@@ -37,8 +37,8 @@ export const template = self => function () {
     </ul>
     <br>
     <br>
-    ${memos.map((memo,idx) => html`
-      <protobot-memo memoContent="${memo}" @update-memo="${updateMemo.bind(this, idx)}"></protobot-memo>
+    ${memos.map(({ memoId }) => html`
+      <protobot-memo .memoId="${memoId}"></protobot-memo>
     `)}
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>

@@ -20,6 +20,7 @@ export const GetTopicMixin = (base) => (class extends base {
   mainUtteranceId;
 
   updated (changedProps) {
+    if (super.updated) super.updated(changedProps);
     if (changedProps.has('topicId')) {
       this.getTopic(this.topicId);
     }

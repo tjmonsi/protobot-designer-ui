@@ -4188,10 +4188,14 @@ Textarea = __decorate([customElement('wl-textarea')], Textarea);
 
 const template = self => function () {
   const {
-    memoContent,
-    handleMemo,
-    updateMemo
+    memo,
+    saveMemo
   } = this;
+  const {
+    text
+  } = memo || {
+    text: 'Loading...'
+  };
   return html`
     <style>
       ${styles$1}
@@ -4200,7 +4204,7 @@ const template = self => function () {
     </style>
 
     <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
-    label="Leave Memo Here" value="${memoContent}" @change="${handleMemo.bind(this)}"></wl-textarea>
+    label="Leave Memo Here" value="${text}" @change="${saveMemo.bind(this)}"></wl-textarea>
     <br>
   `;
 }.bind(self)();
@@ -11644,8 +11648,63 @@ const GetDomainMixin = base => _decorate(null, function (_initialize, _GetPathMi
   };
 }, GetPathMixin(base));
 
-let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initialize, _GetDomainMixin) {
-  class ProtobotMemo extends _GetDomainMixin {
+/**
+ *
+ * @param {*} base
+ */
+
+const GetMemoMixin = base => _decorate(null, function (_initialize, _base) {
+  class _class extends _base {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "memoId",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "memo",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "updated",
+      value: // @ts-ignore
+      // @ts-ignore
+      function updated(changedProps) {
+        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
+
+        if (changedProps.has('memoId')) {
+          this.getMemo(this.memoId);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "getMemo",
+      value: async function getMemo(memoId) {
+        console.log(memoId);
+        const snap = await database.ref(`memos/data/${memoId}`).once('value');
+        this.memo = snap.val() || null;
+      }
+    }]
+  };
+}, base);
+
+let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initialize, _GetMemoMixin) {
+  class ProtobotMemo extends _GetMemoMixin {
     constructor(...args) {
       super(...args);
 
@@ -11657,66 +11716,30 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
   return {
     F: ProtobotMemo,
     d: [{
-      kind: "field",
-      decorators: [property()],
-      key: "memoContent",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [property()],
-      key: "updateMemo",
-      value: void 0
-    }, {
       kind: "method",
       key: "render",
-      value: // need to be function call
-      function render() {
+      value: function render() {
         return template(this);
       }
     }, {
       kind: "method",
-      key: "handleMemo",
-      value: async function handleMemo(event) {
-        this.saveMemo();
-        const {
-          target
-        } = event;
+      key: "saveMemo",
+      value: async function saveMemo({
+        target
+      }) {
         const {
           value
-        } = target; // this dispatch event called update-memo
+        } = target;
+        console.log('saved!'); // this is where you get the unique memo id
 
-        this.dispatchEvent(new window.CustomEvent('update-memo', {
-          detail: value
-        }));
-      }
-    }, {
-      kind: "method",
-      key: "saveMemo",
-      value: async function saveMemo() {
-        console.log("saved!"); // this is where you get the unique memo id
-
-        const {
-          key: memoId
-        } = database.ref('memos/data').push();
         const updates = {};
-        const memo = {
-          text: this.memoContent,
-          domainId: this.domainId,
-          crowdId: this.crowdId // can be null
-          // page: macro || micro// macro/micro
-          // deployedVersion: // think how to add this one
-
-        };
-        console.log(memo);
-        console.log(updates);
-        updates[`memos/data/${memoId}`] = memo;
-        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = true; // this saves the memo in db
+        updates[`memos/data/${this.memoId}/text`] = value; // this saves the memo in db
 
         await database.ref().update(updates);
       }
     }]
   };
-}, GetDomainMixin(LitElement));
+}, GetMemoMixin(GetDomainMixin(LitElement)));
 
 /**
  *
@@ -12126,6 +12149,8 @@ const GetUtteranceMixin = base => _decorate(null, function (_initialize, _base) 
       value: // @ts-ignore
       // @ts-ignore
       function updated(changedProps) {
+        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
+
         if (changedProps.has('utteranceId')) {
           this.getUtterance(this.utteranceId);
         }
@@ -12272,6 +12297,8 @@ const GetTopicMixin = base => _decorate(null, function (_initialize, _base) {
       // @ts-ignore
       // @ts-ignore
       function updated(changedProps) {
+        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
+
         if (changedProps.has('topicId')) {
           this.getTopic(this.topicId);
         }
@@ -18081,8 +18108,10 @@ const template$c = self => function () {
     </ul>
     <br>
     <br>
-    ${memos.map((memo, idx) => html`
-      <protobot-memo memoContent="${memo}" @update-memo="${updateMemo.bind(this, idx)}"></protobot-memo>
+    ${memos.map(({
+    memoId
+  }) => html`
+      <protobot-memo .memoId="${memoId}"></protobot-memo>
     `)}
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
@@ -18097,11 +18126,117 @@ const template$c = self => function () {
   `;
 }.bind(self)();
 
+/**
+ *
+ * @param {*} base
+ */
+
+const GetDomainMemosMixin = base => _decorate(null, function (_initialize, _GetDomainMixin) {
+  class _class extends _GetDomainMixin {
+    // @ts-ignore
+    constructor() {
+      super();
+
+      _initialize(this);
+
+      this.boundSaveDomainMemos = this.saveDomainMemos.bind(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "memos",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "method",
+      key: "disconnectedCallback",
+      value: function disconnectedCallback() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
+          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
+        }
+
+        this.disconnectRef();
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: function domainChanged(data) {
+        _get(_getPrototypeOf(_class.prototype), "domainChanged", this).call(this, data);
+
+        if (data) {
+          this.getDomainMemos(this.domainId);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "disconnectRef",
+      value: function disconnectRef() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
+
+        if (this.domainMemosRef) {
+          this.domainMemosRef.off('value', this.boundSaveDomainMemos);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "getDomainMemos",
+      value: function getDomainMemos(id) {
+        this.disconnectRef();
+
+        if (id) {
+          console.log(id);
+          this.domainMemosRef = database.ref(`memos/lists/domain-memo/${id}`);
+          this.domainMemosRef.on('value', this.boundSaveDomainMemos);
+        } else {
+          console.log('No values for id-crowdId: ', id);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveDomainMemos",
+      value: function saveDomainMemos(snap) {
+        const data = snap.val() || null;
+        const array = [];
+
+        if (data) {
+          for (const memoId in data) {
+            array.push({ ...data[memoId],
+              memoId
+            });
+          }
+
+          this.memos = array;
+          this.domainMemosChanged(this.memos);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "domainMemosChanged",
+      value: function domainMemosChanged(data) {}
+    }]
+  };
+}, GetDomainMixin(base));
+
 // Extend the LitElement base class
 // @ts-ignore
 
-let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], function (_initialize, _GetDomainMixin) {
-  class ProtobotMacroSidebar extends _GetDomainMixin {
+let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], function (_initialize, _GetDomainMemosMixin) {
+  class ProtobotMacroSidebar extends _GetDomainMemosMixin {
     constructor(...args) {
       super(...args);
 
@@ -18113,49 +18248,45 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
   return {
     F: ProtobotMacroSidebar,
     d: [{
-      kind: "field",
-      decorators: [property({
-        type: Array
-      })],
-      key: "memos",
-
-      value() {
-        return [''];
-      }
-
-    }, {
       kind: "method",
       key: "render",
       value: function render() {
-        console.log(this.memos);
         return template$c(this);
       }
     }, {
       kind: "method",
       key: "save",
-      value: async function save() {
-        // updates[`domains/data/${this.domainId}/deployed`] = false;
-        // await database.ref().update(updates);
-      }
+      value: function save() {}
     }, {
       kind: "method",
       key: "addMemo",
-      value: async function addMemo(event) {
-        this.memos.push('');
-        this.requestUpdate(); // console.log(this.memos)
-      }
-    }, {
-      kind: "method",
-      key: "updateMemo",
-      value: async function updateMemo(idx, {
-        detail: value
-      }) {
-        this.memos[idx] = value;
-        console.log(this.memos);
+      value: async function addMemo() {
+        const updates = {};
+        const {
+          key: memoId
+        } = database.ref('memos/data').push();
+        const memo = {
+          text: '',
+          domainId: this.domainId,
+          crowdId: this.crowdId || null // can be null
+          // page: macro || micro// macro/micro
+          // deployedVersion: // think how to add this one
+
+        }; // console.log(this.memos)
+
+        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = true;
+
+        if (this.crowdId) {
+          updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = true;
+        }
+
+        updates[`memos/data/${memoId}`] = memo; // this saves the memo in db
+
+        await database.ref().update(updates);
       }
     }]
   };
-}, GetDomainMixin(LitElement));
+}, GetDomainMemosMixin(LitElement));
 
 var styles$j = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 

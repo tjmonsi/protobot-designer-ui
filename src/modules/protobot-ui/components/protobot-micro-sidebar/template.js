@@ -11,6 +11,8 @@ import styles from './style.css';
 export const template = self => function () {
   // @ts-ignore
   const { topics, save, addMemo, memos, updateMemo } = this;
+  const { queryObject } = this;
+  const { page } = queryObject;
 
   return html`
     <style>

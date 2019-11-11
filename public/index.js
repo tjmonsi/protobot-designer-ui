@@ -18350,8 +18350,8 @@ const template$d = self => function () {
 // Extend the LitElement base class
 // @ts-ignore
 
-let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], function (_initialize, _GetDomainMemosMixin) {
-  class ProtobotMicroSidebar extends _GetDomainMemosMixin {
+let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], function (_initialize, _GetPathMixin) {
+  class ProtobotMicroSidebar extends _GetPathMixin {
     constructor(...args) {
       super(...args);
 
@@ -18368,7 +18368,6 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
       value: // @property({ type: Array })
       // memos = [''];
       function render() {
-        // console.log(this.memos)
         return template$d(this);
       }
     }, {
@@ -18386,8 +18385,8 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
         const memo = {
           text: '',
           domainId: this.domainId,
-          crowdId: this.crowdId || null // can be null
-          // page: macro || micro// macro/micro
+          crowdId: this.crowdId || null,
+          page: this.page // page: macro || micro// macro/micro
           // deployedVersion: // think how to add this one
 
         }; // console.log(this.memos)
@@ -18421,7 +18420,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
 
     }]
   };
-}, GetDomainMemosMixin(LitElement));
+}, GetPathMixin(GetDomainMemosMixin(LitElement)));
 
 var styles$k = "";
 

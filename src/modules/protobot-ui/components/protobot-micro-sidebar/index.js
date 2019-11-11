@@ -1,19 +1,19 @@
 // Import the LitElement base class and html helper function
-import { LitElement, customElement, property } from 'lit-element';
+import { LitElement, customElement } from 'lit-element';
 import { template } from './template.js';
 import { GetDomainMemosMixin } from '../../mixins/get-domain-memos';
 import { database } from '../../../firebase';
+import { GetPathMixin } from '../../mixins/get-path';
 // import { ProtobotMemo } from '../../components/protobot-memo';
 
 // Extend the LitElement base class
 // @ts-ignore
 @customElement('protobot-micro-sidebar')
-class ProtobotMicroSidebar extends GetDomainMemosMixin(LitElement) {
+class ProtobotMicroSidebar extends GetPathMixin(GetDomainMemosMixin(LitElement)) {
   // @property({ type: Array })
   // memos = [''];
 
   render () {
-    // console.log(this.memos)
     return template(this);
   }
 
@@ -25,7 +25,8 @@ class ProtobotMicroSidebar extends GetDomainMemosMixin(LitElement) {
     const memo = {
       text: '',
       domainId: this.domainId,
-      crowdId: this.crowdId || null// can be null
+      crowdId: this.crowdId || null,
+      page: this.page
       // page: macro || micro// macro/micro
       // deployedVersion: // think how to add this one
     };

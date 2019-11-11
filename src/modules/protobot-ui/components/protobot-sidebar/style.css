@@ -2,27 +2,27 @@
   margin: 40px;
 }
 
-h2 {
+h3 {
   font-family: 'Open Sans', sans-serif;
 }
 
 .left-side-text {
-  font-size: 20px;
+  font-size: 18px;
   font-family: 'Open Sans', sans-serif;
 }
 
 .review-link {
-  font-size: 20px;
+  font-size: 18px;
   font-family: 'Open Sans', sans-serif;
 }
 
 .crowd-link {
-  font-size: 20px;
+  font-size: 18px;
   font-family: 'Open Sans', sans-serif;
 }
 
 a {
-  color: coral;
+  color:rgb(146, 146, 146);
 }
 
 /* a:visited {

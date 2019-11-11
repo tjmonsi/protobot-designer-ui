@@ -20,21 +20,19 @@ export const template = self => function () {
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
-    <h2>Domain</h2>
+    <h3>Domain</h3>
     <input class="left-side-text" type="text" value="${domainName}" @change="${changeDomainName.bind(this)}">
-    <h2>Designer</h2>
+    <h3>Designer</h3>
     <input class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
     <br>
-    <br>
-    <h2>Review pages</h2>
+    <h3>Pages</h3>
     <ul class = "review-link">
-      <li><a href="/?domain=${this.domainId}&page=macro">Macro review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=macro">Macro Review</a></li>
       <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
+      <li><a href="/?domain=${this.domainId}">Design and Revise</a></li>
       <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
     </ul>
-    <br>
-    <br>
-    <h2>Crowd list</h2>
+    <h3>Crowd list</h3>
     <ul class = "crowd-link">
       ${users ? users.map(item => html`
       <li>

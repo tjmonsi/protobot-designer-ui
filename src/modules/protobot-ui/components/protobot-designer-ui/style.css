@@ -2,11 +2,12 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
+  grid-template-columns: 1fr 3fr 1fr;
 }
 
 .left {
-  background: rgb(94, 94, 94);
+  /* background: rgb(94, 94, 94); */
+  background: #252839;
   color: white;
   padding: 10px;
   height: 100vh
@@ -19,7 +20,7 @@
 }
 
 .right {
-  background:rgb(94, 94, 94);
+  background: #252839;
   color: white;
   padding: 10px;
   height: 100vh

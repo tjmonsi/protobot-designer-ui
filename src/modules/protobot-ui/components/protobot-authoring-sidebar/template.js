@@ -1,5 +1,6 @@
 import { html } from 'lit-element';
 import '../topic-list-item';
+import '@vaadin/vaadin-text-field/vaadin-text-area';
 
 // @ts-ignore
 import styles from './style.css';
@@ -15,7 +16,7 @@ export const template = self => function () {
     <style>
       ${styles}
     </style>
-    <h2>Topic list</h2>
+    <h3>Topic list</h3>
 
     <ul class ="topic-list">
     ${topics.map(topic => html`
@@ -26,6 +27,14 @@ export const template = self => function () {
     `)}
     </ul>
 
-    <button class="button" type="button" @click="${deploy.bind(this)}">Deploy</button>
+    <div>
+      <h3>Leave Message Here</h3>
+      <textarea class="commit-input" placeholder="Write here ..."></textarea>
+    </div>
+
+    <br>
+    <div class="button-container">
+      <button class="button" type="button" @click="${deploy.bind(this)}">Deploy</button>
+    </div>
   `;
 }.bind(self)();

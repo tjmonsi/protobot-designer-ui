@@ -19,7 +19,7 @@ export const template = self => function () {
     <h1 style="text-align: center">
       Conversational Flow
     </h1>
-
+    <div class="empty-box"></div>
     ${topics.map((topic, index) => html`
       <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" index="${index}"></conversational-flow-topic>
 

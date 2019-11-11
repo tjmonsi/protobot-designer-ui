@@ -37,10 +37,10 @@ export const template = self => function () {
     </ul>
     <br>
     <br>
-    ${memos.map((memo, idx) => html`
+    ${memos.map(({ memoId }) => html`
       <!-- see @update-memo when dispatched by protobot-memo, it will call updateMemo of protobot-micro-sidebar -->
       <!-- no need to pass functions -->
-      <protobot-memo memoContent="${memo}" @update-memo="${updateMemo.bind(this, idx)}"></protobot-memo>
+      <protobot-memo .memoId="${memoId}"></protobot-memo>
     `)}
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
@@ -50,7 +50,5 @@ export const template = self => function () {
         Done with Labeling
       </vaadin-button>
     </div> -->
-
-
   `;
 }.bind(self)();

@@ -27,7 +27,7 @@ export const template = self => function () {
     </style>
 
     ${domain ? html`
-      <div class="left">
+      <div class="left" style="overflow:scroll;">
         <protobot-sidebar></protobot-sidebar>
       </div>
       <div class="center" style="overflow:scroll;">

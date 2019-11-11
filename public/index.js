@@ -11774,7 +11774,7 @@ const template$1 = self => function () {
     <ul class = "review-link">
       <li><a href="/?domain=${this.domainId}&page=macro">Macro review</a></li>
       <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
-      <li><a href="/?domain=${this.domainId}&page=history">History review</a></li>
+      <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
     </ul>
     <br>
     <br>
@@ -18329,10 +18329,12 @@ const template$d = self => function () {
     </ul>
     <br>
     <br>
-    ${memos.map((memo, idx) => html`
+    ${memos.map(({
+    memoId
+  }) => html`
       <!-- see @update-memo when dispatched by protobot-memo, it will call updateMemo of protobot-micro-sidebar -->
       <!-- no need to pass functions -->
-      <protobot-memo memoContent="${memo}" @update-memo="${updateMemo.bind(this, idx)}"></protobot-memo>
+      <protobot-memo .memoId="${memoId}"></protobot-memo>
     `)}
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
@@ -18342,16 +18344,14 @@ const template$d = self => function () {
         Done with Labeling
       </vaadin-button>
     </div> -->
-
-
   `;
 }.bind(self)();
 
 // Extend the LitElement base class
 // @ts-ignore
 
-let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], function (_initialize, _GetDomainMixin) {
-  class ProtobotMicroSidebar extends _GetDomainMixin {
+let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], function (_initialize, _GetDomainMemosMixin) {
+  class ProtobotMicroSidebar extends _GetDomainMemosMixin {
     constructor(...args) {
       super(...args);
 
@@ -18363,49 +18363,65 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   return {
     F: ProtobotMicroSidebar,
     d: [{
-      kind: "field",
-      decorators: [property({
-        type: Array
-      })],
-      key: "memos",
-
-      value() {
-        return [''];
-      }
-
-    }, {
       kind: "method",
       key: "render",
-      value: function render() {
-        console.log(this.memos);
+      value: // @property({ type: Array })
+      // memos = [''];
+      function render() {
+        // console.log(this.memos)
         return template$d(this);
       }
     }, {
       kind: "method",
       key: "save",
-      value: async function save() {
-        // updates[`domains/data/${this.domainId}/deployed`] = false;
-        // await database.ref().update(updates);
-      }
+      value: function save() {}
     }, {
       kind: "method",
       key: "addMemo",
-      value: async function addMemo(event) {
-        this.memos.push('');
-        this.requestUpdate(); // console.log(this.memos)
-      }
-    }, {
-      kind: "method",
-      key: "updateMemo",
-      value: async function updateMemo(idx, {
-        detail: value
-      }) {
-        this.memos[idx] = value;
-        console.log(this.memos);
-      }
+      value: async function addMemo() {
+        const updates = {};
+        const {
+          key: memoId
+        } = database.ref('memos/data').push();
+        const memo = {
+          text: '',
+          domainId: this.domainId,
+          crowdId: this.crowdId || null // can be null
+          // page: macro || micro// macro/micro
+          // deployedVersion: // think how to add this one
+
+        }; // console.log(this.memos)
+
+        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = true;
+
+        if (this.crowdId) {
+          updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = true;
+        }
+
+        updates[`memos/data/${memoId}`] = memo; // this saves the memo in db
+
+        await database.ref().update(updates);
+      } // async save () {
+      //   const updates = {};
+      //   // updates[`last-deployed/data/${this.domainId}/`] = this.domain;
+      //   // updates[`domains/data/${this.domainId}/deployed`] = false;
+      //   // await database.ref().update(updates);
+      // }
+      // async addMemo (event) {
+      //   const { target } = event;
+      //   const { value } = target;
+      //   this.memos.push('');
+      //   this.requestUpdate();
+      //   // console.log(this.memos)
+      // }
+      // async updateMemo (idx, { detail: value }) {
+      //   this.memos[idx] = value;
+      //   console.log(this.memos);
+      // }
+
     }]
   };
-}, GetDomainMixin(LitElement));
+}, GetDomainMemosMixin(LitElement));
 
 var styles$k = "";
 
@@ -33693,7 +33709,7 @@ const template$g = self => function () {
     </style>
 
     ${domain ? html`
-      <div class="left">
+      <div class="left" style="overflow:scroll;">
         <protobot-sidebar></protobot-sidebar>
       </div>
       <div class="center" style="overflow:scroll;">

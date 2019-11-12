@@ -47,7 +47,7 @@ export const template = self => function () {
           <protobot-authoring></protobot-authoring>
         ` : ''}
       </div>
-      <div class="right">
+      <div class="right" style="overflow:scroll;">
         ${page === 'authoring' || !page ? html`
           <protobot-authoring-sidebar></protobot-authoring-sidebar>
         ` : ''}

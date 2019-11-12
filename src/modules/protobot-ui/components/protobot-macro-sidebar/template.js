@@ -10,7 +10,8 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topics, save, addMemo, memos, updateMemo } = this;
+  const { topics, save, addMemo, memos } = this;
+  const { page: pageId } = this.queryObject || { page: null };
 
   return html`
     <style>
@@ -37,9 +38,9 @@ export const template = self => function () {
     </ul>
     <br>
     <br>
-    ${memos.map(({ memoId }) => html`
+    ${memos.map(({ page, memoId }) => page === pageId ? html`
       <protobot-memo .memoId="${memoId}"></protobot-memo>
-    `)}
+    ` : '')}
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>

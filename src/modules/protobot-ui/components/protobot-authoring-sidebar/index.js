@@ -14,7 +14,9 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
 
   async deploy () {
     const updates = {};
-    updates[`last-deployed/data/${this.domainId}/`] = this.domain;
+    const { key: deployedVersion } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+    updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain, deployedVersion };
+    updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain, deployedVersion };
     updates[`domains/data/${this.domainId}/deployed`] = false;
     await database.ref().update(updates);
   }

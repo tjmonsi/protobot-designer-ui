@@ -48,7 +48,6 @@ export const GetDomainMemosMixin = (base) => (class extends GetDomainMixin(base)
     this.disconnectRef();
 
     if (id) {
-      console.log(id)
       this.domainMemosRef = database.ref(`memos/lists/domain-memo/${id}`);
       this.domainMemosRef.on('value', this.boundSaveDomainMemos);
     } else {
@@ -61,7 +60,7 @@ export const GetDomainMemosMixin = (base) => (class extends GetDomainMixin(base)
     const array = [];
     if (data) {
       for (const memoId in data) {
-        array.push({ ...data[memoId], memoId });
+        array.push({ page: data[memoId], memoId });
       }
       this.memos = array;
       this.domainMemosChanged(this.memos);

@@ -23753,7 +23753,15 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       key: "deploy",
       value: async function deploy() {
         const updates = {};
-        updates[`last-deployed/data/${this.domainId}/`] = this.domain;
+        const {
+          key: deployedVersion
+        } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+        updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
+          deployedVersion
+        };
+        updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
+          deployedVersion
+        };
         updates[`domains/data/${this.domainId}/deployed`] = false;
         await database.ref().update(updates);
       }
@@ -29087,9 +29095,13 @@ const template$c = self => function () {
     topics,
     save,
     addMemo,
-    memos,
-    updateMemo
+    memos
   } = this;
+  const {
+    page: pageId
+  } = this.queryObject || {
+    page: null
+  };
   return html`
     <style>
       ${styles$i}
@@ -29116,10 +29128,11 @@ const template$c = self => function () {
     <br>
     <br>
     ${memos.map(({
+    page,
     memoId
-  }) => html`
+  }) => page === pageId ? html`
       <protobot-memo .memoId="${memoId}"></protobot-memo>
-    `)}
+    ` : '')}
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>
@@ -29206,7 +29219,6 @@ const GetDomainMemosMixin = base => _decorate(null, function (_initialize, _GetD
         this.disconnectRef();
 
         if (id) {
-          console.log(id);
           this.domainMemosRef = database.ref(`memos/lists/domain-memo/${id}`);
           this.domainMemosRef.on('value', this.boundSaveDomainMemos);
         } else {
@@ -29222,7 +29234,8 @@ const GetDomainMemosMixin = base => _decorate(null, function (_initialize, _GetD
 
         if (data) {
           for (const memoId in data) {
-            array.push({ ...data[memoId],
+            array.push({
+              page: data[memoId],
               memoId
             });
           }
@@ -29272,19 +29285,27 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
         const {
           key: memoId
         } = database.ref('memos/data').push();
+        const {
+          page
+        } = this.queryObject || {
+          page: null
+        };
+        const {
+          deployedVersion
+        } = this.domain;
         const memo = {
           text: '',
           domainId: this.domainId,
-          crowdId: this.crowdId || null // can be null
-          // page: macro || micro// macro/micro
-          // deployedVersion: // think how to add this one
-
+          crowdId: this.crowdId || null,
+          // can be null
+          page,
+          deployedVersion: deployedVersion || null
         }; // console.log(this.memos)
 
-        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = true;
+        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = page;
 
         if (this.crowdId) {
-          updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = true;
+          updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;
         }
 
         updates[`memos/data/${memoId}`] = memo; // this saves the memo in db

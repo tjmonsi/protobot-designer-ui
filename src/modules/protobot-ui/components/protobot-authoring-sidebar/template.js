@@ -1,6 +1,6 @@
 import { html } from 'lit-element';
 import '../topic-list-item';
-import '@vaadin/vaadin-text-field/vaadin-text-area';
+import 'weightless/textarea';
 
 // @ts-ignore
 import styles from './style.css';
@@ -29,10 +29,13 @@ export const template = self => function () {
 
     <div>
       <h3>Leave Message Here</h3>
-      <textarea class="commit-input" placeholder="Write here ..."></textarea>
+      <!-- <textarea class="commit-input" placeholder="Write here ..."></textarea> -->
+      <wl-textarea outlined
+        class = "commit-input"
+        placeholder="Write here ...">
+      </wl-textarea outlined>
     </div>
 
-    <br>
     <div class="button-container">
       <button class="button" type="button" @click="${deploy.bind(this)}">Deploy</button>
     </div>

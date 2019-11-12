@@ -43,7 +43,7 @@ export const GetPathMixin = (base) => (class extends base {
     paramString = (paramString || '').replace(/\+/g, '%20');
     const paramList = paramString.split('&');
     for (let i = 0; i < paramList.length; i++) {
-      let param = paramList[i].split('=');
+      const param = paramList[i].split('=');
       if (param[0]) {
         // @ts-ignore
         params[decodeURIComponent(param[0])] = decodeURIComponent(param[1] || '');

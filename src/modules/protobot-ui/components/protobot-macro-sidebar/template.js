@@ -23,8 +23,7 @@ export const template = self => function () {
 
     <div class = "instruction">
       <h2>Instruction</h2>
-      <p>In this stage, you can label the topic for each utterance.
-        Please click the select-box to label the topic.</p>
+      <p>In Macro Review, you can explore the whole conversation flows which are followed and prototyped by crowds.</p>
     </div>
     <br>
     <h2>Current Topic List</h2>

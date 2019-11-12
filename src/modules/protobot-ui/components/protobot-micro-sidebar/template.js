@@ -10,9 +10,11 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topics, save, addMemo, memos, updateMemo } = this;
+  const { topics, save, addMemo, memos } = this;
   const { queryObject } = this;
-  const { page } = queryObject;
+  const { page: pageId, crowdId: crowd } = queryObject;
+
+  console.log(crowd, pageId);
 
   return html`
     <style>
@@ -39,11 +41,9 @@ export const template = self => function () {
     </ul>
     <br>
     <br>
-    ${memos.map(({ memoId }) => html`
-      <!-- see @update-memo when dispatched by protobot-memo, it will call updateMemo of protobot-micro-sidebar -->
-      <!-- no need to pass functions -->
+    ${memos.map(({ page, crowdId, memoId }) => page === pageId && crowdId === crowd ? html`
       <protobot-memo .memoId="${memoId}"></protobot-memo>
-    `)}
+    ` : '')}
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>

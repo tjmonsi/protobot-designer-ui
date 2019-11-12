@@ -3,13 +3,12 @@ import { LitElement, customElement } from 'lit-element';
 import { template } from './template.js';
 import { GetDomainMemosMixin } from '../../mixins/get-domain-memos';
 import { database } from '../../../firebase';
-import { GetPathMixin } from '../../mixins/get-path';
 // import { ProtobotMemo } from '../../components/protobot-memo';
 
 // Extend the LitElement base class
 // @ts-ignore
 @customElement('protobot-micro-sidebar')
-class ProtobotMicroSidebar extends GetPathMixin(GetDomainMemosMixin(LitElement)) {
+class ProtobotMicroSidebar extends GetDomainMemosMixin(LitElement) {
   // @property({ type: Array })
   // memos = [''];
 
@@ -22,19 +21,23 @@ class ProtobotMicroSidebar extends GetPathMixin(GetDomainMemosMixin(LitElement))
   async addMemo () {
     const updates = {};
     const { key: memoId } = database.ref('memos/data').push();
+    const { page, crowdId } = this.queryObject || { page: null };
+    const { deployedVersion } = this.domain;
     const memo = {
       text: '',
       domainId: this.domainId,
-      crowdId: this.crowdId || null,
-      page: this.page
-      // page: macro || micro// macro/micro
-      // deployedVersion: // think how to add this one
+      crowdId: crowdId || null, // can be null
+      page,
+      deployedVersion: deployedVersion || null
     };
     // console.log(this.memos)
-    updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = true;
+    updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = {
+      page,
+      crowdId: crowdId || null
+    };
 
     if (this.crowdId) {
-      updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = true;
+      updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;
     }
 
     updates[`memos/data/${memoId}`] = memo;

@@ -18,17 +18,20 @@ class ProtobotMacroSidebar extends GetDomainMemosMixin(LitElement) {
   async addMemo () {
     const updates = {};
     const { key: memoId } = database.ref('memos/data').push();
-    const { page } = this.queryObject || { page: null };
+    const { page, crowdId } = this.queryObject || { page: null };
     const { deployedVersion } = this.domain;
     const memo = {
       text: '',
       domainId: this.domainId,
-      crowdId: this.crowdId || null, // can be null
+      crowdId: crowdId || null, // can be null
       page,
       deployedVersion: deployedVersion || null
     };
     // console.log(this.memos)
-    updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = page;
+    updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = {
+      page,
+      crowdId: crowdId || null
+    };
 
     if (this.crowdId) {
       updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;

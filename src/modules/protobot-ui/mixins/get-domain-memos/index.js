@@ -60,7 +60,7 @@ export const GetDomainMemosMixin = (base) => (class extends GetDomainMixin(base)
     const array = [];
     if (data) {
       for (const memoId in data) {
-        array.push({ page: data[memoId], memoId });
+        array.push({ ...data[memoId], memoId });
       }
       this.memos = array;
       this.domainMemosChanged(this.memos);

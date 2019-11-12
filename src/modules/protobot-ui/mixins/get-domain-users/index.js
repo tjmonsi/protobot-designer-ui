@@ -69,5 +69,5 @@ export const GetDomainUsersMixin = (base) => (class extends GetDomainMixin(base)
     }
   }
 
-  domainUsersChanged (data) { console.log(data); }
+  domainUsersChanged (data) { }
 });

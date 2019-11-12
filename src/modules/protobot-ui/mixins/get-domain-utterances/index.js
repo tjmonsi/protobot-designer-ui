@@ -29,7 +29,12 @@ export const GetDomainUtterancesMixin = (base) => (class extends GetPathMixin(ba
     super.connectedCallback();
 
     // @ts-ignore
-    const { domain, crowdId, set } = this.queryObject || { domain: null, crowdId: null };
+    const { domain, crowdId, set, page } = this.queryObject || { domain: null, crowdId: null };
+
+    if (!crowdId) {
+      window.location.href = `/?page=${page}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
+      return;
+    }
 
     if (domain) {
       this.getDomainUtterances(domain, crowdId, set);
@@ -56,7 +61,7 @@ export const GetDomainUtterancesMixin = (base) => (class extends GetPathMixin(ba
    *
    * @param {String} id
    */
-  getDomainUtterances (id, crowdId = '-Lr7LknQcW1sqZd1dzDZ', set = '1') {
+  getDomainUtterances (id, crowdId, set = '1') {
     this.disconnectRef();
 
     // console.log(id, crowdId);

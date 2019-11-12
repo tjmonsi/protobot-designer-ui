@@ -11886,9 +11886,7 @@ const GetDomainUsersMixin = base => _decorate(null, function (_initialize, _GetD
     }, {
       kind: "method",
       key: "domainUsersChanged",
-      value: function domainUsersChanged(data) {
-        console.log(data);
-      }
+      value: function domainUsersChanged(data) {}
     }]
   };
 }, GetDomainMixin(base));
@@ -13061,11 +13059,17 @@ const GetDomainUtterancesMixin = base => _decorate(null, function (_initialize, 
         const {
           domain,
           crowdId,
-          set
+          set,
+          page
         } = this.queryObject || {
           domain: null,
           crowdId: null
         };
+
+        if (!crowdId) {
+          window.location.href = `/?page=${page}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
+          return;
+        }
 
         if (domain) {
           this.getDomainUtterances(domain, crowdId, set);
@@ -13099,7 +13103,7 @@ const GetDomainUtterancesMixin = base => _decorate(null, function (_initialize, 
     }, {
       kind: "method",
       key: "getDomainUtterances",
-      value: function getDomainUtterances(id, crowdId = '-Lr7LknQcW1sqZd1dzDZ', set = '1') {
+      value: function getDomainUtterances(id, crowdId, set = '1') {
         this.disconnectRef(); // console.log(id, crowdId);
 
         this.crowdId = crowdId;
@@ -18100,7 +18104,8 @@ const template$c = self => function () {
     memos
   } = this;
   const {
-    page: pageId
+    page: pageId,
+    crowdId: crowd
   } = this.queryObject || {
     page: null
   };
@@ -18130,8 +18135,9 @@ const template$c = self => function () {
     <br>
     ${memos.map(({
     page,
+    crowdId,
     memoId
-  }) => page === pageId ? html`
+  }) => page === pageId && crowdId === crowd ? html`
       <protobot-memo .memoId="${memoId}"></protobot-memo>
     ` : '')}
     <div class="add-container">
@@ -18235,8 +18241,7 @@ const GetDomainMemosMixin = base => _decorate(null, function (_initialize, _GetD
 
         if (data) {
           for (const memoId in data) {
-            array.push({
-              page: data[memoId],
+            array.push({ ...data[memoId],
               memoId
             });
           }
@@ -18287,7 +18292,8 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
           key: memoId
         } = database.ref('memos/data').push();
         const {
-          page
+          page,
+          crowdId
         } = this.queryObject || {
           page: null
         };
@@ -18297,13 +18303,16 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
         const memo = {
           text: '',
           domainId: this.domainId,
-          crowdId: this.crowdId || null,
+          crowdId: crowdId || null,
           // can be null
           page,
           deployedVersion: deployedVersion || null
         }; // console.log(this.memos)
 
-        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = page;
+        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = {
+          page,
+          crowdId: crowdId || null
+        };
 
         if (this.crowdId) {
           updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;
@@ -18330,9 +18339,16 @@ const template$d = self => function () {
     topics,
     save,
     addMemo,
-    memos,
-    updateMemo
+    memos
   } = this;
+  const {
+    queryObject
+  } = this;
+  const {
+    page: pageId,
+    crowdId: crowd
+  } = queryObject;
+  console.log(crowd, pageId);
   return html`
     <style>
       ${styles$j}
@@ -18359,12 +18375,12 @@ const template$d = self => function () {
     <br>
     <br>
     ${memos.map(({
+    page,
+    crowdId,
     memoId
-  }) => html`
-      <!-- see @update-memo when dispatched by protobot-memo, it will call updateMemo of protobot-micro-sidebar -->
-      <!-- no need to pass functions -->
+  }) => page === pageId && crowdId === crowd ? html`
       <protobot-memo .memoId="${memoId}"></protobot-memo>
-    `)}
+    ` : '')}
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>
@@ -18379,8 +18395,8 @@ const template$d = self => function () {
 // Extend the LitElement base class
 // @ts-ignore
 
-let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], function (_initialize, _GetPathMixin) {
-  class ProtobotMicroSidebar extends _GetPathMixin {
+let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], function (_initialize, _GetDomainMemosMixin) {
+  class ProtobotMicroSidebar extends _GetDomainMemosMixin {
     constructor(...args) {
       super(...args);
 
@@ -18411,19 +18427,31 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
         const {
           key: memoId
         } = database.ref('memos/data').push();
+        const {
+          page,
+          crowdId
+        } = this.queryObject || {
+          page: null
+        };
+        const {
+          deployedVersion
+        } = this.domain;
         const memo = {
           text: '',
           domainId: this.domainId,
-          crowdId: this.crowdId || null,
-          page: this.page // page: macro || micro// macro/micro
-          // deployedVersion: // think how to add this one
-
+          crowdId: crowdId || null,
+          // can be null
+          page,
+          deployedVersion: deployedVersion || null
         }; // console.log(this.memos)
 
-        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = true;
+        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = {
+          page,
+          crowdId: crowdId || null
+        };
 
         if (this.crowdId) {
-          updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = true;
+          updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;
         }
 
         updates[`memos/data/${memoId}`] = memo; // this saves the memo in db
@@ -18449,7 +18477,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
 
     }]
   };
-}, GetPathMixin(GetDomainMemosMixin(LitElement)));
+}, GetDomainMemosMixin(LitElement));
 
 var styles$k = "";
 

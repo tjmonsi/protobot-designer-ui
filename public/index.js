@@ -12077,9 +12077,552 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
   };
 }, GetPathMixin(LitElement));
 
-var styles$9 = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background:hsl(242, 46%, 66%);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:hsl(242, 46%, 66%);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  font-weight: bold;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background:skyblue;\n}\n";
+var styles$9 = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: rgb(49, 63, 102);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:rgb(49, 63, 102);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  font-weight: bold;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background: rgb(74, 94, 150);\n}\n\nwl-button {\n  --button-border-radius\t: 0px;\n  --button-padding : 10px;\n  --button-font-size\t:10px;\n  --button-bg\t: rgb(182, 182, 182);\n  --button-bg-hover : rgb(71, 71, 71);\n}\n";
 
-var styles$a = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%;\n  font-size: 15px;\n}\n";
+function computeRadius(a, b) {
+  return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2)) / 2;
+}
+
+function getWebkitMatrix(computedStyle) {
+  return new WebKitCSSMatrix(computedStyle.webkitTransform);
+}
+
+function getScale(computedStyle, rect) {
+  const matrix = getWebkitMatrix(computedStyle);
+  return {
+    x: (rect == null ? computedStyle.getPropertyValue('width') : rect.width) === 0 ? 0 : matrix.a,
+    y: (rect == null ? computedStyle.getPropertyValue('height') : rect.height) === 0 ? 0 : matrix.d
+  };
+}
+
+function getOpacity(computedStyle) {
+  if (computedStyle.getPropertyValue('width') === '0px' || computedStyle.getPropertyValue('height') === '0px') {
+    return 0;
+  }
+
+  const opacityString = computedStyle.getPropertyValue('opacity');
+  return isNaN(+opacityString) ? 0 : Number(opacityString);
+}
+
+function isTouchEvent(event) {
+  return event.changedTouches != null;
+}
+
+function normalizePointerEvent(e) {
+  let isTouch = false;
+  let pointerEvent;
+
+  if (isTouchEvent(e)) {
+    pointerEvent = e.changedTouches[0];
+    isTouch = true;
+  } else {
+    pointerEvent = e;
+  }
+
+  let {
+    clientX,
+    clientY,
+    pageX,
+    pageY
+  } = pointerEvent;
+  return {
+    clientX,
+    clientY,
+    pageX,
+    pageY,
+    isTouch
+  };
+}
+
+var styles$a = `:host{position:relative;display:block;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([unbounded])){overflow:hidden}:host([overlay]){position:absolute;top:50%;left:50%;width:100%;height:100%;transform:translate(-50%,-50%)}.ripple{background:var(--ripple-color,currentcolor);opacity:var(--ripple-opacity,.15);border-radius:100%;pointer-events:none;will-change:opacity,transform}`;
+
+/**
+ * Base configuration for the ripple animation.
+ */
+
+const RIPPLE_ANIMATION_CONFIG = {
+  easing: "ease-out",
+  fill: "both"
+};
+/**
+ * Initial animation duration.
+ */
+
+const RIPPLE_INITIAL_DURATION = 350;
+/**
+ * Release animation duration.
+ */
+
+const RIPPLE_RELEASE_DURATION = 500;
+/**
+ * Indicate touch actions.
+ * @cssprop --ripple-color - Color.
+ * @cssprop --ripple-opacity - Opacity.
+ */
+
+let Ripple = class Ripple extends LitElement {
+  /**
+   * Indicate touch actions.
+   * @cssprop --ripple-color - Color.
+   * @cssprop --ripple-opacity - Opacity.
+   */
+  constructor() {
+    super(...arguments);
+    /**
+     * Makes the ripple visible outside the bounds.
+     * @attr
+     */
+
+    this.unbounded = false;
+    /**
+     * Makes ripple appear from the center.
+     * @attr
+     */
+
+    this.centered = false;
+    /**
+     * Overlays the ripple.
+     * @attr
+     */
+
+    this.overlay = false;
+    /**
+     * Disables the ripple.
+     * @attr
+     */
+
+    this.disabled = false;
+    /**
+     * Allows focusin to spawn a ripple.
+     * @attr
+     */
+
+    this.focusable = false;
+    /**
+     * Releases the ripple after it has been spawned.
+     * @attr
+     */
+
+    this.autoRelease = false;
+    /**
+     * Initial animation duration.
+     * @attr
+     */
+
+    this.initialDuration = RIPPLE_INITIAL_DURATION;
+    /**
+     * Fade out animation duration.
+     * @attr
+     */
+
+    this.releaseDuration = RIPPLE_RELEASE_DURATION;
+    /**
+     * Role of the ripple.
+     * @attr
+     */
+
+    this.role = "presentation";
+    /**
+     * Target for the spawn ripple events.
+     * @attr
+     */
+
+    this.target = this;
+    /**
+     * Event subscribers on the target.
+     */
+
+    this.listeners = [];
+    /**
+     * Event subscribers present during the ripple animation.
+     */
+
+    this.rippleAnimationListeners = [];
+  }
+  /**
+   * Hooks up the element.
+   */
+
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addListeners();
+  }
+  /**
+   * Tears down the element.
+   */
+
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeListeners();
+  }
+  /**
+   * Reacts on updated properties.
+   * @param props
+   */
+
+
+  updated(props) {
+    super.updated(props); // If the target has changed we need to hook up the new listeners
+
+    if (props.has("target") && this.target != null) {
+      this.removeListeners();
+      this.addListeners();
+    }
+  }
+  /**
+   * Adds event listeners to the target.
+   */
+
+
+  addListeners() {
+    if (this.target == null) return;
+    this.listeners.push(addListener(this.target, "mousedown", this.spawnRipple.bind(this), {
+      passive: true
+    }), addListener(this.target, "focusin", this.onFocusIn.bind(this), {
+      passive: true
+    }), addListener(this.target, "focusout", this.onFocusOut.bind(this), {
+      passive: true
+    }));
+  }
+  /**
+   * Removes listeners.
+   */
+
+
+  removeListeners() {
+    removeListeners(this.listeners);
+  }
+  /**
+   * Handles the mouse down events and spawns a ripple.
+   * If no event is provided the ripple will spawn in the center.
+   * @param {MouseEvent | TouchEvent} e
+   * @param config
+   */
+
+
+  spawnRipple(e, config) {
+    // Check if the ripple is disabled
+    if (this.disabled) {
+      // Return an empty noop function
+      return () => {};
+    } // Release the existing ripple if there is one
+
+
+    this.releaseRipple(); // Compute the spawn coordinates for the ripple
+
+    const rect = this.getBoundingClientRect();
+    let x = 0;
+    let y = 0;
+
+    if (this.centered || e == null) {
+      x = rect.width / 2;
+      y = rect.height / 2;
+    } else {
+      let {
+        clientX,
+        clientY
+      } = normalizePointerEvent(e);
+      x = clientX - rect.left;
+      y = clientY - rect.top;
+    } // Show the ripple and store the release function
+
+
+    const release = this.showRippleAtCoords({
+      x,
+      y
+    }, config); // Add the release function to the array of listeners
+
+    this.rippleAnimationListeners.push(release); // Only if the target is present or if the ripple is NOT focusable we attach the release listeners.
+
+    if (this.target != null && !this.focusable) {
+      this.rippleAnimationListeners.push(addListener(window, "mouseup", this.releaseRipple.bind(this), {
+        passive: true
+      }));
+    }
+
+    return release;
+  }
+  /**
+   * Handles the mouse up event and removes the ripple.
+   */
+
+
+  releaseRipple() {
+    removeListeners(this.rippleAnimationListeners);
+  }
+  /**
+   * Shows a ripple at a specific coordinate.
+   * @param number
+   * @param config
+   */
+
+
+  showRippleAtCoords({
+    x,
+    y
+  }, config) {
+    const {
+      offsetWidth,
+      offsetHeight
+    } = this;
+    const scale = getScale(window.getComputedStyle(this));
+    const {
+      releaseDuration = this.releaseDuration,
+      initialDuration = this.initialDuration,
+      autoRelease = this.autoRelease
+    } = config || {}; // Add the scale in case the ripple is transformed
+
+    x *= scale.x === 0 ? 1 : 1 / scale.x;
+    y *= scale.y === 0 ? 1 : 1 / scale.y; // Create the ripple
+
+    const $ripple = document.createElement("div");
+    $ripple.classList.add("ripple"); // Compute distance from the center of the rectangle (container) to its corner.
+    // If the coords are in the center the ripple would fill the entire container.
+
+    const containerRadius = computeRadius(offsetWidth, offsetHeight); // Compute the additional distance we have to add to the radius to make sure it always fills
+    // the entire container. The extra distance will be the distance from the center to the coords.
+    // If the coords are in the middle the extra radius will be 0.
+
+    const extraRadius = computeRadius(Math.abs(offsetWidth / 2 - x), Math.abs(offsetHeight / 2 - y)); // The size of the ripple is the diameter
+
+    const radius = Math.round(containerRadius + extraRadius * 2);
+    const diameter = radius * 2; // Assign the styles that makes it spawn from the desired coords
+
+    Object.assign($ripple.style, {
+      "left": `${x - radius}px`,
+      "top": `${y - radius}px`,
+      "height": `${diameter}px`,
+      "width": `${diameter}px`,
+      "position": "absolute"
+    }); // Cleans up the ripple
+
+    let released = false;
+
+    const release = () => {
+      if (released) return;
+      released = true; // Fade the ripple out
+
+      const opacity = getOpacity(window.getComputedStyle($ripple));
+      const outAnimation = $ripple.animate({
+        opacity: [opacity.toString(), `0`]
+      }, { ...RIPPLE_ANIMATION_CONFIG,
+        duration: releaseDuration
+      }); // When the out animation finished we remove the ripple before the next frame
+
+      outAnimation.onfinish = () => {
+        requestAnimationFrame(() => {
+          if (this.shadowRoot.contains($ripple)) {
+            this.shadowRoot.removeChild($ripple);
+          }
+        });
+      };
+    }; // Start the animation and add the ripple to the DOM
+
+
+    this.shadowRoot.appendChild($ripple); // Release instantly if autorelease
+
+    if (autoRelease) {
+      release();
+    } // Scale the ripple in
+
+
+    $ripple.animate({
+      transform: [`scale(0)`, `scale(1)`]
+    }, { ...RIPPLE_ANIMATION_CONFIG,
+      duration: initialDuration
+    });
+    return release;
+  }
+  /**
+   * Add a persistent ripple when the taget gains focus.
+   */
+
+
+  onFocusIn() {
+    if (!this.focusable) return;
+    this.spawnRipple(undefined, {
+      autoRelease: false
+    });
+  }
+  /**
+   * Release the current ripple when the focus is lost from the target.
+   */
+
+
+  onFocusOut() {
+    if (!this.focusable) return;
+    this.releaseRipple();
+  }
+  /**
+   * Returns the template for the element.
+   */
+
+
+  render() {
+    return html``;
+  }
+
+};
+Ripple.styles = [sharedStyles, cssResult(styles$a)];
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "unbounded", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "centered", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "overlay", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "disabled", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "focusable", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "autoRelease", void 0);
+
+__decorate([property({
+  type: Number
+}), __metadata("design:type", Number)], Ripple.prototype, "initialDuration", void 0);
+
+__decorate([property({
+  type: Number
+}), __metadata("design:type", Number)], Ripple.prototype, "releaseDuration", void 0);
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata("design:type", String)], Ripple.prototype, "role", void 0);
+
+__decorate([property({
+  type: Object
+}), __metadata("design:type", EventTarget)], Ripple.prototype, "target", void 0);
+
+Ripple = __decorate([customElement("wl-ripple")], Ripple);
+
+var styles$b = ``;
+
+class ButtonBehavior extends FormElementBehavior {
+  constructor() {
+    super(...arguments);
+    this.type = 'submit';
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.listeners.push(addListener(this, 'click', this.onClick.bind(this)), addListener(this, 'keydown', this.onKeyDown.bind(this)));
+  }
+
+  onKeyDown(e) {
+    if (e.code === ENTER || e.code === SPACE) {
+      this.click();
+      stopEvent(e);
+
+      if (this.$ripple != null) {
+        this.$ripple.spawnRipple(undefined, {
+          autoRelease: true
+        });
+      }
+    }
+  }
+
+  onClick(e) {
+    if (this.disabled) {
+      stopEvent(e);
+      return;
+    }
+
+    if (e.target == this && !e.defaultPrevented) {
+      this.$formElement.dispatchEvent(new MouseEvent('click', {
+        relatedTarget: this,
+        composed: true
+      }));
+    }
+  }
+
+  renderFormElement() {
+    return html` <button style="display: none;" id="${this.formElementId}" aria-hidden="true" tabindex="-1" type="${this.type}" ?disabled="${this.disabled}" name="${ifDefined(this.name)}" value="${ifDefined(this.value)}"> </button> `;
+  }
+
+}
+
+ButtonBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$b)];
+
+__decorate([property({
+  type: String
+}), __metadata('design:type', String)], ButtonBehavior.prototype, 'type', void 0);
+
+var styles$c = `:host{--_button-color:var(--button-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_button-shadow-color:var(--button-shadow-color,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.2));color:var(--_button-color);background:var(--_button-bg);box-shadow:var(--elevation-1,0 .3125rem .625rem -.125rem var(--_button-shadow-color));padding:var(--button-padding,.75rem 1.5rem);font-size:var(--button-font-size,1rem);border-radius:var(--button-border-radius,.5rem);font-family:var(--button-font-family,var(--font-family-sans-serif,"Roboto Condensed",helvetica,sans-serif));transition:var(--button-transition,box-shadow var(--transition-duration-slow,.25s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));letter-spacing:var(--button-letter-spacing,.125rem);line-height:1;text-transform:uppercase;cursor:pointer;text-align:center;-webkit-user-select:none;-moz-user-select:none;user-select:none;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:0}:host,:host([fab]){display:inline-flex;align-items:center;justify-content:center}:host([fab]){width:var(--button-fab-size,2.5rem);height:var(--button-fab-size,2.5rem);padding:0;letter-spacing:0;border-radius:100%}:host([inverted]){color:var(--_button-bg);background:var(--_button-color)}:host([outlined]){border:var(--button-border-outlined,.125rem solid currentColor)}:host(:focus),:host(:hover){--_button-color:var(--button-color-hover,hsl(var(--primary-400-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-hover,hsl(var(--primary-400,var(--primary-hue,224),var(--primary-saturation,42%),var(--primary-lightness,52%))));--_button-shadow-color:var(--button-shadow-color-hover,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.5));will-change:background,color,box-shadow}:host(:active){--_button-color:var(--button-color-active,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));box-shadow:var(--elevation-4,0 .5rem 1rem -.125rem var(--_button-shadow-color))}:host([flat]:focus){background:var(--button-bg-active-flat,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),.08))}:host([disabled]){--_button-color:var(--button-color-disabled,hsl(var(--shade-400-contrast,var(--shade-hue-contrast,0),var(--shade-saturation-contrast,100%),var(--shade-lightness-contrast,100%))));--_button-bg:var(--button-bg-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));box-shadow:none;cursor:default;pointer-events:none}:host([flat]){box-shadow:none;background:none}#ripple{z-index:-1}`;
+
+let Button = class Button extends ButtonBehavior {
+  constructor() {
+    super(...arguments);
+    this.inverted = false;
+    this.fab = false;
+    this.outlined = false;
+    this.noRipple = false;
+    this.flat = false;
+    this.role = 'button';
+  }
+
+  render() {
+    return html` <wl-ripple id="ripple" overlay .target="${this}" ?disabled="${this.disabled || this.noRipple}"></wl-ripple> <slot></slot> ${this.renderFormElement()} `;
+  }
+
+};
+Button.styles = [...ButtonBehavior.styles, cssResult(styles$c)];
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'inverted', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'fab', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'outlined', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'noRipple', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'flat', void 0);
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata('design:type', String)], Button.prototype, 'role', void 0);
+
+__decorate([query('#ripple'), __metadata('design:type', Ripple)], Button.prototype, '$ripple', void 0);
+
+Button = __decorate([customElement('wl-button')], Button);
+
+var styles$d = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%;\n  font-size: 15px;\n}\n";
 
 /**
  *
@@ -12097,7 +12640,7 @@ const template$3 = self => function () {
   } = utterance || {};
   return html`
     <style>
-      ${styles$a}
+      ${styles$d}
     </style>
 
     <div class="flex-area">
@@ -12237,13 +12780,13 @@ const template$4 = self => function () {
 
       <!-- ternary expression -->
       ${!sub ? html`
-        <button type="button" @click="${newTopic.bind(this)}">New</button>
-        <button type="button" @click="${subTopic.bind(this)}">Sub</button>
+        <wl-button type="button" @click="${newTopic.bind(this)}">New</wl-button>
+        <wl-button type="button" @click="${subTopic.bind(this)}">Sub</wl-button>
       ` : html`
-        <button type="button" @click="${subTopic.bind(this)}">New</button>
+        <wl-button type="button" @click="${subTopic.bind(this)}">New</wl-button>
       `}
 
-      <button type="button" @click="${deleteTopic.bind(this)}">Delete</button>
+      <wl-button type="button" @click="${deleteTopic.bind(this)}">Delete</wl-button>
     </div>
   `;
 }.bind(self)();
@@ -12494,7 +13037,7 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
   };
 }, GetTopicMixin(LitElement));
 
-var styles$b = ".empty-box{\n  height: 30px;\n}\n\nh1 {\n  font-family: 'Open Sans', sans-serif;\n}\n";
+var styles$e = ".empty-box{\n  height: 30px;\n}\n\nh1 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
 
 /**
  *
@@ -12509,7 +13052,7 @@ const template$5 = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$b}
+      ${styles$e}
     </style>
 
     <h1 style="text-align: center">
@@ -12521,7 +13064,7 @@ const template$5 = self => function () {
 
       ${index !== topics.length - 1 ? html`
         <div style="text-align: center">
-          <button style="text-align: center" type="button" @click="${swap.bind(this)}" index="${index}">Swap</button>
+          <wl-button class="swap-button" style="text-align: center" type="button" @click="${swap.bind(this)}" index="${index}">Swap</wl-button>
         </div>
       ` : ''}
     `)}
@@ -12603,7 +13146,7 @@ let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], functio
   };
 }, GetDomainMixin(LitElement));
 
-var styles$c = ".flex-area {\n  display: flex;\n\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n}\n";
+var styles$f = ".flex-area {\n  display: flex;\n\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n}\n";
 
 /**
  *
@@ -12620,7 +13163,7 @@ const template$6 = self => function () {
   } = topic || {};
   return html`
     <style>
-      ${styles$c}
+      ${styles$f}
     </style>
 
     ${name}
@@ -12685,7 +13228,7 @@ let TopicListItem = _decorate([customElement('topic-list-item')], function (_ini
   };
 }, GetTopicMixin(LitElement));
 
-var styles$d = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n\n\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.button {\n  margin: auto;\n  background: black;\n  color: white;\n  font-size: 20px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
+var styles$g = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n\n\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.button {\n  margin: auto;\n  background: black;\n  color: white;\n  font-size: 20px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
 /**
  *
@@ -12696,11 +13239,13 @@ const template$7 = self => function () {
   // @ts-ignore
   const {
     topics,
-    deploy
+    deploy,
+    commitMessage,
+    handleCommitMsg
   } = this;
   return html`
     <style>
-      ${styles$d}
+      ${styles$g}
     </style>
     <h3>Topic list</h3>
 
@@ -12718,12 +13263,15 @@ const template$7 = self => function () {
       <!-- <textarea class="commit-input" placeholder="Write here ..."></textarea> -->
       <wl-textarea outlined
         class = "commit-input"
-        placeholder="Write here ...">
+        placeholder="Write here ..."
+        value="${commitMessage}"
+        @change="${handleCommitMsg.bind(this)}"
+        @submit="${deploy.bind(this)}">
       </wl-textarea outlined>
     </div>
 
     <div class="button-container">
-      <button class="button" type="button" @click="${deploy.bind(this)}">Deploy</button>
+      <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button>
     </div>
   `;
 }.bind(self)();
@@ -12743,10 +13291,28 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   return {
     F: ProtobotAuthoringSidebar,
     d: [{
+      kind: "field",
+      decorators: [property()],
+      key: "commitMessage",
+      value: void 0
+    }, {
       kind: "method",
       key: "render",
       value: function render() {
+        console.log(this.commitMessage);
         return template$7(this);
+      }
+    }, {
+      kind: "method",
+      key: "handleCommitMsg",
+      value: async function handleCommitMsg(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+        this.commitMessage = value;
       }
     }, {
       kind: "method",
@@ -12756,11 +13322,16 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
         const {
           key: deployedVersion
         } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+        const {
+          value: commitMessage
+        } = database.ref(`deployed-history/data/${this.domainId}/${this.deployedVersion}/`).push();
         updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
-          deployedVersion
+          deployedVersion,
+          commitMessage
         };
         updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
-          deployedVersion
+          deployedVersion,
+          commitMessage
         };
         updates[`domains/data/${this.domainId}/deployed`] = false;
         await database.ref().update(updates);
@@ -12769,9 +13340,9 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   };
 }, GetDomainMixin(LitElement));
 
-var styles$e = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
+var styles$h = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
 
-var styles$f = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n.utterance{\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
+var styles$i = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n.utterance{\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
 
 // import '@polymer/paper-item/paper-item.js';
 // import '@polymer/paper-listbox/paper-listbox.js';
@@ -12799,7 +13370,7 @@ const template$8 = self => function () {
   } = utterance || {};
   return html`
     <style>
-      ${styles$f}
+      ${styles$i}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -12978,14 +13549,14 @@ const template$9 = self => function () {
 
   return html`
     <style>
-      ${styles$e}
+      ${styles$h}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
     <h1>Micro Review</h1>
-    <h3>Crowd name: ${crowdID}</h3>
+    <h3>Crowd name: ${this.crowdID}</h3>
     <br>
 
     ${utterances && utterances.length ? utterances.map(item => html`
@@ -13214,7 +13785,7 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
   };
 }, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
 
-var styles$g = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n.link:hover {\n  stroke-opacity: .5;\n}\n";
+var styles$j = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n.link:hover {\n  stroke-opacity: .5;\n}\n";
 
 /**
  *
@@ -13225,7 +13796,7 @@ const template$a = self => function () {
 
   return html`
     <style>
-      ${styles$g}
+      ${styles$j}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -18043,7 +18614,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
   };
 }, GetDomainMixin(LitElement));
 
-var styles$h = "";
+var styles$k = "";
 
 /**
  *
@@ -18056,7 +18627,7 @@ const template$b = self => function () {
   console.log(this);
   return html`
     <style>
-      ${styles$h}
+      ${styles$k}
     </style>
 
     History
@@ -18088,7 +18659,7 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
   };
 }, GetDomainMixin(LitElement));
 
-var styles$i = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$l = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
@@ -18111,7 +18682,7 @@ const template$c = self => function () {
   };
   return html`
     <style>
-      ${styles$i}
+      ${styles$l}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -18326,7 +18897,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$j = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$m = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
@@ -18351,7 +18922,7 @@ const template$d = self => function () {
   console.log(crowd, pageId);
   return html`
     <style>
-      ${styles$j}
+      ${styles$m}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -18479,552 +19050,9 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$k = "";
+var styles$n = "";
 
-var styles$l = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
-
-function computeRadius(a, b) {
-  return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2)) / 2;
-}
-
-function getWebkitMatrix(computedStyle) {
-  return new WebKitCSSMatrix(computedStyle.webkitTransform);
-}
-
-function getScale(computedStyle, rect) {
-  const matrix = getWebkitMatrix(computedStyle);
-  return {
-    x: (rect == null ? computedStyle.getPropertyValue('width') : rect.width) === 0 ? 0 : matrix.a,
-    y: (rect == null ? computedStyle.getPropertyValue('height') : rect.height) === 0 ? 0 : matrix.d
-  };
-}
-
-function getOpacity(computedStyle) {
-  if (computedStyle.getPropertyValue('width') === '0px' || computedStyle.getPropertyValue('height') === '0px') {
-    return 0;
-  }
-
-  const opacityString = computedStyle.getPropertyValue('opacity');
-  return isNaN(+opacityString) ? 0 : Number(opacityString);
-}
-
-function isTouchEvent(event) {
-  return event.changedTouches != null;
-}
-
-function normalizePointerEvent(e) {
-  let isTouch = false;
-  let pointerEvent;
-
-  if (isTouchEvent(e)) {
-    pointerEvent = e.changedTouches[0];
-    isTouch = true;
-  } else {
-    pointerEvent = e;
-  }
-
-  let {
-    clientX,
-    clientY,
-    pageX,
-    pageY
-  } = pointerEvent;
-  return {
-    clientX,
-    clientY,
-    pageX,
-    pageY,
-    isTouch
-  };
-}
-
-var styles$m = `:host{position:relative;display:block;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([unbounded])){overflow:hidden}:host([overlay]){position:absolute;top:50%;left:50%;width:100%;height:100%;transform:translate(-50%,-50%)}.ripple{background:var(--ripple-color,currentcolor);opacity:var(--ripple-opacity,.15);border-radius:100%;pointer-events:none;will-change:opacity,transform}`;
-
-/**
- * Base configuration for the ripple animation.
- */
-
-const RIPPLE_ANIMATION_CONFIG = {
-  easing: "ease-out",
-  fill: "both"
-};
-/**
- * Initial animation duration.
- */
-
-const RIPPLE_INITIAL_DURATION = 350;
-/**
- * Release animation duration.
- */
-
-const RIPPLE_RELEASE_DURATION = 500;
-/**
- * Indicate touch actions.
- * @cssprop --ripple-color - Color.
- * @cssprop --ripple-opacity - Opacity.
- */
-
-let Ripple = class Ripple extends LitElement {
-  /**
-   * Indicate touch actions.
-   * @cssprop --ripple-color - Color.
-   * @cssprop --ripple-opacity - Opacity.
-   */
-  constructor() {
-    super(...arguments);
-    /**
-     * Makes the ripple visible outside the bounds.
-     * @attr
-     */
-
-    this.unbounded = false;
-    /**
-     * Makes ripple appear from the center.
-     * @attr
-     */
-
-    this.centered = false;
-    /**
-     * Overlays the ripple.
-     * @attr
-     */
-
-    this.overlay = false;
-    /**
-     * Disables the ripple.
-     * @attr
-     */
-
-    this.disabled = false;
-    /**
-     * Allows focusin to spawn a ripple.
-     * @attr
-     */
-
-    this.focusable = false;
-    /**
-     * Releases the ripple after it has been spawned.
-     * @attr
-     */
-
-    this.autoRelease = false;
-    /**
-     * Initial animation duration.
-     * @attr
-     */
-
-    this.initialDuration = RIPPLE_INITIAL_DURATION;
-    /**
-     * Fade out animation duration.
-     * @attr
-     */
-
-    this.releaseDuration = RIPPLE_RELEASE_DURATION;
-    /**
-     * Role of the ripple.
-     * @attr
-     */
-
-    this.role = "presentation";
-    /**
-     * Target for the spawn ripple events.
-     * @attr
-     */
-
-    this.target = this;
-    /**
-     * Event subscribers on the target.
-     */
-
-    this.listeners = [];
-    /**
-     * Event subscribers present during the ripple animation.
-     */
-
-    this.rippleAnimationListeners = [];
-  }
-  /**
-   * Hooks up the element.
-   */
-
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.addListeners();
-  }
-  /**
-   * Tears down the element.
-   */
-
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.removeListeners();
-  }
-  /**
-   * Reacts on updated properties.
-   * @param props
-   */
-
-
-  updated(props) {
-    super.updated(props); // If the target has changed we need to hook up the new listeners
-
-    if (props.has("target") && this.target != null) {
-      this.removeListeners();
-      this.addListeners();
-    }
-  }
-  /**
-   * Adds event listeners to the target.
-   */
-
-
-  addListeners() {
-    if (this.target == null) return;
-    this.listeners.push(addListener(this.target, "mousedown", this.spawnRipple.bind(this), {
-      passive: true
-    }), addListener(this.target, "focusin", this.onFocusIn.bind(this), {
-      passive: true
-    }), addListener(this.target, "focusout", this.onFocusOut.bind(this), {
-      passive: true
-    }));
-  }
-  /**
-   * Removes listeners.
-   */
-
-
-  removeListeners() {
-    removeListeners(this.listeners);
-  }
-  /**
-   * Handles the mouse down events and spawns a ripple.
-   * If no event is provided the ripple will spawn in the center.
-   * @param {MouseEvent | TouchEvent} e
-   * @param config
-   */
-
-
-  spawnRipple(e, config) {
-    // Check if the ripple is disabled
-    if (this.disabled) {
-      // Return an empty noop function
-      return () => {};
-    } // Release the existing ripple if there is one
-
-
-    this.releaseRipple(); // Compute the spawn coordinates for the ripple
-
-    const rect = this.getBoundingClientRect();
-    let x = 0;
-    let y = 0;
-
-    if (this.centered || e == null) {
-      x = rect.width / 2;
-      y = rect.height / 2;
-    } else {
-      let {
-        clientX,
-        clientY
-      } = normalizePointerEvent(e);
-      x = clientX - rect.left;
-      y = clientY - rect.top;
-    } // Show the ripple and store the release function
-
-
-    const release = this.showRippleAtCoords({
-      x,
-      y
-    }, config); // Add the release function to the array of listeners
-
-    this.rippleAnimationListeners.push(release); // Only if the target is present or if the ripple is NOT focusable we attach the release listeners.
-
-    if (this.target != null && !this.focusable) {
-      this.rippleAnimationListeners.push(addListener(window, "mouseup", this.releaseRipple.bind(this), {
-        passive: true
-      }));
-    }
-
-    return release;
-  }
-  /**
-   * Handles the mouse up event and removes the ripple.
-   */
-
-
-  releaseRipple() {
-    removeListeners(this.rippleAnimationListeners);
-  }
-  /**
-   * Shows a ripple at a specific coordinate.
-   * @param number
-   * @param config
-   */
-
-
-  showRippleAtCoords({
-    x,
-    y
-  }, config) {
-    const {
-      offsetWidth,
-      offsetHeight
-    } = this;
-    const scale = getScale(window.getComputedStyle(this));
-    const {
-      releaseDuration = this.releaseDuration,
-      initialDuration = this.initialDuration,
-      autoRelease = this.autoRelease
-    } = config || {}; // Add the scale in case the ripple is transformed
-
-    x *= scale.x === 0 ? 1 : 1 / scale.x;
-    y *= scale.y === 0 ? 1 : 1 / scale.y; // Create the ripple
-
-    const $ripple = document.createElement("div");
-    $ripple.classList.add("ripple"); // Compute distance from the center of the rectangle (container) to its corner.
-    // If the coords are in the center the ripple would fill the entire container.
-
-    const containerRadius = computeRadius(offsetWidth, offsetHeight); // Compute the additional distance we have to add to the radius to make sure it always fills
-    // the entire container. The extra distance will be the distance from the center to the coords.
-    // If the coords are in the middle the extra radius will be 0.
-
-    const extraRadius = computeRadius(Math.abs(offsetWidth / 2 - x), Math.abs(offsetHeight / 2 - y)); // The size of the ripple is the diameter
-
-    const radius = Math.round(containerRadius + extraRadius * 2);
-    const diameter = radius * 2; // Assign the styles that makes it spawn from the desired coords
-
-    Object.assign($ripple.style, {
-      "left": `${x - radius}px`,
-      "top": `${y - radius}px`,
-      "height": `${diameter}px`,
-      "width": `${diameter}px`,
-      "position": "absolute"
-    }); // Cleans up the ripple
-
-    let released = false;
-
-    const release = () => {
-      if (released) return;
-      released = true; // Fade the ripple out
-
-      const opacity = getOpacity(window.getComputedStyle($ripple));
-      const outAnimation = $ripple.animate({
-        opacity: [opacity.toString(), `0`]
-      }, { ...RIPPLE_ANIMATION_CONFIG,
-        duration: releaseDuration
-      }); // When the out animation finished we remove the ripple before the next frame
-
-      outAnimation.onfinish = () => {
-        requestAnimationFrame(() => {
-          if (this.shadowRoot.contains($ripple)) {
-            this.shadowRoot.removeChild($ripple);
-          }
-        });
-      };
-    }; // Start the animation and add the ripple to the DOM
-
-
-    this.shadowRoot.appendChild($ripple); // Release instantly if autorelease
-
-    if (autoRelease) {
-      release();
-    } // Scale the ripple in
-
-
-    $ripple.animate({
-      transform: [`scale(0)`, `scale(1)`]
-    }, { ...RIPPLE_ANIMATION_CONFIG,
-      duration: initialDuration
-    });
-    return release;
-  }
-  /**
-   * Add a persistent ripple when the taget gains focus.
-   */
-
-
-  onFocusIn() {
-    if (!this.focusable) return;
-    this.spawnRipple(undefined, {
-      autoRelease: false
-    });
-  }
-  /**
-   * Release the current ripple when the focus is lost from the target.
-   */
-
-
-  onFocusOut() {
-    if (!this.focusable) return;
-    this.releaseRipple();
-  }
-  /**
-   * Returns the template for the element.
-   */
-
-
-  render() {
-    return html``;
-  }
-
-};
-Ripple.styles = [sharedStyles, cssResult(styles$m)];
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "unbounded", void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "centered", void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "overlay", void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "disabled", void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "focusable", void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "autoRelease", void 0);
-
-__decorate([property({
-  type: Number
-}), __metadata("design:type", Number)], Ripple.prototype, "initialDuration", void 0);
-
-__decorate([property({
-  type: Number
-}), __metadata("design:type", Number)], Ripple.prototype, "releaseDuration", void 0);
-
-__decorate([property({
-  type: String,
-  reflect: true
-}), __metadata("design:type", String)], Ripple.prototype, "role", void 0);
-
-__decorate([property({
-  type: Object
-}), __metadata("design:type", EventTarget)], Ripple.prototype, "target", void 0);
-
-Ripple = __decorate([customElement("wl-ripple")], Ripple);
-
-var styles$n = ``;
-
-class ButtonBehavior extends FormElementBehavior {
-  constructor() {
-    super(...arguments);
-    this.type = 'submit';
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.listeners.push(addListener(this, 'click', this.onClick.bind(this)), addListener(this, 'keydown', this.onKeyDown.bind(this)));
-  }
-
-  onKeyDown(e) {
-    if (e.code === ENTER || e.code === SPACE) {
-      this.click();
-      stopEvent(e);
-
-      if (this.$ripple != null) {
-        this.$ripple.spawnRipple(undefined, {
-          autoRelease: true
-        });
-      }
-    }
-  }
-
-  onClick(e) {
-    if (this.disabled) {
-      stopEvent(e);
-      return;
-    }
-
-    if (e.target == this && !e.defaultPrevented) {
-      this.$formElement.dispatchEvent(new MouseEvent('click', {
-        relatedTarget: this,
-        composed: true
-      }));
-    }
-  }
-
-  renderFormElement() {
-    return html` <button style="display: none;" id="${this.formElementId}" aria-hidden="true" tabindex="-1" type="${this.type}" ?disabled="${this.disabled}" name="${ifDefined(this.name)}" value="${ifDefined(this.value)}"> </button> `;
-  }
-
-}
-
-ButtonBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$n)];
-
-__decorate([property({
-  type: String
-}), __metadata('design:type', String)], ButtonBehavior.prototype, 'type', void 0);
-
-var styles$o = `:host{--_button-color:var(--button-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_button-shadow-color:var(--button-shadow-color,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.2));color:var(--_button-color);background:var(--_button-bg);box-shadow:var(--elevation-1,0 .3125rem .625rem -.125rem var(--_button-shadow-color));padding:var(--button-padding,.75rem 1.5rem);font-size:var(--button-font-size,1rem);border-radius:var(--button-border-radius,.5rem);font-family:var(--button-font-family,var(--font-family-sans-serif,"Roboto Condensed",helvetica,sans-serif));transition:var(--button-transition,box-shadow var(--transition-duration-slow,.25s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));letter-spacing:var(--button-letter-spacing,.125rem);line-height:1;text-transform:uppercase;cursor:pointer;text-align:center;-webkit-user-select:none;-moz-user-select:none;user-select:none;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:0}:host,:host([fab]){display:inline-flex;align-items:center;justify-content:center}:host([fab]){width:var(--button-fab-size,2.5rem);height:var(--button-fab-size,2.5rem);padding:0;letter-spacing:0;border-radius:100%}:host([inverted]){color:var(--_button-bg);background:var(--_button-color)}:host([outlined]){border:var(--button-border-outlined,.125rem solid currentColor)}:host(:focus),:host(:hover){--_button-color:var(--button-color-hover,hsl(var(--primary-400-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-hover,hsl(var(--primary-400,var(--primary-hue,224),var(--primary-saturation,42%),var(--primary-lightness,52%))));--_button-shadow-color:var(--button-shadow-color-hover,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.5));will-change:background,color,box-shadow}:host(:active){--_button-color:var(--button-color-active,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));box-shadow:var(--elevation-4,0 .5rem 1rem -.125rem var(--_button-shadow-color))}:host([flat]:focus){background:var(--button-bg-active-flat,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),.08))}:host([disabled]){--_button-color:var(--button-color-disabled,hsl(var(--shade-400-contrast,var(--shade-hue-contrast,0),var(--shade-saturation-contrast,100%),var(--shade-lightness-contrast,100%))));--_button-bg:var(--button-bg-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));box-shadow:none;cursor:default;pointer-events:none}:host([flat]){box-shadow:none;background:none}#ripple{z-index:-1}`;
-
-let Button = class Button extends ButtonBehavior {
-  constructor() {
-    super(...arguments);
-    this.inverted = false;
-    this.fab = false;
-    this.outlined = false;
-    this.noRipple = false;
-    this.flat = false;
-    this.role = 'button';
-  }
-
-  render() {
-    return html` <wl-ripple id="ripple" overlay .target="${this}" ?disabled="${this.disabled || this.noRipple}"></wl-ripple> <slot></slot> ${this.renderFormElement()} `;
-  }
-
-};
-Button.styles = [...ButtonBehavior.styles, cssResult(styles$o)];
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'inverted', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'fab', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'outlined', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'noRipple', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'flat', void 0);
-
-__decorate([property({
-  type: String,
-  reflect: true
-}), __metadata('design:type', String)], Button.prototype, 'role', void 0);
-
-__decorate([query('#ripple'), __metadata('design:type', Ripple)], Button.prototype, '$ripple', void 0);
-
-Button = __decorate([customElement('wl-button')], Button);
+var styles$o = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
 
 var styles$p = ``;
 
@@ -33599,7 +33627,7 @@ customElements.define(RadioGroupElement.is, RadioGroupElement);
 const template$e = self => function () {
   return html`
   <style>
-    ${styles$l}
+    ${styles$o}
   </style>
 
   <h2>Planning for revision</h2>
@@ -33713,7 +33741,7 @@ const template$f = self => function () {
   // const {} = this;
   return html`
     <style>
-      ${styles$k}
+      ${styles$n}
     </style>
 
     <to-do-list></to-do-list>

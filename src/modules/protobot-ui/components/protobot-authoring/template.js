@@ -1,5 +1,6 @@
 import { html } from 'lit-element';
 import '../conversational-flow-topic';
+import 'weightless/button';
 
 // @ts-ignore
 import styles from './style.css';
@@ -25,7 +26,7 @@ export const template = self => function () {
 
       ${index !== topics.length - 1 ? html`
         <div style="text-align: center">
-          <button style="text-align: center" type="button" @click="${swap.bind(this)}" index="${index}">Swap</button>
+          <wl-button class="swap-button" style="text-align: center" type="button" @click="${swap.bind(this)}" index="${index}">Swap</wl-button>
         </div>
       ` : ''}
     `)}

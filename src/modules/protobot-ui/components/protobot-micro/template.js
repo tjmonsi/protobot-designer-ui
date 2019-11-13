@@ -24,7 +24,7 @@ export const template = self => function () {
     </style>
 
     <h1>Micro Review</h1>
-    <h3>Crowd name: ${crowdID}</h3>
+    <h3>Crowd name: ${this.crowdID}</h3>
     <br>
 
     ${utterances && utterances.length ? utterances.map(item => html`

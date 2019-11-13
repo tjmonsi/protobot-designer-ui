@@ -8,13 +8,13 @@
 
 .flex-1 {
   flex: 1;
-  background:hsl(242, 46%, 66%);
+  background: rgb(49, 63, 102);
   padding: 12px;
 }
 
 .flex-2 {
   flex: 3;
-  background:hsl(242, 46%, 66%);
+  background:rgb(49, 63, 102);
   padding: 12px
 }
 
@@ -29,5 +29,13 @@
 }
 
 .sub div {
-  background:skyblue;
+  background: rgb(74, 94, 150);
+}
+
+wl-button {
+  --button-border-radius	: 0px;
+  --button-padding : 10px;
+  --button-font-size	:10px;
+  --button-bg	: rgb(182, 182, 182);
+  --button-bg-hover : rgb(71, 71, 71);
 }

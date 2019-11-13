@@ -5,3 +5,9 @@
 h1 {
   font-family: 'Open Sans', sans-serif;
 }
+
+.swap-button {
+  --button-font-size: 10px;
+  --button-padding: 10px;
+  --button-bg	: rgb(70, 70, 70);
+}

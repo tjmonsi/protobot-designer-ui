@@ -1,6 +1,8 @@
 import { html } from 'lit-element';
 // @ts-ignore
 import styles from './style.css';
+import 'weightless/button';
+
 
 import '../conversational-flow-utterance';
 /**
@@ -29,13 +31,13 @@ export const template = self => function () {
 
       <!-- ternary expression -->
       ${!sub ? html`
-        <button type="button" @click="${newTopic.bind(this)}">New</button>
-        <button type="button" @click="${subTopic.bind(this)}">Sub</button>
+        <wl-button type="button" @click="${newTopic.bind(this)}">New</wl-button>
+        <wl-button type="button" @click="${subTopic.bind(this)}">Sub</wl-button>
       ` : html`
-        <button type="button" @click="${subTopic.bind(this)}">New</button>
+        <wl-button type="button" @click="${subTopic.bind(this)}">New</wl-button>
       `}
 
-      <button type="button" @click="${deleteTopic.bind(this)}">Delete</button>
+      <wl-button type="button" @click="${deleteTopic.bind(this)}">Delete</wl-button>
     </div>
   `;
 }.bind(self)();

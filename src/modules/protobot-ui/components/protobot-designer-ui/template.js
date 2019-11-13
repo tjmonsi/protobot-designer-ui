@@ -9,6 +9,8 @@ import '../protobot-history';
 import '../protobot-macro-sidebar';
 import '../protobot-micro-sidebar';
 import '../protobot-history-sidebar';
+import 'weightless/ripple';
+
 
 // @ts-ignore
 import styles from './style.css';
@@ -24,9 +26,13 @@ export const template = self => function () {
   return html`
     <style>
       ${styles}
+      @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
     </style>
 
     ${domain ? html`
+      <!-- <div class="top">
+        <h2>protobot</h2>
+      </div> -->
       <div class="left" style="overflow:scroll;">
         <protobot-sidebar></protobot-sidebar>
       </div>

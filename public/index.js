@@ -3360,7 +3360,7 @@ LitElement['finalized'] = true;
 
 LitElement.render = render$1;
 
-var styles = ":host {\n  margin: 40px;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.left-side-text {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.review-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.crowd-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\na {\n  color:rgb(146, 146, 146);\n}\n\n/* a:visited {\n  color: white;\n} */";
+var styles = ":host {\n  margin: 40px;\n}\n\nh1 {\n  color: rgb(255, 245, 152);\n  font-family: 'Josefin Sans', sans-serif;\n  font-weight: bold;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.left-side-text {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.review-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.crowd-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\na {\n  color:rgb(146, 146, 146);\n}\n\n/* a:visited {\n  color: white;\n} */";
 
 /**
  * @license
@@ -11762,8 +11762,10 @@ const template$1 = self => function () {
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap');
     </style>
-
+    <h1>PROTOBOT</h1>
     <h3>Domain</h3>
     <input class="left-side-text" type="text" value="${domainName}" @change="${changeDomainName.bind(this)}">
     <h3>Designer</h3>
@@ -11771,8 +11773,8 @@ const template$1 = self => function () {
     <br>
     <h3>Pages</h3>
     <ul class = "review-link">
-      <li><a href="/?domain=${this.domainId}&page=macro">Macro Review</a></li>
       <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=macro">Macro Review</a></li>
       <li><a href="/?domain=${this.domainId}">Design and Revise</a></li>
       <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
     </ul>
@@ -33778,7 +33780,7 @@ let ProtobotHistorySidebar = _decorate([customElement('protobot-history-sidebar'
   };
 }, GetDomainMixin(LitElement));
 
-var styles$s = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  grid-template-columns: 1fr 3fr 1fr;\n}\n\n.left {\n  /* background: rgb(94, 94, 94); */\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$s = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 1fr 3fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n.left {\n  /* background: rgb(94, 94, 94); */\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
 
 /**
  *
@@ -33797,9 +33799,13 @@ const template$g = self => function () {
   return html`
     <style>
       ${styles$s}
+      @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
     </style>
 
     ${domain ? html`
+      <!-- <div class="top">
+        <h2>protobot</h2>
+      </div> -->
       <div class="left" style="overflow:scroll;">
         <protobot-sidebar></protobot-sidebar>
       </div>

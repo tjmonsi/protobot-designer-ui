@@ -2,6 +2,12 @@
   margin: 40px;
 }
 
+h1 {
+  color: rgb(255, 245, 152);
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: bold;
+}
+
 h3 {
   font-family: 'Open Sans', sans-serif;
 }

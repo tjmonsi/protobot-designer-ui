@@ -1,6 +1,8 @@
 import { html } from 'lit-element';
 import '../topic-list-item';
 import 'weightless/textarea';
+import 'weightless/button';
+
 
 // @ts-ignore
 import styles from './style.css';
@@ -10,7 +12,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topics, deploy } = this;
+  const { topics, deploy, commitMessage, handleCommitMsg } = this;
 
   return html`
     <style>
@@ -32,12 +34,15 @@ export const template = self => function () {
       <!-- <textarea class="commit-input" placeholder="Write here ..."></textarea> -->
       <wl-textarea outlined
         class = "commit-input"
-        placeholder="Write here ...">
+        placeholder="Write here ..."
+        value="${commitMessage}"
+        @change="${handleCommitMsg.bind(this)}"
+        @submit="${deploy.bind(this)}">
       </wl-textarea outlined>
     </div>
 
     <div class="button-container">
-      <button class="button" type="button" @click="${deploy.bind(this)}">Deploy</button>
+      <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button>
     </div>
   `;
 }.bind(self)();

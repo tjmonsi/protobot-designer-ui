@@ -3,7 +3,6 @@ import '../topic-list-item';
 import 'weightless/textarea';
 import 'weightless/button';
 
-
 // @ts-ignore
 import styles from './style.css';
 /**
@@ -12,7 +11,8 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topics, deploy, commitMessage, handleCommitMsg } = this;
+  const { topics, deploy, domain, handleCommitMsg } = this;
+  const { commitMessage } = domain;
 
   return html`
     <style>
@@ -33,7 +33,7 @@ export const template = self => function () {
       <h3>Leave Message Here</h3>
       <wl-textarea outlined
         class = "commit-input"
-        value="${this.commitMessage}"
+        value="${commitMessage}"
         @change="${handleCommitMsg.bind(this)}"
         @submit="${deploy.bind(this)}">
       </wl-textarea outlined>

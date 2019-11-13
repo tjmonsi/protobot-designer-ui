@@ -36,7 +36,7 @@ class ProtobotMicroSidebar extends GetDomainMemosMixin(LitElement) {
       crowdId: crowdId || null
     };
 
-    if (this.crowdId) {
+    if (crowdId) {
       updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;
     }
 

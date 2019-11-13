@@ -13240,9 +13240,12 @@ const template$7 = self => function () {
   const {
     topics,
     deploy,
-    commitMessage,
+    domain,
     handleCommitMsg
   } = this;
+  const {
+    commitMessage
+  } = domain;
   return html`
     <style>
       ${styles$g}
@@ -13262,7 +13265,7 @@ const template$7 = self => function () {
       <h3>Leave Message Here</h3>
       <wl-textarea outlined
         class = "commit-input"
-        value="${this.commitMessage}"
+        value="${commitMessage}"
         @change="${handleCommitMsg.bind(this)}"
         @submit="${deploy.bind(this)}">
       </wl-textarea outlined>
@@ -13309,7 +13312,9 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
         const {
           value
         } = target;
-        this.commitMessage = value;
+        const updates = {};
+        updates[`domains/data/${this.domainId}/commitMessage`] = value || '';
+        await database.ref().update(updates);
       }
     }, {
       kind: "method",
@@ -13317,20 +13322,25 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       value: async function deploy() {
         const updates = {};
         const {
+          domain
+        } = this;
+        const {
+          commitMessage
+        } = domain;
+        const {
           key: deployedVersion
         } = database.ref(`deployed-history/data/${this.domainId}/`).push();
-        const {
-          value: commitMessage
-        } = database.ref(`deployed-history/data/${this.domainId}/${this.deployedVersion}/`).push();
         updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
           deployedVersion,
-          commitMessage
+          commitMessage: commitMessage || ''
         };
         updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
           deployedVersion,
-          commitMessage
+          commitMessage: commitMessage || ''
         };
         updates[`domains/data/${this.domainId}/deployed`] = false;
+        updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
+        updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
         await database.ref().update(updates);
       }
     }]
@@ -18882,7 +18892,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
           crowdId: crowdId || null
         };
 
-        if (this.crowdId) {
+        if (crowdId) {
           updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;
         }
 
@@ -19018,7 +19028,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
           crowdId: crowdId || null
         };
 
-        if (this.crowdId) {
+        if (crowdId) {
           updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;
         }
 

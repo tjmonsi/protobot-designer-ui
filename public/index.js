@@ -13228,7 +13228,7 @@ let TopicListItem = _decorate([customElement('topic-list-item')], function (_ini
   };
 }, GetTopicMixin(LitElement));
 
-var styles$g = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n\n\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.button {\n  margin: auto;\n  background: black;\n  color: white;\n  font-size: 20px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
+var styles$g = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.button {\n  margin: auto;\n  background: black;\n  color: white;\n  font-size: 20px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
 /**
  *
@@ -13247,7 +13247,7 @@ const template$7 = self => function () {
     <style>
       ${styles$g}
     </style>
-    <h3>Topic list</h3>
+    <h3>Current topic list</h3>
 
     <ul class ="topic-list">
     ${topics.map(topic => html`
@@ -13260,11 +13260,9 @@ const template$7 = self => function () {
 
     <div>
       <h3>Leave Message Here</h3>
-      <!-- <textarea class="commit-input" placeholder="Write here ..."></textarea> -->
       <wl-textarea outlined
         class = "commit-input"
-        placeholder="Write here ..."
-        value="${commitMessage}"
+        value="${this.commitMessage}"
         @change="${handleCommitMsg.bind(this)}"
         @submit="${deploy.bind(this)}">
       </wl-textarea outlined>
@@ -13299,7 +13297,6 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       kind: "method",
       key: "render",
       value: function render() {
-        console.log(this.commitMessage);
         return template$7(this);
       }
     }, {
@@ -18689,11 +18686,11 @@ const template$c = self => function () {
     </style>
 
     <div class = "instruction">
-      <h2>Instruction</h2>
+      <h3>Instruction</h3>
       <p>In Macro Review, you can explore the whole conversation flows which are followed and prototyped by crowds.</p>
     </div>
     <br>
-    <h2>Current Topic List</h2>
+    <h3>Current Topic List</h3>
     <ul class ="topic-list">
     ${topics.map(topic => html`
       <li>
@@ -18929,12 +18926,12 @@ const template$d = self => function () {
     </style>
 
     <div class = "instruction">
-      <h2>Instruction</h2>
+      <h3>Instruction</h3>
       <p>In this stage, you can label the topic for each utterance.
         Please click the select-box to label the topic.</p>
     </div>
     <br>
-    <h2>Current Topic List</h2>
+    <h3>Current Topic List</h3>
     <ul class ="topic-list">
     ${topics.map(topic => html`
       <li>
@@ -33815,10 +33812,10 @@ const template$g = self => function () {
       </div>
       <div class="right" style="overflow:scroll;">
         ${page === 'authoring' || !page ? html`
-          <protobot-authoring-sidebar></protobot-authoring-sidebar>
+          <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
         ` : ''}
         ${page === 'macro' ? html`
-          <protobot-macro-sidebar></protobot-macro-sidebar>
+          <protobot-macro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-macro-sidebar>
         ` : ''}
         ${page === 'micro' ? html`
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>

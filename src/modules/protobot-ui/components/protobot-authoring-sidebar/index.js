@@ -12,7 +12,6 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
   commitMessage;
 
   render () {
-    console.log(this.commitMessage)
     return template(this);
   }
 
@@ -21,18 +20,16 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
     const { value } = target;
     this.commitMessage = value;
   }
-
-
   async deploy () {
-    const updates = {};
-    const { key: deployedVersion } = database.ref(`deployed-history/data/${this.domainId}/`).push();
-    const { value: commitMessage } = database.ref(`deployed-history/data/${this.domainId}/${this.deployedVersion}/`).push();
+      const updates = {};
+      const { key: deployedVersion } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+      const { value: commitMessage } = database.ref(`deployed-history/data/${this.domainId}/${this.deployedVersion}/`).push();
 
-    updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain, deployedVersion, commitMessage };
-    updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain, deployedVersion, commitMessage };
-    updates[`domains/data/${this.domainId}/deployed`] = false;
-    await database.ref().update(updates);
-  }
+      updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain, deployedVersion, commitMessage };
+      updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain, deployedVersion, commitMessage };
+      updates[`domains/data/${this.domainId}/deployed`] = false;
+      await database.ref().update(updates);
+    }
 
 }
 

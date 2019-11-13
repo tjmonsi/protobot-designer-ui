@@ -3,7 +3,7 @@ h3 {
 }
 
 .topic-list {
-  font-size: 18px;
+  font-size: 15px;
   font-family: 'Open Sans', sans-serif;
 }
 
@@ -16,8 +16,6 @@ h3 {
   --textarea-min-height: 150px;
   --input-font-size: 15px;
   color: blue;
-
-
 }
 
 

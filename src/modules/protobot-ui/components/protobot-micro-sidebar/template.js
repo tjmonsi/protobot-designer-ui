@@ -25,12 +25,12 @@ export const template = self => function () {
     </style>
 
     <div class = "instruction">
-      <h2>Instruction</h2>
+      <h3>Instruction</h3>
       <p>In this stage, you can label the topic for each utterance.
         Please click the select-box to label the topic.</p>
     </div>
     <br>
-    <h2>Current Topic List</h2>
+    <h3>Current Topic List</h3>
     <ul class ="topic-list">
     ${topics.map(topic => html`
       <li>

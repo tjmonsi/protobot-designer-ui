@@ -18,7 +18,7 @@ export const template = self => function () {
     <style>
       ${styles}
     </style>
-    <h3>Topic list</h3>
+    <h3>Current topic list</h3>
 
     <ul class ="topic-list">
     ${topics.map(topic => html`
@@ -31,11 +31,9 @@ export const template = self => function () {
 
     <div>
       <h3>Leave Message Here</h3>
-      <!-- <textarea class="commit-input" placeholder="Write here ..."></textarea> -->
       <wl-textarea outlined
         class = "commit-input"
-        placeholder="Write here ..."
-        value="${commitMessage}"
+        value="${this.commitMessage}"
         @change="${handleCommitMsg.bind(this)}"
         @submit="${deploy.bind(this)}">
       </wl-textarea outlined>

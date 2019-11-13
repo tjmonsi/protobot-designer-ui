@@ -49,10 +49,10 @@ export const template = self => function () {
       </div>
       <div class="right" style="overflow:scroll;">
         ${page === 'authoring' || !page ? html`
-          <protobot-authoring-sidebar></protobot-authoring-sidebar>
+          <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
         ` : ''}
         ${page === 'macro' ? html`
-          <protobot-macro-sidebar></protobot-macro-sidebar>
+          <protobot-macro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-macro-sidebar>
         ` : ''}
         ${page === 'micro' ? html`
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>

@@ -1,8 +1,19 @@
 
 .center-modal {
-  background: #888888;
+  background: #221f4d;
+  font-family: 'Open Sans', sans-serif;
   font-size: 20px;
   color: white;
   padding: 60px 20px;
   text-align: center;
+}
+
+.domain-id {
+  font-size: 18px;
+  font-family: 'Open Sans', sans-serif;
+  margin: 10px;
+}
+
+.new-button {
+  --button-bg	: rgb(78, 91, 150);
 }

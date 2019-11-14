@@ -11990,96 +11990,7 @@ let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_
   };
 }, GetDomainUsersMixin(LitElement));
 
-var styles$8 = "\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n}\n";
-
-/**
- *
- * @param {any} self
- */
-
-const template$2 = self => function () {
-  // @ts-ignore
-  const {
-    submit
-  } = this;
-  return html`
-    <style>
-      ${styles$8}
-    </style>
-
-    <div class="center-modal">
-      <form @submit="${submit.bind(this)}">
-        <p>
-          For Researchers:
-        </p>
-        <label>
-          Put in the domain id of an existing user.<br>
-        </label>
-        <input id="domain" name="domain" type="text">
-        <button>Submit</button>
-      </form>
-      <div style="padding-top: 48px">
-        <p>
-          Or click on any of the buttons for a blank domain
-        </p>
-        <button type="button">New Blank Domain</button>
-      </div>
-    </div>
-
-
-  `;
-}.bind(self)();
-
-// @ts-ignore
-
-let ProtobotStart = _decorate([customElement('protobot-start')], function (_initialize, _GetPathMixin) {
-  class ProtobotStart extends _GetPathMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotStart,
-    d: [{
-      kind: "field",
-      decorators: [property()],
-      key: "x",
-
-      value() {
-        return 1;
-      }
-
-    }, {
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$2(this);
-      }
-    }, {
-      kind: "method",
-      key: "submit",
-      value: function submit(event) {
-        event.preventDefault();
-        const {
-          target
-        } = event;
-        const {
-          domain
-        } = target;
-
-        if (domain.value) {
-          window.location.href = `/?domain=${domain.value}`;
-        }
-      }
-    }]
-  };
-}, GetPathMixin(LitElement));
-
-var styles$9 = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: rgb(49, 63, 102);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:rgb(49, 63, 102);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  font-weight: bold;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background: rgb(74, 94, 150);\n}\n\nwl-button {\n  --button-border-radius\t: 0px;\n  --button-padding : 10px;\n  --button-font-size\t:10px;\n  --button-bg\t: rgb(182, 182, 182);\n  --button-bg-hover : rgb(71, 71, 71);\n}\n";
+var styles$8 = "\n.center-modal {\n  background: #221f4d;\n  font-family: 'Open Sans', sans-serif;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n}\n\n.domain-id {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n  margin: 10px;\n}\n\n.new-button {\n  --button-bg\t: rgb(78, 91, 150);\n}";
 
 function computeRadius(a, b) {
   return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2)) / 2;
@@ -12136,7 +12047,7 @@ function normalizePointerEvent(e) {
   };
 }
 
-var styles$a = `:host{position:relative;display:block;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([unbounded])){overflow:hidden}:host([overlay]){position:absolute;top:50%;left:50%;width:100%;height:100%;transform:translate(-50%,-50%)}.ripple{background:var(--ripple-color,currentcolor);opacity:var(--ripple-opacity,.15);border-radius:100%;pointer-events:none;will-change:opacity,transform}`;
+var styles$9 = `:host{position:relative;display:block;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([unbounded])){overflow:hidden}:host([overlay]){position:absolute;top:50%;left:50%;width:100%;height:100%;transform:translate(-50%,-50%)}.ripple{background:var(--ripple-color,currentcolor);opacity:var(--ripple-opacity,.15);border-radius:100%;pointer-events:none;will-change:opacity,transform}`;
 
 /**
  * Base configuration for the ripple animation.
@@ -12467,7 +12378,7 @@ let Ripple = class Ripple extends LitElement {
   }
 
 };
-Ripple.styles = [sharedStyles, cssResult(styles$a)];
+Ripple.styles = [sharedStyles, cssResult(styles$9)];
 
 __decorate([property({
   type: Boolean,
@@ -12518,7 +12429,7 @@ __decorate([property({
 
 Ripple = __decorate([customElement("wl-ripple")], Ripple);
 
-var styles$b = ``;
+var styles$a = ``;
 
 class ButtonBehavior extends FormElementBehavior {
   constructor() {
@@ -12564,13 +12475,13 @@ class ButtonBehavior extends FormElementBehavior {
 
 }
 
-ButtonBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$b)];
+ButtonBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$a)];
 
 __decorate([property({
   type: String
 }), __metadata('design:type', String)], ButtonBehavior.prototype, 'type', void 0);
 
-var styles$c = `:host{--_button-color:var(--button-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_button-shadow-color:var(--button-shadow-color,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.2));color:var(--_button-color);background:var(--_button-bg);box-shadow:var(--elevation-1,0 .3125rem .625rem -.125rem var(--_button-shadow-color));padding:var(--button-padding,.75rem 1.5rem);font-size:var(--button-font-size,1rem);border-radius:var(--button-border-radius,.5rem);font-family:var(--button-font-family,var(--font-family-sans-serif,"Roboto Condensed",helvetica,sans-serif));transition:var(--button-transition,box-shadow var(--transition-duration-slow,.25s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));letter-spacing:var(--button-letter-spacing,.125rem);line-height:1;text-transform:uppercase;cursor:pointer;text-align:center;-webkit-user-select:none;-moz-user-select:none;user-select:none;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:0}:host,:host([fab]){display:inline-flex;align-items:center;justify-content:center}:host([fab]){width:var(--button-fab-size,2.5rem);height:var(--button-fab-size,2.5rem);padding:0;letter-spacing:0;border-radius:100%}:host([inverted]){color:var(--_button-bg);background:var(--_button-color)}:host([outlined]){border:var(--button-border-outlined,.125rem solid currentColor)}:host(:focus),:host(:hover){--_button-color:var(--button-color-hover,hsl(var(--primary-400-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-hover,hsl(var(--primary-400,var(--primary-hue,224),var(--primary-saturation,42%),var(--primary-lightness,52%))));--_button-shadow-color:var(--button-shadow-color-hover,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.5));will-change:background,color,box-shadow}:host(:active){--_button-color:var(--button-color-active,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));box-shadow:var(--elevation-4,0 .5rem 1rem -.125rem var(--_button-shadow-color))}:host([flat]:focus){background:var(--button-bg-active-flat,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),.08))}:host([disabled]){--_button-color:var(--button-color-disabled,hsl(var(--shade-400-contrast,var(--shade-hue-contrast,0),var(--shade-saturation-contrast,100%),var(--shade-lightness-contrast,100%))));--_button-bg:var(--button-bg-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));box-shadow:none;cursor:default;pointer-events:none}:host([flat]){box-shadow:none;background:none}#ripple{z-index:-1}`;
+var styles$b = `:host{--_button-color:var(--button-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_button-shadow-color:var(--button-shadow-color,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.2));color:var(--_button-color);background:var(--_button-bg);box-shadow:var(--elevation-1,0 .3125rem .625rem -.125rem var(--_button-shadow-color));padding:var(--button-padding,.75rem 1.5rem);font-size:var(--button-font-size,1rem);border-radius:var(--button-border-radius,.5rem);font-family:var(--button-font-family,var(--font-family-sans-serif,"Roboto Condensed",helvetica,sans-serif));transition:var(--button-transition,box-shadow var(--transition-duration-slow,.25s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));letter-spacing:var(--button-letter-spacing,.125rem);line-height:1;text-transform:uppercase;cursor:pointer;text-align:center;-webkit-user-select:none;-moz-user-select:none;user-select:none;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:0}:host,:host([fab]){display:inline-flex;align-items:center;justify-content:center}:host([fab]){width:var(--button-fab-size,2.5rem);height:var(--button-fab-size,2.5rem);padding:0;letter-spacing:0;border-radius:100%}:host([inverted]){color:var(--_button-bg);background:var(--_button-color)}:host([outlined]){border:var(--button-border-outlined,.125rem solid currentColor)}:host(:focus),:host(:hover){--_button-color:var(--button-color-hover,hsl(var(--primary-400-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-hover,hsl(var(--primary-400,var(--primary-hue,224),var(--primary-saturation,42%),var(--primary-lightness,52%))));--_button-shadow-color:var(--button-shadow-color-hover,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.5));will-change:background,color,box-shadow}:host(:active){--_button-color:var(--button-color-active,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));box-shadow:var(--elevation-4,0 .5rem 1rem -.125rem var(--_button-shadow-color))}:host([flat]:focus){background:var(--button-bg-active-flat,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),.08))}:host([disabled]){--_button-color:var(--button-color-disabled,hsl(var(--shade-400-contrast,var(--shade-hue-contrast,0),var(--shade-saturation-contrast,100%),var(--shade-lightness-contrast,100%))));--_button-bg:var(--button-bg-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));box-shadow:none;cursor:default;pointer-events:none}:host([flat]){box-shadow:none;background:none}#ripple{z-index:-1}`;
 
 let Button = class Button extends ButtonBehavior {
   constructor() {
@@ -12588,7 +12499,7 @@ let Button = class Button extends ButtonBehavior {
   }
 
 };
-Button.styles = [...ButtonBehavior.styles, cssResult(styles$c)];
+Button.styles = [...ButtonBehavior.styles, cssResult(styles$b)];
 
 __decorate([property({
   type: Boolean,
@@ -12623,6 +12534,96 @@ __decorate([property({
 __decorate([query('#ripple'), __metadata('design:type', Ripple)], Button.prototype, '$ripple', void 0);
 
 Button = __decorate([customElement('wl-button')], Button);
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$2 = self => function () {
+  // @ts-ignore
+  const {
+    submit
+  } = this;
+  return html`
+    <style>
+      ${styles$8}
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+    </style>
+
+    <div class="center-modal">
+      <form @submit="${submit.bind(this)}">
+        <p>
+          For Designers:
+        </p>
+        <label>
+          Fill in the domain id of an existing user.<br>
+        </label>
+        <input class= "domain-id" id="domain" name="domain" type="text">
+        <wl-button class ="submit-button">Submit</wl-button>
+      </form>
+      <div style="padding-top: 48px">
+        <p>
+          Or click on any of the buttons for a blank domain
+        </p>
+        <wl-button class ="new-button">New Blank Domain</wl-button>
+      </div>
+    </div>
+
+
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotStart = _decorate([customElement('protobot-start')], function (_initialize, _GetPathMixin) {
+  class ProtobotStart extends _GetPathMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotStart,
+    d: [{
+      kind: "field",
+      decorators: [property()],
+      key: "x",
+
+      value() {
+        return 1;
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$2(this);
+      }
+    }, {
+      kind: "method",
+      key: "submit",
+      value: function submit(event) {
+        event.preventDefault();
+        const {
+          target
+        } = event;
+        const {
+          domain
+        } = target;
+
+        if (domain.value) {
+          window.location.href = `/?domain=${domain.value}`;
+        }
+      }
+    }]
+  };
+}, GetPathMixin(LitElement));
+
+var styles$c = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: rgb(49, 63, 102);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:rgb(49, 63, 102);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  font-weight: bold;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background: rgb(74, 94, 150);\n}\n\nwl-button {\n  --button-border-radius\t: 0px;\n  --button-padding : 10px;\n  --button-font-size\t:10px;\n  --button-bg\t: rgb(182, 182, 182);\n  --button-bg-hover : rgb(71, 71, 71);\n}\n";
 
 var styles$d = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%;\n  font-size: 15px;\n}\n";
 
@@ -12767,7 +12768,7 @@ const template$4 = self => function () {
   } = topic || {};
   return html`
     <style>
-      ${styles$9}
+      ${styles$c}
     </style>
 
     <div class="flex-area ${sub ? 'sub' : ''}">

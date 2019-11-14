@@ -3,6 +3,7 @@ import { html } from 'lit-element';
 import styles from './style.css';
 import { until } from 'lit-html/directives/until';
 import '../protobot-memo';
+import '../protobot-memo-all';
 
 /**
  *
@@ -41,5 +42,8 @@ export const template = self => function () {
         <a href="/?domain=${this.domainId}&page=micro&crowdId=${item}&set=1">${until(gettingCrowdId(item), 'Loading...')}</a>
       </li>`) : ''}
     </ul>
+
+    <protobot-memo-all></protobot-memo-all>
+
   `;
 }.bind(self)();

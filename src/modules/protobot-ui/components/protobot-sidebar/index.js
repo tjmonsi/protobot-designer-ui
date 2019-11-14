@@ -55,6 +55,17 @@ class ProtobotSidebar extends GetDomainUsersMixin(LitElement) {
     // console.log(`${id}`);
     return (await database.ref(`users/data/${id}/name`).once('value')).val();
   }
+
+  // /**
+  //  *
+  //  * @param {String} memoId
+  //  */
+  // async gettingMemo (memoId) {
+  //   // console.log(`${id}`);
+  //   return (await database.ref(`memos/data/${memoId}/text`).once('value')).val();
+  // }
+
+
 }
 
 export { ProtobotSidebar };

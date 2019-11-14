@@ -23,7 +23,7 @@ export const GetMemoMixin = (base) => (class extends base {
   }
 
   async getMemo (memoId) {
-    console.log(memoId);
+    // console.log(memoId);
     const snap = await database.ref(`memos/data/${memoId}`).once('value');
     this.memo = snap.val() || null;
   }

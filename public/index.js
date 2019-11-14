@@ -13547,9 +13547,10 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
 const template$9 = self => function () {
   // @ts-ignore
   const {
-    crowdID,
+    crowdId,
     topics,
-    utterances
+    utterances,
+    gettingCrowdId
   } = this; // console.log(topics);
   // const t = [];
   // for (const i in topics) {
@@ -13565,7 +13566,9 @@ const template$9 = self => function () {
     </style>
 
     <h1>Micro Review</h1>
-    <h3>Crowd name: ${this.crowdID}</h3>
+    <!-- <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3> -->
+    <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3>
+
     <br>
 
     ${utterances && utterances.length ? utterances.map(item => html`
@@ -13728,7 +13731,6 @@ const GetDomainUtterancesMixin = base => _decorate(null, function (_initialize, 
   };
 }, GetPathMixin(base));
 
-// import { database } from '../../../firebase';
 // Extend the LitElement base class
 // @ts-ignore
 
@@ -13749,6 +13751,18 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
       key: "render",
       value: function render() {
         return template$9(this);
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingCrowdId",
+      value: async function gettingCrowdId(id) {
+        // console.log("here", id);
+        return (await database.ref(`users/data/${id}/name`).once('value')).val();
       } // async createTopic (sub) {
       //   const { key: topicId } = database.ref('labels/data').push();
       //   const { key: utteranceId } = database.ref('utterances/data').push();

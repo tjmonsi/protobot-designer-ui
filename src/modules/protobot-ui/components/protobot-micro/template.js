@@ -9,7 +9,7 @@ import '../utterance-review-item';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { crowdID, topics, utterances } = this;
+  const { crowdId, topics, utterances, gettingCrowdId } = this;
   // console.log(topics);
   // const t = [];
   // for (const i in topics) {
@@ -24,7 +24,9 @@ export const template = self => function () {
     </style>
 
     <h1>Micro Review</h1>
-    <h3>Crowd name: ${this.crowdID}</h3>
+    <!-- <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3> -->
+    <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3>
+
     <br>
 
     ${utterances && utterances.length ? utterances.map(item => html`

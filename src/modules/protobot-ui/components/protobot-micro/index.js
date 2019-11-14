@@ -3,8 +3,8 @@ import { LitElement, customElement } from 'lit-element';
 import { template } from './template.js';
 import { GetDomainMixin } from '../../mixins/get-domain';
 import { GetDomainUtterancesMixin } from '../../mixins/get-domain-utterances';
+import { database } from '../../../firebase';
 // import { GetTopicMixin } from '../../mixins/get-topic';
-// import { database } from '../../../firebase';
 
 // Extend the LitElement base class
 // @ts-ignore
@@ -12,6 +12,15 @@ import { GetDomainUtterancesMixin } from '../../mixins/get-domain-utterances';
 class ProtobotMicro extends GetDomainUtterancesMixin(GetDomainMixin(LitElement)) {
   render () {
     return template(this);
+  }
+
+  /**
+   *
+   * @param {String} id
+   */
+  async gettingCrowdId (id) {
+    // console.log("here", id);
+    return (await database.ref(`users/data/${id}/name`).once('value')).val();
   }
 
   // async createTopic (sub) {

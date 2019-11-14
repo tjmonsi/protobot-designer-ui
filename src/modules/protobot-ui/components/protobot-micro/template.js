@@ -3,6 +3,8 @@ import { html } from 'lit-element';
 import styles from './style.css';
 import '../topic-list-item';
 import '../utterance-review-item';
+import { until } from 'lit-html/directives/until';
+
 /**
  *
  * @param {any} self
@@ -25,7 +27,7 @@ export const template = self => function () {
 
     <h1>Micro Review</h1>
     <!-- <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3> -->
-    <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3>
+    <h3>Crowd name: ${until(gettingCrowdId(crowdId))}</h3>
 
     <br>
 

@@ -3400,7 +3400,7 @@ const _infinity = 0x7fffffff;
  *     html`${until(content, html`<span>Loading...</span>`)}`
  */
 
-const until$1 = directive((...args) => part => {
+const until = directive((...args) => part => {
   let state = _state.get(part);
 
   if (state === undefined) {
@@ -11741,7 +11741,7 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
   };
 }, GetMemoMixin(GetDomainMixin(LitElement)));
 
-var styles$8 = "";
+var styles$8 = ".micro {\n  color: red;\n}\n\n.macro {\n  color: yellow;\n}";
 
 /**
  *
@@ -11749,6 +11749,12 @@ var styles$8 = "";
  */
 
 const template$1 = self => function () {
+  // @ts-ignore
+  const {
+    gettingMemo,
+    memos,
+    gettingMemoPage
+  } = this;
   return html`
     <style>
       ${styles$8}
@@ -11756,20 +11762,125 @@ const template$1 = self => function () {
     </style>
 
     <h3>All memos</h3>
-    <!-- <ul class = "memo-list">
-      ${users ? users.map(item => html`
-      <li>
-        ${until(gettingCrowdId(item), 'Loading...')}
+    <ul class = "memo-list">
+      ${memos ? memos.map(item => html`
+      <li class = "${until(gettingMemoPage(item.memoId), '')}">
+        ${until(gettingMemo(item.memoId), 'Loading...')}
       </li>`) : ''}
-    </ul> -->
+    </ul>
 
   `;
 }.bind(self)();
 
+/**
+ *
+ * @param {*} base
+ */
+
+const GetDomainMemosMixin = base => _decorate(null, function (_initialize, _GetDomainMixin) {
+  class _class extends _GetDomainMixin {
+    // @ts-ignore
+    constructor() {
+      super();
+
+      _initialize(this);
+
+      this.boundSaveDomainMemos = this.saveDomainMemos.bind(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "memos",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "method",
+      key: "disconnectedCallback",
+      value: function disconnectedCallback() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
+          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
+        }
+
+        this.disconnectRef();
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: function domainChanged(data) {
+        _get(_getPrototypeOf(_class.prototype), "domainChanged", this).call(this, data);
+
+        if (data) {
+          this.getDomainMemos(this.domainId);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "disconnectRef",
+      value: function disconnectRef() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
+
+        if (this.domainMemosRef) {
+          this.domainMemosRef.off('value', this.boundSaveDomainMemos);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "getDomainMemos",
+      value: function getDomainMemos(id) {
+        this.disconnectRef();
+
+        if (id) {
+          this.domainMemosRef = database.ref(`memos/lists/domain-memo/${id}`);
+          this.domainMemosRef.on('value', this.boundSaveDomainMemos);
+        } else {
+          console.log('No values for id-crowdId: ', id);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveDomainMemos",
+      value: function saveDomainMemos(snap) {
+        const data = snap.val() || null;
+        const array = [];
+
+        if (data) {
+          for (const memoId in data) {
+            array.push({ ...data[memoId],
+              memoId
+            });
+          }
+
+          this.memos = array;
+          this.domainMemosChanged(this.memos);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "domainMemosChanged",
+      value: function domainMemosChanged(data) {}
+    }]
+  };
+}, GetDomainMixin(base));
+
 // @ts-ignore
 
-let ProtobotMemoAll = _decorate([customElement('protobot-memo-all')], function (_initialize, _GetMemoMixin) {
-  class ProtobotMemoAll extends _GetMemoMixin {
+let ProtobotMemoAll = _decorate([customElement('protobot-memo-all')], function (_initialize, _GetDomainMemosMixin) {
+  class ProtobotMemoAll extends _GetDomainMemosMixin {
     constructor(...args) {
       super(...args);
 
@@ -11798,9 +11909,21 @@ let ProtobotMemoAll = _decorate([customElement('protobot-memo-all')], function (
         // console.log(`${id}`);
         return (await database.ref(`memos/data/${memoId}/text`).once('value')).val();
       }
+      /**
+       *
+       * @param {String} memoId
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingMemoPage",
+      value: async function gettingMemoPage(memoId) {
+        // console.log(`${id}`);
+        return (await database.ref(`memos/data/${memoId}/page`).once('value')).val();
+      }
     }]
   };
-}, GetMemoMixin(LitElement));
+}, GetDomainMemosMixin(LitElement));
 
 /**
  *
@@ -11815,8 +11938,12 @@ const template$2 = self => function () {
     designerName,
     changeDesignerName,
     users,
-    gettingCrowdId
+    gettingCrowdId,
+    queryObject
   } = this;
+  const {
+    page
+  } = queryObject;
   return html`
     <style>
       ${styles}
@@ -11836,19 +11963,22 @@ const template$2 = self => function () {
     <ul class = "review-link">
       <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
       <li><a href="/?domain=${this.domainId}&page=macro">Macro Review</a></li>
-      <li><a href="/?domain=${this.domainId}">Design and Revise</a></li>
+      <li><a href="/?domain=${this.domainId}&page=authoring">Design and Revise</a></li>
       <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
     </ul>
-    <h3>Crowd list</h3>
-    <ul class = "crowd-link">
-      ${users ? users.map(item => html`
-      <li>
-        <a href="/?domain=${this.domainId}&page=micro&crowdId=${item}&set=1">${until$1(gettingCrowdId(item), 'Loading...')}</a>
-      </li>`) : ''}
-    </ul>
+    ${page === 'micro' ? html`
+      <h3>Crowd list</h3>
+      <ul class = "crowd-link">
+        ${users ? users.map(item => html`
+        <li>
+          <a href="/?domain=${this.domainId}&page=micro&crowdId=${item}&set=1">${until(gettingCrowdId(item), 'Loading...')}</a>
+        </li>`) : ''}
+      </ul>
+    ` : ''}
 
-    <protobot-memo-all></protobot-memo-all>
-
+    ${page === 'authoring' ? html`
+      <protobot-memo-all></protobot-memo-all>
+    ` : ''}
   `;
 }.bind(self)();
 
@@ -13465,7 +13595,7 @@ const template$9 = self => function () {
           <div class ="utterance ${!bot ? 'utterance__right' : ''}"> ${text}</div>
           <!-- <div>
             ${utteranceTopics ? Object.keys(utteranceTopics).map(item => html`
-              <span>${until$1(gettingTopic(item), 'Loading...')}</span>
+              <span>${until(gettingTopic(item), 'Loading...')}</span>
             `) : ''}
           </div> -->
 
@@ -13473,7 +13603,7 @@ const template$9 = self => function () {
             <div class = "select-topic">
               <select class="select-box" placeholder="Topic" @change=${selectedTopic.bind(this)}>
                 <option value="none">Choose the topic</option>
-                ${topics ? topics.map(item => html`<option value="${item.id}">${until$1(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
+                ${topics ? topics.map(item => html`<option value="${item.id}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
                 <option value="new-topic">New Topic</option>
               </select>
             </div>
@@ -13640,7 +13770,7 @@ const template$a = self => function () {
 
     <h1>Micro Review</h1>
     <!-- <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3> -->
-    <h3>Crowd name: ${until$1(gettingCrowdId(crowdId))}</h3>
+    <h3>Crowd name: ${until(gettingCrowdId(crowdId))}</h3>
 
     <br>
 
@@ -13723,7 +13853,7 @@ const GetDomainUtterancesMixin = base => _decorate(null, function (_initialize, 
         };
 
         if (!crowdId) {
-          window.location.href = `/?page=${page}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
+          window.location.href = `/?page=${page || 'micro'}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
           return;
         }
 
@@ -18819,111 +18949,6 @@ const template$d = self => function () {
 
   `;
 }.bind(self)();
-
-/**
- *
- * @param {*} base
- */
-
-const GetDomainMemosMixin = base => _decorate(null, function (_initialize, _GetDomainMixin) {
-  class _class extends _GetDomainMixin {
-    // @ts-ignore
-    constructor() {
-      super();
-
-      _initialize(this);
-
-      this.boundSaveDomainMemos = this.saveDomainMemos.bind(this);
-    }
-
-  }
-
-  return {
-    F: _class,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: Array
-      })],
-      key: "memos",
-
-      value() {
-        return [];
-      }
-
-    }, {
-      kind: "method",
-      key: "disconnectedCallback",
-      value: function disconnectedCallback() {
-        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
-          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
-        }
-
-        this.disconnectRef();
-      }
-    }, {
-      kind: "method",
-      key: "domainChanged",
-      value: function domainChanged(data) {
-        _get(_getPrototypeOf(_class.prototype), "domainChanged", this).call(this, data);
-
-        if (data) {
-          this.getDomainMemos(this.domainId);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "disconnectRef",
-      value: function disconnectRef() {
-        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
-
-        if (this.domainMemosRef) {
-          this.domainMemosRef.off('value', this.boundSaveDomainMemos);
-        }
-      }
-      /**
-       *
-       * @param {String} id
-       */
-
-    }, {
-      kind: "method",
-      key: "getDomainMemos",
-      value: function getDomainMemos(id) {
-        this.disconnectRef();
-
-        if (id) {
-          this.domainMemosRef = database.ref(`memos/lists/domain-memo/${id}`);
-          this.domainMemosRef.on('value', this.boundSaveDomainMemos);
-        } else {
-          console.log('No values for id-crowdId: ', id);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "saveDomainMemos",
-      value: function saveDomainMemos(snap) {
-        const data = snap.val() || null;
-        const array = [];
-
-        if (data) {
-          for (const memoId in data) {
-            array.push({ ...data[memoId],
-              memoId
-            });
-          }
-
-          this.memos = array;
-          this.domainMemosChanged(this.memos);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "domainMemosChanged",
-      value: function domainMemosChanged(data) {}
-    }]
-  };
-}, GetDomainMixin(base));
 
 // Extend the LitElement base class
 // @ts-ignore
@@ -33897,7 +33922,7 @@ const template$h = self => function () {
         <protobot-sidebar></protobot-sidebar>
       </div>
       <div class="center" style="overflow:scroll;">
-        ${page === 'authoring' || !page ? html`
+        ${page === 'authoring' ? html`
           <protobot-authoring></protobot-authoring>
         ` : ''}
 
@@ -33905,7 +33930,7 @@ const template$h = self => function () {
           <protobot-macro></protobot-macro>
         ` : ''}
 
-        ${page === 'micro' ? html`
+        ${page === 'micro' || !page ? html`
           <protobot-micro></protobot-micro>
         ` : ''}
 

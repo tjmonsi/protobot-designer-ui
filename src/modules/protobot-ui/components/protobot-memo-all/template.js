@@ -1,6 +1,7 @@
 import { html } from 'lit-element';
 // @ts-ignore
 import styles from './style.css';
+import { until } from 'lit-html/directives/until';
 
 /**
  *
@@ -8,7 +9,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { gettingMemo } = this;
+  const { gettingMemo, memos, gettingMemoPage } = this;
 
   return html`
     <style>
@@ -17,12 +18,12 @@ export const template = self => function () {
     </style>
 
     <h3>All memos</h3>
-    <!-- <ul class = "memo-list">
-      ${users ? users.map(item => html`
-      <li>
-        ${until(gettingCrowdId(item), 'Loading...')}
+    <ul class = "memo-list">
+      ${memos ? memos.map(item => html`
+      <li class = "${until(gettingMemoPage(item.memoId), '')}">
+        ${until(gettingMemo(item.memoId), 'Loading...')}
       </li>`) : ''}
-    </ul> -->
+    </ul>
 
   `;
 }.bind(self)();

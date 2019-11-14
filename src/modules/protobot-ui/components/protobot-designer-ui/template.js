@@ -37,7 +37,7 @@ export const template = self => function () {
         <protobot-sidebar></protobot-sidebar>
       </div>
       <div class="center" style="overflow:scroll;">
-        ${page === 'authoring' || !page ? html`
+        ${page === 'authoring' ? html`
           <protobot-authoring></protobot-authoring>
         ` : ''}
 
@@ -45,7 +45,7 @@ export const template = self => function () {
           <protobot-macro></protobot-macro>
         ` : ''}
 
-        ${page === 'micro' ? html`
+        ${page === 'micro' || !page ? html`
           <protobot-micro></protobot-micro>
         ` : ''}
 

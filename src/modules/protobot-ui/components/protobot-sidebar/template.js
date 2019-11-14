@@ -11,7 +11,8 @@ import '../protobot-memo-all';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { domainName, changeDomainName, designerName, changeDesignerName, users, gettingCrowdId } = this;
+  const { domainName, changeDomainName, designerName, changeDesignerName, users, gettingCrowdId, queryObject } = this;
+  const { page } = queryObject;
 
   return html`
     <style>
@@ -32,18 +33,21 @@ export const template = self => function () {
     <ul class = "review-link">
       <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
       <li><a href="/?domain=${this.domainId}&page=macro">Macro Review</a></li>
-      <li><a href="/?domain=${this.domainId}">Design and Revise</a></li>
+      <li><a href="/?domain=${this.domainId}&page=authoring">Design and Revise</a></li>
       <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
     </ul>
-    <h3>Crowd list</h3>
-    <ul class = "crowd-link">
-      ${users ? users.map(item => html`
-      <li>
-        <a href="/?domain=${this.domainId}&page=micro&crowdId=${item}&set=1">${until(gettingCrowdId(item), 'Loading...')}</a>
-      </li>`) : ''}
-    </ul>
+    ${ page === 'micro' ? html`
+      <h3>Crowd list</h3>
+      <ul class = "crowd-link">
+        ${users ? users.map(item => html`
+        <li>
+          <a href="/?domain=${this.domainId}&page=micro&crowdId=${item}&set=1">${until(gettingCrowdId(item), 'Loading...')}</a>
+        </li>`) : ''}
+      </ul>
+    ` : ''}
 
-    <protobot-memo-all></protobot-memo-all>
-
+    ${ page === 'authoring' ? html`
+      <protobot-memo-all></protobot-memo-all>
+    ` : ''}
   `;
 }.bind(self)();

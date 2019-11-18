@@ -11741,3139 +11741,7 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
   };
 }, GetMemoMixin(GetDomainMixin(LitElement)));
 
-var styles$8 = ".micro {\n  color: red;\n}\n\n.macro {\n  color: yellow;\n}";
-
-/**
- *
- * @param {any} self
- */
-
-const template$1 = self => function () {
-  // @ts-ignore
-  const {
-    gettingMemo,
-    memos,
-    gettingMemoPage
-  } = this;
-  return html`
-    <style>
-      ${styles$8}
-      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
-    </style>
-
-    <h3>All memos</h3>
-    <ul class = "memo-list">
-      ${memos ? memos.map(item => html`
-      <li class = "${until(gettingMemoPage(item.memoId), '')}">
-        ${until(gettingMemo(item.memoId), 'Loading...')}
-      </li>`) : ''}
-    </ul>
-
-  `;
-}.bind(self)();
-
-/**
- *
- * @param {*} base
- */
-
-const GetDomainMemosMixin = base => _decorate(null, function (_initialize, _GetDomainMixin) {
-  class _class extends _GetDomainMixin {
-    // @ts-ignore
-    constructor() {
-      super();
-
-      _initialize(this);
-
-      this.boundSaveDomainMemos = this.saveDomainMemos.bind(this);
-    }
-
-  }
-
-  return {
-    F: _class,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: Array
-      })],
-      key: "memos",
-
-      value() {
-        return [];
-      }
-
-    }, {
-      kind: "method",
-      key: "disconnectedCallback",
-      value: function disconnectedCallback() {
-        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
-          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
-        }
-
-        this.disconnectRef();
-      }
-    }, {
-      kind: "method",
-      key: "domainChanged",
-      value: function domainChanged(data) {
-        _get(_getPrototypeOf(_class.prototype), "domainChanged", this).call(this, data);
-
-        if (data) {
-          this.getDomainMemos(this.domainId);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "disconnectRef",
-      value: function disconnectRef() {
-        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
-
-        if (this.domainMemosRef) {
-          this.domainMemosRef.off('value', this.boundSaveDomainMemos);
-        }
-      }
-      /**
-       *
-       * @param {String} id
-       */
-
-    }, {
-      kind: "method",
-      key: "getDomainMemos",
-      value: function getDomainMemos(id) {
-        this.disconnectRef();
-
-        if (id) {
-          this.domainMemosRef = database.ref(`memos/lists/domain-memo/${id}`);
-          this.domainMemosRef.on('value', this.boundSaveDomainMemos);
-        } else {
-          console.log('No values for id-crowdId: ', id);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "saveDomainMemos",
-      value: function saveDomainMemos(snap) {
-        const data = snap.val() || null;
-        const array = [];
-
-        if (data) {
-          for (const memoId in data) {
-            array.push({ ...data[memoId],
-              memoId
-            });
-          }
-
-          this.memos = array;
-          this.domainMemosChanged(this.memos);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "domainMemosChanged",
-      value: function domainMemosChanged(data) {}
-    }]
-  };
-}, GetDomainMixin(base));
-
-// @ts-ignore
-
-let ProtobotMemoAll = _decorate([customElement('protobot-memo-all')], function (_initialize, _GetDomainMemosMixin) {
-  class ProtobotMemoAll extends _GetDomainMemosMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotMemoAll,
-    d: [{
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$1(this);
-      }
-      /**
-       *
-       * @param {String} memoId
-       */
-
-    }, {
-      kind: "method",
-      key: "gettingMemo",
-      value: async function gettingMemo(memoId) {
-        // console.log(`${id}`);
-        return (await database.ref(`memos/data/${memoId}/text`).once('value')).val();
-      }
-      /**
-       *
-       * @param {String} memoId
-       */
-
-    }, {
-      kind: "method",
-      key: "gettingMemoPage",
-      value: async function gettingMemoPage(memoId) {
-        // console.log(`${id}`);
-        return (await database.ref(`memos/data/${memoId}/page`).once('value')).val();
-      }
-    }]
-  };
-}, GetDomainMemosMixin(LitElement));
-
-/**
- *
- * @param {any} self
- */
-
-const template$2 = self => function () {
-  // @ts-ignore
-  const {
-    domainName,
-    changeDomainName,
-    designerName,
-    changeDesignerName,
-    users,
-    gettingCrowdId,
-    queryObject
-  } = this;
-  const {
-    page
-  } = queryObject;
-  return html`
-    <style>
-      ${styles}
-      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap');
-    </style>
-    <h1>PROTOBOT</h1>
-    <h3>Domain</h3>
-    <input class="left-side-text" type="text" value="${domainName}" @change="${changeDomainName.bind(this)}">
-    <h3>Designer</h3>
-    <input class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
-    <br>
-    <h3>Pages</h3>
-    <ul class = "review-link">
-      <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
-      <li><a href="/?domain=${this.domainId}&page=macro">Macro Review</a></li>
-      <li><a href="/?domain=${this.domainId}&page=authoring">Design and Revise</a></li>
-      <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
-    </ul>
-    ${page === 'micro' ? html`
-      <h3>Crowd list</h3>
-      <ul class = "crowd-link">
-        ${users ? users.map(item => html`
-        <li>
-          <a href="/?domain=${this.domainId}&page=micro&crowdId=${item}&set=1">${until(gettingCrowdId(item), 'Loading...')}</a>
-        </li>`) : ''}
-      </ul>
-    ` : ''}
-
-    ${page === 'authoring' ? html`
-      <protobot-memo-all></protobot-memo-all>
-    ` : ''}
-  `;
-}.bind(self)();
-
-/**
- *
- * @param {*} base
- */
-
-const GetDomainUsersMixin = base => _decorate(null, function (_initialize, _GetDomainMixin) {
-  class _class extends _GetDomainMixin {
-    // @ts-ignore
-    constructor() {
-      super();
-
-      _initialize(this);
-
-      this.boundSaveDomainUsers = this.saveDomainUsers.bind(this);
-    }
-
-  }
-
-  return {
-    F: _class,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: Array
-      })],
-      key: "users",
-
-      value() {
-        return [];
-      }
-
-    }, {
-      kind: "method",
-      key: "disconnectedCallback",
-      value: function disconnectedCallback() {
-        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
-          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
-        }
-
-        this.disconnectRef();
-      }
-    }, {
-      kind: "method",
-      key: "domainChanged",
-      value: function domainChanged(data) {
-        _get(_getPrototypeOf(_class.prototype), "domainChanged", this).call(this, data);
-
-        if (data) {
-          this.getDomainUsers(data);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "disconnectRef",
-      value: function disconnectRef() {
-        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
-
-        if (this.domainUsersRef) {
-          this.domainUsersRef.off('value', this.boundSaveDomainUsers);
-        }
-      }
-      /**
-       *
-       * @param {String} id
-       */
-
-    }, {
-      kind: "method",
-      key: "getDomainUsers",
-      value: function getDomainUsers(id) {
-        this.disconnectRef();
-
-        if (id) {
-          this.domainUsersRef = database.ref('users/lists/domain-utterances/');
-          this.domainUsersRef.on('value', this.boundSaveDomainUsers);
-        } else {
-          console.log('No values for id-crowdId: ', id);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "saveDomainUsers",
-      value: function saveDomainUsers(snap) {
-        const data = snap.val() || null;
-        const array = [];
-
-        if (data) {
-          for (const user in data) {
-            if (data[user][this.domainId]) {
-              array.push(user);
-            }
-          }
-
-          this.users = array;
-          this.domainUsersChanged(this.users);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "domainUsersChanged",
-      value: function domainUsersChanged(data) {}
-    }]
-  };
-}, GetDomainMixin(base));
-
-// @ts-ignore
-
-let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_initialize, _GetDomainUsersMixin) {
-  class ProtobotSidebar extends _GetDomainUsersMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotSidebar,
-    d: [{
-      kind: "field",
-      decorators: [property()],
-      key: "domainName",
-
-      value() {
-        return '';
-      }
-
-    }, {
-      kind: "field",
-      decorators: [property()],
-      key: "designerName",
-
-      value() {
-        return '';
-      }
-
-    }, {
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$2(this);
-      }
-    }, {
-      kind: "method",
-      key: "domainChanged",
-      value: function domainChanged(domain) {
-        _get(_getPrototypeOf(ProtobotSidebar.prototype), "domainChanged", this).call(this, domain);
-
-        if (domain) {
-          this.domainName = domain.name || '';
-          this.designerName = domain.designer || '';
-        }
-      }
-    }, {
-      kind: "method",
-      key: "changeDomainName",
-      value: async function changeDomainName(event) {
-        const {
-          target
-        } = event;
-        const {
-          value
-        } = target;
-
-        if (this.domainName !== value) {
-          // saves the name
-          await database.ref(`domains/data/${this.domainId}/name`).set(value);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "changeDesignerName",
-      value: async function changeDesignerName(event) {
-        const {
-          target
-        } = event;
-        const {
-          value
-        } = target;
-
-        if (this.designerName !== value) {
-          // saves the designer
-          await database.ref(`domains/data/${this.domainId}/designer`).set(value);
-        }
-      }
-      /**
-       *
-       * @param {String} id
-       */
-
-    }, {
-      kind: "method",
-      key: "gettingCrowdId",
-      value: async function gettingCrowdId(id) {
-        // console.log(`${id}`);
-        return (await database.ref(`users/data/${id}/name`).once('value')).val();
-      } // /**
-      //  *
-      //  * @param {String} memoId
-      //  */
-      // async gettingMemo (memoId) {
-      //   // console.log(`${id}`);
-      //   return (await database.ref(`memos/data/${memoId}/text`).once('value')).val();
-      // }
-
-    }]
-  };
-}, GetDomainUsersMixin(LitElement));
-
-var styles$9 = "\n.center-modal {\n  background: #221f4d;\n  font-family: 'Open Sans', sans-serif;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n}\n\n.domain-id {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n  margin: 10px;\n}\n\n.new-button {\n  --button-bg\t: rgb(78, 91, 150);\n}";
-
-function computeRadius(a, b) {
-  return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2)) / 2;
-}
-
-function getWebkitMatrix(computedStyle) {
-  return new WebKitCSSMatrix(computedStyle.webkitTransform);
-}
-
-function getScale(computedStyle, rect) {
-  const matrix = getWebkitMatrix(computedStyle);
-  return {
-    x: (rect == null ? computedStyle.getPropertyValue('width') : rect.width) === 0 ? 0 : matrix.a,
-    y: (rect == null ? computedStyle.getPropertyValue('height') : rect.height) === 0 ? 0 : matrix.d
-  };
-}
-
-function getOpacity(computedStyle) {
-  if (computedStyle.getPropertyValue('width') === '0px' || computedStyle.getPropertyValue('height') === '0px') {
-    return 0;
-  }
-
-  const opacityString = computedStyle.getPropertyValue('opacity');
-  return isNaN(+opacityString) ? 0 : Number(opacityString);
-}
-
-function isTouchEvent(event) {
-  return event.changedTouches != null;
-}
-
-function normalizePointerEvent(e) {
-  let isTouch = false;
-  let pointerEvent;
-
-  if (isTouchEvent(e)) {
-    pointerEvent = e.changedTouches[0];
-    isTouch = true;
-  } else {
-    pointerEvent = e;
-  }
-
-  let {
-    clientX,
-    clientY,
-    pageX,
-    pageY
-  } = pointerEvent;
-  return {
-    clientX,
-    clientY,
-    pageX,
-    pageY,
-    isTouch
-  };
-}
-
-var styles$a = `:host{position:relative;display:block;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([unbounded])){overflow:hidden}:host([overlay]){position:absolute;top:50%;left:50%;width:100%;height:100%;transform:translate(-50%,-50%)}.ripple{background:var(--ripple-color,currentcolor);opacity:var(--ripple-opacity,.15);border-radius:100%;pointer-events:none;will-change:opacity,transform}`;
-
-/**
- * Base configuration for the ripple animation.
- */
-
-const RIPPLE_ANIMATION_CONFIG = {
-  easing: "ease-out",
-  fill: "both"
-};
-/**
- * Initial animation duration.
- */
-
-const RIPPLE_INITIAL_DURATION = 350;
-/**
- * Release animation duration.
- */
-
-const RIPPLE_RELEASE_DURATION = 500;
-/**
- * Indicate touch actions.
- * @cssprop --ripple-color - Color.
- * @cssprop --ripple-opacity - Opacity.
- */
-
-let Ripple = class Ripple extends LitElement {
-  /**
-   * Indicate touch actions.
-   * @cssprop --ripple-color - Color.
-   * @cssprop --ripple-opacity - Opacity.
-   */
-  constructor() {
-    super(...arguments);
-    /**
-     * Makes the ripple visible outside the bounds.
-     * @attr
-     */
-
-    this.unbounded = false;
-    /**
-     * Makes ripple appear from the center.
-     * @attr
-     */
-
-    this.centered = false;
-    /**
-     * Overlays the ripple.
-     * @attr
-     */
-
-    this.overlay = false;
-    /**
-     * Disables the ripple.
-     * @attr
-     */
-
-    this.disabled = false;
-    /**
-     * Allows focusin to spawn a ripple.
-     * @attr
-     */
-
-    this.focusable = false;
-    /**
-     * Releases the ripple after it has been spawned.
-     * @attr
-     */
-
-    this.autoRelease = false;
-    /**
-     * Initial animation duration.
-     * @attr
-     */
-
-    this.initialDuration = RIPPLE_INITIAL_DURATION;
-    /**
-     * Fade out animation duration.
-     * @attr
-     */
-
-    this.releaseDuration = RIPPLE_RELEASE_DURATION;
-    /**
-     * Role of the ripple.
-     * @attr
-     */
-
-    this.role = "presentation";
-    /**
-     * Target for the spawn ripple events.
-     * @attr
-     */
-
-    this.target = this;
-    /**
-     * Event subscribers on the target.
-     */
-
-    this.listeners = [];
-    /**
-     * Event subscribers present during the ripple animation.
-     */
-
-    this.rippleAnimationListeners = [];
-  }
-  /**
-   * Hooks up the element.
-   */
-
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.addListeners();
-  }
-  /**
-   * Tears down the element.
-   */
-
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this.removeListeners();
-  }
-  /**
-   * Reacts on updated properties.
-   * @param props
-   */
-
-
-  updated(props) {
-    super.updated(props); // If the target has changed we need to hook up the new listeners
-
-    if (props.has("target") && this.target != null) {
-      this.removeListeners();
-      this.addListeners();
-    }
-  }
-  /**
-   * Adds event listeners to the target.
-   */
-
-
-  addListeners() {
-    if (this.target == null) return;
-    this.listeners.push(addListener(this.target, "mousedown", this.spawnRipple.bind(this), {
-      passive: true
-    }), addListener(this.target, "focusin", this.onFocusIn.bind(this), {
-      passive: true
-    }), addListener(this.target, "focusout", this.onFocusOut.bind(this), {
-      passive: true
-    }));
-  }
-  /**
-   * Removes listeners.
-   */
-
-
-  removeListeners() {
-    removeListeners(this.listeners);
-  }
-  /**
-   * Handles the mouse down events and spawns a ripple.
-   * If no event is provided the ripple will spawn in the center.
-   * @param {MouseEvent | TouchEvent} e
-   * @param config
-   */
-
-
-  spawnRipple(e, config) {
-    // Check if the ripple is disabled
-    if (this.disabled) {
-      // Return an empty noop function
-      return () => {};
-    } // Release the existing ripple if there is one
-
-
-    this.releaseRipple(); // Compute the spawn coordinates for the ripple
-
-    const rect = this.getBoundingClientRect();
-    let x = 0;
-    let y = 0;
-
-    if (this.centered || e == null) {
-      x = rect.width / 2;
-      y = rect.height / 2;
-    } else {
-      let {
-        clientX,
-        clientY
-      } = normalizePointerEvent(e);
-      x = clientX - rect.left;
-      y = clientY - rect.top;
-    } // Show the ripple and store the release function
-
-
-    const release = this.showRippleAtCoords({
-      x,
-      y
-    }, config); // Add the release function to the array of listeners
-
-    this.rippleAnimationListeners.push(release); // Only if the target is present or if the ripple is NOT focusable we attach the release listeners.
-
-    if (this.target != null && !this.focusable) {
-      this.rippleAnimationListeners.push(addListener(window, "mouseup", this.releaseRipple.bind(this), {
-        passive: true
-      }));
-    }
-
-    return release;
-  }
-  /**
-   * Handles the mouse up event and removes the ripple.
-   */
-
-
-  releaseRipple() {
-    removeListeners(this.rippleAnimationListeners);
-  }
-  /**
-   * Shows a ripple at a specific coordinate.
-   * @param number
-   * @param config
-   */
-
-
-  showRippleAtCoords({
-    x,
-    y
-  }, config) {
-    const {
-      offsetWidth,
-      offsetHeight
-    } = this;
-    const scale = getScale(window.getComputedStyle(this));
-    const {
-      releaseDuration = this.releaseDuration,
-      initialDuration = this.initialDuration,
-      autoRelease = this.autoRelease
-    } = config || {}; // Add the scale in case the ripple is transformed
-
-    x *= scale.x === 0 ? 1 : 1 / scale.x;
-    y *= scale.y === 0 ? 1 : 1 / scale.y; // Create the ripple
-
-    const $ripple = document.createElement("div");
-    $ripple.classList.add("ripple"); // Compute distance from the center of the rectangle (container) to its corner.
-    // If the coords are in the center the ripple would fill the entire container.
-
-    const containerRadius = computeRadius(offsetWidth, offsetHeight); // Compute the additional distance we have to add to the radius to make sure it always fills
-    // the entire container. The extra distance will be the distance from the center to the coords.
-    // If the coords are in the middle the extra radius will be 0.
-
-    const extraRadius = computeRadius(Math.abs(offsetWidth / 2 - x), Math.abs(offsetHeight / 2 - y)); // The size of the ripple is the diameter
-
-    const radius = Math.round(containerRadius + extraRadius * 2);
-    const diameter = radius * 2; // Assign the styles that makes it spawn from the desired coords
-
-    Object.assign($ripple.style, {
-      "left": `${x - radius}px`,
-      "top": `${y - radius}px`,
-      "height": `${diameter}px`,
-      "width": `${diameter}px`,
-      "position": "absolute"
-    }); // Cleans up the ripple
-
-    let released = false;
-
-    const release = () => {
-      if (released) return;
-      released = true; // Fade the ripple out
-
-      const opacity = getOpacity(window.getComputedStyle($ripple));
-      const outAnimation = $ripple.animate({
-        opacity: [opacity.toString(), `0`]
-      }, { ...RIPPLE_ANIMATION_CONFIG,
-        duration: releaseDuration
-      }); // When the out animation finished we remove the ripple before the next frame
-
-      outAnimation.onfinish = () => {
-        requestAnimationFrame(() => {
-          if (this.shadowRoot.contains($ripple)) {
-            this.shadowRoot.removeChild($ripple);
-          }
-        });
-      };
-    }; // Start the animation and add the ripple to the DOM
-
-
-    this.shadowRoot.appendChild($ripple); // Release instantly if autorelease
-
-    if (autoRelease) {
-      release();
-    } // Scale the ripple in
-
-
-    $ripple.animate({
-      transform: [`scale(0)`, `scale(1)`]
-    }, { ...RIPPLE_ANIMATION_CONFIG,
-      duration: initialDuration
-    });
-    return release;
-  }
-  /**
-   * Add a persistent ripple when the taget gains focus.
-   */
-
-
-  onFocusIn() {
-    if (!this.focusable) return;
-    this.spawnRipple(undefined, {
-      autoRelease: false
-    });
-  }
-  /**
-   * Release the current ripple when the focus is lost from the target.
-   */
-
-
-  onFocusOut() {
-    if (!this.focusable) return;
-    this.releaseRipple();
-  }
-  /**
-   * Returns the template for the element.
-   */
-
-
-  render() {
-    return html``;
-  }
-
-};
-Ripple.styles = [sharedStyles, cssResult(styles$a)];
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "unbounded", void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "centered", void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "overlay", void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "disabled", void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "focusable", void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata("design:type", Boolean)], Ripple.prototype, "autoRelease", void 0);
-
-__decorate([property({
-  type: Number
-}), __metadata("design:type", Number)], Ripple.prototype, "initialDuration", void 0);
-
-__decorate([property({
-  type: Number
-}), __metadata("design:type", Number)], Ripple.prototype, "releaseDuration", void 0);
-
-__decorate([property({
-  type: String,
-  reflect: true
-}), __metadata("design:type", String)], Ripple.prototype, "role", void 0);
-
-__decorate([property({
-  type: Object
-}), __metadata("design:type", EventTarget)], Ripple.prototype, "target", void 0);
-
-Ripple = __decorate([customElement("wl-ripple")], Ripple);
-
-var styles$b = ``;
-
-class ButtonBehavior extends FormElementBehavior {
-  constructor() {
-    super(...arguments);
-    this.type = 'submit';
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.listeners.push(addListener(this, 'click', this.onClick.bind(this)), addListener(this, 'keydown', this.onKeyDown.bind(this)));
-  }
-
-  onKeyDown(e) {
-    if (e.code === ENTER || e.code === SPACE) {
-      this.click();
-      stopEvent(e);
-
-      if (this.$ripple != null) {
-        this.$ripple.spawnRipple(undefined, {
-          autoRelease: true
-        });
-      }
-    }
-  }
-
-  onClick(e) {
-    if (this.disabled) {
-      stopEvent(e);
-      return;
-    }
-
-    if (e.target == this && !e.defaultPrevented) {
-      this.$formElement.dispatchEvent(new MouseEvent('click', {
-        relatedTarget: this,
-        composed: true
-      }));
-    }
-  }
-
-  renderFormElement() {
-    return html` <button style="display: none;" id="${this.formElementId}" aria-hidden="true" tabindex="-1" type="${this.type}" ?disabled="${this.disabled}" name="${ifDefined(this.name)}" value="${ifDefined(this.value)}"> </button> `;
-  }
-
-}
-
-ButtonBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$b)];
-
-__decorate([property({
-  type: String
-}), __metadata('design:type', String)], ButtonBehavior.prototype, 'type', void 0);
-
-var styles$c = `:host{--_button-color:var(--button-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_button-shadow-color:var(--button-shadow-color,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.2));color:var(--_button-color);background:var(--_button-bg);box-shadow:var(--elevation-1,0 .3125rem .625rem -.125rem var(--_button-shadow-color));padding:var(--button-padding,.75rem 1.5rem);font-size:var(--button-font-size,1rem);border-radius:var(--button-border-radius,.5rem);font-family:var(--button-font-family,var(--font-family-sans-serif,"Roboto Condensed",helvetica,sans-serif));transition:var(--button-transition,box-shadow var(--transition-duration-slow,.25s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));letter-spacing:var(--button-letter-spacing,.125rem);line-height:1;text-transform:uppercase;cursor:pointer;text-align:center;-webkit-user-select:none;-moz-user-select:none;user-select:none;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:0}:host,:host([fab]){display:inline-flex;align-items:center;justify-content:center}:host([fab]){width:var(--button-fab-size,2.5rem);height:var(--button-fab-size,2.5rem);padding:0;letter-spacing:0;border-radius:100%}:host([inverted]){color:var(--_button-bg);background:var(--_button-color)}:host([outlined]){border:var(--button-border-outlined,.125rem solid currentColor)}:host(:focus),:host(:hover){--_button-color:var(--button-color-hover,hsl(var(--primary-400-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-hover,hsl(var(--primary-400,var(--primary-hue,224),var(--primary-saturation,42%),var(--primary-lightness,52%))));--_button-shadow-color:var(--button-shadow-color-hover,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.5));will-change:background,color,box-shadow}:host(:active){--_button-color:var(--button-color-active,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));box-shadow:var(--elevation-4,0 .5rem 1rem -.125rem var(--_button-shadow-color))}:host([flat]:focus){background:var(--button-bg-active-flat,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),.08))}:host([disabled]){--_button-color:var(--button-color-disabled,hsl(var(--shade-400-contrast,var(--shade-hue-contrast,0),var(--shade-saturation-contrast,100%),var(--shade-lightness-contrast,100%))));--_button-bg:var(--button-bg-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));box-shadow:none;cursor:default;pointer-events:none}:host([flat]){box-shadow:none;background:none}#ripple{z-index:-1}`;
-
-let Button = class Button extends ButtonBehavior {
-  constructor() {
-    super(...arguments);
-    this.inverted = false;
-    this.fab = false;
-    this.outlined = false;
-    this.noRipple = false;
-    this.flat = false;
-    this.role = 'button';
-  }
-
-  render() {
-    return html` <wl-ripple id="ripple" overlay .target="${this}" ?disabled="${this.disabled || this.noRipple}"></wl-ripple> <slot></slot> ${this.renderFormElement()} `;
-  }
-
-};
-Button.styles = [...ButtonBehavior.styles, cssResult(styles$c)];
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'inverted', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'fab', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'outlined', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'noRipple', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'flat', void 0);
-
-__decorate([property({
-  type: String,
-  reflect: true
-}), __metadata('design:type', String)], Button.prototype, 'role', void 0);
-
-__decorate([query('#ripple'), __metadata('design:type', Ripple)], Button.prototype, '$ripple', void 0);
-
-Button = __decorate([customElement('wl-button')], Button);
-
-/**
- *
- * @param {any} self
- */
-
-const template$3 = self => function () {
-  // @ts-ignore
-  const {
-    submit,
-    newDomain
-  } = this;
-  return html`
-    <style>
-      ${styles$9}
-      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
-    </style>
-
-    <div class="center-modal">
-      <form @submit="${submit.bind(this)}">
-        <p>
-          For Designers:
-        </p>
-        <label>
-          Fill in the domain id of an existing user.<br>
-        </label>
-        <input class= "domain-id" id="domain" name="domain" type="text">
-        <wl-button class ="submit-button">Submit</wl-button>
-      </form>
-      <div style="padding-top: 48px">
-        <p>
-          Or click on any of the buttons for a blank domain
-        </p>
-        <wl-button class ="new-button" @click="${newDomain.bind(this)}">New Blank Domain</wl-button>
-      </div>
-    </div>
-
-
-  `;
-}.bind(self)();
-
-// @ts-ignore
-
-let ProtobotStart = _decorate([customElement('protobot-start')], function (_initialize, _GetPathMixin) {
-  class ProtobotStart extends _GetPathMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotStart,
-    d: [{
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$3(this);
-      }
-    }, {
-      kind: "method",
-      key: "submit",
-      value: function submit(event) {
-        event.preventDefault();
-        const {
-          target
-        } = event;
-        const {
-          domain
-        } = target;
-
-        if (domain.value) {
-          window.location.href = `/?domain=${domain.value}`;
-        }
-      }
-    }, {
-      kind: "method",
-      key: "newDomain",
-      value: async function newDomain() {
-        const {
-          key
-        } = database.ref('domains/data').push();
-        const updates = {};
-        updates[`domains/data/${key}`] = {
-          deployed: false,
-          desinger: '',
-          name: ''
-        };
-        await database.ref().update(updates);
-        window.location.href = `/?domain=${key}`;
-      }
-    }]
-  };
-}, GetPathMixin(LitElement));
-
-var styles$d = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: rgb(49, 63, 102);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:rgb(49, 63, 102);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  font-weight: bold;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background: rgb(74, 94, 150);\n}\n\nwl-button {\n  --button-border-radius\t: 0px;\n  --button-padding : 10px;\n  --button-font-size\t:10px;\n  --button-bg\t: rgb(182, 182, 182);\n  --button-bg-hover : rgb(71, 71, 71);\n}\n";
-
-var styles$e = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%;\n  font-size: 15px;\n}\n";
-
-/**
- *
- * @param {any} self
- */
-
-const template$4 = self => function () {
-  // @ts-ignore
-  const {
-    utterance,
-    utteranceTextChanged
-  } = this;
-  const {
-    text
-  } = utterance || {};
-  return html`
-    <style>
-      ${styles$e}
-    </style>
-
-    <div class="flex-area">
-      <div class="flex-1">
-        <input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">
-      </div>
-    </div>
-  `;
-}.bind(self)();
-
-/**
- *
- * @param {*} base
- */
-
-const GetUtteranceMixin = base => _decorate(null, function (_initialize, _base) {
-  class _class extends _base {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: _class,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: String
-      })],
-      key: "utteranceId",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: Object
-      })],
-      key: "utterance",
-      value: void 0
-    }, {
-      kind: "method",
-      key: "updated",
-      value: // @ts-ignore
-      // @ts-ignore
-      function updated(changedProps) {
-        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
-
-        if (changedProps.has('utteranceId')) {
-          this.getUtterance(this.utteranceId);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "getUtterance",
-      value: async function getUtterance(utteranceId) {
-        const snap = await database.ref(`utterances/data/${utteranceId}`).once('value');
-        this.utterance = snap.val() || null;
-      }
-    }]
-  };
-}, base);
-
-// @ts-ignore
-
-let ConversationalFlowUtterance = _decorate([customElement('conversational-flow-utterance')], function (_initialize, _GetUtteranceMixin) {
-  class ConversationalFlowUtterance extends _GetUtteranceMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ConversationalFlowUtterance,
-    d: [{
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$4(this);
-      }
-    }, {
-      kind: "method",
-      key: "utteranceTextChanged",
-      value: async function utteranceTextChanged(event) {
-        const {
-          target
-        } = event;
-        const {
-          value
-        } = target;
-
-        if (this.utterance.text !== value) {
-          await database.ref(`utterances/data/${this.utteranceId}/text`).set(value);
-        }
-      }
-    }]
-  };
-}, GetUtteranceMixin(LitElement));
-
-/**
- *
- * @param {any} self
- */
-
-const template$5 = self => function () {
-  // @ts-ignore
-  const {
-    topic,
-    topicNameChanged,
-    mainUtteranceId,
-    newTopic,
-    subTopic,
-    deleteTopic,
-    sub
-  } = this;
-  const {
-    name
-  } = topic || {};
-  return html`
-    <style>
-      ${styles$d}
-    </style>
-
-    <div class="flex-area ${sub ? 'sub' : ''}">
-      <div class="flex-1">
-        <input class="text-area" type="text" value="${name}" placeholder="topic" @change="${topicNameChanged.bind(this)}">
-      </div>
-
-      <div class="flex-2">
-        <conversational-flow-utterance .utteranceId="${mainUtteranceId}" ></conversational-flow-utterance>
-      </div>
-
-
-      <!-- ternary expression -->
-      ${!sub ? html`
-        <wl-button type="button" @click="${newTopic.bind(this)}">New</wl-button>
-        <wl-button type="button" @click="${subTopic.bind(this)}">Sub</wl-button>
-      ` : html`
-        <wl-button type="button" @click="${subTopic.bind(this)}">New</wl-button>
-      `}
-
-      <wl-button type="button" @click="${deleteTopic.bind(this)}">Delete</wl-button>
-    </div>
-  `;
-}.bind(self)();
-
-/**
- *
- * @param {*} base
- */
-
-const GetTopicMixin = base => _decorate(null, function (_initialize, _base) {
-  class _class extends _base {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: _class,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: String
-      })],
-      key: "topicId",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: Object
-      })],
-      key: "topic",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: String
-      })],
-      key: "mainUtteranceId",
-      value: void 0
-    }, {
-      kind: "method",
-      key: "updated",
-      value: // @ts-ignore
-      // @ts-ignore
-      // @ts-ignore
-      function updated(changedProps) {
-        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
-
-        if (changedProps.has('topicId')) {
-          this.getTopic(this.topicId);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "getTopic",
-      value: async function getTopic(topicId) {
-        const snap = await database.ref(`labels/data/${topicId}`).once('value');
-        this.topic = snap.val() || null; // console.log('here!')
-        // console.log(this.topic)
-
-        const {
-          mainUtterance,
-          utterances
-        } = this.topic;
-        let utteranceId;
-
-        for (const utterance in utterances) {
-          utteranceId = utterance;
-          break;
-        }
-
-        this.mainUtteranceId = mainUtterance || utteranceId;
-      }
-    }]
-  };
-}, base);
-
-// @ts-ignore
-
-let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topic')], function (_initialize, _GetTopicMixin) {
-  class ConversationalFlowTopic extends _GetTopicMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ConversationalFlowTopic,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: Number
-      })],
-      key: "index",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: Boolean
-      })],
-      key: "sub",
-
-      value() {
-        return false;
-      }
-
-    }, {
-      kind: "method",
-      key: "render",
-      value: // @ts-ignore
-      function render() {
-        return template$5(this);
-      }
-    }, {
-      kind: "method",
-      key: "topicNameChanged",
-      value: async function topicNameChanged(event) {
-        const {
-          target
-        } = event;
-        const {
-          value
-        } = target;
-
-        if (this.topic.name !== value) {
-          await database.ref(`labels/data/${this.topicId}/name`).set(value);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "newTopic",
-      value: function newTopic() {
-        this.createTopic();
-      }
-    }, {
-      kind: "method",
-      key: "subTopic",
-      value: function subTopic() {
-        this.createTopic(true);
-      }
-    }, {
-      kind: "method",
-      key: "createTopic",
-      value: async function createTopic(sub) {
-        const {
-          key: topicId
-        } = database.ref('labels/data').push();
-        const {
-          key: utteranceId
-        } = database.ref('utterances/data').push();
-        const {
-          domain
-        } = this.topic;
-        const updates = {};
-        const snap = await database.ref(`domains/data/${domain}`).once('value');
-        const {
-          topics
-        } = snap.val() || {
-          topics: {}
-        };
-        const array = [];
-
-        for (const topic in topics) {
-          array.push({
-            topic,
-            order: topics[topic]
-          });
-        }
-
-        const topicArray = array.sort((i, j) => i.order - j.order).map(i => i.topic);
-        const topic = {
-          domain,
-          name: 'Topic',
-          required: true,
-          mainUtterance: utteranceId,
-          utterances: {}
-        };
-        topic.utterances[utteranceId] = true;
-        const utterance = {
-          bot: true,
-          domain,
-          required: true,
-          text: 'Utterance',
-          topics: {}
-        };
-        utterance.topics[topicId] = true;
-        topicArray.splice(this.index + 1, 0, topicId);
-        const newTopics = {};
-
-        for (const i in topicArray) {
-          newTopics[topicArray[i]] = parseInt(i);
-        }
-
-        updates[`labels/data/${topicId}`] = topic;
-        updates[`utterances/data/${utteranceId}`] = utterance;
-        updates[`domains/data/${domain}/topics`] = newTopics;
-        updates[`domains/data/${domain}/subs/${topicId}`] = sub || false;
-        updates[`domains/data/${domain}/topicList/${topicId}`] = true;
-        await database.ref().update(updates);
-      }
-    }, {
-      kind: "method",
-      key: "deleteTopic",
-      value: async function deleteTopic() {
-        const {
-          topicId,
-          topic
-        } = this;
-        const {
-          domain
-        } = topic;
-        const updates = {};
-        const snap = await database.ref(`domains/data/${domain}`).once('value');
-        const {
-          topics
-        } = snap.val() || {
-          topics: {}
-        };
-        const array = [];
-
-        for (const topic in topics) {
-          array.push({
-            topic,
-            order: topics[topic]
-          });
-        }
-
-        const topicArray = array.sort((i, j) => i.order - j.order).map(i => i.topic);
-        topicArray.splice(this.index, 1);
-        const newTopics = {};
-
-        for (const i in topicArray) {
-          newTopics[topicArray[i]] = parseInt(i);
-        }
-
-        updates[`labels/data/${topicId}`] = null;
-        updates[`domains/data/${domain}/topics`] = newTopics;
-        updates[`domains/data/${domain}/topicList/${topicId}`] = null;
-        await database.ref().update(updates);
-      }
-    }]
-  };
-}, GetTopicMixin(LitElement));
-
-var styles$f = ".empty-box{\n  height: 30px;\n}\n\nh1 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
-
-/**
- *
- * @param {any} self
- */
-
-const template$6 = self => function () {
-  // @ts-ignore
-  const {
-    topics,
-    swap
-  } = this;
-  return html`
-    <style>
-      ${styles$f}
-    </style>
-
-    <h1 style="text-align: center">
-      Conversational Flow
-    </h1>
-    <div class="empty-box"></div>
-    ${topics.map((topic, index) => html`
-      <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" index="${index}"></conversational-flow-topic>
-
-      ${index !== topics.length - 1 ? html`
-        <div style="text-align: center">
-          <wl-button class="swap-button" style="text-align: center" type="button" @click="${swap.bind(this)}" index="${index}">Swap</wl-button>
-        </div>
-      ` : ''}
-    `)}
-  `;
-}.bind(self)();
-
-// @ts-ignore
-
-let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], function (_initialize, _GetDomainMixin) {
-  class ProtobotAuthoring extends _GetDomainMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotAuthoring,
-    d: [{
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$6(this);
-      }
-    }, {
-      kind: "method",
-      key: "domainChanged",
-      value: async function domainChanged(domain) {
-        if (!domain) {
-          window.location.href = '/';
-        } else {
-          const {
-            deployed
-          } = domain;
-
-          if (deployed) {
-            const updates = {};
-            updates[`last-deployed/data/${this.domainId}/`] = domain;
-            updates[`domains/data/${this.domainId}/deployed`] = false;
-            await database.ref().update(updates);
-          }
-        } // if there is a domain...
-
-      }
-    }, {
-      kind: "method",
-      key: "swap",
-      value: async function swap(event) {
-        const {
-          target
-        } = event;
-        const updates = {};
-        const index = parseInt(target.getAttribute('index'));
-        const next = index + 1;
-        let swap1 = null;
-        let swap2 = null;
-
-        for (const i in this.domain.topics) {
-          if (this.domain.topics[i] === index) {
-            swap1 = i;
-          }
-
-          if (this.domain.topics[i] === next) {
-            swap2 = i;
-          }
-        }
-
-        if (swap1 && swap2) {
-          this.domain.topics[swap1] = next;
-          this.domain.topics[swap2] = index;
-        }
-
-        updates[`domains/data/${this.domainId}/topics`] = this.domain.topics;
-        await database.ref().update(updates);
-      }
-    }]
-  };
-}, GetDomainMixin(LitElement));
-
-var styles$g = ".flex-area {\n  display: flex;\n\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n}\n";
-
-/**
- *
- * @param {any} self
- */
-
-const template$7 = self => function () {
-  // @ts-ignore
-  const {
-    topic
-  } = this;
-  const {
-    name
-  } = topic || {};
-  return html`
-    <style>
-      ${styles$g}
-    </style>
-
-    ${name}
-  `;
-}.bind(self)();
-
-// @ts-ignore
-
-let TopicListItem = _decorate([customElement('topic-list-item')], function (_initialize, _GetTopicMixin) {
-  class TopicListItem extends _GetTopicMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: TopicListItem,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: Number
-      })],
-      key: "index",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: Boolean
-      })],
-      key: "sub",
-
-      value() {
-        return false;
-      }
-
-    }, {
-      kind: "method",
-      key: "render",
-      value: // @ts-ignore
-      function render() {
-        return template$7(this);
-      }
-    }, {
-      kind: "method",
-      key: "topicNameChanged",
-      value: async function topicNameChanged(event) {
-        const {
-          target
-        } = event;
-        const {
-          value
-        } = target;
-
-        if (this.topic.name !== value) {
-          await database.ref(`labels/data/${this.topicId}/name`).set(value);
-        }
-      }
-    }]
-  };
-}, GetTopicMixin(LitElement));
-
-var styles$h = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
-
-/**
- *
- * @param {any} self
- */
-
-const template$8 = self => function () {
-  // @ts-ignore
-  const {
-    topics,
-    deploy,
-    domain,
-    handleCommitMsg
-  } = this;
-  const {
-    commitMessage
-  } = domain;
-  return html`
-    <style>
-      ${styles$h}
-    </style>
-    <h3>Current topic list</h3>
-
-    <ul class ="topic-list">
-    ${topics.map(topic => html`
-      <li>
-        <topic-list-item class="item" topicId="${topic.id}">
-        </topic-list-item>
-      </li>
-    `)}
-    </ul>
-
-    <div>
-      <h3>Leave Message Here</h3>
-      <wl-textarea outlined
-        class = "commit-input"
-        value="${commitMessage}"
-        @change="${handleCommitMsg.bind(this)}"
-        @submit="${deploy.bind(this)}">
-      </wl-textarea outlined>
-    </div>
-
-    <div class="button-container">
-      <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button>
-    </div>
-  `;
-}.bind(self)();
-
-// @ts-ignore
-
-let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-sidebar')], function (_initialize, _GetDomainMixin) {
-  class ProtobotAuthoringSidebar extends _GetDomainMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotAuthoringSidebar,
-    d: [{
-      kind: "field",
-      decorators: [property()],
-      key: "commitMessage",
-      value: void 0
-    }, {
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$8(this);
-      }
-    }, {
-      kind: "method",
-      key: "handleCommitMsg",
-      value: async function handleCommitMsg(event) {
-        const {
-          target
-        } = event;
-        const {
-          value
-        } = target;
-        const updates = {};
-        updates[`domains/data/${this.domainId}/commitMessage`] = value || '';
-        await database.ref().update(updates);
-      }
-    }, {
-      kind: "method",
-      key: "deploy",
-      value: async function deploy() {
-        const updates = {};
-        const {
-          domain
-        } = this;
-        const {
-          commitMessage
-        } = domain;
-        const {
-          key: deployedVersion
-        } = database.ref(`deployed-history/data/${this.domainId}/`).push();
-        updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
-          deployedVersion,
-          commitMessage: commitMessage || ''
-        };
-        updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
-          deployedVersion,
-          commitMessage: commitMessage || ''
-        };
-        updates[`domains/data/${this.domainId}/deployed`] = false;
-        updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
-        updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
-        await database.ref().update(updates);
-      }
-    }]
-  };
-}, GetDomainMixin(LitElement));
-
-var styles$i = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
-
-var styles$j = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n.utterance{\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
-
-// import '@polymer/paper-item/paper-item.js';
-// import '@polymer/paper-listbox/paper-listbox.js';
-// import '@vaadin/vaadin-button';
-
-/**
- *
- * @param {any} self
- */
-
-const template$9 = self => function () {
-  // @ts-ignore
-  const {
-    utterance,
-    topics,
-    selectedTopic,
-    gettingTopic,
-    textInputVisible,
-    appendTopic
-  } = this;
-  const {
-    text,
-    bot,
-    topics: utteranceTopics
-  } = utterance || {};
-  return html`
-    <style>
-      ${styles$j}
-      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
-    </style>
-
-    ${utterance ? html`
-      <div class="feed ${!bot ? 'feed__right' : ''}">
-        <div>
-          <div class="label">${bot ? 'Bot' : 'User'}</div>
-          <div class ="utterance ${!bot ? 'utterance__right' : ''}"> ${text}</div>
-          <!-- <div>
-            ${utteranceTopics ? Object.keys(utteranceTopics).map(item => html`
-              <span>${until(gettingTopic(item), 'Loading...')}</span>
-            `) : ''}
-          </div> -->
-
-          <div class="select-container ${!bot ? 'select-container__right' : ''}">
-            <div class = "select-topic">
-              <select class="select-box" placeholder="Topic" @change=${selectedTopic.bind(this)}>
-                <option value="none">Choose the topic</option>
-                ${topics ? topics.map(item => html`<option value="${item.id}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
-                <option value="new-topic">New Topic</option>
-              </select>
-            </div>
-            ${textInputVisible ? html`
-              <div class="new-topic-input">
-                <input type="text" class="input-box" value="new label" @change=${appendTopic.bind(this)}>
-              </div>
-              ` : ''}
-          </div>
-        </div>
-      </div>
-    ` : ''}
-
-  `;
-}.bind(self)();
-/**
- * <select @change=${selectedTopic.bind(this)}>
-            ${topics ? topics.map(item => html`<option value="${item.id}">${item.id}</option>`) : ''}
-            <option value="new-topic">New Topic</option>
-          </select>
- */
-// theme= "${bot ? 'contrast' : ''} primary"
-
-// @ts-ignore
-
-let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], function (_initialize, _GetUtteranceMixin) {
-  class UtteranceReviewItem extends _GetUtteranceMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: UtteranceReviewItem,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: Boolean
-      })],
-      key: "textInputVisible",
-
-      value() {
-        return false;
-      }
-
-    }, {
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$9(this);
-      }
-    }, {
-      kind: "method",
-      key: "selectedTopic",
-      value: async function selectedTopic({
-        target
-      }) {
-        const {
-          value
-        } = target;
-        const {
-          utteranceId,
-          utterance
-        } = this;
-        const {
-          domain
-        } = utterance;
-        const updates = {};
-        this.textInputVisible = false;
-
-        if (value === 'new-topic') {
-          this.textInputVisible = true;
-          return;
-        } // topic.utterances[utteranceId] = true;
-
-
-        utterance.topics[value] = true;
-        updates[`labels/data/${value}/utterances/${utteranceId}`] = true;
-        updates[`utterances/data/${utteranceId}`] = utterance;
-        updates[`domains/data/${domain}/topicList/${value}`] = true;
-        await database.ref().update(updates);
-      }
-    }, {
-      kind: "method",
-      key: "appendTopic",
-      value: async function appendTopic(event) {
-        const {
-          target
-        } = event;
-        const {
-          value: name
-        } = target;
-        const {
-          utteranceId,
-          utterance
-        } = this;
-        const {
-          domain
-        } = utterance;
-        const updates = {};
-
-        if (name && name !== 'new label') {
-          const {
-            key: topicId
-          } = database.ref('labels/data').push();
-          const topic = {
-            domain,
-            name,
-            required: false,
-            mainUtterance: utteranceId,
-            utterances: {}
-          };
-          topic.utterances[utteranceId] = true;
-          utterance.topics[topicId] = true;
-          updates[`labels/data/${topicId}`] = topic;
-          updates[`utterances/data/${utteranceId}`] = utterance;
-          updates[`domains/data/${domain}/topicList/${topicId}`] = true;
-          await database.ref().update(updates);
-        }
-      }
-      /**
-       *
-       * @param {String} id
-       */
-
-    }, {
-      kind: "method",
-      key: "gettingTopic",
-      value: async function gettingTopic(id) {
-        return (await database.ref(`labels/data/${id}/name`).once('value')).val();
-      }
-    }]
-  };
-}, GetUtteranceMixin(GetDomainMixin(LitElement)));
-
-/**
- *
- * @param {any} self
- */
-
-const template$a = self => function () {
-  // @ts-ignore
-  const {
-    crowdId,
-    topics,
-    utterances,
-    gettingCrowdId
-  } = this; // console.log(topics);
-  // const t = [];
-  // for (const i in topics) {
-  //   t.push(html`<vaadin-item>${topics[i].id}</vaadin-item>`);
-  // }
-
-  return html`
-    <style>
-      ${styles$i}
-      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
-    </style>
-
-    <h1>Micro Review</h1>
-    <!-- <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3> -->
-    <h3>Crowd name: ${until(gettingCrowdId(crowdId))}</h3>
-
-    <br>
-
-    ${utterances && utterances.length ? utterances.map(item => html`
-      <utterance-review-item .utteranceId="${item.id}"></utterance-review-item>
-    `) : ''}
-  `;
-}.bind(self)(); // ${[ t[0], t[1], t[2], t[3], t[4], t[5] ].map(item => html`<vaadin-item>${item.id}</vaadin-item>`)}
-
-/**
- *
- * @param {*} base
- */
-
-const GetDomainUtterancesMixin = base => _decorate(null, function (_initialize, _GetPathMixin) {
-  class _class extends _GetPathMixin {
-    // @ts-ignore
-    // @ts-ignore
-    // @ts-ignore
-    constructor() {
-      super();
-
-      _initialize(this);
-
-      this.boundSaveDomainUtterances = this.saveDomainUtterances.bind(this);
-    }
-
-  }
-
-  return {
-    F: _class,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: String
-      })],
-      key: "setId",
-
-      value() {
-        return '';
-      }
-
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: String
-      })],
-      key: "crowdId",
-
-      value() {
-        return '';
-      }
-
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: Array
-      })],
-      key: "utterances",
-
-      value() {
-        return [];
-      }
-
-    }, {
-      kind: "method",
-      key: "connectedCallback",
-      value: function connectedCallback() {
-        _get(_getPrototypeOf(_class.prototype), "connectedCallback", this).call(this); // @ts-ignore
-
-
-        const {
-          domain,
-          crowdId,
-          set,
-          page
-        } = this.queryObject || {
-          domain: null,
-          crowdId: null
-        };
-
-        if (!crowdId) {
-          window.location.href = `/?page=${page || 'micro'}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
-          return;
-        }
-
-        if (domain) {
-          this.getDomainUtterances(domain, crowdId, set);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "disconnectedCallback",
-      value: function disconnectedCallback() {
-        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
-          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
-        }
-
-        this.disconnectRef();
-      }
-    }, {
-      kind: "method",
-      key: "disconnectRef",
-      value: function disconnectRef() {
-        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
-
-        if (this.domainUtterancesRef) {
-          this.domainUtterancesRef.off('value', this.boundSaveDomainUtterances);
-        }
-      }
-      /**
-       *
-       * @param {String} id
-       */
-
-    }, {
-      kind: "method",
-      key: "getDomainUtterances",
-      value: function getDomainUtterances(id, crowdId, set = '1') {
-        this.disconnectRef(); // console.log(id, crowdId);
-
-        this.crowdId = crowdId;
-        this.setId = set;
-
-        if (id && crowdId && set) {
-          this.domainUtterancesRef = database.ref(`users/lists/domain-utterances/${crowdId}/${id}/${set}`);
-          this.domainUtterancesRef.on('value', this.boundSaveDomainUtterances);
-        } else {
-          console.log('No values for id-crowdId: ', id, crowdId);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "saveDomainUtterances",
-      value: function saveDomainUtterances(snap) {
-        const data = snap.val() || null; // console.log(data);
-
-        const array = [];
-
-        if (data) {
-          for (const utterance in data) {
-            array.push({
-              utterance,
-              order: data[utterance]
-            });
-          }
-
-          this.utterances = array.sort((i, j) => i.order - j.order).map(i => ({
-            id: i.utterance
-          }));
-          this.domainUtterancesChanged(this.utterances);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "domainUtterancesChanged",
-      value: function domainUtterancesChanged(data) {}
-    }]
-  };
-}, GetPathMixin(base));
-
-// Extend the LitElement base class
-// @ts-ignore
-
-let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_initialize, _GetDomainUtterancesM) {
-  class ProtobotMicro extends _GetDomainUtterancesM {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotMicro,
-    d: [{
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$a(this);
-      }
-      /**
-       *
-       * @param {String} id
-       */
-
-    }, {
-      kind: "method",
-      key: "gettingCrowdId",
-      value: async function gettingCrowdId(id) {
-        // console.log("here", id);
-        return (await database.ref(`users/data/${id}/name`).once('value')).val();
-      } // async createTopic (sub) {
-      //   const { key: topicId } = database.ref('labels/data').push();
-      //   const { key: utteranceId } = database.ref('utterances/data').push();
-      //   const { domain } = this.topic;
-      //   const updates = {};
-      //   const snap = await database.ref(`domains/data/${domain}`).once('value');
-      //   const { topics } = snap.val() || { topics: {} };
-      //   const array = [];
-      //   for (const topic in topics) {
-      //     array.push({ topic, order: topics[topic] });
-      //   }
-      //   const topicArray = array.sort((i, j) => (i.order - j.order)).map(i => i.topic);
-      //   const topic = {
-      //     domain,
-      //     name: 'Topic',
-      //     required: true,
-      //     mainUtterance: utteranceId,
-      //     utterances: {}
-      //   };
-      //   topic.utterances[utteranceId] = true;
-      //   const utterance = {
-      //     bot: true,
-      //     domain,
-      //     required: true,
-      //     text: 'Utterance',
-      //     topics: {}
-      //   };
-      //   utterance.topics[topicId] = true;
-      //   topicArray.splice(this.index + 1, 0, topicId);
-      //   const newTopics = {};
-      //   for (const i in topicArray) {
-      //     newTopics[topicArray[i]] = parseInt(i);
-      //   }
-      //   updates[`labels/data/${topicId}`] = topic;
-      //   updates[`utterances/data/${utteranceId}`] = utterance;
-      //   updates[`domains/data/${domain}/topics`] = newTopics;
-      //   updates[`domains/data/${domain}/subs/${topicId}`] = sub || false;
-      //   updates[`domains/data/${domain}/topicList/${topicId}`] = true;
-      //   await database.ref().update(updates);
-      // }
-
-    }]
-  };
-}, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
-
-var styles$k = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n.link:hover {\n  stroke-opacity: .5;\n}\n";
-
-/**
- *
- * @param {any} self
- */
-
-const template$b = self => function () {
-
-  return html`
-    <style>
-      ${styles$k}
-      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
-    </style>
-
-    <h1>Macro Review</h1>
-    <br>
-
-
-    <div class="sankey"></div>
-  `;
-}.bind(self)();
-
-/**
- *
- * @param {*} base
- */
-
-const GetTreeStructureMixin = base => _decorate(null, function (_initialize, _GetDomainMixin) {
-  class _class extends _GetDomainMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: _class,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: Object
-      })],
-      key: "tree",
-      value: void 0
-    }, {
-      kind: "method",
-      key: "updated",
-      value: // @ts-ignore
-      function updated(changedProps) {
-        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
-
-        if (changedProps.has('domainId')) {
-          this.getTreeStructure(this.domainId);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "getTreeStructure",
-      value: async function getTreeStructure(domainId) {
-        console.log(domainId);
-        const snap = await database.ref('tree-structure/data/').orderByChild('domain').equalTo(domainId) // .limitToFirst(10)
-        .once('value');
-        this.tree = snap.val() || null;
-        this.treeChanged(this.tree);
-      }
-    }, {
-      kind: "method",
-      key: "treeChanged",
-      value: function treeChanged(tree) {}
-    }]
-  };
-}, GetDomainMixin(base));
-
-/* googleCharts.js Version: 1.5.0 Built On: 2018-12-30 */
-const loadScript = Symbol('loadScript');
-const instance = Symbol('instance');
-
-let _instance;
-
-class GoogleChartsManager {
-  get [instance]() {
-    return _instance;
-  }
-
-  set [instance](value) {
-    _instance = value;
-  }
-
-  constructor() {
-    if (this[instance]) {
-      return this[instance];
-    }
-
-    this[instance] = this;
-  }
-
-  reset() {
-    _instance = null;
-  }
-
-  [loadScript]() {
-    if (!this.scriptPromise) {
-      this.scriptPromise = new Promise(resolve => {
-        const body = document.getElementsByTagName('body')[0];
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-
-        script.onload = function () {
-          GoogleCharts.api = window.google;
-          GoogleCharts.api.charts.load('current', {
-            packages: ['corechart', 'table']
-          });
-          GoogleCharts.api.charts.setOnLoadCallback(() => {
-            resolve();
-          });
-        };
-
-        script.src = 'https://www.gstatic.com/charts/loader.js';
-        body.appendChild(script);
-      });
-    }
-
-    return this.scriptPromise;
-  }
-
-  load(callback, type) {
-    return this[loadScript]().then(() => {
-      if (type) {
-        let config = {};
-
-        if (type instanceof Object) {
-          config = type;
-        } else if (Array.isArray(type)) {
-          config = {
-            packages: type
-          };
-        } else {
-          config = {
-            packages: [type]
-          };
-        }
-
-        this.api.charts.load('current', config);
-        this.api.charts.setOnLoadCallback(callback);
-      } else {
-        if (typeof callback != 'function') {
-          throw 'callback must be a function';
-        } else {
-          callback();
-        }
-      }
-    });
-  }
-
-}
-
-const GoogleCharts = new GoogleChartsManager();
-
-// import { d3sankey } from './sankey';
-// import { sankey as d3sankey } from 'd3-sankey';
-// import 'd3-sankey';
-// import { database } from '../../../firebase';
-// Extend the LitElement base class
-// @ts-ignore
-
-let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_initialize, _GetTreeStructureMixi) {
-  class ProtobotMacro extends _GetTreeStructureMixi {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotMacro,
-    d: [{
-      kind: "method",
-      key: "treeChanged",
-      value: function treeChanged(tree) {
-        if (tree) {
-          console.log(this.tree); // this.setSankey(this.tree);
-          // Load the charts library with a callback
-
-          GoogleCharts.load(this.drawChart.bind(this, tree), {
-            packages: ['sankey']
-          });
-        }
-      }
-    }, {
-      kind: "method",
-      key: "drawChart",
-      value: function drawChart(tree) {
-        const data = new GoogleCharts.api.visualization.DataTable();
-        data.addColumn('string', 'From');
-        data.addColumn('string', 'To');
-        data.addColumn('number', 'Weight');
-        const rows = []; // const { tree } = this;
-
-        console.log(tree);
-
-        if (tree) {
-          for (const i in tree) {
-            const row = [i];
-
-            for (const j in tree[i].children) {
-              row.push(j); // @ts-ignore
-
-              row.push(Object.keys(tree[i].utterances).length);
-            }
-
-            if (row.length === 3) {
-              rows.push(row);
-            }
-          }
-
-          data.addRows(rows);
-          const options = {
-            width: 600,
-            sankey: {
-              node: {
-                interactivity: true
-              }
-            }
-          };
-          const chart = new GoogleCharts.api.visualization.Sankey(this.shadowRoot.querySelector('.sankey'));
-          chart.draw(data, options);
-          GoogleCharts.api.visualization.events.addListener(chart, 'select', this.selectHandler.bind(this));
-        }
-
-        console.log(this.tree);
-      }
-    }, {
-      kind: "method",
-      key: "selectHandler",
-      value: function selectHandler(e) {
-        console.log(e);
-      } // async setSankey (tree) {
-      //   const margin = { top: 10, right: 10, bottom: 10, left: 10 };
-      //   const width = this.getBoundingClientRect().width - margin.left - margin.right;
-      //   const height = 480 - margin.top - margin.bottom;
-      //   const x = this.shadowRoot.querySelector('.sankey');
-      //   if (x) {
-      //     x.innerHTML = '';
-      //   }
-      //   const svg = d3.select(this.shadowRoot).select('.sankey').append('svg')
-      //     .attr('width', '100vw')
-      //     .attr('height', '100vh')
-      //     .append('g')
-      //     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-      //   const color = d3.scaleOrdinal([
-      //     '#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#e6550d',
-      //     '#fd8d3c', '#fdae6b', '#fdd0a2', '#31a354', '#74c476',
-      //     '#a1d99b', '#c7e9c0', '#756bb1', '#9e9ac8', '#bcbddc',
-      //     '#dadaeb', '#636363', '#969696', '#bdbdbd', '#d9d9d9']);
-      //   const sankey = d3sankey()
-      //     .nodeWidth(36)
-      //     // @ts-ignore
-      //     .nodePadding(290)
-      //     .size([this.getBoundingClientRect().width, this.getBoundingClientRect().height]);
-      //   const graph = await d3.json('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_sankey.json');
-      //   // console.log(d3.json)
-      //   // console.log(graph);
-      //   const g = { nodes: [], links: [] };
-      //   let count = 0;
-      //   for (const i in tree) {
-      //     const node = {
-      //       node: count,
-      //       name: i
-      //     };
-      //     count++;
-      //     // @ts-ignore
-      //     g.nodes.push(node);
-      //   }
-      //   for (const i in tree) {
-      //     for (const j in tree[i].children) {
-      //       // @ts-ignore
-      //       const index = g.nodes.findIndex(item => item.name === i);
-      //       // @ts-ignore
-      //       const c = index > -1 ? g.nodes[index].node : null;
-      //       // @ts-ignore
-      //       const targetIndex = g.nodes.findIndex(item => item.name === j);
-      //       // @ts-ignore
-      //       const targetC = targetIndex > -1 ? g.nodes[targetIndex].node : null;
-      //       if (c && targetC) {
-      //         const link = {
-      //           source: c,
-      //           target: targetC,
-      //           value: Object.keys(tree[i].utterances).length
-      //         };
-      //         // @ts-ignore
-      //         g.links.push(link);
-      //       }
-      //     }
-      //   }
-      //   console.log(g)
-      //   // Constructs a new Sankey generator with the default settings.
-      //   sankey
-      //     .nodes(g.nodes)
-      //     .links(g.links)
-      //     .layout(1);
-      //   // add in the links
-      //   const link = svg.append('g')
-      //     .selectAll('.link')
-      //     .data(g.links)
-      //     .enter()
-      //     .append('path')
-      //     .attr('class', 'link')
-      //     .attr('d', sankey.link())
-      //     .style('stroke-width', function (d) { return Math.max(1, d.dy); })
-      //     .sort(function (a, b) { return b.dy - a.dy; });
-      //   // console.log(link);
-      //   // add in the nodes
-      //   const node = svg.append('g')
-      //     .selectAll('.node')
-      //     .data(g.nodes)
-      //     .enter().append('g')
-      //     .attr('class', 'node')
-      //     .attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; })
-      //     .call(d3.drag()
-      //       .subject(function (d) { return d; })
-      //       .on('start', function () { this.parentNode.appendChild(this); })
-      //       .on('drag', dragmove));
-      //   console.log(color);
-      //   // add the rectangles for the nodes
-      //   node
-      //     .append('rect')
-      //     .attr('height', function (d) { return d.dy; })
-      //     .attr('width', sankey.nodeWidth())
-      //     .style('fill', function (d) {
-      //       return color(d.name.replace(/ .*/, ''));
-      //     })
-      //     .style('stroke', function (d) { return d3.rgb(d.color).darker(2); })
-      //     // Add hover text
-      //     .append('title')
-      //     .text(function (d) { return d.name + '\n' + 'There is ' + d.value + ' stuff in this node'; });
-      //   // add in the title for the nodes
-      //   node
-      //     .append('text')
-      //     .attr('x', -6)
-      //     .attr('y', function (d) { return d.dy / 2; })
-      //     .attr('dy', '.35em')
-      //     .attr('text-anchor', 'end')
-      //     .attr('transform', null)
-      //     .text(function (d) { return d.name; })
-      //     .filter(function (d) { return d.x < width / 2; })
-      //     .attr('x', 6 + sankey.nodeWidth())
-      //     .attr('text-anchor', 'start');
-      //   // the function for moving the nodes
-      //   function dragmove (d) {
-      //     d3.select(this)
-      //       .attr('transform',
-      //         'translate(' +
-      //           d.x + ',' +
-      //           (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ')');
-      //     sankey.relayout();
-      //     link.attr('d', sankey.link());
-      //   }
-      // }
-
-    }, {
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$b(this);
-      }
-    }]
-  };
-}, GetTreeStructureMixin(LitElement));
-
-var styles$l = "";
-
-/**
- *
- * @param {any} self
- */
-
-const template$c = self => function () {
-  // @ts-ignore
-  // const { topic } = this;
-  console.log(this);
-  return html`
-    <style>
-      ${styles$l}
-    </style>
-
-    History
-  `;
-}.bind(self)();
-
-// Extend the LitElement base class
-// @ts-ignore
-
-let ProtobotHistory = _decorate([customElement('protobot-history')], function (_initialize, _GetDomainMixin) {
-  class ProtobotHistory extends _GetDomainMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotHistory,
-    d: [{
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$c(this);
-      }
-    }]
-  };
-}, GetDomainMixin(LitElement));
-
-var styles$m = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
-
-/**
- *
- * @param {any} self
- */
-
-const template$d = self => function () {
-  // @ts-ignore
-  const {
-    topics,
-    save,
-    addMemo,
-    memos,
-    domain
-  } = this;
-  const {
-    domainVersion: dv
-  } = domain;
-  const {
-    page: pageId,
-    crowdId: crowd
-  } = this.queryObject || {
-    page: null
-  };
-  return html`
-    <style>
-      ${styles$m}
-      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
-    </style>
-
-    <div class = "instruction">
-      <h3>Instruction</h3>
-      <p>In Macro Review, you can explore the whole conversation flows which are followed and prototyped by crowds.</p>
-    </div>
-    <br>
-    <h3>Current Topic List</h3>
-    <ul class ="topic-list">
-    ${topics.map(topic => html`
-      <li>
-        <topic-list-item class="item" topicId="${topic.id}">
-        </topic-list-item>
-      </li>
-    `)}
-    </ul>
-    <br>
-    <br>
-    ${memos.map(({
-    page,
-    crowdId,
-    memoId,
-    deployedVersion
-  }) => page === pageId && crowdId === crowd && deployedVersion === dv ? html`
-      <protobot-memo .memoId="${memoId}"></protobot-memo>
-    ` : '')}
-    <div class="add-container">
-      <button class="add-button" @click="${addMemo.bind(this)}">+</button>
-    </div>
-    <!-- <div class="button-container">
-      <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
-        Done with Labeling
-      </vaadin-button>
-    </div> -->
-
-
-  `;
-}.bind(self)();
-
-// Extend the LitElement base class
-// @ts-ignore
-
-let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], function (_initialize, _GetDomainMemosMixin) {
-  class ProtobotMacroSidebar extends _GetDomainMemosMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotMacroSidebar,
-    d: [{
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$d(this);
-      }
-    }, {
-      kind: "method",
-      key: "save",
-      value: function save() {}
-    }, {
-      kind: "method",
-      key: "addMemo",
-      value: async function addMemo() {
-        const updates = {};
-        const {
-          key: memoId
-        } = database.ref('memos/data').push();
-        const {
-          page,
-          crowdId
-        } = this.queryObject || {
-          page: null
-        };
-        const {
-          deployedVersion
-        } = this.domain;
-        const memo = {
-          text: '',
-          domainId: this.domainId,
-          crowdId: crowdId || null,
-          // can be null
-          page,
-          deployedVersion: deployedVersion || null
-        }; // console.log(this.memos)
-
-        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = {
-          page,
-          crowdId: crowdId || null,
-          deployedVersion: deployedVersion || null
-        };
-
-        if (crowdId) {
-          updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;
-        }
-
-        updates[`memos/data/${memoId}`] = memo; // this saves the memo in db
-
-        await database.ref().update(updates);
-      }
-    }]
-  };
-}, GetDomainMemosMixin(LitElement));
-
-var styles$n = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
-
-/**
- *
- * @param {any} self
- */
-
-const template$e = self => function () {
-  // @ts-ignore
-  const {
-    topics,
-    save,
-    addMemo,
-    memos,
-    domain
-  } = this;
-  const {
-    queryObject
-  } = this;
-  const {
-    deployedVersion: dv
-  } = domain;
-  const {
-    page: pageId,
-    crowdId: crowd
-  } = queryObject;
-  return html`
-    <style>
-      ${styles$n}
-      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
-      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
-    </style>
-
-    <div class = "instruction">
-      <h3>Instruction</h3>
-      <p>In this stage, you can label the topic for each utterance.
-        Please click the select-box to label the topic.</p>
-    </div>
-    <br>
-    <h3>Current Topic List</h3>
-    <ul class ="topic-list">
-    ${topics.map(topic => html`
-      <li>
-        <topic-list-item class="item" .topicId="${topic.id}">
-        </topic-list-item>
-      </li>
-    `)}
-    </ul>
-    <br>
-    <br>
-    ${memos.map(({
-    page,
-    crowdId,
-    memoId,
-    deployedVersion
-  }) => page === pageId && crowdId === crowd && deployedVersion === dv ? html`
-      <protobot-memo .memoId="${memoId}"></protobot-memo>
-    ` : '')}
-    <div class="add-container">
-      <button class="add-button" @click="${addMemo.bind(this)}">+</button>
-    </div>
-    <!-- <div class="button-container">
-      <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
-        Done with Labeling
-      </vaadin-button>
-    </div> -->
-  `;
-}.bind(self)();
-
-// Extend the LitElement base class
-// @ts-ignore
-
-let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], function (_initialize, _GetDomainMemosMixin) {
-  class ProtobotMicroSidebar extends _GetDomainMemosMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotMicroSidebar,
-    d: [{
-      kind: "method",
-      key: "render",
-      value: // @property({ type: Array })
-      // memos = [''];
-      function render() {
-        return template$e(this);
-      }
-    }, {
-      kind: "method",
-      key: "save",
-      value: function save() {}
-    }, {
-      kind: "method",
-      key: "addMemo",
-      value: async function addMemo() {
-        const updates = {};
-        const {
-          key: memoId
-        } = database.ref('memos/data').push();
-        const {
-          page,
-          crowdId
-        } = this.queryObject || {
-          page: null
-        };
-        const {
-          deployedVersion
-        } = this.domain;
-        const memo = {
-          text: '',
-          domainId: this.domainId,
-          crowdId: crowdId || null,
-          // can be null
-          page,
-          deployedVersion: deployedVersion || null
-        }; // console.log(this.memos)
-
-        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = {
-          page,
-          crowdId: crowdId || null,
-          deployedVersion: deployedVersion || null
-        };
-
-        if (crowdId) {
-          updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;
-        }
-
-        updates[`memos/data/${memoId}`] = memo; // this saves the memo in db
-
-        await database.ref().update(updates);
-      } // async save () {
-      //   const updates = {};
-      //   // updates[`last-deployed/data/${this.domainId}/`] = this.domain;
-      //   // updates[`domains/data/${this.domainId}/deployed`] = false;
-      //   // await database.ref().update(updates);
-      // }
-      // async addMemo (event) {
-      //   const { target } = event;
-      //   const { value } = target;
-      //   this.memos.push('');
-      //   this.requestUpdate();
-      //   // console.log(this.memos)
-      // }
-      // async updateMemo (idx, { detail: value }) {
-      //   this.memos[idx] = value;
-      //   console.log(this.memos);
-      // }
-
-    }]
-  };
-}, GetDomainMemosMixin(LitElement));
-
-var styles$o = "";
-
-var styles$p = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
-
-var styles$q = ``;
-
-var SwitchBehaviorEvent;
-
-(function (SwitchBehaviorEvent) {
-  SwitchBehaviorEvent['CHANGE'] = 'change';
-})(SwitchBehaviorEvent || (SwitchBehaviorEvent = {}));
-
-class SwitchBehavior extends FormElementBehavior {
-  constructor() {
-    super(...arguments);
-    this.checked = false;
-    this.ariaChecked = this.checked.toString();
-    this.role = 'checkbox';
-    this.formElementType = 'checkbox';
-  }
-
-  firstUpdated(props) {
-    super.firstUpdated(props);
-    this.onClick = this.onClick.bind(this);
-    this.onKeyDown = this.onKeyDown.bind(this);
-    this.attachListeners();
-  }
-
-  updated(props) {
-    super.updated(props);
-    this.updateAria(props);
-  }
-
-  updateAria(props) {
-    if (props.has('checked')) {
-      this.ariaChecked = this.checked.toString();
-    }
-  }
-
-  attachListeners() {
-    this.listeners.push(addListener(this, 'click', this.onClick.bind(this)), addListener(this, 'keydown', this.onKeyDown.bind(this)));
-  }
-
-  onClick(e) {
-    if (this.disabled) {
-      stopEvent(e);
-      return;
-    }
-
-    this.toggle();
-  }
-
-  toggle() {
-    this.checked = !this.checked;
-    this.dispatchChangeEvent();
-  }
-
-  dispatchChangeEvent() {
-    requestAnimationFrame(() => {
-      this.dispatchEvent(new CustomEvent(SwitchBehaviorEvent.CHANGE, {
-        composed: true,
-        bubbles: true
-      }));
-    });
-  }
-
-  onKeyDown(e) {
-    if (e.code === SPACE || e.code === ENTER) {
-      this.click();
-      stopEvent(e);
-    }
-  }
-
-  renderFormElement() {
-    return html` <input style="display: none;" id="${this.formElementId}" type="${this.formElementType}" ?checked="${this.checked}" ?required="${this.required}" ?disabled="${this.disabled}" ?readonly="${this.readonly}" .value="${ifDefined(this.value)}" name="${ifDefined(this.name)}" aria-hidden="true" tabindex="-1"> `;
-  }
-
-}
-
-SwitchBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$q)];
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], SwitchBehavior.prototype, 'checked', void 0);
-
-__decorate([property({
-  type: String,
-  reflect: true,
-  attribute: 'aria-checked'
-}), __metadata('design:type', String)], SwitchBehavior.prototype, 'ariaChecked', void 0);
-
-__decorate([property({
-  type: String,
-  reflect: true
-}), __metadata('design:type', String)], SwitchBehavior.prototype, 'role', void 0);
-
-var styles$r = ``;
-
-class CheckboxBehavior extends SwitchBehavior {
-  constructor() {
-    super(...arguments);
-    this.indeterminate = false;
-  }
-
-  toggle() {
-    if (this.indeterminate) {
-      this.indeterminate = false;
-    }
-
-    this.checked = !this.checked;
-    this.dispatchChangeEvent();
-  }
-
-  updateAria(props) {
-    if (props.has('checked') || props.has('indeterminate')) {
-      this.ariaChecked = this.indeterminate ? `mixed` : this.checked.toString();
-    }
-  }
-
-}
-
-CheckboxBehavior.styles = [...SwitchBehavior.styles, cssResult(styles$r)];
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], CheckboxBehavior.prototype, 'indeterminate', void 0);
-
-var styles$s = `:host{--_checkbox-bg:var(--checkbox-bg,transparent);--_checkbox-color:var(--checkbox-color,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))));background:var(--_checkbox-bg);color:var(--_checkbox-color);width:var(--checkbox-size,1.25rem);height:var(--checkbox-size,1.25rem);border:var(--checkbox-border-config,.125rem solid) currentColor;border-radius:var(--checkbox-border-radius,.375rem);transition:var(--checkbox-transition,background var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)),border-color var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));position:relative;display:inline-flex;align-items:center;justify-content:center;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([disabled])){cursor:pointer}:host([checked]),:host([indeterminate]){--_checkbox-bg:var(--checkbox-bg-checked,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_checkbox-color:var(--checkbox-color-checked,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))))}:host([checked]:not([indeterminate])) #checkmark-path,:host([indeterminate]) #indeterminate-path{stroke-dashoffset:0}:host(:focus),:host(:hover){will-change:border,background}:host(:focus) #checkmark-path,:host(:hover) #checkmark-path{will-change:stroke-dashoffset}:host([disabled]){--_checkbox-bg:var(--checkbox-bg-disabled,transparent);--_checkbox-color:var(--checkbox-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));pointer-events:none}:host([disabled][checked]),:host([disabled][indeterminate]){--_checkbox-bg:var(--checkbox-bg-disabled-checked,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))));--_checkbox-color:var(--checkbox-color-disabled-checked,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))))}#checkmark{width:var(--checkbox-checkmark-size,.75rem);height:var(--checkbox-checkmark-size,.75rem)}#checkmark-path,#indeterminate-path{stroke-width:var(--checkbox-checkmark-path-width,.1875rem);stroke:var(--checkbox-checkmark-stroke-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));stroke-dasharray:var(--checkbox-checkmark-path-dasharray,30);stroke-dashoffset:var(--checkbox-checkmark-path-dasharray,30);transition:var(--checkbox-checkmark-transition,stroke-dashoffset var(--transition-duration-medium,.18s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)))}#checkmark-path{transition-delay:var(--checkbox-checkmark-path-delay,50ms)}#ripple{transform:var(--checkbox-ripple-transform,translate(-50%,-50%) scale(1.8))}`;
-
-let Checkbox = class Checkbox extends CheckboxBehavior {
-  render() {
-    return html` <svg id="checkmark" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 24 24"> <path id="checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path> <line id="indeterminate-path" fill="none" x1="0" y1="12.5" x2="24" y2="12.5"/> </svg> <wl-ripple id="ripple" .target="${this}" focusable overlay unbounded centered initialDuration="200"></wl-ripple> <slot></slot> ${this.renderFormElement()} `;
-  }
-
-};
-Checkbox.styles = [...SwitchBehavior.styles, cssResult(styles$s)];
-Checkbox = __decorate([customElement('wl-checkbox')], Checkbox);
+var styles$8 = ".memo-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n\n.micro {\n  color: red;\n}\n\n.macro {\n  color: yellow;\n}\n\n";
 
 class Lumo extends HTMLElement {
   static get version() {
@@ -16270,56 +13138,6 @@ const $_documentContainer$1 = document.createElement('template');
 $_documentContainer$1.innerHTML = `<custom-style>
   <style>
     html {
-      --lumo-size-xs: 1.625rem;
-      --lumo-size-s: 1.875rem;
-      --lumo-size-m: 2.25rem;
-      --lumo-size-l: 2.75rem;
-      --lumo-size-xl: 3.5rem;
-
-      /* Icons */
-      --lumo-icon-size-s: 1.25em;
-      --lumo-icon-size-m: 1.5em;
-      --lumo-icon-size-l: 2.25em;
-      /* For backwards compatibility */
-      --lumo-icon-size: var(--lumo-icon-size-m);
-    }
-  </style>
-</custom-style>`;
-document.head.appendChild($_documentContainer$1.content);
-
-const $_documentContainer$2 = document.createElement('template');
-$_documentContainer$2.innerHTML = `<custom-style>
-  <style>
-    html {
-      /* Square */
-      --lumo-space-xs: 0.25rem;
-      --lumo-space-s: 0.5rem;
-      --lumo-space-m: 1rem;
-      --lumo-space-l: 1.5rem;
-      --lumo-space-xl: 2.5rem;
-
-      /* Wide */
-      --lumo-space-wide-xs: calc(var(--lumo-space-xs) / 2) var(--lumo-space-xs);
-      --lumo-space-wide-s: calc(var(--lumo-space-s) / 2) var(--lumo-space-s);
-      --lumo-space-wide-m: calc(var(--lumo-space-m) / 2) var(--lumo-space-m);
-      --lumo-space-wide-l: calc(var(--lumo-space-l) / 2) var(--lumo-space-l);
-      --lumo-space-wide-xl: calc(var(--lumo-space-xl) / 2) var(--lumo-space-xl);
-
-      /* Tall */
-      --lumo-space-tall-xs: var(--lumo-space-xs) calc(var(--lumo-space-xs) / 2);
-      --lumo-space-tall-s: var(--lumo-space-s) calc(var(--lumo-space-s) / 2);
-      --lumo-space-tall-m: var(--lumo-space-m) calc(var(--lumo-space-m) / 2);
-      --lumo-space-tall-l: var(--lumo-space-l) calc(var(--lumo-space-l) / 2);
-      --lumo-space-tall-xl: var(--lumo-space-xl) calc(var(--lumo-space-xl) / 2);
-    }
-  </style>
-</custom-style>`;
-document.head.appendChild($_documentContainer$2.content);
-
-const $_documentContainer$3 = document.createElement('template');
-$_documentContainer$3.innerHTML = `<custom-style>
-  <style>
-    html {
       /* Border radius */
       --lumo-border-radius-s: 0.25em; /* Checkbox, badge, date-picker year indicator, etc */
       --lumo-border-radius-m: var(--lumo-border-radius, 0.25em); /* Button, text field, menu overlay, etc */
@@ -16338,315 +13156,7 @@ $_documentContainer$3.innerHTML = `<custom-style>
     }
   </style>
 </custom-style>`;
-document.head.appendChild($_documentContainer$3.content);
-
-const $_documentContainer$4 = document.createElement('template');
-$_documentContainer$4.innerHTML = `<custom-style>
-  <style>
-    html {
-      /* Font families */
-      --lumo-font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-
-      /* Font sizes */
-      --lumo-font-size-xxs: .75rem;
-      --lumo-font-size-xs: .8125rem;
-      --lumo-font-size-s: .875rem;
-      --lumo-font-size-m: 1rem;
-      --lumo-font-size-l: 1.125rem;
-      --lumo-font-size-xl: 1.375rem;
-      --lumo-font-size-xxl: 1.75rem;
-      --lumo-font-size-xxxl: 2.5rem;
-
-      /* Line heights */
-      --lumo-line-height-xs: 1.25;
-      --lumo-line-height-s: 1.375;
-      --lumo-line-height-m: 1.625;
-    }
-
-  </style>
-</custom-style><dom-module id="lumo-typography">
-  <template>
-    <style>
-      html {
-        font-family: var(--lumo-font-family);
-        font-size: var(--lumo-font-size, var(--lumo-font-size-m));
-        line-height: var(--lumo-line-height-m);
-        -webkit-text-size-adjust: 100%;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-
-      /* Can’t combine with the above selector because that doesn’t work in browsers without native shadow dom */
-      :host {
-        font-family: var(--lumo-font-family);
-        font-size: var(--lumo-font-size, var(--lumo-font-size-m));
-        line-height: var(--lumo-line-height-m);
-        -webkit-text-size-adjust: 100%;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-
-      small,
-      [theme~="font-size-s"] {
-        font-size: var(--lumo-font-size-s);
-        line-height: var(--lumo-line-height-s);
-      }
-
-      [theme~="font-size-xs"] {
-        font-size: var(--lumo-font-size-xs);
-        line-height: var(--lumo-line-height-xs);
-      }
-
-      h1,
-      h2,
-      h3,
-      h4,
-      h5,
-      h6 {
-        font-weight: 600;
-        line-height: var(--lumo-line-height-xs);
-        margin-top: 1.25em;
-      }
-
-      h1 {
-        font-size: var(--lumo-font-size-xxxl);
-        margin-bottom: 0.75em;
-      }
-
-      h2 {
-        font-size: var(--lumo-font-size-xxl);
-        margin-bottom: 0.5em;
-      }
-
-      h3 {
-        font-size: var(--lumo-font-size-xl);
-        margin-bottom: 0.5em;
-      }
-
-      h4 {
-        font-size: var(--lumo-font-size-l);
-        margin-bottom: 0.5em;
-      }
-
-      h5 {
-        font-size: var(--lumo-font-size-m);
-        margin-bottom: 0.25em;
-      }
-
-      h6 {
-        font-size: var(--lumo-font-size-xs);
-        margin-bottom: 0;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-      }
-
-      p,
-      blockquote {
-        margin-top: 0.5em;
-        margin-bottom: 0.75em;
-      }
-
-      a {
-        text-decoration: none;
-      }
-
-      a:hover {
-        text-decoration: underline;
-      }
-
-      hr {
-        display: block;
-        align-self: stretch;
-        height: 1px;
-        border: 0;
-        padding: 0;
-        margin: var(--lumo-space-s) calc(var(--lumo-border-radius-m) / 2);
-        background-color: var(--lumo-contrast-10pct);
-      }
-
-      blockquote {
-        border-left: 2px solid var(--lumo-contrast-30pct);
-      }
-
-      b,
-      strong {
-        font-weight: 600;
-      }
-    </style>
-  </template>
-</dom-module>`;
-document.head.appendChild($_documentContainer$4.content);
-
-const $_documentContainer$5 = document.createElement('template');
-$_documentContainer$5.innerHTML = `<dom-module id="lumo-required-field">
-  <template>
-    <style>
-      [part="label"] {
-        align-self: flex-start;
-        color: var(--lumo-secondary-text-color);
-        font-weight: 500;
-        font-size: var(--lumo-font-size-s);
-        margin-left: calc(var(--lumo-border-radius-m) / 4);
-        transition: color 0.2s;
-        line-height: 1;
-        padding-bottom: 0.5em;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        position: relative;
-        max-width: 100%;
-        box-sizing: border-box;
-      }
-
-      :host([has-label])::before {
-        margin-top: calc(var(--lumo-font-size-s) * 1.5);
-      }
-
-      :host([has-label]) {
-        padding-top: var(--lumo-space-m);
-      }
-
-      :host([required]) [part="label"] {
-        padding-right: 1em;
-      }
-
-      [part="label"]::after {
-        content: var(--lumo-required-field-indicator, "•");
-        transition: opacity 0.2s;
-        opacity: 0;
-        color: var(--lumo-primary-text-color);
-        position: absolute;
-        right: 0;
-        width: 1em;
-        text-align: center;
-      }
-
-      :host([required]:not([has-value])) [part="label"]::after {
-        opacity: 1;
-      }
-
-      :host([invalid]) [part="label"]::after {
-        color: var(--lumo-error-text-color);
-      }
-
-      [part="error-message"] {
-        margin-left: calc(var(--lumo-border-radius-m) / 4);
-        font-size: var(--lumo-font-size-xs);
-        line-height: var(--lumo-line-height-xs);
-        color: var(--lumo-error-text-color);
-        will-change: max-height;
-        transition: 0.4s max-height;
-        max-height: 5em;
-      }
-
-      /* Margin that doesn’t reserve space when there’s no error message */
-      [part="error-message"]:not(:empty)::before,
-      [part="error-message"]:not(:empty)::after {
-        content: "";
-        display: block;
-        height: 0.4em;
-      }
-
-      :host(:not([invalid])) [part="error-message"] {
-        max-height: 0;
-        overflow: hidden;
-      }
-    </style>
-  </template>
-</dom-module>`;
-document.head.appendChild($_documentContainer$5.content);
-
-const $_documentContainer$6 = document.createElement('template');
-$_documentContainer$6.innerHTML = `<custom-style>
-  <style>
-    @font-face {
-      font-family: 'lumo-icons';
-      src: url(data:application/font-woff;charset=utf-8;base64,d09GRgABAAAAABEgAAsAAAAAIiwAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABHU1VCAAABCAAAADsAAABUIIslek9TLzIAAAFEAAAAQwAAAFZAIUuKY21hcAAAAYgAAAD4AAADrsCU8d5nbHlmAAACgAAAC2MAABd4h9To2WhlYWQAAA3kAAAAMQAAADYSnCkuaGhlYQAADhgAAAAdAAAAJAbpA35obXR4AAAOOAAAABAAAACspBAAAGxvY2EAAA5IAAAAWAAAAFh55IAsbWF4cAAADqAAAAAfAAAAIAFKAXBuYW1lAAAOwAAAATEAAAIuUUJZCHBvc3QAAA/0AAABKwAAAelm8SzVeJxjYGRgYOBiMGCwY2BycfMJYeDLSSzJY5BiYGGAAJA8MpsxJzM9kYEDxgPKsYBpDiBmg4gCACY7BUgAeJxjYGS+yDiBgZWBgamKaQ8DA0MPhGZ8wGDIyAQUZWBlZsAKAtJcUxgcXjG+0mIO+p/FEMUcxDANKMwIkgMABn8MLQB4nO3SWW6DMABF0UtwCEnIPM/zhLK8LqhfXRybSP14XUYtHV9hGYQwQBNIo3cUIPkhQeM7rib1ekqnXg981XuC1qvy84lzojleh3puxL0hPjGjRU473teloEefAUNGjJkwZcacBUtWrNmwZceeA0dOnLlw5cadB09elPGhGf+j0NTI/65KfXerT6JhqKnpRKtgOpuqaTrtKjPUlqHmhto21I7pL6i6hlqY3q7qGWrfUAeGOjTUkaGODXViqFNDnRnq3FAXhro01JWhrg11Y6hbQ90Z6t5QD4Z6NNSToZ4N9WKoV0O9GerdUB+G+jTUl6GWRvkL24BkEXictVh9bFvVFb/nxvbz+7Rf/N6zHcd2bCfP+Wgc1Z9N0jpNnEL6kbRVS6HA2hQYGh9TGR1CbCqa2rXrWOkQE/sHNJgmtZvoVNZqE1B1DNHxzTQxCehUTYiJTQyENui0qSLezr3PduyQfgmRWOfde8+9551z7rnn/O4jLoJ/bRP0UaKQMLFJjpBAvphLZC3Dk0ok7WBzR2/upJs7Ryw/nfFbln/uuN/apCvwrKLrSvUqRufbm5pn0fs0w4gYxnGVP6qHnO4bWiDQGQgwtS6lm3lB3QoX1M2vwEmuzirF39y+Es2+DJ8d1pkyqBIqoze3D1+Zz4DrFoazxI8dWwMrDlZ2DMqQAR9AROsJU+2cmlTPazTco52F1xTa2a2+K8vvq92dVHmtLoPeQX/AZPRYGthDYOeZjBjKoFsVGulR3lWU95WeCK44qHU7MhWUGUKZDT3oKUcG2GWuh+EDDfUYA/jhAhl0TOsJNYSEu7mQmi3UzfXwZKA4BsVsHLXQYGgRW95uEtpJ1Vfn9XiLriRBlFEqxsDjA09yCNUoQxxwd7KWSTt2y3GTKiflqHRSoWZc3m11Wa/fJdFgXD4sSYfleJBKd8GMz7J8dZn/cGRCcKGDnA2Ge3fKzcvlnTDNthGWLXzX/WaXtUAmRgeLlHSr30r0G9UTXMb0AtmwzOoy73fkSlHZkduw/TYuU9cAD4YutPoxTTsA3797wVr4Z/1NC5zARHr4vtxJjxIfiZMhMkbWk+14BnJZKwqGZwDfswLyxWDSg11rFLJF7Nopxjd1h1/QOT+oezgfu3Yq+Hk+duf5x+40o1GTkaIgikK/IEnC6aYxCUBaZJSN4XTYFjU/YMNIKqJwhDGOCCI8FDXnXmXjtGhGJyShqjAOnBOkW2JG9S7GgYeMWAU5JzhnWmBOaOM+CKEPoqSfFDC2Unq+DLlUgUVUFFLZGJg6jtlojsdsa8kPObPuJdi5dnBdBsLJMGTWDa4t2JvtwuPo9s+Y86suv/W33QG1rAaOAUV+vx4K6f2D04PVKlC7WLSrZzAi45ZV6lIC7WoXqmRyvUqoVwrzUoVsIjeTXWQv+RH5GTlBXiB/In8ln0IbBCAFOajAJrgZYyOHWqOfUe/aHjI12R6OQo1jCgt215l+4f6XPb+0MNou0V+43n2F77tSfRb24d7zitgnKmvYHs69zugaPvBwv6ioXkb2LdL65Atw51uLkXlu1bhMMRcXSPcYoqKIRlh34lQP8/5JbuUFye4vxD6/6MxFF11C0uVLr9Ulgw44tS3pMViNLUExbycFgLIct+QDMibRimx1ydUz8FXZiuOIDBOMVX2nUZc+huNE5XUJ81uiJoiabwqaVF0uacKbau/pl4R2VW0XXlJra6boVrYG646TF5NYzwy4vjENVrDlcNpZPl8DH6XX8XWCx0mvWVZY6KFLrvsY66/zPict5FnxaNUR/juvZCM3TvD60E2W1tZizbXTPDuabcm0nbbzpWKpmA1ayBQ8giedLUM+A0kNjBjQjmuYz7YrgIXYvmF63ZLBwSXrpn9Tb9wwdd/U1H0PMQK3XcO8ul3WT7PyPPdpy0TemKxNRcJNauiXJnnUDpUppQWs4SnUIy0EESGYqJYQLGHxzaGWwVIaS6Y7mQFM8ZjYDQ3axjf61SWjU33JwOZA1pwaG1L9mzf71aHRdX1JHw6Fp0aXhNwbqyeGNg4NbdzGCBxoz4ZXjy4Nu69Zr6sDY6vMrLU5nA1P8JkbdWXJ6ERfMryvNh1JfQ9+T4dIhGvK9w3dxjBBzatsQ/MlOHVIDnYpDz6odAXlQ01t2Pa5Iafd8MMpxAeDKP0C6CjgVLT5osB6icUx01lWjXxzT/GyRF2welEM5Z/7jG3VjQ1SrNn5IbyzOG5dobB3/QHxyZvsXcoz8IoEwS7plCg+zxHQk424q9BfEpkESJbFHQusDBSWFkuBkoPO0kLKwRVYjxGXlHTcTDQMJ/H6TX9afkO7mnraTO1feTnZAXLu4cp7HAXMmNG1yeFk9TgS/NHhZR/4QoBTr/ZB+6hCgyl15Nq1UbN6nE1/ZnP1U2cizCBpvs8cJQZJ4LkYx5N/yZPAUZNQQ0V4f3BQllWrK3YRzl30dOT6RVn2upNur6woSa8CqpdT/aKnBM4o3jNur9d9xqtUT6veBEt9Ca9at+ERzEEhUkR8sa5mQ4aVvJoVeEA8zI4ei5mULXFGyU7z/6TAeYLVcpzSWZY8PYYF5yrTV60sT0+XV141vX++Wf16V2bFeGVPZXxFpkvyeKTWLlzfW0mnKxsY6Y3294/0998SCfX1blm5pbcvFGlq/r07MRAMhYIDiW5JFKWW3vdrEpCsZSJG+om7Zu/PSScZJhNkLbmW5Wsr12pWqW5zKtlwRS4bFOxUw17mCzy6lskCDl1WYOGWDYrADrMA7BDDweWWNd5koiJnR1dz+ytLP2q0SqPB1lnK2ccB7RYe4FSoPks3iB3t4txTSHctb2sy1ivk0pvHuCNm6w1f6wxv3+OCgN78LqdQnUVh7R0oTAp0zOf2rbW770Vu5C2dIyGdTnHo8zSji7dppj0USoVCz+lhRMTh53Teq9VbGfbjuSbAooSdXayY4PYHg374C6f7gl1B/DXuJ4/QXxOBdJFJspFsI3egpoWUUCjlTIFnNYNl+ZyZKmBeYKGHkD1QyDlhaKbKwKcIJqJ4TLJ2OmdY/JWXae4DdGBw8HZ7eXcgFF2zr2SoalDry5iKqoa0Puhe3hPQ2s3elTYM+MI+n3rK0KgL7/La3GeMLt6m7u912vGnvtORiIa0qBmhqVi+XW9XNBmqb8eVgKzIHfGI5bNoG7X0UCzeISmqIcO/nY8FH7U8avX9fx/ST+hx0sezPw9Qy8Mum3GWf2N4Uy/yIYGVBXbJHWIZp7dfTcptdMTr9Qmq7DaiK/ukqCL4kt4RUfS5XPnMtmT22/mQFqF7emSqtrlu8SVElxDRJrZODkpuwe0VfTfjdEp1f7A7v+fozNBXUJ/6WTuK2TtFlpFVZAZ3LcFvUi1Z2p2YT+EMAkGJVStOzLTAPg4IqWIAlzRSjOBkl2zxj3TKycpzT/MnvX3uaSMWM+gU0rkXjohhefVRMaps3/kLMSKv23lT23uxQrkQjyOJleMDsdhAnD6ZGElWZ5MjCXzCE/hkWX+WF4knzGhVOyK2eQZekV3eyo0zL8kuYWCnDCvjjhAkcTPOBDXVdoav3HVcFnQjLvtV9S2p0zA6JegPwMQxt+yFb3ll9zGlq/5dRKb3cEyQYoaNYpharJ7xCB7AWxsLY3jjZXY0XsZj0Wjwc9I6PP/dKABnCZaqHpaZEACxk4ZeLZSKNgZABl+lYQX1sJQOSX3n6r410evcoud5JeAGUXVP9H1tZOKejTq4Ono0z0erro1FrnOpohva1d/hTdtVsQdKN5W9RlT3NjD0nznyKNTgKAMfWNWcyodV0IGLPIHOF0o4JyqufaK4z6WIIzuGh3d8c8cwQg8ER+OVxyrjdm8vNuhts4LoOihGxIMuUdgzwiYN7xhh1+oZnJNuTG7gQZvu4XWZ9GAZZjGEubwePqYhtKDTH+9VQkl17/iGybsnJ+8+sKtyPrcll9ty65Zsdst/9iqpEKh7M5VdBxh3csOdNc6tW3I1uyM1PzOXegSOrLFsFNI2O27M+TF2ApnN9MUv5ud6LjxIvEQnHRzxIu4IsA9MLFkJn2tcZoZ7ON7dXe7ujrc8HrusPKamlqXwd77lQUuLpilau4PUMapueBb7irU4RoUXEYXuVuIGlRGmOp+2lNkaRPVziOqmlaZvaqG4dFgSj0jxEJWrv12IUWntmw+rfQarRE0Aph4ocI6nlUlGqs+u3/+T/ethW62PpHp2eHbZstnh/wOO95yDAHicY2BkYGAAYi2NOJ94fpuvDNzML4AiDNc/fzqEoP+/Zp7KdAvI5WBgAokCAGkcDfgAAAB4nGNgZGBgDvqfBSRfMAAB81QGRgZUoA0AVvYDbwAAAHicY2BgYGB+MTQwAM8EJo8AAAAAAE4AmgDoAQoBLAFOAXABmgHEAe4CGgKcAugEmgS8BNYE8gUOBSoFegXQBf4GRAZmBrYHGAeQCBgIUghqCP4JRgm+CdoKBAo8CoIKuArwC1ALlgu8eJxjYGRgYNBmTGEQZQABJiDmAkIGhv9gPgMAGJQBvAB4nG2RPU7DMBiG3/QP0UoIBGJh8QILavozdmRo9w7d09RpUzlx5LgVvQMn4BAcgoEzcAgOwVvzSZVQbcnf48fvFysJgGt8IcJxROiG9TgauODuj5ukG+EW+UG4jR4ehTv0Q+EunjER7uEWmk+IWpc0d3gVbuAKb8JN+nfhFvlDuI17fAp36L+Fu1jgR7iHp+jF7Arbz1Nb1nO93pnEncSJFtrVuS3VKB6e5EyX2iVer9TyoOr9eux9pjJnCzW1pdfGWFU5u9WpjzfeV5PBIBMfp7aAwQ4FLPrIkbKWqDHn+67pDRK4s4lzbsEux5qHvcIIMb/nueSMyTKkE3jWFdNLHLjW2PPmMa1Hxn3GjGW/wjT0HtOG09JU4WxLk9LH2ISuiv9twJn9y8fh9uIXI+BknAAAAHicbY7ZboMwEEW5CVBCSLrv+76kfJRjTwHFsdGAG+Xvy5JUfehIHp0rnxmNN/D6ir3/a4YBhvARIMQOIowQY4wEE0yxiz3s4wCHOMIxTnCKM5zjApe4wjVucIs73OMBj3jCM17wije84wMzfHqJ0EVmUkmmJo77oOmrHvfIRZbXsTCZplTZldlgb3TYGVHProwFs11t1A57tcON2rErR3PBqcwF1/6ctI6k0GSU4JHMSS6WghdJQ99sTbfuN7QLJ9vQ37dNrgyktnIxlDYLJNuqitpRbYWKFNuyDT6pog6oOYKHtKakeakqKjHXpPwlGRcsC+OqxLIiJpXqoqqDMreG2l5bv9Ri3TRX+c23DZna9WFFgmXuO6Ps1Jm/w6ErW8N3FbHn/QC444j0AA==) format('woff');
-      font-weight: normal;
-      font-style: normal;
-    }
-
-    html {
-      --lumo-icons-align-center: "\\ea01";
-      --lumo-icons-align-left: "\\ea02";
-      --lumo-icons-align-right: "\\ea03";
-      --lumo-icons-angle-down: "\\ea04";
-      --lumo-icons-angle-left: "\\ea05";
-      --lumo-icons-angle-right: "\\ea06";
-      --lumo-icons-angle-up: "\\ea07";
-      --lumo-icons-arrow-down: "\\ea08";
-      --lumo-icons-arrow-left: "\\ea09";
-      --lumo-icons-arrow-right: "\\ea0a";
-      --lumo-icons-arrow-up: "\\ea0b";
-      --lumo-icons-bar-chart: "\\ea0c";
-      --lumo-icons-bell: "\\ea0d";
-      --lumo-icons-calendar: "\\ea0e";
-      --lumo-icons-checkmark: "\\ea0f";
-      --lumo-icons-chevron-down: "\\ea10";
-      --lumo-icons-chevron-left: "\\ea11";
-      --lumo-icons-chevron-right: "\\ea12";
-      --lumo-icons-chevron-up: "\\ea13";
-      --lumo-icons-clock: "\\ea14";
-      --lumo-icons-cog: "\\ea15";
-      --lumo-icons-cross: "\\ea16";
-      --lumo-icons-download: "\\ea17";
-      --lumo-icons-dropdown: "\\ea18";
-      --lumo-icons-edit: "\\ea19";
-      --lumo-icons-error: "\\ea1a";
-      --lumo-icons-eye: "\\ea1b";
-      --lumo-icons-eye-disabled: "\\ea1c";
-      --lumo-icons-menu: "\\ea1d";
-      --lumo-icons-minus: "\\ea1e";
-      --lumo-icons-ordered-list: "\\ea1f";
-      --lumo-icons-phone: "\\ea20";
-      --lumo-icons-photo: "\\ea21";
-      --lumo-icons-play: "\\ea22";
-      --lumo-icons-plus: "\\ea23";
-      --lumo-icons-redo: "\\ea24";
-      --lumo-icons-reload: "\\ea25";
-      --lumo-icons-search: "\\ea26";
-      --lumo-icons-undo: "\\ea27";
-      --lumo-icons-unordered-list: "\\ea28";
-      --lumo-icons-upload: "\\ea29";
-      --lumo-icons-user: "\\ea2a";
-    }
-  </style>
-</custom-style>`;
-document.head.appendChild($_documentContainer$6.content);
-
-const $_documentContainer$7 = document.createElement('template');
-$_documentContainer$7.innerHTML = `<dom-module id="lumo-field-button">
-  <template>
-    <style>
-      [part\$="button"] {
-        flex: none;
-        width: 1em;
-        height: 1em;
-        line-height: 1;
-        font-size: var(--lumo-icon-size-m);
-        text-align: center;
-        color: var(--lumo-contrast-60pct);
-        transition: 0.2s color;
-        cursor: var(--lumo-clickable-cursor);
-      }
-
-      :host(:not([readonly])) [part\$="button"]:hover {
-        color: var(--lumo-contrast-90pct);
-      }
-
-      :host([disabled]) [part\$="button"],
-      :host([readonly]) [part\$="button"] {
-        color: var(--lumo-contrast-20pct);
-      }
-
-      [part\$="button"]::before {
-        font-family: "lumo-icons";
-        display: block;
-      }
-    </style>
-  </template>
-</dom-module>`;
-document.head.appendChild($_documentContainer$7.content);
+document.head.appendChild($_documentContainer$1.content);
 
 /**
 @license
@@ -16757,282 +13267,177 @@ const html$1 = function html(strings, ...values) {
   return template;
 };
 
-const $_documentContainer$8 = html$1`<dom-module id="lumo-text-field" theme-for="vaadin-text-field">
+const $_documentContainer$2 = html$1`<dom-module id="lumo-checkbox" theme-for="vaadin-checkbox">
   <template>
-    <style include="lumo-required-field lumo-field-button">
-      :host {
-        --lumo-text-field-size: var(--lumo-size-m);
-        color: var(--lumo-body-text-color);
-        font-size: var(--lumo-font-size-m);
-        font-family: var(--lumo-font-family);
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        -webkit-tap-highlight-color: transparent;
-        padding: var(--lumo-space-xs) 0;
-      }
-
-      :host::before {
-        height: var(--lumo-text-field-size);
-        box-sizing: border-box;
-        display: inline-flex;
-        align-items: center;
-      }
-
-      :host([focused]:not([readonly])) [part="label"] {
-        color: var(--lumo-primary-text-color);
-      }
-
-      [part="value"],
-      [part="input-field"] ::slotted(input),
-      [part="input-field"] ::slotted(textarea),
-      /* Slotted by vaadin-select-text-field */
-      [part="input-field"] ::slotted([part="value"]) {
-        cursor: inherit;
-        min-height: var(--lumo-text-field-size);
-        padding: 0 0.25em;
-        --_lumo-text-field-overflow-mask-image: linear-gradient(to left, transparent, #000 1.25em);
-        -webkit-mask-image: var(--_lumo-text-field-overflow-mask-image);
-      }
-
-      [part="value"]:focus,
-      [part="input-field"] ::slotted(input):focus,
-      [part="input-field"] ::slotted(textarea):focus {
-        -webkit-mask-image: none;
-        mask-image: none;
-      }
-
-      /*
-        TODO: CSS custom property in \`mask-image\` causes crash in Edge
-        see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/15415089/
-      */
-      @-moz-document url-prefix() {
-        [part="value"],
-        [part="input-field"] ::slotted(input),
-        [part="input-field"] ::slotted(textarea),
-        [part="input-field"] ::slotted([part="value"]) {
-          mask-image: var(--_lumo-text-field-overflow-mask-image);
-        }
-      }
-
-      [part="value"]::-webkit-input-placeholder {
-        color: inherit;
-        transition: opacity 0.175s 0.05s;
-        opacity: 0.5;
-      }
-
-      [part="value"]:-ms-input-placeholder {
-        color: inherit;
-        opacity: 0.5;
-      }
-
-      [part="value"]::-moz-placeholder {
-        color: inherit;
-        transition: opacity 0.175s 0.05s;
-        opacity: 0.5;
-      }
-
-      [part="value"]::placeholder {
-        color: inherit;
-        transition: opacity 0.175s 0.1s;
-        opacity: 0.5;
-      }
-
-      [part="input-field"] {
-        border-radius: var(--lumo-border-radius);
-        background-color: var(--lumo-contrast-10pct);
-        padding: 0 calc(0.375em + var(--lumo-border-radius) / 4 - 1px);
-        font-weight: 500;
+    <style include="lumo-checkbox-style lumo-checkbox-effects">
+      /* IE11 only */
+      ::-ms-backdrop,
+      [part="checkbox"] {
         line-height: 1;
-        position: relative;
-        cursor: text;
-        box-sizing: border-box;
+      }
+    </style>
+  </template>
+</dom-module><dom-module id="lumo-checkbox-style">
+  <template>
+    <style>
+      :host {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: default;
+        outline: none;
       }
 
-      /* Used for hover and activation effects */
-      [part="input-field"]::after {
-        content: "";
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        border-radius: inherit;
+      [part="label"]:not([empty]) {
+        margin: 0.1875em 0.875em 0.1875em 0.375em;
+      }
+
+      [part="checkbox"] {
+        width: calc(1em + 2px);
+        height: calc(1em + 2px);
+        margin: 0.1875em;
+        position: relative;
+        border-radius: var(--lumo-border-radius);
+        background-color: var(--lumo-contrast-20pct);
+        transition: transform 0.2s cubic-bezier(.12, .32, .54, 2), background-color 0.15s;
         pointer-events: none;
-        background-color: var(--lumo-contrast-50pct);
+        line-height: 1.2;
+      }
+
+      :host([indeterminate]) [part="checkbox"],
+      :host([checked]) [part="checkbox"] {
+        background-color: var(--lumo-primary-color);
+      }
+
+      /* Needed to align the checkbox nicely on the baseline */
+      [part="checkbox"]::before {
+        content: "\\2003";
+      }
+
+      /* Checkmark */
+      [part="checkbox"]::after {
+        content: "";
+        display: inline-block;
+        width: 0;
+        height: 0;
+        border: 0 solid var(--lumo-primary-contrast-color);
+        border-width: 0.1875em 0 0 0.1875em;
+        box-sizing: border-box;
+        transform-origin: 0 0;
+        position: absolute;
+        top: 0.8125em;
+        left: 0.5em;
+        transform: scale(0.55) rotate(-135deg);
         opacity: 0;
-        transition: transform 0.15s, opacity 0.2s;
-        transform-origin: 100% 0;
+      }
+
+      :host([checked]) [part="checkbox"]::after {
+        opacity: 1;
+        width: 0.625em;
+        height: 1.0625em;
+      }
+
+      /* Indeterminate checkmark */
+
+      :host([indeterminate]) [part="checkbox"]::after {
+        transform: none;
+        opacity: 1;
+        top: 45%;
+        height: 10%;
+        left: 22%;
+        right: 22%;
+        width: auto;
+        border: 0;
+        background-color: var(--lumo-primary-contrast-color);
+        transition: opacity 0.25s;
+      }
+
+      /* Focus ring */
+
+      :host([focus-ring]) [part="checkbox"] {
+        box-shadow: 0 0 0 3px var(--lumo-primary-color-50pct);
+      }
+
+      /* Disabled */
+
+      :host([disabled]) {
+        pointer-events: none;
+        color: var(--lumo-disabled-text-color);
+      }
+
+      :host([disabled]) [part="label"] ::slotted(*) {
+        color: inherit;
+      }
+
+      :host([disabled]) [part="checkbox"] {
+        background-color: var(--lumo-contrast-10pct);
+      }
+
+      :host([disabled]) [part="checkbox"]::after {
+        border-color: var(--lumo-contrast-30pct);
+      }
+
+      :host([indeterminate][disabled]) [part="checkbox"]::after {
+        background-color: var(--lumo-contrast-30pct);
+      }
+    </style>
+  </template>
+</dom-module><dom-module id="lumo-checkbox-effects">
+  <template>
+    <style>
+      /* Transition the checkmark if activated with the mouse (disabled for grid select-all this way) */
+      :host(:hover) [part="checkbox"]::after {
+        transition: width 0.1s, height 0.25s;
+      }
+
+      /* Used for activation "halo" */
+      [part="checkbox"]::before {
+        color: transparent;
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        background-color: inherit;
+        transform: scale(1.4);
+        opacity: 0;
+        transition: transform 0.1s, opacity 0.8s;
       }
 
       /* Hover */
 
-      :host(:hover:not([readonly]):not([focused])) [part="label"] {
-        color: var(--lumo-body-text-color);
+      :host(:not([checked]):not([indeterminate]):not([disabled]):hover) [part="checkbox"] {
+        background-color: var(--lumo-contrast-30pct);
       }
 
-      :host(:hover:not([readonly]):not([focused])) [part="input-field"]::after {
-        opacity: 0.1;
-      }
-
-      /* Touch device adjustment */
+      /* Disable hover for touch devices */
       @media (pointer: coarse) {
-        :host(:hover:not([readonly]):not([focused])) [part="label"] {
-          color: var(--lumo-secondary-text-color);
-        }
-
-        :host(:hover:not([readonly]):not([focused])) [part="input-field"]::after {
-          opacity: 0;
-        }
-
-        :host(:active:not([readonly]):not([focused])) [part="input-field"]::after {
-          opacity: 0.2;
+        :host(:not([checked]):not([indeterminate]):not([disabled]):hover) [part="checkbox"] {
+          background-color: var(--lumo-contrast-20pct);
         }
       }
 
-      /* Trigger when not focusing using the keyboard */
-      :host([focused]:not([focus-ring]):not([readonly])) [part="input-field"]::after {
-        transform: scaleX(0);
-        transition-duration: 0.15s, 1s;
+      /* Active */
+
+      :host([active]) [part="checkbox"] {
+        transform: scale(0.9);
+        transition-duration: 0.05s;
       }
 
-      /* Focus-ring */
-
-      :host([focus-ring]) [part="input-field"] {
-        box-shadow: 0 0 0 2px var(--lumo-primary-color-50pct);
+      :host([active][checked]) [part="checkbox"] {
+        transform: scale(1.1);
       }
 
-      /* Read-only and disabled */
-      :host([readonly]) [part="value"]::-webkit-input-placeholder,
-      :host([disabled]) [part="value"]::-webkit-input-placeholder {
-        opacity: 0;
-      }
-
-      :host([readonly]) [part="value"]:-ms-input-placeholder,
-      :host([disabled]) [part="value"]:-ms-input-placeholder {
-        opacity: 0;
-      }
-
-      :host([readonly]) [part="value"]::-moz-placeholder,
-      :host([disabled]) [part="value"]::-moz-placeholder {
-        opacity: 0;
-      }
-
-      :host([readonly]) [part="value"]::placeholder,
-      :host([disabled]) [part="value"]::placeholder {
-        opacity: 0;
-      }
-
-      /* Read-only */
-
-      :host([readonly]) [part="input-field"] {
-        color: var(--lumo-secondary-text-color);
-        background-color: transparent;
-        cursor: default;
-      }
-
-      :host([readonly]) [part="input-field"]::after {
-        background-color: transparent;
-        opacity: 1;
-        border: 1px dashed var(--lumo-contrast-30pct);
-      }
-
-      /* Disabled style */
-
-      :host([disabled]) {
-        pointer-events: none;
-      }
-
-      :host([disabled]) [part="input-field"] {
-        background-color: var(--lumo-contrast-5pct);
-      }
-
-      :host([disabled]) [part="label"],
-      :host([disabled]) [part="value"],
-      :host([disabled]) [part="input-field"] ::slotted(*) {
-        color: var(--lumo-disabled-text-color);
-        -webkit-text-fill-color: var(--lumo-disabled-text-color);
-      }
-
-      /* Invalid style */
-
-      :host([invalid]) [part="input-field"] {
-        background-color: var(--lumo-error-color-10pct);
-      }
-
-      :host([invalid]) [part="input-field"]::after {
-        background-color: var(--lumo-error-color-50pct);
-      }
-
-      :host([invalid][focus-ring]) [part="input-field"] {
-        box-shadow: 0 0 0 2px var(--lumo-error-color-50pct);
-      }
-
-      :host([input-prevented]) [part="input-field"] {
-        color: var(--lumo-error-text-color);
-      }
-
-      /* Small theme */
-
-      :host([theme~="small"]) {
-        font-size: var(--lumo-font-size-s);
-        --lumo-text-field-size: var(--lumo-size-s);
-      }
-
-      :host([theme~="small"][has-label]) [part="label"] {
-        font-size: var(--lumo-font-size-xs);
-      }
-
-      :host([theme~="small"][has-label]) [part="error-message"] {
-        font-size: var(--lumo-font-size-xxs);
-      }
-
-      /* Text align */
-
-      :host([theme~="align-center"]) [part="value"] {
-        text-align: center;
-        --_lumo-text-field-overflow-mask-image: none;
-      }
-
-      :host([theme~="align-right"]) [part="value"] {
-        text-align: right;
-        --_lumo-text-field-overflow-mask-image: none;
-      }
-
-      @-moz-document url-prefix() {
-        /* Firefox is smart enough to align overflowing text to right */
-        :host([theme~="align-right"]) [part="value"] {
-          --_lumo-text-field-overflow-mask-image: linear-gradient(to right, transparent 0.25em, #000 1.5em);
-        }
-      }
-
-      /* Slotted content */
-
-      [part="input-field"] ::slotted(:not([part]):not(iron-icon):not(input):not(textarea)) {
-        color: var(--lumo-secondary-text-color);
-        font-weight: 400;
-      }
-
-      /* Slotted icons */
-
-      [part="input-field"] ::slotted(iron-icon) {
-        color: var(--lumo-contrast-60pct);
-        width: var(--lumo-icon-size-m);
-        height: var(--lumo-icon-size-m);
-      }
-
-      /* Vaadin icons are based on a 16x16 grid (unlike Lumo and Material icons with 24x24), so they look too big by default */
-      [part="input-field"] ::slotted(iron-icon[icon^="vaadin:"]) {
-        padding: 0.25em;
-        box-sizing: border-box !important;
-      }
-
-      [part="clear-button"]::before {
-        content: var(--lumo-icons-cross);
+      :host([active]:not([checked])) [part="checkbox"]::before {
+        transition-duration: 0.01s, 0.01s;
+        transform: scale(0);
+        opacity: 0.4;
       }
     </style>
   </template>
 </dom-module>`;
-document.head.appendChild($_documentContainer$8.content);
+document.head.appendChild($_documentContainer$2.content);
 
 /**
 @license
@@ -23554,425 +19959,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 const PolymerElement = ElementMixin(HTMLElement);
 
 /**
- * @polymerMixin
- */
-const ThemePropertyMixin = superClass => class VaadinThemePropertyMixin extends superClass {
-  static get properties() {
-    return {
-      /**
-       * Helper property with theme attribute value facilitating propagation
-       * in shadow DOM.
-       *
-       * Enables the component implementation to propagate the `theme`
-       * attribute value to the subcomponents in Shadow DOM by binding
-       * the subcomponent’s "theme" attribute to the `theme` property of
-       * the host.
-       *
-       * **NOTE:** Extending the mixin only provides the property for binding,
-       * and does not make the propagation alone.
-       *
-       * See [Theme Attribute and Subcomponents](https://github.com/vaadin/vaadin-themable-mixin/wiki/5.-Theme-Attribute-and-Subcomponents).
-       * page for more information.
-       *
-       * @protected
-       */
-      theme: {
-        type: String,
-        readOnly: true
-      }
-    };
-  }
-  /** @protected */
-
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    super.attributeChangedCallback(name, oldValue, newValue);
-
-    if (name === 'theme') {
-      this._setTheme(newValue);
-    }
-  }
-
-};
-
-/**
- * @polymerMixin
- * @mixes Vaadin.ThemePropertyMixin
- */
-
-const ThemableMixin = superClass => class VaadinThemableMixin extends ThemePropertyMixin(superClass) {
-  /** @protected */
-  static finalize() {
-    super.finalize();
-    const template = this.prototype._template;
-    const hasOwnTemplate = this.template && this.template.parentElement && this.template.parentElement.id === this.is;
-
-    const inheritedTemplate = Object.getPrototypeOf(this.prototype)._template;
-
-    if (inheritedTemplate && !hasOwnTemplate) {
-      // The element doesn't define its own template -> include the theme modules from the inherited template
-      Array.from(inheritedTemplate.content.querySelectorAll('style[include]')).forEach(s => {
-        this._includeStyle(s.getAttribute('include'), template);
-      });
-    }
-
-    this._includeMatchingThemes(template);
-  }
-  /** @protected */
-
-
-  static _includeMatchingThemes(template) {
-    const domModule = DomModule;
-    const modules = domModule.prototype.modules;
-    let hasThemes = false;
-    const defaultModuleName = this.is + '-default-theme';
-    Object.keys(modules).sort((moduleNameA, moduleNameB) => {
-      const vaadinA = moduleNameA.indexOf('vaadin-') === 0;
-      const vaadinB = moduleNameB.indexOf('vaadin-') === 0;
-      const vaadinThemePrefixes = ['lumo-', 'material-'];
-      const vaadinThemeA = vaadinThemePrefixes.filter(prefix => moduleNameA.indexOf(prefix) === 0).length > 0;
-      const vaadinThemeB = vaadinThemePrefixes.filter(prefix => moduleNameB.indexOf(prefix) === 0).length > 0;
-
-      if (vaadinA !== vaadinB) {
-        // Include vaadin core styles first
-        return vaadinA ? -1 : 1;
-      } else if (vaadinThemeA !== vaadinThemeB) {
-        // Include vaadin theme styles after that
-        return vaadinThemeA ? -1 : 1;
-      } else {
-        // Lastly include custom styles so they override all vaadin styles
-        return 0;
-      }
-    }).forEach(moduleName => {
-      if (moduleName !== defaultModuleName) {
-        const themeFor = modules[moduleName].getAttribute('theme-for');
-
-        if (themeFor) {
-          themeFor.split(' ').forEach(themeForToken => {
-            if (new RegExp('^' + themeForToken.split('*').join('.*') + '$').test(this.is)) {
-              hasThemes = true;
-
-              this._includeStyle(moduleName, template);
-            }
-          });
-        }
-      }
-    });
-
-    if (!hasThemes && modules[defaultModuleName]) {
-      // No theme modules found, include the default module if it exists
-      this._includeStyle(defaultModuleName, template);
-    }
-  }
-  /** @private */
-
-
-  static _includeStyle(moduleName, template) {
-    if (template && !template.content.querySelector(`style[include="${moduleName}"]`)) {
-      const styleEl = document.createElement('style');
-      styleEl.setAttribute('include', moduleName);
-      template.content.appendChild(styleEl);
-    }
-  }
-
-};
-
-/**
-@license
-Copyright (c) 2017 Vaadin Ltd.
-This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
-*/
-
-/**
- * A private mixin to avoid problems with dynamic properties and Polymer Analyzer.
- * No need to expose these properties in the API docs.
- * @polymerMixin
- */
-const TabIndexMixin = superClass => class VaadinTabIndexMixin extends superClass {
-  static get properties() {
-    var properties = {
-      /**
-       * Internal property needed to listen to `tabindex` attribute changes.
-       *
-       * For changing the tabindex of this component use the native `tabIndex` property.
-       * @private
-       */
-      tabindex: {
-        type: Number,
-        value: 0,
-        reflectToAttribute: true,
-        observer: '_tabindexChanged'
-      }
-    };
-
-    if (window.ShadyDOM) {
-      // ShadyDOM browsers need the `tabIndex` in order to notify when the user changes it programmatically.
-      properties['tabIndex'] = properties.tabindex;
-    }
-
-    return properties;
-  }
-
-};
-/**
- * Polymer.IronControlState is not a proper 2.0 class, also, its tabindex
- * implementation fails in the shadow dom, so we have this for vaadin elements.
- * @polymerMixin
- */
-
-
-const ControlStateMixin = superClass => class VaadinControlStateMixin extends TabIndexMixin(superClass) {
-  static get properties() {
-    return {
-      /**
-       * Specify that this control should have input focus when the page loads.
-       */
-      autofocus: {
-        type: Boolean
-      },
-
-      /**
-       * Stores the previous value of tabindex attribute of the disabled element
-       */
-      _previousTabIndex: {
-        type: Number
-      },
-
-      /**
-       * If true, the user cannot interact with this element.
-       */
-      disabled: {
-        type: Boolean,
-        observer: '_disabledChanged',
-        reflectToAttribute: true
-      },
-      _isShiftTabbing: {
-        type: Boolean
-      }
-    };
-  }
-
-  ready() {
-    this.addEventListener('focusin', e => {
-      if (e.composedPath()[0] === this) {
-        this._focus(e);
-      } else if (e.composedPath().indexOf(this.focusElement) !== -1 && !this.disabled) {
-        this._setFocused(true);
-      }
-    });
-    this.addEventListener('focusout', e => this._setFocused(false)); // In super.ready() other 'focusin' and 'focusout' listeners might be
-    // added, so we call it after our own ones to ensure they execute first.
-    // Issue to watch out: when incorrect, <vaadin-combo-box> refocuses the
-    // input field on iOS after “Done” is pressed.
-
-    super.ready(); // This fixes the bug in Firefox 61 (https://bugzilla.mozilla.org/show_bug.cgi?id=1472887)
-    // where focusout event does not go out of shady DOM because composed property in the event is not true
-
-    const ensureEventComposed = e => {
-      if (!e.composed) {
-        e.target.dispatchEvent(new CustomEvent(e.type, {
-          bubbles: true,
-          composed: true,
-          cancelable: false
-        }));
-      }
-    };
-
-    this.shadowRoot.addEventListener('focusin', ensureEventComposed);
-    this.shadowRoot.addEventListener('focusout', ensureEventComposed);
-    this.addEventListener('keydown', e => {
-      if (!e.defaultPrevented && e.keyCode === 9) {
-        if (e.shiftKey) {
-          // Flag is checked in _focus event handler.
-          this._isShiftTabbing = true;
-          HTMLElement.prototype.focus.apply(this);
-
-          this._setFocused(false); // Event handling in IE is asynchronous and the flag is removed asynchronously as well
-
-
-          setTimeout(() => this._isShiftTabbing = false, 0);
-        } else {
-          // Workaround for FF63-65 bug that causes the focus to get lost when
-          // blurring a slotted component with focusable shadow root content
-          // https://bugzilla.mozilla.org/show_bug.cgi?id=1528686
-          // TODO: Remove when safe
-          const firefox = window.navigator.userAgent.match(/Firefox\/(\d\d\.\d)/);
-
-          if (firefox && parseFloat(firefox[1]) >= 63 && parseFloat(firefox[1]) < 66 && this.parentNode && this.nextSibling) {
-            const fakeTarget = document.createElement('input');
-            fakeTarget.style.position = 'absolute';
-            fakeTarget.style.opacity = 0;
-            fakeTarget.tabIndex = this.tabIndex;
-            this.parentNode.insertBefore(fakeTarget, this.nextSibling);
-            fakeTarget.focus();
-            fakeTarget.addEventListener('focusout', () => this.parentNode.removeChild(fakeTarget));
-          }
-        }
-      }
-    });
-
-    if (this.autofocus && !this.focused && !this.disabled) {
-      window.requestAnimationFrame(() => {
-        this._focus();
-
-        this._setFocused(true);
-
-        this.setAttribute('focus-ring', '');
-      });
-    }
-
-    this._boundKeydownListener = this._bodyKeydownListener.bind(this);
-    this._boundKeyupListener = this._bodyKeyupListener.bind(this);
-  }
-  /**
-   * @protected
-   */
-
-
-  connectedCallback() {
-    super.connectedCallback();
-    document.body.addEventListener('keydown', this._boundKeydownListener, true);
-    document.body.addEventListener('keyup', this._boundKeyupListener, true);
-  }
-  /**
-   * @protected
-   */
-
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    document.body.removeEventListener('keydown', this._boundKeydownListener, true);
-    document.body.removeEventListener('keyup', this._boundKeyupListener, true); // in non-Chrome browsers, blur does not fire on the element when it is disconnected.
-    // reproducible in `<vaadin-date-picker>` when closing on `Cancel` or `Today` click.
-
-    if (this.hasAttribute('focused')) {
-      this._setFocused(false);
-    }
-  }
-
-  _setFocused(focused) {
-    if (focused) {
-      this.setAttribute('focused', '');
-    } else {
-      this.removeAttribute('focused');
-    } // focus-ring is true when the element was focused from the keyboard.
-    // Focus Ring [A11ycasts]: https://youtu.be/ilj2P5-5CjI
-
-
-    if (focused && this._tabPressed) {
-      this.setAttribute('focus-ring', '');
-    } else {
-      this.removeAttribute('focus-ring');
-    }
-  }
-
-  _bodyKeydownListener(e) {
-    this._tabPressed = e.keyCode === 9;
-  }
-
-  _bodyKeyupListener() {
-    this._tabPressed = false;
-  }
-  /**
-   * Any element extending this mixin is required to implement this getter.
-   * It returns the actual focusable element in the component.
-   */
-
-
-  get focusElement() {
-    window.console.warn(`Please implement the 'focusElement' property in <${this.localName}>`);
-    return this;
-  }
-
-  _focus(e) {
-    if (this._isShiftTabbing) {
-      return;
-    }
-
-    this.focusElement.focus();
-
-    this._setFocused(true);
-  }
-  /**
-   * Moving the focus from the host element causes firing of the blur event what leads to problems in IE.
-   * @private
-   */
-
-
-  focus() {
-    if (!this.focusElement || this.disabled) {
-      return;
-    }
-
-    this.focusElement.focus();
-
-    this._setFocused(true);
-  }
-  /**
-   * Native bluring in the host element does nothing because it does not have the focus.
-   * In chrome it works, but not in FF.
-   * @private
-   */
-
-
-  blur() {
-    this.focusElement.blur();
-
-    this._setFocused(false);
-  }
-
-  _disabledChanged(disabled) {
-    this.focusElement.disabled = disabled;
-
-    if (disabled) {
-      this.blur();
-      this._previousTabIndex = this.tabindex;
-      this.tabindex = -1;
-      this.setAttribute('aria-disabled', 'true');
-    } else {
-      if (typeof this._previousTabIndex !== 'undefined') {
-        this.tabindex = this._previousTabIndex;
-      }
-
-      this.removeAttribute('aria-disabled');
-    }
-  }
-
-  _tabindexChanged(tabindex) {
-    if (tabindex !== undefined) {
-      this.focusElement.tabIndex = tabindex;
-    }
-
-    if (this.disabled && this.tabindex) {
-      // If tabindex attribute was changed while checkbox was disabled
-      if (this.tabindex !== -1) {
-        this._previousTabIndex = this.tabindex;
-      }
-
-      this.tabindex = tabindex = undefined;
-    }
-
-    if (window.ShadyDOM) {
-      this.setProperties({
-        tabIndex: tabindex,
-        tabindex: tabindex
-      });
-    }
-  }
-  /**
-   * @protected
-   */
-
-
-  click() {
-    if (!this.disabled) {
-      super.click();
-    }
-  }
-
-};
-
-/**
 @license
 Copyright (c) 2017 The Polymer Project Authors. All rights reserved.
 This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
@@ -24131,1761 +20117,6 @@ let debouncerQueue = new Set();
 const enqueueDebouncer = function (debouncer) {
   debouncerQueue.add(debouncer);
 };
-
-/**
-@license
-Copyright (c) 2017 Vaadin Ltd.
-This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
-*/
-const $_documentContainer$9 = document.createElement('template');
-$_documentContainer$9.innerHTML = `<dom-module id="vaadin-text-field-shared-styles">
-  <template>
-    <style>
-      :host {
-        display: inline-flex;
-        outline: none;
-      }
-
-      :host::before {
-        content: "\\2003";
-        width: 0;
-        display: inline-block;
-        /* Size and position this element on the same vertical position as the input-field element
-           to make vertical align for the host element work as expected */
-      }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-
-      .vaadin-text-field-container,
-      .vaadin-text-area-container {
-        display: flex;
-        flex-direction: column;
-        min-width: 100%;
-        max-width: 100%;
-        width: var(--vaadin-text-field-default-width, 12em);
-      }
-
-      [part="label"]:empty {
-        display: none;
-      }
-
-      [part="input-field"] {
-        display: flex;
-        align-items: center;
-        flex: auto;
-      }
-
-      .vaadin-text-field-container [part="input-field"] {
-        flex-grow: 0;
-      }
-
-      /* Reset the native input styles */
-      [part="value"],
-      [part="input-field"] ::slotted(input),
-      [part="input-field"] ::slotted(textarea) {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        outline: none;
-        margin: 0;
-        padding: 0;
-        border: 0;
-        border-radius: 0;
-        min-width: 0;
-        font: inherit;
-        font-size: 1em;
-        line-height: normal;
-        color: inherit;
-        background-color: transparent;
-        /* Disable default invalid style in Firefox */
-        box-shadow: none;
-      }
-
-      [part="input-field"] ::slotted(*) {
-        flex: none;
-      }
-
-      [part="value"],
-      [part="input-field"] ::slotted(input),
-      [part="input-field"] ::slotted(textarea),
-      /* Slotted by vaadin-select-text-field */
-      [part="input-field"] ::slotted([part="value"]) {
-        flex: auto;
-        white-space: nowrap;
-        overflow: hidden;
-        width: 100%;
-        height: 100%;
-      }
-
-      [part="input-field"] ::slotted(textarea) {
-        resize: none;
-      }
-
-      [part="value"]::-ms-clear,
-      [part="input-field"] ::slotted(input)::-ms-clear {
-        display: none;
-      }
-
-      [part="clear-button"] {
-        cursor: default;
-      }
-
-      [part="clear-button"]::before {
-        content: "✕";
-      }
-    </style>
-  </template>
-</dom-module>`;
-document.head.appendChild($_documentContainer$9.content);
-const HOST_PROPS = {
-  default: ['list', 'autofocus', 'pattern', 'autocapitalize', 'autocorrect', 'maxlength', 'minlength', 'name', 'placeholder', 'autocomplete', 'title'],
-  accessible: ['disabled', 'readonly', 'required', 'invalid']
-};
-const PROP_TYPE = {
-  DEFAULT: 'default',
-  ACCESSIBLE: 'accessible'
-};
-/**
- * @polymerMixin
- * @mixes Vaadin.ControlStateMixin
- */
-
-const TextFieldMixin = subclass => class VaadinTextFieldMixin extends ControlStateMixin(subclass) {
-  static get properties() {
-    return {
-      /**
-       * Whether the value of the control can be automatically completed by the browser.
-       * List of available options at:
-       * https://developer.mozilla.org/en/docs/Web/HTML/Element/input#attr-autocomplete
-       */
-      autocomplete: {
-        type: String
-      },
-
-      /**
-       * This is a property supported by Safari that is used to control whether
-       * autocorrection should be enabled when the user is entering/editing the text.
-       * Possible values are:
-       * on: Enable autocorrection.
-       * off: Disable autocorrection.
-       */
-      autocorrect: {
-        type: String
-      },
-
-      /**
-       * This is a property supported by Safari and Chrome that is used to control whether
-       * autocapitalization should be enabled when the user is entering/editing the text.
-       * Possible values are:
-       * characters: Characters capitalization.
-       * words: Words capitalization.
-       * sentences: Sentences capitalization.
-       * none: No capitalization.
-       */
-      autocapitalize: {
-        type: String
-      },
-
-      /**
-       * Specify that the value should be automatically selected when the field gains focus.
-       */
-      autoselect: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Set to true to display the clear icon which clears the input.
-       */
-      clearButtonVisible: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Error to show when the input value is invalid.
-       */
-      errorMessage: {
-        type: String,
-        value: ''
-      },
-
-      /**
-       * Object with translated strings used for localization. Has
-       * the following structure and default values:
-       *
-       * ```
-       * {
-       *   // Translation of the clear icon button accessible label
-       *   clear: 'Clear'
-       * }
-       * ```
-       */
-      i18n: {
-        type: Object,
-        value: () => {
-          return {
-            clear: 'Clear'
-          };
-        }
-      },
-
-      /**
-       * String used for the label element.
-       */
-      label: {
-        type: String,
-        value: '',
-        observer: '_labelChanged'
-      },
-
-      /**
-       * Maximum number of characters (in Unicode code points) that the user can enter.
-       */
-      maxlength: {
-        type: Number
-      },
-
-      /**
-       * Minimum number of characters (in Unicode code points) that the user can enter.
-       */
-      minlength: {
-        type: Number
-      },
-
-      /**
-       * The name of the control, which is submitted with the form data.
-       */
-      name: {
-        type: String
-      },
-
-      /**
-       * A hint to the user of what can be entered in the control.
-       */
-      placeholder: {
-        type: String
-      },
-
-      /**
-       * This attribute indicates that the user cannot modify the value of the control.
-       */
-      readonly: {
-        type: Boolean,
-        reflectToAttribute: true
-      },
-
-      /**
-       * Specifies that the user must fill in a value.
-       */
-      required: {
-        type: Boolean,
-        reflectToAttribute: true
-      },
-
-      /**
-       * The initial value of the control.
-       * It can be used for two-way data binding.
-       */
-      value: {
-        type: String,
-        value: '',
-        observer: '_valueChanged',
-        notify: true
-      },
-
-      /**
-       * This property is set to true when the control value is invalid.
-       */
-      invalid: {
-        type: Boolean,
-        reflectToAttribute: true,
-        notify: true,
-        value: false
-      },
-
-      /**
-       * Specifies that the text field has value.
-       */
-      hasValue: {
-        type: Boolean,
-        reflectToAttribute: true
-      },
-
-      /**
-       * When set to true, user is prevented from typing a value that
-       * conflicts with the given `pattern`.
-       */
-      preventInvalidInput: {
-        type: Boolean
-      },
-      _labelId: String,
-      _errorId: String,
-      _inputId: String
-    };
-  }
-
-  static get observers() {
-    return ['_stateChanged(disabled, readonly, clearButtonVisible, hasValue)', '_hostPropsChanged(' + HOST_PROPS.default.join(', ') + ')', '_hostAccessiblePropsChanged(' + HOST_PROPS.accessible.join(', ') + ')', '_getActiveErrorId(invalid, errorMessage, _errorId)', '_getActiveLabelId(label, _labelId, _inputId)', '__observeOffsetHeight(errorMessage, invalid, label)'];
-  }
-
-  get focusElement() {
-    if (!this.shadowRoot) {
-      return;
-    }
-
-    const slotted = this.querySelector(`${this._slottedTagName}[slot="${this._slottedTagName}"]`);
-
-    if (slotted) {
-      return slotted;
-    }
-
-    return this.shadowRoot.querySelector('[part="value"]');
-  }
-  /**
-   * @private
-   */
-
-
-  get inputElement() {
-    return this.focusElement;
-  }
-
-  get _slottedTagName() {
-    return 'input';
-  }
-
-  _createConstraintsObserver() {
-    // This complex observer needs to be added dynamically here (instead of defining it above in the `get observers()`)
-    // so that it runs after complex observers of inheriting classes. Otherwise e.g. `_stepOrMinChanged()` observer of
-    // vaadin-number-field would run after this and the `min` and `step` properties would not yet be propagated to
-    // the `inputElement` when this runs.
-    this._createMethodObserver('_constraintsChanged(required, minlength, maxlength, pattern)');
-  }
-
-  _onInput(e) {
-    if (this.__preventInput) {
-      e.stopImmediatePropagation();
-      this.__preventInput = false;
-      return;
-    }
-
-    if (this.preventInvalidInput) {
-      const input = this.inputElement;
-
-      if (input.value.length > 0 && !this.checkValidity()) {
-        input.value = this.value || ''; // add input-prevented attribute for 200ms
-
-        this.setAttribute('input-prevented', '');
-        this._inputDebouncer = Debouncer.debounce(this._inputDebouncer, timeOut.after(200), () => {
-          this.removeAttribute('input-prevented');
-        });
-        return;
-      }
-    }
-
-    if (!e.__fromClearButton) {
-      this.__userInput = true;
-    }
-
-    this.value = e.target.value;
-  } // NOTE(yuriy): Workaround needed for IE11 and Edge for proper displaying
-  // of the clear button instead of setting display property for it depending on state.
-
-
-  _stateChanged(disabled, readonly, clearButtonVisible, hasValue) {
-    if (!disabled && !readonly && clearButtonVisible && hasValue) {
-      this.$.clearButton.removeAttribute('hidden');
-    } else {
-      this.$.clearButton.setAttribute('hidden', true);
-    }
-  }
-
-  _onChange(e) {
-    if (this._valueClearing) {
-      return;
-    } // In the Shadow DOM, the `change` event is not leaked into the
-    // ancestor tree, so we must do this manually.
-
-
-    const changeEvent = new CustomEvent('change', {
-      detail: {
-        sourceEvent: e
-      },
-      bubbles: e.bubbles,
-      cancelable: e.cancelable
-    });
-    this.dispatchEvent(changeEvent);
-  }
-
-  _valueChanged(newVal, oldVal) {
-    // setting initial value to empty string, skip validation
-    if (newVal === '' && oldVal === undefined) {
-      return;
-    }
-
-    if (newVal !== '' && newVal != null) {
-      this.hasValue = true;
-    } else {
-      this.hasValue = false;
-    }
-
-    if (this.__userInput) {
-      this.__userInput = false;
-      return;
-    } else if (newVal !== undefined) {
-      this.inputElement.value = newVal;
-    } else {
-      this.value = this.inputElement.value = '';
-    }
-
-    if (this.invalid) {
-      this.validate();
-    }
-  }
-
-  _labelChanged(label) {
-    if (label !== '' && label != null) {
-      this.setAttribute('has-label', '');
-    } else {
-      this.removeAttribute('has-label');
-    }
-  }
-
-  _onSlotChange() {
-    const slotted = this.querySelector(`${this._slottedTagName}[slot="${this._slottedTagName}"]`);
-
-    if (this.value) {
-      this.inputElement.value = this.value;
-      this.validate();
-    }
-
-    if (slotted && !this._slottedInput) {
-      this._validateSlottedValue(slotted);
-
-      this._addInputListeners(slotted);
-
-      this._addIEListeners(slotted);
-
-      this._slottedInput = slotted;
-    } else if (!slotted && this._slottedInput) {
-      this._removeInputListeners(this._slottedInput);
-
-      this._removeIEListeners(this._slottedInput);
-
-      this._slottedInput = undefined;
-    }
-
-    Object.keys(PROP_TYPE).map(key => PROP_TYPE[key]).forEach(type => this._propagateHostAttributes(HOST_PROPS[type].map(attr => this[attr]), type));
-  }
-
-  _hostPropsChanged(...attributesValues) {
-    this._propagateHostAttributes(attributesValues, PROP_TYPE.DEFAULT);
-  }
-
-  _hostAccessiblePropsChanged(...attributesValues) {
-    this._propagateHostAttributes(attributesValues, PROP_TYPE.ACCESSIBLE);
-  }
-
-  _validateSlottedValue(slotted) {
-    if (slotted.value !== this.value) {
-      console.warn('Please define value on the vaadin-text-field component!');
-      slotted.value = '';
-    }
-  }
-
-  _propagateHostAttributes(attributesValues, type) {
-    const input = this.inputElement;
-    const attributeNames = HOST_PROPS[type];
-
-    if (type === 'accessible') {
-      attributeNames.forEach((attr, index) => {
-        this._setOrToggleAttribute(attr, attributesValues[index], input);
-
-        this._setOrToggleAttribute(`aria-${attr}`, attributesValues[index], input);
-      });
-    } else {
-      attributeNames.forEach((attr, index) => {
-        this._setOrToggleAttribute(attr, attributesValues[index], input);
-      });
-    }
-  }
-
-  _setOrToggleAttribute(name, value, node) {
-    if (!name || !node) {
-      return;
-    }
-
-    if (value) {
-      node.setAttribute(name, typeof value === 'boolean' ? '' : value);
-    } else {
-      node.removeAttribute(name);
-    }
-  }
-
-  _constraintsChanged(required, minlength, maxlength, pattern) {
-    if (!this.invalid) {
-      return;
-    }
-
-    if (!required && !minlength && !maxlength && !pattern) {
-      this.invalid = false;
-    } else {
-      this.validate();
-    }
-  }
-  /**
-   * Returns true if the current input value satisfies all constraints (if any)
-   * @returns {boolean}
-   */
-
-
-  checkValidity() {
-    if (this.required || this.pattern || this.maxlength || this.minlength) {
-      return this.inputElement.checkValidity();
-    } else {
-      return !this.invalid;
-    }
-  }
-
-  _addInputListeners(node) {
-    node.addEventListener('input', this._boundOnInput);
-    node.addEventListener('change', this._boundOnChange);
-    node.addEventListener('blur', this._boundOnBlur);
-    node.addEventListener('focus', this._boundOnFocus);
-  }
-
-  _removeInputListeners(node) {
-    node.removeEventListener('input', this._boundOnInput);
-    node.removeEventListener('change', this._boundOnChange);
-    node.removeEventListener('blur', this._boundOnBlur);
-    node.removeEventListener('focus', this._boundOnFocus);
-  }
-
-  ready() {
-    super.ready();
-
-    this._createConstraintsObserver();
-
-    this._boundOnInput = this._onInput.bind(this);
-    this._boundOnChange = this._onChange.bind(this);
-    this._boundOnBlur = this._onBlur.bind(this);
-    this._boundOnFocus = this._onFocus.bind(this);
-    const defaultInput = this.shadowRoot.querySelector('[part="value"]');
-    this._slottedInput = this.querySelector(`${this._slottedTagName}[slot="${this._slottedTagName}"]`);
-
-    this._addInputListeners(defaultInput);
-
-    this._addIEListeners(defaultInput);
-
-    if (this._slottedInput) {
-      this._addIEListeners(this._slottedInput);
-
-      this._addInputListeners(this._slottedInput);
-    }
-
-    this.shadowRoot.querySelector('[name="input"], [name="textarea"]').addEventListener('slotchange', this._onSlotChange.bind(this));
-
-    if (!(window.ShadyCSS && window.ShadyCSS.nativeCss)) {
-      this.updateStyles();
-    }
-
-    this.$.clearButton.addEventListener('mousedown', () => this._valueClearing = true);
-    this.$.clearButton.addEventListener('mouseleave', () => this._valueClearing = false);
-    this.$.clearButton.addEventListener('click', this._onClearButtonClick.bind(this));
-    this.addEventListener('keydown', this._onKeyDown.bind(this));
-    var uniqueId = TextFieldMixin._uniqueId = 1 + TextFieldMixin._uniqueId || 0;
-    this._errorId = `${this.constructor.is}-error-${uniqueId}`;
-    this._labelId = `${this.constructor.is}-label-${uniqueId}`;
-    this._inputId = `${this.constructor.is}-input-${uniqueId}`; // Lumo theme defines a max-height transition for the "error-message"
-    // part on invalid state change.
-
-    this.shadowRoot.querySelector('[part="error-message"]').addEventListener('transitionend', () => {
-      this.__observeOffsetHeight();
-    });
-  }
-  /**
-   * Returns true if `value` is valid.
-   * `<iron-form>` uses this to check the validity for all its elements.
-   *
-   * @return {boolean} True if the value is valid.
-   */
-
-
-  validate() {
-    return !(this.invalid = !this.checkValidity());
-  }
-
-  clear() {
-    this.value = '';
-  }
-
-  _onBlur() {
-    this.validate();
-  }
-
-  _onFocus() {
-    if (this.autoselect) {
-      this.inputElement.select(); // iOS 9 workaround: https://stackoverflow.com/a/7436574
-
-      setTimeout(() => {
-        try {
-          this.inputElement.setSelectionRange(0, 9999);
-        } catch (e) {// The workaround may cause errors on different input types.
-          // Needs to be suppressed. See https://github.com/vaadin/flow/issues/6070
-        }
-      });
-    }
-  }
-
-  _onClearButtonClick(e) {
-    e.preventDefault(); // NOTE(yuriy): This line won't affect focus on the host. Cannot be properly tested.
-
-    this.inputElement.focus();
-    this.clear();
-    this._valueClearing = false;
-
-    if (navigator.userAgent.match(/Trident/)) {
-      // Disable IE input" event prevention here, we want the input event from
-      // below to propagate normally.
-      this.__preventInput = false;
-    }
-
-    const inputEvent = new Event('input', {
-      bubbles: true,
-      composed: true
-    });
-    inputEvent.__fromClearButton = true;
-    const changeEvent = new Event('change', {
-      bubbles: !this._slottedInput
-    });
-    changeEvent.__fromClearButton = true;
-    this.inputElement.dispatchEvent(inputEvent);
-    this.inputElement.dispatchEvent(changeEvent);
-  }
-
-  _onKeyDown(e) {
-    if (e.keyCode === 27 && this.clearButtonVisible) {
-      const dispatchChange = !!this.value;
-      this.clear();
-      dispatchChange && this.inputElement.dispatchEvent(new Event('change', {
-        bubbles: !this._slottedInput
-      }));
-    }
-  }
-
-  _addIEListeners(node) {
-    /* istanbul ignore if */
-    if (navigator.userAgent.match(/Trident/)) {
-      // IE11 dispatches `input` event in following cases:
-      // - focus or blur, when placeholder attribute is set
-      // - placeholder attribute value changed
-      // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/101220/
-      this._shouldPreventInput = () => {
-        this.__preventInput = true;
-        requestAnimationFrame(() => {
-          this.__preventInput = false;
-        });
-      };
-
-      node.addEventListener('focusin', this._shouldPreventInput);
-      node.addEventListener('focusout', this._shouldPreventInput);
-
-      this._createPropertyObserver('placeholder', this._shouldPreventInput);
-    }
-  }
-
-  _removeIEListeners(node) {
-    /* istanbul ignore if */
-    if (navigator.userAgent.match(/Trident/)) {
-      node.removeEventListener('focusin', this._shouldPreventInput);
-      node.removeEventListener('focusout', this._shouldPreventInput);
-    }
-  }
-
-  _getActiveErrorId(invalid, errorMessage, errorId) {
-    this._setOrToggleAttribute('aria-describedby', errorMessage && invalid ? errorId : undefined, this.focusElement);
-  }
-
-  _getActiveLabelId(label, _labelId, _inputId) {
-    let ids = _inputId;
-
-    if (label) {
-      ids = `${_labelId} ${_inputId}`;
-    }
-
-    this.focusElement.setAttribute('aria-labelledby', ids);
-  }
-
-  _getErrorMessageAriaHidden(invalid, errorMessage, errorId) {
-    return (!(errorMessage && invalid ? errorId : undefined)).toString();
-  }
-
-  _dispatchIronResizeEventIfNeeded(sizePropertyName, value) {
-    const previousSizePropertyName = '__previous' + sizePropertyName;
-
-    if (this[previousSizePropertyName] !== undefined && this[previousSizePropertyName] !== value) {
-      this.dispatchEvent(new CustomEvent('iron-resize', {
-        bubbles: true
-      }));
-    }
-
-    this[previousSizePropertyName] = value;
-  }
-
-  __observeOffsetHeight() {
-    this._dispatchIronResizeEventIfNeeded('Height', this.offsetHeight);
-  }
-  /**
-   * @protected
-   */
-
-
-  attributeChangedCallback(prop, oldVal, newVal) {
-    super.attributeChangedCallback(prop, oldVal, newVal); // Needed until Edge has CSS Custom Properties (present in Edge Preview)
-
-    /* istanbul ignore if */
-
-    if (!(window.ShadyCSS && window.ShadyCSS.nativeCss) && /^(focused|focus-ring|invalid|disabled|placeholder|has-value)$/.test(prop)) {
-      this.updateStyles();
-    } // Safari has an issue with repainting shadow root element styles when a host attribute changes.
-    // Need this workaround (toggle any inline css property on and off) until the issue gets fixed.
-
-
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-    /* istanbul ignore if */
-
-    if (isSafari && this.root) {
-      const WEBKIT_PROPERTY = '-webkit-backface-visibility';
-      this.root.querySelectorAll('*').forEach(el => {
-        el.style[WEBKIT_PROPERTY] = 'visible';
-        el.style[WEBKIT_PROPERTY] = '';
-      });
-    }
-  }
-  /**
-   * Fired when the user commits a value change.
-   *
-   * @event change
-   */
-
-  /**
-   * Fired when the value is changed by the user: on every typing keystroke,
-   * and the value is cleared using the clear button.
-   *
-   * @event input
-   */
-
-  /**
-   * Fired when the size of the element changes.
-   *
-   * @event iron-resize
-   */
-
-
-};
-
-const DEV_MODE_CODE_REGEXP = /\/\*\*\s+vaadin-dev-mode:start([\s\S]*)vaadin-dev-mode:end\s+\*\*\//i;
-const FlowClients = window.Vaadin && window.Vaadin.Flow && window.Vaadin.Flow.clients;
-
-function isMinified() {
-  function test() {
-    /** vaadin-dev-mode:start
-    return false;
-    vaadin-dev-mode:end **/
-    return true;
-  }
-
-  return uncommentAndRun(test);
-}
-
-function isDevelopmentMode() {
-  try {
-    if (isForcedDevelopmentMode()) {
-      return true;
-    }
-
-    if (!isLocalhost()) {
-      return false;
-    }
-
-    if (FlowClients) {
-      return !isFlowProductionMode();
-    }
-
-    return !isMinified();
-  } catch (e) {
-    // Some error in this code, assume production so no further actions will be taken
-    return false;
-  }
-}
-
-function isForcedDevelopmentMode() {
-  return localStorage.getItem("vaadin.developmentmode.force");
-}
-
-function isLocalhost() {
-  return ["localhost", "127.0.0.1"].indexOf(window.location.hostname) >= 0;
-}
-
-function isFlowProductionMode() {
-  if (FlowClients) {
-    const productionModeApps = Object.keys(FlowClients).map(key => FlowClients[key]).filter(client => client.productionMode);
-
-    if (productionModeApps.length > 0) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-function uncommentAndRun(callback, args) {
-  if (typeof callback !== 'function') {
-    return;
-  }
-
-  const match = DEV_MODE_CODE_REGEXP.exec(callback.toString());
-
-  if (match) {
-    try {
-      // requires CSP: script-src 'unsafe-eval'
-      callback = new Function(match[1]);
-    } catch (e) {
-      // eat the exception
-      console.log('vaadin-development-mode-detector: uncommentAndRun() failed', e);
-    }
-  }
-
-  return callback(args);
-} // A guard against polymer-modulizer removing the window.Vaadin
-// initialization above.
-
-
-window['Vaadin'] = window['Vaadin'] || {};
-/**
- * Inspects the source code of the given `callback` function for
- * specially-marked _commented_ code. If such commented code is found in the
- * callback source, uncomments and runs that code instead of the callback
- * itself. Otherwise runs the callback as is.
- *
- * The optional arguments are passed into the callback / uncommented code,
- * the result is returned.
- *
- * See the `isMinified()` function source code in this file for an example.
- *
- */
-
-const runIfDevelopmentMode = function (callback, args) {
-  if (window.Vaadin.developmentMode) {
-    return uncommentAndRun(callback, args);
-  }
-};
-
-if (window.Vaadin.developmentMode === undefined) {
-  window.Vaadin.developmentMode = isDevelopmentMode();
-}
-
-/* This file is autogenerated from src/vaadin-usage-statistics.tpl.html */
-
-function maybeGatherAndSendStats() {
-  /** vaadin-dev-mode:start
-  (function () {
-  'use strict';
-  var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-  } : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-  };
-  var classCallCheck = function (instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-  };
-  var createClass = function () {
-  function defineProperties(target, props) {
-    for (var i = 0; i < props.length; i++) {
-      var descriptor = props[i];
-      descriptor.enumerable = descriptor.enumerable || false;
-      descriptor.configurable = true;
-      if ("value" in descriptor) descriptor.writable = true;
-      Object.defineProperty(target, descriptor.key, descriptor);
-    }
-  }
-   return function (Constructor, protoProps, staticProps) {
-    if (protoProps) defineProperties(Constructor.prototype, protoProps);
-    if (staticProps) defineProperties(Constructor, staticProps);
-    return Constructor;
-  };
-  }();
-  var getPolymerVersion = function getPolymerVersion() {
-  return window.Polymer && window.Polymer.version;
-  };
-  var StatisticsGatherer = function () {
-  function StatisticsGatherer(logger) {
-    classCallCheck(this, StatisticsGatherer);
-     this.now = new Date().getTime();
-    this.logger = logger;
-  }
-   createClass(StatisticsGatherer, [{
-    key: 'frameworkVersionDetectors',
-    value: function frameworkVersionDetectors() {
-      return {
-        'Flow': function Flow() {
-          if (window.Vaadin && window.Vaadin.Flow && window.Vaadin.Flow.clients) {
-            var flowVersions = Object.keys(window.Vaadin.Flow.clients).map(function (key) {
-              return window.Vaadin.Flow.clients[key];
-            }).filter(function (client) {
-              return client.getVersionInfo;
-            }).map(function (client) {
-              return client.getVersionInfo().flow;
-            });
-            if (flowVersions.length > 0) {
-              return flowVersions[0];
-            }
-          }
-        },
-        'Vaadin Framework': function VaadinFramework() {
-          if (window.vaadin && window.vaadin.clients) {
-            var frameworkVersions = Object.values(window.vaadin.clients).filter(function (client) {
-              return client.getVersionInfo;
-            }).map(function (client) {
-              return client.getVersionInfo().vaadinVersion;
-            });
-            if (frameworkVersions.length > 0) {
-              return frameworkVersions[0];
-            }
-          }
-        },
-        'AngularJs': function AngularJs() {
-          if (window.angular && window.angular.version && window.angular.version) {
-            return window.angular.version.full;
-          }
-        },
-        'Angular': function Angular() {
-          if (window.ng) {
-            var tags = document.querySelectorAll("[ng-version]");
-            if (tags.length > 0) {
-              return tags[0].getAttribute("ng-version");
-            }
-            return "Unknown";
-          }
-        },
-        'Backbone.js': function BackboneJs() {
-          if (window.Backbone) {
-            return window.Backbone.VERSION;
-          }
-        },
-        'React': function React() {
-          var reactSelector = '[data-reactroot], [data-reactid]';
-          if (!!document.querySelector(reactSelector)) {
-            // React does not publish the version by default
-            return "unknown";
-          }
-        },
-        'Ember': function Ember() {
-          if (window.Em && window.Em.VERSION) {
-            return window.Em.VERSION;
-          } else if (window.Ember && window.Ember.VERSION) {
-            return window.Ember.VERSION;
-          }
-        },
-        'jQuery': function (_jQuery) {
-          function jQuery() {
-            return _jQuery.apply(this, arguments);
-          }
-           jQuery.toString = function () {
-            return _jQuery.toString();
-          };
-           return jQuery;
-        }(function () {
-          if (typeof jQuery === 'function' && jQuery.prototype.jquery !== undefined) {
-            return jQuery.prototype.jquery;
-          }
-        }),
-        'Polymer': function Polymer() {
-          var version = getPolymerVersion();
-          if (version) {
-            return version;
-          }
-        },
-        'LitElement': function LitElement() {
-          var version = window.litElementVersions && window.litElementVersions[0];
-          if (version) {
-            return version;
-          }
-        },
-        'LitHtml': function LitHtml() {
-          var version = window.litHtmlVersions && window.litHtmlVersions[0];
-          if (version) {
-            return version;
-          }
-        },
-        'Vue.js': function VueJs() {
-          if (window.Vue) {
-            return window.Vue.version;
-          }
-        }
-      };
-    }
-  }, {
-    key: 'getUsedVaadinElements',
-    value: function getUsedVaadinElements(elements) {
-      var version = getPolymerVersion();
-      var elementClasses = void 0;
-      if (version && version.indexOf('2') === 0) {
-        // Polymer 2: components classes are stored in window.Vaadin
-        elementClasses = Object.keys(window.Vaadin).map(function (c) {
-          return window.Vaadin[c];
-        }).filter(function (c) {
-          return c.is;
-        });
-      } else {
-        // Polymer 3: components classes are stored in window.Vaadin.registrations
-        elementClasses = window.Vaadin.registrations || [];
-      }
-      elementClasses.forEach(function (klass) {
-        var version = klass.version ? klass.version : "0.0.0";
-        elements[klass.is] = { version: version };
-      });
-    }
-  }, {
-    key: 'getUsedVaadinThemes',
-    value: function getUsedVaadinThemes(themes) {
-      ['Lumo', 'Material'].forEach(function (themeName) {
-        var theme;
-        var version = getPolymerVersion();
-        if (version && version.indexOf('2') === 0) {
-          // Polymer 2: themes are stored in window.Vaadin
-          theme = window.Vaadin[themeName];
-        } else {
-          // Polymer 3: themes are stored in custom element registry
-          theme = customElements.get('vaadin-' + themeName.toLowerCase() + '-styles');
-        }
-        if (theme && theme.version) {
-          themes[themeName] = { version: theme.version };
-        }
-      });
-    }
-  }, {
-    key: 'getFrameworks',
-    value: function getFrameworks(frameworks) {
-      var detectors = this.frameworkVersionDetectors();
-      Object.keys(detectors).forEach(function (framework) {
-        var detector = detectors[framework];
-        try {
-          var version = detector();
-          if (version) {
-            frameworks[framework] = { version: version };
-          }
-        } catch (e) {}
-      });
-    }
-  }, {
-    key: 'gather',
-    value: function gather(storage) {
-      var storedStats = storage.read();
-      var gatheredStats = {};
-      var types = ["elements", "frameworks", "themes"];
-       types.forEach(function (type) {
-        gatheredStats[type] = {};
-        if (!storedStats[type]) {
-          storedStats[type] = {};
-        }
-      });
-       var previousStats = JSON.stringify(storedStats);
-       this.getUsedVaadinElements(gatheredStats.elements);
-      this.getFrameworks(gatheredStats.frameworks);
-      this.getUsedVaadinThemes(gatheredStats.themes);
-       var now = this.now;
-      types.forEach(function (type) {
-        var keys = Object.keys(gatheredStats[type]);
-        keys.forEach(function (key) {
-          if (!storedStats[type][key] || _typeof(storedStats[type][key]) != _typeof({})) {
-            storedStats[type][key] = { firstUsed: now };
-          }
-          // Discards any previously logged version number
-          storedStats[type][key].version = gatheredStats[type][key].version;
-          storedStats[type][key].lastUsed = now;
-        });
-      });
-       var newStats = JSON.stringify(storedStats);
-      storage.write(newStats);
-      if (newStats != previousStats && Object.keys(storedStats).length > 0) {
-        this.logger.debug("New stats: " + newStats);
-      }
-    }
-  }]);
-  return StatisticsGatherer;
-  }();
-  var StatisticsStorage = function () {
-  function StatisticsStorage(key) {
-    classCallCheck(this, StatisticsStorage);
-     this.key = key;
-  }
-   createClass(StatisticsStorage, [{
-    key: 'read',
-    value: function read() {
-      var localStorageStatsString = localStorage.getItem(this.key);
-      try {
-        return JSON.parse(localStorageStatsString ? localStorageStatsString : '{}');
-      } catch (e) {
-        return {};
-      }
-    }
-  }, {
-    key: 'write',
-    value: function write(data) {
-      localStorage.setItem(this.key, data);
-    }
-  }, {
-    key: 'clear',
-    value: function clear() {
-      localStorage.removeItem(this.key);
-    }
-  }, {
-    key: 'isEmpty',
-    value: function isEmpty() {
-      var storedStats = this.read();
-      var empty = true;
-      Object.keys(storedStats).forEach(function (key) {
-        if (Object.keys(storedStats[key]).length > 0) {
-          empty = false;
-        }
-      });
-       return empty;
-    }
-  }]);
-  return StatisticsStorage;
-  }();
-  var StatisticsSender = function () {
-  function StatisticsSender(url, logger) {
-    classCallCheck(this, StatisticsSender);
-     this.url = url;
-    this.logger = logger;
-  }
-   createClass(StatisticsSender, [{
-    key: 'send',
-    value: function send(data, errorHandler) {
-      var logger = this.logger;
-       if (navigator.onLine === false) {
-        logger.debug("Offline, can't send");
-        errorHandler();
-        return;
-      }
-      logger.debug("Sending data to " + this.url);
-       var req = new XMLHttpRequest();
-      req.withCredentials = true;
-      req.addEventListener("load", function () {
-        // Stats sent, nothing more to do
-        logger.debug("Response: " + req.responseText);
-      });
-      req.addEventListener("error", function () {
-        logger.debug("Send failed");
-        errorHandler();
-      });
-      req.addEventListener("abort", function () {
-        logger.debug("Send aborted");
-        errorHandler();
-      });
-      req.open("POST", this.url);
-      req.setRequestHeader("Content-Type", "application/json");
-      req.send(data);
-    }
-  }]);
-  return StatisticsSender;
-  }();
-  var StatisticsLogger = function () {
-  function StatisticsLogger(id) {
-    classCallCheck(this, StatisticsLogger);
-     this.id = id;
-  }
-   createClass(StatisticsLogger, [{
-    key: '_isDebug',
-    value: function _isDebug() {
-      return localStorage.getItem("vaadin." + this.id + ".debug");
-    }
-  }, {
-    key: 'debug',
-    value: function debug(msg) {
-      if (this._isDebug()) {
-        console.info(this.id + ": " + msg);
-      }
-    }
-  }]);
-  return StatisticsLogger;
-  }();
-  var UsageStatistics = function () {
-  function UsageStatistics() {
-    classCallCheck(this, UsageStatistics);
-     this.now = new Date();
-    this.timeNow = this.now.getTime();
-    this.gatherDelay = 10; // Delay between loading this file and gathering stats
-    this.initialDelay = 24 * 60 * 60;
-     this.logger = new StatisticsLogger("statistics");
-    this.storage = new StatisticsStorage("vaadin.statistics.basket");
-    this.gatherer = new StatisticsGatherer(this.logger);
-    this.sender = new StatisticsSender("https://tools.vaadin.com/usage-stats/submit", this.logger);
-  }
-   createClass(UsageStatistics, [{
-    key: 'maybeGatherAndSend',
-    value: function maybeGatherAndSend() {
-      var _this = this;
-       if (localStorage.getItem(UsageStatistics.optOutKey)) {
-        return;
-      }
-      this.gatherer.gather(this.storage);
-      setTimeout(function () {
-        _this.maybeSend();
-      }, this.gatherDelay * 1000);
-    }
-  }, {
-    key: 'lottery',
-    value: function lottery() {
-      return Math.random() <= 0.05;
-    }
-  }, {
-    key: 'currentMonth',
-    value: function currentMonth() {
-      return this.now.getYear() * 12 + this.now.getMonth();
-    }
-  }, {
-    key: 'maybeSend',
-    value: function maybeSend() {
-      var firstUse = Number(localStorage.getItem(UsageStatistics.firstUseKey));
-      var monthProcessed = Number(localStorage.getItem(UsageStatistics.monthProcessedKey));
-       if (!firstUse) {
-        // Use a grace period to avoid interfering with tests, incognito mode etc
-        firstUse = this.timeNow;
-        localStorage.setItem(UsageStatistics.firstUseKey, firstUse);
-      }
-       if (this.timeNow < firstUse + this.initialDelay * 1000) {
-        this.logger.debug("No statistics will be sent until the initial delay of " + this.initialDelay + "s has passed");
-        return;
-      }
-      if (this.currentMonth() <= monthProcessed) {
-        this.logger.debug("This month has already been processed");
-        return;
-      }
-      localStorage.setItem(UsageStatistics.monthProcessedKey, this.currentMonth());
-      // Use random sampling
-      if (this.lottery()) {
-        this.logger.debug("Congratulations, we have a winner!");
-      } else {
-        this.logger.debug("Sorry, no stats from you this time");
-        return;
-      }
-       this.send();
-    }
-  }, {
-    key: 'send',
-    value: function send() {
-      // Ensure we have the latest data
-      this.gatherer.gather(this.storage);
-       // Read, send and clean up
-      var data = this.storage.read();
-      data["firstUse"] = Number(localStorage.getItem(UsageStatistics.firstUseKey));
-      data["usageStatisticsVersion"] = UsageStatistics.version;
-      var info = 'This request contains usage statistics gathered from the application running in development mode. \n\nStatistics gathering is automatically disabled and excluded from production builds.\n\nFor details and to opt-out, see https://github.com/vaadin/vaadin-usage-statistics.\n\n\n\n';
-      var self = this;
-      this.sender.send(info + JSON.stringify(data), function () {
-        // Revert the 'month processed' flag
-        localStorage.setItem(UsageStatistics.monthProcessedKey, self.currentMonth() - 1);
-      });
-    }
-  }], [{
-    key: 'version',
-    get: function get$1() {
-      return '2.0.10';
-    }
-  }, {
-    key: 'firstUseKey',
-    get: function get$1() {
-      return 'vaadin.statistics.firstuse';
-    }
-  }, {
-    key: 'monthProcessedKey',
-    get: function get$1() {
-      return 'vaadin.statistics.monthProcessed';
-    }
-  }, {
-    key: 'optOutKey',
-    get: function get$1() {
-      return 'vaadin.statistics.optout';
-    }
-  }]);
-  return UsageStatistics;
-  }();
-  try {
-  window.Vaadin = window.Vaadin || {};
-  window.Vaadin.usageStatsChecker = window.Vaadin.usageStatsChecker || new UsageStatistics();
-  window.Vaadin.usageStatsChecker.maybeGatherAndSend();
-  } catch (e) {
-  // Intentionally ignored as this is not a problem in the app being developed
-  }
-  }());
-   vaadin-dev-mode:end **/
-}
-
-const usageStatistics = function () {
-  if (typeof runIfDevelopmentMode === 'function') {
-    return runIfDevelopmentMode(maybeGatherAndSendStats);
-  }
-};
-
-if (!window.Vaadin) {
-  window['Vaadin'] = {};
-}
-/**
- * Array of Vaadin custom element classes that have been finalized.
- */
-
-
-window['Vaadin'].registrations = window.Vaadin.registrations || []; // Use the hack to prevent polymer-modulizer from converting to exports
-
-window['Vaadin'].developmentModeCallback = window.Vaadin.developmentModeCallback || {};
-
-window['Vaadin'].developmentModeCallback['vaadin-usage-statistics'] = function () {
-  if (usageStatistics) {
-    usageStatistics();
-  }
-};
-
-let statsJob;
-/**
- * @polymerMixin
- */
-
-const ElementMixin$1 = superClass => class VaadinElementMixin extends superClass {
-  /** @protected */
-  static _finalizeClass() {
-    super._finalizeClass(); // Registers a class prototype for telemetry purposes.
-
-
-    if (this.is) {
-      window.Vaadin.registrations.push(this);
-
-      if (window.Vaadin.developmentModeCallback) {
-        statsJob = Debouncer.debounce(statsJob, idlePeriod, () => {
-          window.Vaadin.developmentModeCallback['vaadin-usage-statistics']();
-        });
-        enqueueDebouncer(statsJob);
-      }
-    }
-  }
-
-  ready() {
-    super.ready();
-
-    if (document.doctype === null) {
-      console.warn('Vaadin components require the "standards mode" declaration. Please add <!DOCTYPE html> to the HTML document.');
-    }
-  }
-
-};
-
-/**
-@license
-Copyright (c) 2017 Vaadin Ltd.
-This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
-*/
-/**
- * `<vaadin-text-field>` is a Web Component for text field control in forms.
- *
- * ```html
- * <vaadin-text-field label="First Name">
- * </vaadin-text-field>
- * ```
- *
- * ### Prefixes and suffixes
- *
- * These are child elements of a `<vaadin-text-field>` that are displayed
- * inline with the input, before or after.
- * In order for an element to be considered as a prefix, it must have the slot
- * attribute set to `prefix` (and similarly for `suffix`).
- *
- * ```html
- * <vaadin-text-field label="Email address">
- *   <div slot="prefix">Sent to:</div>
- *   <div slot="suffix">@vaadin.com</div>
- * </vaadin-text-area>
- * ```
- *
- * ### Styling
- *
- * The following custom properties are available for styling:
- *
- * Custom property | Description | Default
- * ----------------|-------------|-------------
- * `--vaadin-text-field-default-width` | Set the default width of the input field | `12em`
- *
- * The following shadow DOM parts are available for styling:
- *
- * Part name | Description
- * ----------------|----------------
- * `label` | The label element
- * `input-field` | The element that wraps prefix, value and suffix
- * `value` | The text value element inside the `input-field` element
- * `error-message` | The error message element
- *
- * The following state attributes are available for styling:
- *
- * Attribute    | Description | Part name
- * -------------|-------------|------------
- * `disabled` | Set to a disabled text field | :host
- * `has-value` | Set when the element has a value | :host
- * `has-label` | Set when the element has a label | :host
- * `invalid` | Set when the element is invalid | :host
- * `input-prevented` | Temporarily set when invalid input is prevented | :host
- * `focused` | Set when the element is focused | :host
- * `focus-ring` | Set when the element is keyboard focused | :host
- * `readonly` | Set to a readonly text field | :host
- *
- * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
- *
- * @memberof Vaadin
- * @mixes Vaadin.TextFieldMixin
- * @mixes Vaadin.ThemableMixin
- * @demo demo/index.html
- */
-
-class TextFieldElement extends ElementMixin$1(TextFieldMixin(ThemableMixin(PolymerElement))) {
-  static get template() {
-    return html$1`
-    <style include="vaadin-text-field-shared-styles">
-      /* polymer-cli linter breaks with empty line */
-    </style>
-
-    <div class="vaadin-text-field-container">
-
-      <label part="label" on-click="focus" id="[[_labelId]]">[[label]]</label>
-
-      <div part="input-field" id="[[_inputId]]">
-
-        <slot name="prefix"></slot>
-
-        <slot name="input">
-          <input part="value">
-        </slot>
-
-        <div part="clear-button" id="clearButton" role="button" aria-label\$="[[i18n.clear]]"></div>
-        <slot name="suffix"></slot>
-
-      </div>
-
-      <div part="error-message" id="[[_errorId]]" aria-live="assertive" aria-hidden\$="[[_getErrorMessageAriaHidden(invalid, errorMessage, _errorId)]]">[[errorMessage]]</div>
-
-    </div>
-`;
-  }
-
-  static get is() {
-    return 'vaadin-text-field';
-  }
-
-  static get version() {
-    return '2.4.12';
-  }
-
-  static get properties() {
-    return {
-      /**
-       * Identifies a list of pre-defined options to suggest to the user.
-       * The value must be the id of a <datalist> element in the same document.
-       */
-      list: {
-        type: String
-      },
-
-      /**
-       * A regular expression that the value is checked against.
-       * The pattern must match the entire value, not just some subset.
-       */
-      pattern: {
-        type: String
-      },
-
-      /**
-       * Message to show to the user when validation fails.
-       */
-      title: {
-        type: String
-      }
-    };
-  }
-
-}
-
-customElements.define(TextFieldElement.is, TextFieldElement);
-
-const $_documentContainer$a = html$1`<dom-module id="lumo-button" theme-for="vaadin-button">
-  <template>
-    <style>
-      :host {
-        /* Sizing */
-        --lumo-button-size: var(--lumo-size-m);
-        min-width: calc(var(--lumo-button-size) * 2);
-        height: var(--lumo-button-size);
-        padding: 0 calc(var(--lumo-button-size) / 3 + var(--lumo-border-radius) / 2);
-        margin: var(--lumo-space-xs) 0;
-        box-sizing: border-box;
-        /* Style */
-        font-family: var(--lumo-font-family);
-        font-size: var(--lumo-font-size-m);
-        font-weight: 500;
-        color: var(--_lumo-button-color, var(--lumo-primary-text-color));
-        background-color: var(--_lumo-button-background-color, var(--lumo-contrast-5pct));
-        border-radius: var(--lumo-border-radius);
-        cursor: default;
-        -webkit-tap-highlight-color: transparent;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-
-      /* Set only for the internal parts so we don’t affect the host vertical alignment */
-      [part="label"],
-      [part="prefix"],
-      [part="suffix"] {
-        line-height: var(--lumo-line-height-xs);
-      }
-
-      [part="label"] {
-        padding: calc(var(--lumo-button-size) / 6) 0;
-      }
-
-      :host([theme~="small"]) {
-        font-size: var(--lumo-font-size-s);
-        --lumo-button-size: var(--lumo-size-s);
-      }
-
-      :host([theme~="large"]) {
-        font-size: var(--lumo-font-size-l);
-        --lumo-button-size: var(--lumo-size-l);
-      }
-
-      /* This needs to be the last selector for it to take priority */
-      :host([disabled][disabled]) {
-        pointer-events: none;
-        color: var(--lumo-disabled-text-color);
-        background-color: var(--lumo-contrast-5pct);
-      }
-
-      /* For interaction states */
-      :host::before,
-      :host::after {
-        content: "";
-        /* We rely on the host always being relative */
-        position: absolute;
-        z-index: 1;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        background-color: currentColor;
-        border-radius: inherit;
-        opacity: 0;
-        transition: opacity 0.2s;
-        pointer-events: none;
-      }
-
-      /* Hover */
-
-      :host(:hover)::before {
-        opacity: 0.05;
-      }
-
-      /* Disable hover for touch devices */
-      @media (pointer: coarse) {
-        :host(:not([active]):hover)::before {
-          opacity: 0;
-        }
-      }
-
-      /* Active */
-
-      :host::after {
-        transition: opacity 1.4s, transform 0.1s;
-        filter: blur(8px);
-      }
-
-      :host([active])::before {
-        opacity: 0.1;
-        transition-duration: 0s;
-      }
-
-      :host([active])::after {
-        opacity: 0.1;
-        transition-duration: 0s, 0s;
-        transform: scale(0);
-      }
-
-      /* Keyboard focus */
-
-      :host([focus-ring]) {
-        box-shadow: 0 0 0 2px var(--lumo-primary-color-50pct);
-      }
-
-      /* Types (primary, tertiary, tertiary-inline */
-
-      :host([theme~="tertiary"]),
-      :host([theme~="tertiary-inline"]) {
-        background-color: transparent !important;
-        transition: opacity 0.2s;
-        min-width: 0;
-      }
-
-      :host([theme~="tertiary"])::before,
-      :host([theme~="tertiary-inline"])::before {
-        display: none;
-      }
-
-      :host([theme~="tertiary"]) {
-        padding: 0 calc(var(--lumo-button-size) / 6);
-      }
-
-      @media (hover: hover) {
-        :host([theme*="tertiary"]:not([active]):hover) {
-          opacity: 0.8;
-        }
-      }
-
-      :host([theme~="tertiary"][active]),
-      :host([theme~="tertiary-inline"][active]) {
-        opacity: 0.5;
-        transition-duration: 0s;
-      }
-
-      :host([theme~="tertiary-inline"]) {
-        margin: 0;
-        height: auto;
-        padding: 0;
-        line-height: inherit;
-        font-size: inherit;
-      }
-
-      :host([theme~="tertiary-inline"]) [part="label"] {
-        padding: 0;
-        overflow: visible;
-        line-height: inherit;
-      }
-
-      :host([theme~="primary"]) {
-        background-color: var(--_lumo-button-primary-background-color, var(--lumo-primary-color));
-        color: var(--_lumo-button-primary-color, var(--lumo-primary-contrast-color));
-        font-weight: 600;
-        min-width: calc(var(--lumo-button-size) * 2.5);
-      }
-
-      :host([theme~="primary"][disabled]) {
-        background-color: var(--lumo-primary-color-50pct);
-        color: var(--lumo-primary-contrast-color);
-      }
-
-      :host([theme~="primary"]:hover)::before {
-        opacity: 0.1;
-      }
-
-      :host([theme~="primary"][active])::before {
-        background-color: var(--lumo-shade-20pct);
-      }
-
-      @media (pointer: coarse) {
-        :host([theme~="primary"][active])::before {
-          background-color: var(--lumo-shade-60pct);
-        }
-
-        :host([theme~="primary"]:not([active]):hover)::before {
-          opacity: 0;
-        }
-      }
-
-      :host([theme~="primary"][active])::after {
-        opacity: 0.2;
-      }
-
-      /* Colors (success, error, contrast) */
-
-      :host([theme~="success"]) {
-        color: var(--lumo-success-text-color);
-      }
-
-      :host([theme~="success"][theme~="primary"]) {
-        background-color: var(--lumo-success-color);
-        color: var(--lumo-success-contrast-color);
-      }
-
-      :host([theme~="success"][theme~="primary"][disabled]) {
-        background-color: var(--lumo-success-color-50pct);
-      }
-
-      :host([theme~="error"]) {
-        color: var(--lumo-error-text-color);
-      }
-
-      :host([theme~="error"][theme~="primary"]) {
-        background-color: var(--lumo-error-color);
-        color: var(--lumo-error-contrast-color);
-      }
-
-      :host([theme~="error"][theme~="primary"][disabled]) {
-        background-color: var(--lumo-error-color-50pct);
-      }
-
-      :host([theme~="contrast"]) {
-        color: var(--lumo-contrast);
-      }
-
-      :host([theme~="contrast"][theme~="primary"]) {
-        background-color: var(--lumo-contrast);
-        color: var(--lumo-base-color);
-      }
-
-      :host([theme~="contrast"][theme~="primary"][disabled]) {
-        background-color: var(--lumo-contrast-50pct);
-      }
-
-      /* Icons */
-
-      [part] ::slotted(iron-icon) {
-        display: inline-block;
-        width: var(--lumo-icon-size-m);
-        height: var(--lumo-icon-size-m);
-      }
-
-      /* Vaadin icons are based on a 16x16 grid (unlike Lumo and Material icons with 24x24), so they look too big by default */
-      [part] ::slotted(iron-icon[icon^="vaadin:"]) {
-        padding: 0.25em;
-        box-sizing: border-box !important;
-      }
-
-      [part="prefix"] {
-        margin-left: -0.25em;
-        margin-right: 0.25em;
-      }
-
-      [part="suffix"] {
-        margin-left: 0.25em;
-        margin-right: -0.25em;
-      }
-
-      /* Icon-only */
-
-      :host([theme~="icon"]:not([theme~="tertiary-inline"])) {
-        min-width: var(--lumo-button-size);
-        padding-left: calc(var(--lumo-button-size) / 4);
-        padding-right: calc(var(--lumo-button-size) / 4);
-      }
-
-      :host([theme~="icon"]) [part="prefix"],
-      :host([theme~="icon"]) [part="suffix"] {
-        margin-left: 0;
-        margin-right: 0;
-      }
-    </style>
-  </template>
-</dom-module>`;
-document.head.appendChild($_documentContainer$a.content);
 
 /**
 @license
@@ -27163,142 +21394,285 @@ const GestureEventListeners = dedupingMixin(superClass => {
 });
 
 /**
+ * @polymerMixin
+ */
+const ThemePropertyMixin = superClass => class VaadinThemePropertyMixin extends superClass {
+  static get properties() {
+    return {
+      /**
+       * Helper property with theme attribute value facilitating propagation
+       * in shadow DOM.
+       *
+       * Enables the component implementation to propagate the `theme`
+       * attribute value to the subcomponents in Shadow DOM by binding
+       * the subcomponent’s "theme" attribute to the `theme` property of
+       * the host.
+       *
+       * **NOTE:** Extending the mixin only provides the property for binding,
+       * and does not make the propagation alone.
+       *
+       * See [Theme Attribute and Subcomponents](https://github.com/vaadin/vaadin-themable-mixin/wiki/5.-Theme-Attribute-and-Subcomponents).
+       * page for more information.
+       *
+       * @protected
+       */
+      theme: {
+        type: String,
+        readOnly: true
+      }
+    };
+  }
+  /** @protected */
+
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    super.attributeChangedCallback(name, oldValue, newValue);
+
+    if (name === 'theme') {
+      this._setTheme(newValue);
+    }
+  }
+
+};
+
+/**
+ * @polymerMixin
+ * @mixes Vaadin.ThemePropertyMixin
+ */
+
+const ThemableMixin = superClass => class VaadinThemableMixin extends ThemePropertyMixin(superClass) {
+  /** @protected */
+  static finalize() {
+    super.finalize();
+    const template = this.prototype._template;
+    const hasOwnTemplate = this.template && this.template.parentElement && this.template.parentElement.id === this.is;
+
+    const inheritedTemplate = Object.getPrototypeOf(this.prototype)._template;
+
+    if (inheritedTemplate && !hasOwnTemplate) {
+      // The element doesn't define its own template -> include the theme modules from the inherited template
+      Array.from(inheritedTemplate.content.querySelectorAll('style[include]')).forEach(s => {
+        this._includeStyle(s.getAttribute('include'), template);
+      });
+    }
+
+    this._includeMatchingThemes(template);
+  }
+  /** @protected */
+
+
+  static _includeMatchingThemes(template) {
+    const domModule = DomModule;
+    const modules = domModule.prototype.modules;
+    let hasThemes = false;
+    const defaultModuleName = this.is + '-default-theme';
+    Object.keys(modules).sort((moduleNameA, moduleNameB) => {
+      const vaadinA = moduleNameA.indexOf('vaadin-') === 0;
+      const vaadinB = moduleNameB.indexOf('vaadin-') === 0;
+      const vaadinThemePrefixes = ['lumo-', 'material-'];
+      const vaadinThemeA = vaadinThemePrefixes.filter(prefix => moduleNameA.indexOf(prefix) === 0).length > 0;
+      const vaadinThemeB = vaadinThemePrefixes.filter(prefix => moduleNameB.indexOf(prefix) === 0).length > 0;
+
+      if (vaadinA !== vaadinB) {
+        // Include vaadin core styles first
+        return vaadinA ? -1 : 1;
+      } else if (vaadinThemeA !== vaadinThemeB) {
+        // Include vaadin theme styles after that
+        return vaadinThemeA ? -1 : 1;
+      } else {
+        // Lastly include custom styles so they override all vaadin styles
+        return 0;
+      }
+    }).forEach(moduleName => {
+      if (moduleName !== defaultModuleName) {
+        const themeFor = modules[moduleName].getAttribute('theme-for');
+
+        if (themeFor) {
+          themeFor.split(' ').forEach(themeForToken => {
+            if (new RegExp('^' + themeForToken.split('*').join('.*') + '$').test(this.is)) {
+              hasThemes = true;
+
+              this._includeStyle(moduleName, template);
+            }
+          });
+        }
+      }
+    });
+
+    if (!hasThemes && modules[defaultModuleName]) {
+      // No theme modules found, include the default module if it exists
+      this._includeStyle(defaultModuleName, template);
+    }
+  }
+  /** @private */
+
+
+  static _includeStyle(moduleName, template) {
+    if (template && !template.content.querySelector(`style[include="${moduleName}"]`)) {
+      const styleEl = document.createElement('style');
+      styleEl.setAttribute('include', moduleName);
+      template.content.appendChild(styleEl);
+    }
+  }
+
+};
+
+/**
 @license
 Copyright (c) 2017 Vaadin Ltd.
 This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
 */
+
 /**
- * `<vaadin-button>` is a Web Component providing an accessible and customizable button.
- *
- * ```html
- * <vaadin-button>
- * </vaadin-button>
- * ```
- *
- * ```js
- * document.querySelector('vaadin-button').addEventListener('click', () => alert('Hello World!'));
- * ```
- *
- * ### Styling
- *
- * The following shadow DOM parts are exposed for styling:
- *
- * Part name | Description
- * ----------------|----------------
- * `label` | The label (text) inside the button
- * `prefix` | A slot for e.g. an icon before the label
- * `suffix` | A slot for e.g. an icon after the label
- *
- *
- * The following attributes are exposed for styling:
- *
- * Attribute | Description
- * --------- | -----------
- * `active` | Set when the button is pressed down, either with mouse, touch or the keyboard.
- * `disabled` | Set when the button is disabled.
- * `focus-ring` | Set when the button is focused using the keyboard.
- * `focused` | Set when the button is focused.
- *
- * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
- *
- * @memberof Vaadin
- * @mixes Vaadin.ElementMixin
- * @mixes Vaadin.ControlStateMixin
- * @mixes Vaadin.ThemableMixin
- * @mixes Polymer.GestureEventListeners
- * @demo demo/index.html
+ * A private mixin to avoid problems with dynamic properties and Polymer Analyzer.
+ * No need to expose these properties in the API docs.
+ * @polymerMixin
+ */
+const TabIndexMixin = superClass => class VaadinTabIndexMixin extends superClass {
+  static get properties() {
+    var properties = {
+      /**
+       * Internal property needed to listen to `tabindex` attribute changes.
+       *
+       * For changing the tabindex of this component use the native `tabIndex` property.
+       * @private
+       */
+      tabindex: {
+        type: Number,
+        value: 0,
+        reflectToAttribute: true,
+        observer: '_tabindexChanged'
+      }
+    };
+
+    if (window.ShadyDOM) {
+      // ShadyDOM browsers need the `tabIndex` in order to notify when the user changes it programmatically.
+      properties['tabIndex'] = properties.tabindex;
+    }
+
+    return properties;
+  }
+
+};
+/**
+ * Polymer.IronControlState is not a proper 2.0 class, also, its tabindex
+ * implementation fails in the shadow dom, so we have this for vaadin elements.
+ * @polymerMixin
  */
 
-class ButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(GestureEventListeners(PolymerElement)))) {
-  static get template() {
-    return html$1`
-    <style>
-      :host {
-        display: inline-block;
-        position: relative;
-        outline: none;
-        white-space: nowrap;
+
+const ControlStateMixin = superClass => class VaadinControlStateMixin extends TabIndexMixin(superClass) {
+  static get properties() {
+    return {
+      /**
+       * Specify that this control should have input focus when the page loads.
+       */
+      autofocus: {
+        type: Boolean
+      },
+
+      /**
+       * Stores the previous value of tabindex attribute of the disabled element
+       */
+      _previousTabIndex: {
+        type: Number
+      },
+
+      /**
+       * If true, the user cannot interact with this element.
+       */
+      disabled: {
+        type: Boolean,
+        observer: '_disabledChanged',
+        reflectToAttribute: true
+      },
+      _isShiftTabbing: {
+        type: Boolean
       }
-
-      :host([hidden]) {
-        display: none !important;
-      }
-
-      /* Ensure the button is always aligned on the baseline */
-      .vaadin-button-container::before {
-        content: "\\2003";
-        display: inline-block;
-        width: 0;
-      }
-
-      .vaadin-button-container {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        width: 100%;
-        height: 100%;
-        min-height: inherit;
-        text-shadow: inherit;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-      }
-
-      [part="prefix"],
-      [part="suffix"] {
-        flex: none;
-      }
-
-      [part="label"] {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      #button {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: inherit;
-      }
-    </style>
-    <div class="vaadin-button-container">
-      <div part="prefix">
-        <slot name="prefix"></slot>
-      </div>
-      <div part="label">
-        <slot></slot>
-      </div>
-      <div part="suffix">
-        <slot name="suffix"></slot>
-      </div>
-    </div>
-    <button id="button" type="button"></button>
-`;
-  }
-
-  static get is() {
-    return 'vaadin-button';
-  }
-
-  static get version() {
-    return '2.2.1';
+    };
   }
 
   ready() {
-    super.ready(); // Leaving default role in the native button, makes navigation announcement
-    // being different when using focus navigation (tab) versus using normal
-    // navigation (arrows). The first way announces the label on a button
-    // since the focus is moved programmatically, and the second on a group.
+    this.addEventListener('focusin', e => {
+      if (e.composedPath()[0] === this) {
+        this._focus(e);
+      } else if (e.composedPath().indexOf(this.focusElement) !== -1 && !this.disabled) {
+        this._setFocused(true);
+      }
+    });
+    this.addEventListener('focusout', e => this._setFocused(false)); // In super.ready() other 'focusin' and 'focusout' listeners might be
+    // added, so we call it after our own ones to ensure they execute first.
+    // Issue to watch out: when incorrect, <vaadin-combo-box> refocuses the
+    // input field on iOS after “Done” is pressed.
 
-    this.setAttribute('role', 'button');
-    this.$.button.setAttribute('role', 'presentation');
+    super.ready(); // This fixes the bug in Firefox 61 (https://bugzilla.mozilla.org/show_bug.cgi?id=1472887)
+    // where focusout event does not go out of shady DOM because composed property in the event is not true
 
-    this._addActiveListeners();
+    const ensureEventComposed = e => {
+      if (!e.composed) {
+        e.target.dispatchEvent(new CustomEvent(e.type, {
+          bubbles: true,
+          composed: true,
+          cancelable: false
+        }));
+      }
+    };
+
+    this.shadowRoot.addEventListener('focusin', ensureEventComposed);
+    this.shadowRoot.addEventListener('focusout', ensureEventComposed);
+    this.addEventListener('keydown', e => {
+      if (!e.defaultPrevented && e.keyCode === 9) {
+        if (e.shiftKey) {
+          // Flag is checked in _focus event handler.
+          this._isShiftTabbing = true;
+          HTMLElement.prototype.focus.apply(this);
+
+          this._setFocused(false); // Event handling in IE is asynchronous and the flag is removed asynchronously as well
+
+
+          setTimeout(() => this._isShiftTabbing = false, 0);
+        } else {
+          // Workaround for FF63-65 bug that causes the focus to get lost when
+          // blurring a slotted component with focusable shadow root content
+          // https://bugzilla.mozilla.org/show_bug.cgi?id=1528686
+          // TODO: Remove when safe
+          const firefox = window.navigator.userAgent.match(/Firefox\/(\d\d\.\d)/);
+
+          if (firefox && parseFloat(firefox[1]) >= 63 && parseFloat(firefox[1]) < 66 && this.parentNode && this.nextSibling) {
+            const fakeTarget = document.createElement('input');
+            fakeTarget.style.position = 'absolute';
+            fakeTarget.style.opacity = 0;
+            fakeTarget.tabIndex = this.tabIndex;
+            this.parentNode.insertBefore(fakeTarget, this.nextSibling);
+            fakeTarget.focus();
+            fakeTarget.addEventListener('focusout', () => this.parentNode.removeChild(fakeTarget));
+          }
+        }
+      }
+    });
+
+    if (this.autofocus && !this.focused && !this.disabled) {
+      window.requestAnimationFrame(() => {
+        this._focus();
+
+        this._setFocused(true);
+
+        this.setAttribute('focus-ring', '');
+      });
+    }
+
+    this._boundKeydownListener = this._bodyKeydownListener.bind(this);
+    this._boundKeyupListener = this._bodyKeyupListener.bind(this);
+  }
+  /**
+   * @protected
+   */
+
+
+  connectedCallback() {
+    super.connectedCallback();
+    document.body.addEventListener('keydown', this._boundKeydownListener, true);
+    document.body.addEventListener('keyup', this._boundKeyupListener, true);
   }
   /**
    * @protected
@@ -27306,205 +21680,736 @@ class ButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(Gestu
 
 
   disconnectedCallback() {
-    super.disconnectedCallback(); // `active` state is preserved when the element is disconnected between keydown and keyup events.
+    super.disconnectedCallback();
+    document.body.removeEventListener('keydown', this._boundKeydownListener, true);
+    document.body.removeEventListener('keyup', this._boundKeyupListener, true); // in non-Chrome browsers, blur does not fire on the element when it is disconnected.
     // reproducible in `<vaadin-date-picker>` when closing on `Cancel` or `Today` click.
 
-    if (this.hasAttribute('active')) {
-      this.removeAttribute('active');
+    if (this.hasAttribute('focused')) {
+      this._setFocused(false);
     }
   }
 
-  _addActiveListeners() {
-    addListener$1(this, 'down', () => !this.disabled && this.setAttribute('active', ''));
-    addListener$1(this, 'up', () => this.removeAttribute('active'));
-    this.addEventListener('keydown', e => !this.disabled && [13, 32].indexOf(e.keyCode) >= 0 && this.setAttribute('active', ''));
-    this.addEventListener('keyup', () => this.removeAttribute('active'));
-    this.addEventListener('blur', () => this.removeAttribute('active'));
+  _setFocused(focused) {
+    if (focused) {
+      this.setAttribute('focused', '');
+    } else {
+      this.removeAttribute('focused');
+    } // focus-ring is true when the element was focused from the keyboard.
+    // Focus Ring [A11ycasts]: https://youtu.be/ilj2P5-5CjI
+
+
+    if (focused && this._tabPressed) {
+      this.setAttribute('focus-ring', '');
+    } else {
+      this.removeAttribute('focus-ring');
+    }
+  }
+
+  _bodyKeydownListener(e) {
+    this._tabPressed = e.keyCode === 9;
+  }
+
+  _bodyKeyupListener() {
+    this._tabPressed = false;
+  }
+  /**
+   * Any element extending this mixin is required to implement this getter.
+   * It returns the actual focusable element in the component.
+   */
+
+
+  get focusElement() {
+    window.console.warn(`Please implement the 'focusElement' property in <${this.localName}>`);
+    return this;
+  }
+
+  _focus(e) {
+    if (this._isShiftTabbing) {
+      return;
+    }
+
+    this.focusElement.focus();
+
+    this._setFocused(true);
+  }
+  /**
+   * Moving the focus from the host element causes firing of the blur event what leads to problems in IE.
+   * @private
+   */
+
+
+  focus() {
+    if (!this.focusElement || this.disabled) {
+      return;
+    }
+
+    this.focusElement.focus();
+
+    this._setFocused(true);
+  }
+  /**
+   * Native bluring in the host element does nothing because it does not have the focus.
+   * In chrome it works, but not in FF.
+   * @private
+   */
+
+
+  blur() {
+    this.focusElement.blur();
+
+    this._setFocused(false);
+  }
+
+  _disabledChanged(disabled) {
+    this.focusElement.disabled = disabled;
+
+    if (disabled) {
+      this.blur();
+      this._previousTabIndex = this.tabindex;
+      this.tabindex = -1;
+      this.setAttribute('aria-disabled', 'true');
+    } else {
+      if (typeof this._previousTabIndex !== 'undefined') {
+        this.tabindex = this._previousTabIndex;
+      }
+
+      this.removeAttribute('aria-disabled');
+    }
+  }
+
+  _tabindexChanged(tabindex) {
+    if (tabindex !== undefined) {
+      this.focusElement.tabIndex = tabindex;
+    }
+
+    if (this.disabled && this.tabindex) {
+      // If tabindex attribute was changed while checkbox was disabled
+      if (this.tabindex !== -1) {
+        this._previousTabIndex = this.tabindex;
+      }
+
+      this.tabindex = tabindex = undefined;
+    }
+
+    if (window.ShadyDOM) {
+      this.setProperties({
+        tabIndex: tabindex,
+        tabindex: tabindex
+      });
+    }
   }
   /**
    * @protected
    */
 
 
-  get focusElement() {
-    return this.$.button;
+  click() {
+    if (!this.disabled) {
+      super.click();
+    }
   }
 
+};
+
+const DEV_MODE_CODE_REGEXP = /\/\*\*\s+vaadin-dev-mode:start([\s\S]*)vaadin-dev-mode:end\s+\*\*\//i;
+const FlowClients = window.Vaadin && window.Vaadin.Flow && window.Vaadin.Flow.clients;
+
+function isMinified() {
+  function test() {
+    /** vaadin-dev-mode:start
+    return false;
+    vaadin-dev-mode:end **/
+    return true;
+  }
+
+  return uncommentAndRun(test);
 }
 
-customElements.define(ButtonElement.is, ButtonElement);
+function isDevelopmentMode() {
+  try {
+    if (isForcedDevelopmentMode()) {
+      return true;
+    }
 
-const $_documentContainer$b = html$1`<dom-module id="lumo-checkbox" theme-for="vaadin-checkbox">
-  <template>
-    <style include="lumo-checkbox-style lumo-checkbox-effects">
-      /* IE11 only */
-      ::-ms-backdrop,
-      [part="checkbox"] {
-        line-height: 1;
-      }
-    </style>
-  </template>
-</dom-module><dom-module id="lumo-checkbox-style">
-  <template>
-    <style>
-      :host {
-        -webkit-tap-highlight-color: transparent;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        cursor: default;
-        outline: none;
-      }
+    if (!isLocalhost()) {
+      return false;
+    }
 
-      [part="label"]:not([empty]) {
-        margin: 0.1875em 0.875em 0.1875em 0.375em;
-      }
+    if (FlowClients) {
+      return !isFlowProductionMode();
+    }
 
-      [part="checkbox"] {
-        width: calc(1em + 2px);
-        height: calc(1em + 2px);
-        margin: 0.1875em;
-        position: relative;
-        border-radius: var(--lumo-border-radius);
-        background-color: var(--lumo-contrast-20pct);
-        transition: transform 0.2s cubic-bezier(.12, .32, .54, 2), background-color 0.15s;
-        pointer-events: none;
-        line-height: 1.2;
-      }
+    return !isMinified();
+  } catch (e) {
+    // Some error in this code, assume production so no further actions will be taken
+    return false;
+  }
+}
 
-      :host([indeterminate]) [part="checkbox"],
-      :host([checked]) [part="checkbox"] {
-        background-color: var(--lumo-primary-color);
-      }
+function isForcedDevelopmentMode() {
+  return localStorage.getItem("vaadin.developmentmode.force");
+}
 
-      /* Needed to align the checkbox nicely on the baseline */
-      [part="checkbox"]::before {
-        content: "\\2003";
-      }
+function isLocalhost() {
+  return ["localhost", "127.0.0.1"].indexOf(window.location.hostname) >= 0;
+}
 
-      /* Checkmark */
-      [part="checkbox"]::after {
-        content: "";
-        display: inline-block;
-        width: 0;
-        height: 0;
-        border: 0 solid var(--lumo-primary-contrast-color);
-        border-width: 0.1875em 0 0 0.1875em;
-        box-sizing: border-box;
-        transform-origin: 0 0;
-        position: absolute;
-        top: 0.8125em;
-        left: 0.5em;
-        transform: scale(0.55) rotate(-135deg);
-        opacity: 0;
-      }
+function isFlowProductionMode() {
+  if (FlowClients) {
+    const productionModeApps = Object.keys(FlowClients).map(key => FlowClients[key]).filter(client => client.productionMode);
 
-      :host([checked]) [part="checkbox"]::after {
-        opacity: 1;
-        width: 0.625em;
-        height: 1.0625em;
-      }
+    if (productionModeApps.length > 0) {
+      return true;
+    }
+  }
 
-      /* Indeterminate checkmark */
+  return false;
+}
 
-      :host([indeterminate]) [part="checkbox"]::after {
-        transform: none;
-        opacity: 1;
-        top: 45%;
-        height: 10%;
-        left: 22%;
-        right: 22%;
-        width: auto;
-        border: 0;
-        background-color: var(--lumo-primary-contrast-color);
-        transition: opacity 0.25s;
-      }
+function uncommentAndRun(callback, args) {
+  if (typeof callback !== 'function') {
+    return;
+  }
 
-      /* Focus ring */
+  const match = DEV_MODE_CODE_REGEXP.exec(callback.toString());
 
-      :host([focus-ring]) [part="checkbox"] {
-        box-shadow: 0 0 0 3px var(--lumo-primary-color-50pct);
-      }
+  if (match) {
+    try {
+      // requires CSP: script-src 'unsafe-eval'
+      callback = new Function(match[1]);
+    } catch (e) {
+      // eat the exception
+      console.log('vaadin-development-mode-detector: uncommentAndRun() failed', e);
+    }
+  }
 
-      /* Disabled */
+  return callback(args);
+} // A guard against polymer-modulizer removing the window.Vaadin
+// initialization above.
 
-      :host([disabled]) {
-        pointer-events: none;
-        color: var(--lumo-disabled-text-color);
-      }
 
-      :host([disabled]) [part="label"] ::slotted(*) {
-        color: inherit;
-      }
+window['Vaadin'] = window['Vaadin'] || {};
+/**
+ * Inspects the source code of the given `callback` function for
+ * specially-marked _commented_ code. If such commented code is found in the
+ * callback source, uncomments and runs that code instead of the callback
+ * itself. Otherwise runs the callback as is.
+ *
+ * The optional arguments are passed into the callback / uncommented code,
+ * the result is returned.
+ *
+ * See the `isMinified()` function source code in this file for an example.
+ *
+ */
 
-      :host([disabled]) [part="checkbox"] {
-        background-color: var(--lumo-contrast-10pct);
-      }
+const runIfDevelopmentMode = function (callback, args) {
+  if (window.Vaadin.developmentMode) {
+    return uncommentAndRun(callback, args);
+  }
+};
 
-      :host([disabled]) [part="checkbox"]::after {
-        border-color: var(--lumo-contrast-30pct);
-      }
+if (window.Vaadin.developmentMode === undefined) {
+  window.Vaadin.developmentMode = isDevelopmentMode();
+}
 
-      :host([indeterminate][disabled]) [part="checkbox"]::after {
-        background-color: var(--lumo-contrast-30pct);
-      }
-    </style>
-  </template>
-</dom-module><dom-module id="lumo-checkbox-effects">
-  <template>
-    <style>
-      /* Transition the checkmark if activated with the mouse (disabled for grid select-all this way) */
-      :host(:hover) [part="checkbox"]::after {
-        transition: width 0.1s, height 0.25s;
-      }
+/* This file is autogenerated from src/vaadin-usage-statistics.tpl.html */
 
-      /* Used for activation "halo" */
-      [part="checkbox"]::before {
-        color: transparent;
-        display: inline-block;
-        width: 100%;
-        height: 100%;
-        border-radius: inherit;
-        background-color: inherit;
-        transform: scale(1.4);
-        opacity: 0;
-        transition: transform 0.1s, opacity 0.8s;
-      }
-
-      /* Hover */
-
-      :host(:not([checked]):not([indeterminate]):not([disabled]):hover) [part="checkbox"] {
-        background-color: var(--lumo-contrast-30pct);
-      }
-
-      /* Disable hover for touch devices */
-      @media (pointer: coarse) {
-        :host(:not([checked]):not([indeterminate]):not([disabled]):hover) [part="checkbox"] {
-          background-color: var(--lumo-contrast-20pct);
+function maybeGatherAndSendStats() {
+  /** vaadin-dev-mode:start
+  (function () {
+  'use strict';
+  var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+  } : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+  };
+  var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+  };
+  var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+   return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+  }();
+  var getPolymerVersion = function getPolymerVersion() {
+  return window.Polymer && window.Polymer.version;
+  };
+  var StatisticsGatherer = function () {
+  function StatisticsGatherer(logger) {
+    classCallCheck(this, StatisticsGatherer);
+     this.now = new Date().getTime();
+    this.logger = logger;
+  }
+   createClass(StatisticsGatherer, [{
+    key: 'frameworkVersionDetectors',
+    value: function frameworkVersionDetectors() {
+      return {
+        'Flow': function Flow() {
+          if (window.Vaadin && window.Vaadin.Flow && window.Vaadin.Flow.clients) {
+            var flowVersions = Object.keys(window.Vaadin.Flow.clients).map(function (key) {
+              return window.Vaadin.Flow.clients[key];
+            }).filter(function (client) {
+              return client.getVersionInfo;
+            }).map(function (client) {
+              return client.getVersionInfo().flow;
+            });
+            if (flowVersions.length > 0) {
+              return flowVersions[0];
+            }
+          }
+        },
+        'Vaadin Framework': function VaadinFramework() {
+          if (window.vaadin && window.vaadin.clients) {
+            var frameworkVersions = Object.values(window.vaadin.clients).filter(function (client) {
+              return client.getVersionInfo;
+            }).map(function (client) {
+              return client.getVersionInfo().vaadinVersion;
+            });
+            if (frameworkVersions.length > 0) {
+              return frameworkVersions[0];
+            }
+          }
+        },
+        'AngularJs': function AngularJs() {
+          if (window.angular && window.angular.version && window.angular.version) {
+            return window.angular.version.full;
+          }
+        },
+        'Angular': function Angular() {
+          if (window.ng) {
+            var tags = document.querySelectorAll("[ng-version]");
+            if (tags.length > 0) {
+              return tags[0].getAttribute("ng-version");
+            }
+            return "Unknown";
+          }
+        },
+        'Backbone.js': function BackboneJs() {
+          if (window.Backbone) {
+            return window.Backbone.VERSION;
+          }
+        },
+        'React': function React() {
+          var reactSelector = '[data-reactroot], [data-reactid]';
+          if (!!document.querySelector(reactSelector)) {
+            // React does not publish the version by default
+            return "unknown";
+          }
+        },
+        'Ember': function Ember() {
+          if (window.Em && window.Em.VERSION) {
+            return window.Em.VERSION;
+          } else if (window.Ember && window.Ember.VERSION) {
+            return window.Ember.VERSION;
+          }
+        },
+        'jQuery': function (_jQuery) {
+          function jQuery() {
+            return _jQuery.apply(this, arguments);
+          }
+           jQuery.toString = function () {
+            return _jQuery.toString();
+          };
+           return jQuery;
+        }(function () {
+          if (typeof jQuery === 'function' && jQuery.prototype.jquery !== undefined) {
+            return jQuery.prototype.jquery;
+          }
+        }),
+        'Polymer': function Polymer() {
+          var version = getPolymerVersion();
+          if (version) {
+            return version;
+          }
+        },
+        'LitElement': function LitElement() {
+          var version = window.litElementVersions && window.litElementVersions[0];
+          if (version) {
+            return version;
+          }
+        },
+        'LitHtml': function LitHtml() {
+          var version = window.litHtmlVersions && window.litHtmlVersions[0];
+          if (version) {
+            return version;
+          }
+        },
+        'Vue.js': function VueJs() {
+          if (window.Vue) {
+            return window.Vue.version;
+          }
         }
+      };
+    }
+  }, {
+    key: 'getUsedVaadinElements',
+    value: function getUsedVaadinElements(elements) {
+      var version = getPolymerVersion();
+      var elementClasses = void 0;
+      if (version && version.indexOf('2') === 0) {
+        // Polymer 2: components classes are stored in window.Vaadin
+        elementClasses = Object.keys(window.Vaadin).map(function (c) {
+          return window.Vaadin[c];
+        }).filter(function (c) {
+          return c.is;
+        });
+      } else {
+        // Polymer 3: components classes are stored in window.Vaadin.registrations
+        elementClasses = window.Vaadin.registrations || [];
       }
-
-      /* Active */
-
-      :host([active]) [part="checkbox"] {
-        transform: scale(0.9);
-        transition-duration: 0.05s;
+      elementClasses.forEach(function (klass) {
+        var version = klass.version ? klass.version : "0.0.0";
+        elements[klass.is] = { version: version };
+      });
+    }
+  }, {
+    key: 'getUsedVaadinThemes',
+    value: function getUsedVaadinThemes(themes) {
+      ['Lumo', 'Material'].forEach(function (themeName) {
+        var theme;
+        var version = getPolymerVersion();
+        if (version && version.indexOf('2') === 0) {
+          // Polymer 2: themes are stored in window.Vaadin
+          theme = window.Vaadin[themeName];
+        } else {
+          // Polymer 3: themes are stored in custom element registry
+          theme = customElements.get('vaadin-' + themeName.toLowerCase() + '-styles');
+        }
+        if (theme && theme.version) {
+          themes[themeName] = { version: theme.version };
+        }
+      });
+    }
+  }, {
+    key: 'getFrameworks',
+    value: function getFrameworks(frameworks) {
+      var detectors = this.frameworkVersionDetectors();
+      Object.keys(detectors).forEach(function (framework) {
+        var detector = detectors[framework];
+        try {
+          var version = detector();
+          if (version) {
+            frameworks[framework] = { version: version };
+          }
+        } catch (e) {}
+      });
+    }
+  }, {
+    key: 'gather',
+    value: function gather(storage) {
+      var storedStats = storage.read();
+      var gatheredStats = {};
+      var types = ["elements", "frameworks", "themes"];
+       types.forEach(function (type) {
+        gatheredStats[type] = {};
+        if (!storedStats[type]) {
+          storedStats[type] = {};
+        }
+      });
+       var previousStats = JSON.stringify(storedStats);
+       this.getUsedVaadinElements(gatheredStats.elements);
+      this.getFrameworks(gatheredStats.frameworks);
+      this.getUsedVaadinThemes(gatheredStats.themes);
+       var now = this.now;
+      types.forEach(function (type) {
+        var keys = Object.keys(gatheredStats[type]);
+        keys.forEach(function (key) {
+          if (!storedStats[type][key] || _typeof(storedStats[type][key]) != _typeof({})) {
+            storedStats[type][key] = { firstUsed: now };
+          }
+          // Discards any previously logged version number
+          storedStats[type][key].version = gatheredStats[type][key].version;
+          storedStats[type][key].lastUsed = now;
+        });
+      });
+       var newStats = JSON.stringify(storedStats);
+      storage.write(newStats);
+      if (newStats != previousStats && Object.keys(storedStats).length > 0) {
+        this.logger.debug("New stats: " + newStats);
       }
-
-      :host([active][checked]) [part="checkbox"] {
-        transform: scale(1.1);
+    }
+  }]);
+  return StatisticsGatherer;
+  }();
+  var StatisticsStorage = function () {
+  function StatisticsStorage(key) {
+    classCallCheck(this, StatisticsStorage);
+     this.key = key;
+  }
+   createClass(StatisticsStorage, [{
+    key: 'read',
+    value: function read() {
+      var localStorageStatsString = localStorage.getItem(this.key);
+      try {
+        return JSON.parse(localStorageStatsString ? localStorageStatsString : '{}');
+      } catch (e) {
+        return {};
       }
-
-      :host([active]:not([checked])) [part="checkbox"]::before {
-        transition-duration: 0.01s, 0.01s;
-        transform: scale(0);
-        opacity: 0.4;
+    }
+  }, {
+    key: 'write',
+    value: function write(data) {
+      localStorage.setItem(this.key, data);
+    }
+  }, {
+    key: 'clear',
+    value: function clear() {
+      localStorage.removeItem(this.key);
+    }
+  }, {
+    key: 'isEmpty',
+    value: function isEmpty() {
+      var storedStats = this.read();
+      var empty = true;
+      Object.keys(storedStats).forEach(function (key) {
+        if (Object.keys(storedStats[key]).length > 0) {
+          empty = false;
+        }
+      });
+       return empty;
+    }
+  }]);
+  return StatisticsStorage;
+  }();
+  var StatisticsSender = function () {
+  function StatisticsSender(url, logger) {
+    classCallCheck(this, StatisticsSender);
+     this.url = url;
+    this.logger = logger;
+  }
+   createClass(StatisticsSender, [{
+    key: 'send',
+    value: function send(data, errorHandler) {
+      var logger = this.logger;
+       if (navigator.onLine === false) {
+        logger.debug("Offline, can't send");
+        errorHandler();
+        return;
       }
-    </style>
-  </template>
-</dom-module>`;
-document.head.appendChild($_documentContainer$b.content);
+      logger.debug("Sending data to " + this.url);
+       var req = new XMLHttpRequest();
+      req.withCredentials = true;
+      req.addEventListener("load", function () {
+        // Stats sent, nothing more to do
+        logger.debug("Response: " + req.responseText);
+      });
+      req.addEventListener("error", function () {
+        logger.debug("Send failed");
+        errorHandler();
+      });
+      req.addEventListener("abort", function () {
+        logger.debug("Send aborted");
+        errorHandler();
+      });
+      req.open("POST", this.url);
+      req.setRequestHeader("Content-Type", "application/json");
+      req.send(data);
+    }
+  }]);
+  return StatisticsSender;
+  }();
+  var StatisticsLogger = function () {
+  function StatisticsLogger(id) {
+    classCallCheck(this, StatisticsLogger);
+     this.id = id;
+  }
+   createClass(StatisticsLogger, [{
+    key: '_isDebug',
+    value: function _isDebug() {
+      return localStorage.getItem("vaadin." + this.id + ".debug");
+    }
+  }, {
+    key: 'debug',
+    value: function debug(msg) {
+      if (this._isDebug()) {
+        console.info(this.id + ": " + msg);
+      }
+    }
+  }]);
+  return StatisticsLogger;
+  }();
+  var UsageStatistics = function () {
+  function UsageStatistics() {
+    classCallCheck(this, UsageStatistics);
+     this.now = new Date();
+    this.timeNow = this.now.getTime();
+    this.gatherDelay = 10; // Delay between loading this file and gathering stats
+    this.initialDelay = 24 * 60 * 60;
+     this.logger = new StatisticsLogger("statistics");
+    this.storage = new StatisticsStorage("vaadin.statistics.basket");
+    this.gatherer = new StatisticsGatherer(this.logger);
+    this.sender = new StatisticsSender("https://tools.vaadin.com/usage-stats/submit", this.logger);
+  }
+   createClass(UsageStatistics, [{
+    key: 'maybeGatherAndSend',
+    value: function maybeGatherAndSend() {
+      var _this = this;
+       if (localStorage.getItem(UsageStatistics.optOutKey)) {
+        return;
+      }
+      this.gatherer.gather(this.storage);
+      setTimeout(function () {
+        _this.maybeSend();
+      }, this.gatherDelay * 1000);
+    }
+  }, {
+    key: 'lottery',
+    value: function lottery() {
+      return Math.random() <= 0.05;
+    }
+  }, {
+    key: 'currentMonth',
+    value: function currentMonth() {
+      return this.now.getYear() * 12 + this.now.getMonth();
+    }
+  }, {
+    key: 'maybeSend',
+    value: function maybeSend() {
+      var firstUse = Number(localStorage.getItem(UsageStatistics.firstUseKey));
+      var monthProcessed = Number(localStorage.getItem(UsageStatistics.monthProcessedKey));
+       if (!firstUse) {
+        // Use a grace period to avoid interfering with tests, incognito mode etc
+        firstUse = this.timeNow;
+        localStorage.setItem(UsageStatistics.firstUseKey, firstUse);
+      }
+       if (this.timeNow < firstUse + this.initialDelay * 1000) {
+        this.logger.debug("No statistics will be sent until the initial delay of " + this.initialDelay + "s has passed");
+        return;
+      }
+      if (this.currentMonth() <= monthProcessed) {
+        this.logger.debug("This month has already been processed");
+        return;
+      }
+      localStorage.setItem(UsageStatistics.monthProcessedKey, this.currentMonth());
+      // Use random sampling
+      if (this.lottery()) {
+        this.logger.debug("Congratulations, we have a winner!");
+      } else {
+        this.logger.debug("Sorry, no stats from you this time");
+        return;
+      }
+       this.send();
+    }
+  }, {
+    key: 'send',
+    value: function send() {
+      // Ensure we have the latest data
+      this.gatherer.gather(this.storage);
+       // Read, send and clean up
+      var data = this.storage.read();
+      data["firstUse"] = Number(localStorage.getItem(UsageStatistics.firstUseKey));
+      data["usageStatisticsVersion"] = UsageStatistics.version;
+      var info = 'This request contains usage statistics gathered from the application running in development mode. \n\nStatistics gathering is automatically disabled and excluded from production builds.\n\nFor details and to opt-out, see https://github.com/vaadin/vaadin-usage-statistics.\n\n\n\n';
+      var self = this;
+      this.sender.send(info + JSON.stringify(data), function () {
+        // Revert the 'month processed' flag
+        localStorage.setItem(UsageStatistics.monthProcessedKey, self.currentMonth() - 1);
+      });
+    }
+  }], [{
+    key: 'version',
+    get: function get$1() {
+      return '2.0.10';
+    }
+  }, {
+    key: 'firstUseKey',
+    get: function get$1() {
+      return 'vaadin.statistics.firstuse';
+    }
+  }, {
+    key: 'monthProcessedKey',
+    get: function get$1() {
+      return 'vaadin.statistics.monthProcessed';
+    }
+  }, {
+    key: 'optOutKey',
+    get: function get$1() {
+      return 'vaadin.statistics.optout';
+    }
+  }]);
+  return UsageStatistics;
+  }();
+  try {
+  window.Vaadin = window.Vaadin || {};
+  window.Vaadin.usageStatsChecker = window.Vaadin.usageStatsChecker || new UsageStatistics();
+  window.Vaadin.usageStatsChecker.maybeGatherAndSend();
+  } catch (e) {
+  // Intentionally ignored as this is not a problem in the app being developed
+  }
+  }());
+   vaadin-dev-mode:end **/
+}
+
+const usageStatistics = function () {
+  if (typeof runIfDevelopmentMode === 'function') {
+    return runIfDevelopmentMode(maybeGatherAndSendStats);
+  }
+};
+
+if (!window.Vaadin) {
+  window['Vaadin'] = {};
+}
+/**
+ * Array of Vaadin custom element classes that have been finalized.
+ */
+
+
+window['Vaadin'].registrations = window.Vaadin.registrations || []; // Use the hack to prevent polymer-modulizer from converting to exports
+
+window['Vaadin'].developmentModeCallback = window.Vaadin.developmentModeCallback || {};
+
+window['Vaadin'].developmentModeCallback['vaadin-usage-statistics'] = function () {
+  if (usageStatistics) {
+    usageStatistics();
+  }
+};
+
+let statsJob;
+/**
+ * @polymerMixin
+ */
+
+const ElementMixin$1 = superClass => class VaadinElementMixin extends superClass {
+  /** @protected */
+  static _finalizeClass() {
+    super._finalizeClass(); // Registers a class prototype for telemetry purposes.
+
+
+    if (this.is) {
+      window.Vaadin.registrations.push(this);
+
+      if (window.Vaadin.developmentModeCallback) {
+        statsJob = Debouncer.debounce(statsJob, idlePeriod, () => {
+          window.Vaadin.developmentModeCallback['vaadin-usage-statistics']();
+        });
+        enqueueDebouncer(statsJob);
+      }
+    }
+  }
+
+  ready() {
+    super.ready();
+
+    if (document.doctype === null) {
+      console.warn('Vaadin components require the "standards mode" declaration. Please add <!DOCTYPE html> to the HTML document.');
+    }
+  }
+
+};
 
 /**
 @license
@@ -27814,6 +22719,5101 @@ class CheckboxElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(Ges
 }
 
 customElements.define(CheckboxElement.is, CheckboxElement);
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$1 = self => function () {
+  // @ts-ignore
+  const {
+    gettingMemo,
+    memos,
+    gettingMemoPage
+  } = this;
+  return html`
+    <style>
+      ${styles$8}
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+    </style>
+
+    <h3>All memos</h3>
+    <div class = "memo-list">
+      ${memos ? memos.map(item => html`
+      <vaadin-checkbox class = "${until(gettingMemoPage(item.memoId), '')}">
+        ${until(gettingMemo(item.memoId), 'Loading...')}
+      </vaadin-checkbox>`) : ''}
+    </div>
+
+  `;
+}.bind(self)();
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetDomainMemosMixin = base => _decorate(null, function (_initialize, _GetDomainMixin) {
+  class _class extends _GetDomainMixin {
+    // @ts-ignore
+    constructor() {
+      super();
+
+      _initialize(this);
+
+      this.boundSaveDomainMemos = this.saveDomainMemos.bind(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "memos",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "method",
+      key: "disconnectedCallback",
+      value: function disconnectedCallback() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
+          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
+        }
+
+        this.disconnectRef();
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: function domainChanged(data) {
+        _get(_getPrototypeOf(_class.prototype), "domainChanged", this).call(this, data);
+
+        if (data) {
+          this.getDomainMemos(this.domainId);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "disconnectRef",
+      value: function disconnectRef() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
+
+        if (this.domainMemosRef) {
+          this.domainMemosRef.off('value', this.boundSaveDomainMemos);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "getDomainMemos",
+      value: function getDomainMemos(id) {
+        this.disconnectRef();
+
+        if (id) {
+          this.domainMemosRef = database.ref(`memos/lists/domain-memo/${id}`);
+          this.domainMemosRef.on('value', this.boundSaveDomainMemos);
+        } else {
+          console.log('No values for id-crowdId: ', id);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveDomainMemos",
+      value: function saveDomainMemos(snap) {
+        const data = snap.val() || null;
+        const array = [];
+
+        if (data) {
+          for (const memoId in data) {
+            array.push({ ...data[memoId],
+              memoId
+            });
+          }
+
+          this.memos = array;
+          this.domainMemosChanged(this.memos);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "domainMemosChanged",
+      value: function domainMemosChanged(data) {}
+    }]
+  };
+}, GetDomainMixin(base));
+
+// @ts-ignore
+
+let ProtobotMemoAll = _decorate([customElement('protobot-memo-all')], function (_initialize, _GetDomainMemosMixin) {
+  class ProtobotMemoAll extends _GetDomainMemosMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotMemoAll,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$1(this);
+      }
+      /**
+       *
+       * @param {String} memoId
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingMemo",
+      value: async function gettingMemo(memoId) {
+        // console.log(`${id}`);
+        return (await database.ref(`memos/data/${memoId}/text`).once('value')).val();
+      }
+      /**
+       *
+       * @param {String} memoId
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingMemoPage",
+      value: async function gettingMemoPage(memoId) {
+        // console.log(`${id}`);
+        return (await database.ref(`memos/data/${memoId}/page`).once('value')).val();
+      }
+    }]
+  };
+}, GetDomainMemosMixin(LitElement));
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$2 = self => function () {
+  // @ts-ignore
+  const {
+    domainName,
+    changeDomainName,
+    designerName,
+    changeDesignerName,
+    users,
+    gettingCrowdId,
+    queryObject
+  } = this;
+  const {
+    page
+  } = queryObject;
+  return html`
+    <style>
+      ${styles}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap');
+    </style>
+    <h1>PROTOBOT</h1>
+    <h3>Domain</h3>
+    <input class="left-side-text" type="text" value="${domainName}" @change="${changeDomainName.bind(this)}">
+    <h3>Designer</h3>
+    <input class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
+    <br>
+    <h3>Pages</h3>
+    <ul class = "review-link">
+      <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=macro">Macro Review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=authoring">Design and Revise</a></li>
+      <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
+    </ul>
+    ${page === 'micro' ? html`
+      <h3>Crowd list</h3>
+      <ul class = "crowd-link">
+        ${users ? users.map(item => html`
+        <li>
+          <a href="/?domain=${this.domainId}&page=micro&crowdId=${item}&set=1">${until(gettingCrowdId(item), 'Loading...')}</a>
+        </li>`) : ''}
+      </ul>
+    ` : ''}
+
+    ${page === 'authoring' ? html`
+      <protobot-memo-all></protobot-memo-all>
+    ` : ''}
+  `;
+}.bind(self)();
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetDomainUsersMixin = base => _decorate(null, function (_initialize, _GetDomainMixin) {
+  class _class extends _GetDomainMixin {
+    // @ts-ignore
+    constructor() {
+      super();
+
+      _initialize(this);
+
+      this.boundSaveDomainUsers = this.saveDomainUsers.bind(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "users",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "method",
+      key: "disconnectedCallback",
+      value: function disconnectedCallback() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
+          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
+        }
+
+        this.disconnectRef();
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: function domainChanged(data) {
+        _get(_getPrototypeOf(_class.prototype), "domainChanged", this).call(this, data);
+
+        if (data) {
+          this.getDomainUsers(data);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "disconnectRef",
+      value: function disconnectRef() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
+
+        if (this.domainUsersRef) {
+          this.domainUsersRef.off('value', this.boundSaveDomainUsers);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "getDomainUsers",
+      value: function getDomainUsers(id) {
+        this.disconnectRef();
+
+        if (id) {
+          this.domainUsersRef = database.ref('users/lists/domain-utterances/');
+          this.domainUsersRef.on('value', this.boundSaveDomainUsers);
+        } else {
+          console.log('No values for id-crowdId: ', id);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveDomainUsers",
+      value: function saveDomainUsers(snap) {
+        const data = snap.val() || null;
+        const array = [];
+
+        if (data) {
+          for (const user in data) {
+            if (data[user][this.domainId]) {
+              array.push(user);
+            }
+          }
+
+          this.users = array;
+          this.domainUsersChanged(this.users);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "domainUsersChanged",
+      value: function domainUsersChanged(data) {}
+    }]
+  };
+}, GetDomainMixin(base));
+
+// @ts-ignore
+
+let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_initialize, _GetDomainUsersMixin) {
+  class ProtobotSidebar extends _GetDomainUsersMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotSidebar,
+    d: [{
+      kind: "field",
+      decorators: [property()],
+      key: "domainName",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property()],
+      key: "designerName",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$2(this);
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: function domainChanged(domain) {
+        _get(_getPrototypeOf(ProtobotSidebar.prototype), "domainChanged", this).call(this, domain);
+
+        if (domain) {
+          this.domainName = domain.name || '';
+          this.designerName = domain.designer || '';
+        }
+      }
+    }, {
+      kind: "method",
+      key: "changeDomainName",
+      value: async function changeDomainName(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.domainName !== value) {
+          // saves the name
+          await database.ref(`domains/data/${this.domainId}/name`).set(value);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "changeDesignerName",
+      value: async function changeDesignerName(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.designerName !== value) {
+          // saves the designer
+          await database.ref(`domains/data/${this.domainId}/designer`).set(value);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingCrowdId",
+      value: async function gettingCrowdId(id) {
+        // console.log(`${id}`);
+        return (await database.ref(`users/data/${id}/name`).once('value')).val();
+      } // /**
+      //  *
+      //  * @param {String} memoId
+      //  */
+      // async gettingMemo (memoId) {
+      //   // console.log(`${id}`);
+      //   return (await database.ref(`memos/data/${memoId}/text`).once('value')).val();
+      // }
+
+    }]
+  };
+}, GetDomainUsersMixin(LitElement));
+
+var styles$9 = "\n.center-modal {\n  background: #221f4d;\n  font-family: 'Open Sans', sans-serif;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n}\n\n.domain-id {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n  margin: 10px;\n}\n\n.new-button {\n  --button-bg\t: rgb(78, 91, 150);\n}";
+
+function computeRadius(a, b) {
+  return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2)) / 2;
+}
+
+function getWebkitMatrix(computedStyle) {
+  return new WebKitCSSMatrix(computedStyle.webkitTransform);
+}
+
+function getScale(computedStyle, rect) {
+  const matrix = getWebkitMatrix(computedStyle);
+  return {
+    x: (rect == null ? computedStyle.getPropertyValue('width') : rect.width) === 0 ? 0 : matrix.a,
+    y: (rect == null ? computedStyle.getPropertyValue('height') : rect.height) === 0 ? 0 : matrix.d
+  };
+}
+
+function getOpacity(computedStyle) {
+  if (computedStyle.getPropertyValue('width') === '0px' || computedStyle.getPropertyValue('height') === '0px') {
+    return 0;
+  }
+
+  const opacityString = computedStyle.getPropertyValue('opacity');
+  return isNaN(+opacityString) ? 0 : Number(opacityString);
+}
+
+function isTouchEvent(event) {
+  return event.changedTouches != null;
+}
+
+function normalizePointerEvent(e) {
+  let isTouch = false;
+  let pointerEvent;
+
+  if (isTouchEvent(e)) {
+    pointerEvent = e.changedTouches[0];
+    isTouch = true;
+  } else {
+    pointerEvent = e;
+  }
+
+  let {
+    clientX,
+    clientY,
+    pageX,
+    pageY
+  } = pointerEvent;
+  return {
+    clientX,
+    clientY,
+    pageX,
+    pageY,
+    isTouch
+  };
+}
+
+var styles$a = `:host{position:relative;display:block;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([unbounded])){overflow:hidden}:host([overlay]){position:absolute;top:50%;left:50%;width:100%;height:100%;transform:translate(-50%,-50%)}.ripple{background:var(--ripple-color,currentcolor);opacity:var(--ripple-opacity,.15);border-radius:100%;pointer-events:none;will-change:opacity,transform}`;
+
+/**
+ * Base configuration for the ripple animation.
+ */
+
+const RIPPLE_ANIMATION_CONFIG = {
+  easing: "ease-out",
+  fill: "both"
+};
+/**
+ * Initial animation duration.
+ */
+
+const RIPPLE_INITIAL_DURATION = 350;
+/**
+ * Release animation duration.
+ */
+
+const RIPPLE_RELEASE_DURATION = 500;
+/**
+ * Indicate touch actions.
+ * @cssprop --ripple-color - Color.
+ * @cssprop --ripple-opacity - Opacity.
+ */
+
+let Ripple = class Ripple extends LitElement {
+  /**
+   * Indicate touch actions.
+   * @cssprop --ripple-color - Color.
+   * @cssprop --ripple-opacity - Opacity.
+   */
+  constructor() {
+    super(...arguments);
+    /**
+     * Makes the ripple visible outside the bounds.
+     * @attr
+     */
+
+    this.unbounded = false;
+    /**
+     * Makes ripple appear from the center.
+     * @attr
+     */
+
+    this.centered = false;
+    /**
+     * Overlays the ripple.
+     * @attr
+     */
+
+    this.overlay = false;
+    /**
+     * Disables the ripple.
+     * @attr
+     */
+
+    this.disabled = false;
+    /**
+     * Allows focusin to spawn a ripple.
+     * @attr
+     */
+
+    this.focusable = false;
+    /**
+     * Releases the ripple after it has been spawned.
+     * @attr
+     */
+
+    this.autoRelease = false;
+    /**
+     * Initial animation duration.
+     * @attr
+     */
+
+    this.initialDuration = RIPPLE_INITIAL_DURATION;
+    /**
+     * Fade out animation duration.
+     * @attr
+     */
+
+    this.releaseDuration = RIPPLE_RELEASE_DURATION;
+    /**
+     * Role of the ripple.
+     * @attr
+     */
+
+    this.role = "presentation";
+    /**
+     * Target for the spawn ripple events.
+     * @attr
+     */
+
+    this.target = this;
+    /**
+     * Event subscribers on the target.
+     */
+
+    this.listeners = [];
+    /**
+     * Event subscribers present during the ripple animation.
+     */
+
+    this.rippleAnimationListeners = [];
+  }
+  /**
+   * Hooks up the element.
+   */
+
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.addListeners();
+  }
+  /**
+   * Tears down the element.
+   */
+
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.removeListeners();
+  }
+  /**
+   * Reacts on updated properties.
+   * @param props
+   */
+
+
+  updated(props) {
+    super.updated(props); // If the target has changed we need to hook up the new listeners
+
+    if (props.has("target") && this.target != null) {
+      this.removeListeners();
+      this.addListeners();
+    }
+  }
+  /**
+   * Adds event listeners to the target.
+   */
+
+
+  addListeners() {
+    if (this.target == null) return;
+    this.listeners.push(addListener(this.target, "mousedown", this.spawnRipple.bind(this), {
+      passive: true
+    }), addListener(this.target, "focusin", this.onFocusIn.bind(this), {
+      passive: true
+    }), addListener(this.target, "focusout", this.onFocusOut.bind(this), {
+      passive: true
+    }));
+  }
+  /**
+   * Removes listeners.
+   */
+
+
+  removeListeners() {
+    removeListeners(this.listeners);
+  }
+  /**
+   * Handles the mouse down events and spawns a ripple.
+   * If no event is provided the ripple will spawn in the center.
+   * @param {MouseEvent | TouchEvent} e
+   * @param config
+   */
+
+
+  spawnRipple(e, config) {
+    // Check if the ripple is disabled
+    if (this.disabled) {
+      // Return an empty noop function
+      return () => {};
+    } // Release the existing ripple if there is one
+
+
+    this.releaseRipple(); // Compute the spawn coordinates for the ripple
+
+    const rect = this.getBoundingClientRect();
+    let x = 0;
+    let y = 0;
+
+    if (this.centered || e == null) {
+      x = rect.width / 2;
+      y = rect.height / 2;
+    } else {
+      let {
+        clientX,
+        clientY
+      } = normalizePointerEvent(e);
+      x = clientX - rect.left;
+      y = clientY - rect.top;
+    } // Show the ripple and store the release function
+
+
+    const release = this.showRippleAtCoords({
+      x,
+      y
+    }, config); // Add the release function to the array of listeners
+
+    this.rippleAnimationListeners.push(release); // Only if the target is present or if the ripple is NOT focusable we attach the release listeners.
+
+    if (this.target != null && !this.focusable) {
+      this.rippleAnimationListeners.push(addListener(window, "mouseup", this.releaseRipple.bind(this), {
+        passive: true
+      }));
+    }
+
+    return release;
+  }
+  /**
+   * Handles the mouse up event and removes the ripple.
+   */
+
+
+  releaseRipple() {
+    removeListeners(this.rippleAnimationListeners);
+  }
+  /**
+   * Shows a ripple at a specific coordinate.
+   * @param number
+   * @param config
+   */
+
+
+  showRippleAtCoords({
+    x,
+    y
+  }, config) {
+    const {
+      offsetWidth,
+      offsetHeight
+    } = this;
+    const scale = getScale(window.getComputedStyle(this));
+    const {
+      releaseDuration = this.releaseDuration,
+      initialDuration = this.initialDuration,
+      autoRelease = this.autoRelease
+    } = config || {}; // Add the scale in case the ripple is transformed
+
+    x *= scale.x === 0 ? 1 : 1 / scale.x;
+    y *= scale.y === 0 ? 1 : 1 / scale.y; // Create the ripple
+
+    const $ripple = document.createElement("div");
+    $ripple.classList.add("ripple"); // Compute distance from the center of the rectangle (container) to its corner.
+    // If the coords are in the center the ripple would fill the entire container.
+
+    const containerRadius = computeRadius(offsetWidth, offsetHeight); // Compute the additional distance we have to add to the radius to make sure it always fills
+    // the entire container. The extra distance will be the distance from the center to the coords.
+    // If the coords are in the middle the extra radius will be 0.
+
+    const extraRadius = computeRadius(Math.abs(offsetWidth / 2 - x), Math.abs(offsetHeight / 2 - y)); // The size of the ripple is the diameter
+
+    const radius = Math.round(containerRadius + extraRadius * 2);
+    const diameter = radius * 2; // Assign the styles that makes it spawn from the desired coords
+
+    Object.assign($ripple.style, {
+      "left": `${x - radius}px`,
+      "top": `${y - radius}px`,
+      "height": `${diameter}px`,
+      "width": `${diameter}px`,
+      "position": "absolute"
+    }); // Cleans up the ripple
+
+    let released = false;
+
+    const release = () => {
+      if (released) return;
+      released = true; // Fade the ripple out
+
+      const opacity = getOpacity(window.getComputedStyle($ripple));
+      const outAnimation = $ripple.animate({
+        opacity: [opacity.toString(), `0`]
+      }, { ...RIPPLE_ANIMATION_CONFIG,
+        duration: releaseDuration
+      }); // When the out animation finished we remove the ripple before the next frame
+
+      outAnimation.onfinish = () => {
+        requestAnimationFrame(() => {
+          if (this.shadowRoot.contains($ripple)) {
+            this.shadowRoot.removeChild($ripple);
+          }
+        });
+      };
+    }; // Start the animation and add the ripple to the DOM
+
+
+    this.shadowRoot.appendChild($ripple); // Release instantly if autorelease
+
+    if (autoRelease) {
+      release();
+    } // Scale the ripple in
+
+
+    $ripple.animate({
+      transform: [`scale(0)`, `scale(1)`]
+    }, { ...RIPPLE_ANIMATION_CONFIG,
+      duration: initialDuration
+    });
+    return release;
+  }
+  /**
+   * Add a persistent ripple when the taget gains focus.
+   */
+
+
+  onFocusIn() {
+    if (!this.focusable) return;
+    this.spawnRipple(undefined, {
+      autoRelease: false
+    });
+  }
+  /**
+   * Release the current ripple when the focus is lost from the target.
+   */
+
+
+  onFocusOut() {
+    if (!this.focusable) return;
+    this.releaseRipple();
+  }
+  /**
+   * Returns the template for the element.
+   */
+
+
+  render() {
+    return html``;
+  }
+
+};
+Ripple.styles = [sharedStyles, cssResult(styles$a)];
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "unbounded", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "centered", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "overlay", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "disabled", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "focusable", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata("design:type", Boolean)], Ripple.prototype, "autoRelease", void 0);
+
+__decorate([property({
+  type: Number
+}), __metadata("design:type", Number)], Ripple.prototype, "initialDuration", void 0);
+
+__decorate([property({
+  type: Number
+}), __metadata("design:type", Number)], Ripple.prototype, "releaseDuration", void 0);
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata("design:type", String)], Ripple.prototype, "role", void 0);
+
+__decorate([property({
+  type: Object
+}), __metadata("design:type", EventTarget)], Ripple.prototype, "target", void 0);
+
+Ripple = __decorate([customElement("wl-ripple")], Ripple);
+
+var styles$b = ``;
+
+class ButtonBehavior extends FormElementBehavior {
+  constructor() {
+    super(...arguments);
+    this.type = 'submit';
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.listeners.push(addListener(this, 'click', this.onClick.bind(this)), addListener(this, 'keydown', this.onKeyDown.bind(this)));
+  }
+
+  onKeyDown(e) {
+    if (e.code === ENTER || e.code === SPACE) {
+      this.click();
+      stopEvent(e);
+
+      if (this.$ripple != null) {
+        this.$ripple.spawnRipple(undefined, {
+          autoRelease: true
+        });
+      }
+    }
+  }
+
+  onClick(e) {
+    if (this.disabled) {
+      stopEvent(e);
+      return;
+    }
+
+    if (e.target == this && !e.defaultPrevented) {
+      this.$formElement.dispatchEvent(new MouseEvent('click', {
+        relatedTarget: this,
+        composed: true
+      }));
+    }
+  }
+
+  renderFormElement() {
+    return html` <button style="display: none;" id="${this.formElementId}" aria-hidden="true" tabindex="-1" type="${this.type}" ?disabled="${this.disabled}" name="${ifDefined(this.name)}" value="${ifDefined(this.value)}"> </button> `;
+  }
+
+}
+
+ButtonBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$b)];
+
+__decorate([property({
+  type: String
+}), __metadata('design:type', String)], ButtonBehavior.prototype, 'type', void 0);
+
+var styles$c = `:host{--_button-color:var(--button-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_button-shadow-color:var(--button-shadow-color,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.2));color:var(--_button-color);background:var(--_button-bg);box-shadow:var(--elevation-1,0 .3125rem .625rem -.125rem var(--_button-shadow-color));padding:var(--button-padding,.75rem 1.5rem);font-size:var(--button-font-size,1rem);border-radius:var(--button-border-radius,.5rem);font-family:var(--button-font-family,var(--font-family-sans-serif,"Roboto Condensed",helvetica,sans-serif));transition:var(--button-transition,box-shadow var(--transition-duration-slow,.25s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));letter-spacing:var(--button-letter-spacing,.125rem);line-height:1;text-transform:uppercase;cursor:pointer;text-align:center;-webkit-user-select:none;-moz-user-select:none;user-select:none;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:0}:host,:host([fab]){display:inline-flex;align-items:center;justify-content:center}:host([fab]){width:var(--button-fab-size,2.5rem);height:var(--button-fab-size,2.5rem);padding:0;letter-spacing:0;border-radius:100%}:host([inverted]){color:var(--_button-bg);background:var(--_button-color)}:host([outlined]){border:var(--button-border-outlined,.125rem solid currentColor)}:host(:focus),:host(:hover){--_button-color:var(--button-color-hover,hsl(var(--primary-400-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-hover,hsl(var(--primary-400,var(--primary-hue,224),var(--primary-saturation,42%),var(--primary-lightness,52%))));--_button-shadow-color:var(--button-shadow-color-hover,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.5));will-change:background,color,box-shadow}:host(:active){--_button-color:var(--button-color-active,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));box-shadow:var(--elevation-4,0 .5rem 1rem -.125rem var(--_button-shadow-color))}:host([flat]:focus){background:var(--button-bg-active-flat,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),.08))}:host([disabled]){--_button-color:var(--button-color-disabled,hsl(var(--shade-400-contrast,var(--shade-hue-contrast,0),var(--shade-saturation-contrast,100%),var(--shade-lightness-contrast,100%))));--_button-bg:var(--button-bg-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));box-shadow:none;cursor:default;pointer-events:none}:host([flat]){box-shadow:none;background:none}#ripple{z-index:-1}`;
+
+let Button = class Button extends ButtonBehavior {
+  constructor() {
+    super(...arguments);
+    this.inverted = false;
+    this.fab = false;
+    this.outlined = false;
+    this.noRipple = false;
+    this.flat = false;
+    this.role = 'button';
+  }
+
+  render() {
+    return html` <wl-ripple id="ripple" overlay .target="${this}" ?disabled="${this.disabled || this.noRipple}"></wl-ripple> <slot></slot> ${this.renderFormElement()} `;
+  }
+
+};
+Button.styles = [...ButtonBehavior.styles, cssResult(styles$c)];
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'inverted', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'fab', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'outlined', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'noRipple', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'flat', void 0);
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata('design:type', String)], Button.prototype, 'role', void 0);
+
+__decorate([query('#ripple'), __metadata('design:type', Ripple)], Button.prototype, '$ripple', void 0);
+
+Button = __decorate([customElement('wl-button')], Button);
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$3 = self => function () {
+  // @ts-ignore
+  const {
+    submit,
+    newDomain
+  } = this;
+  return html`
+    <style>
+      ${styles$9}
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+    </style>
+
+    <div class="center-modal">
+      <form @submit="${submit.bind(this)}">
+        <p>
+          For Designers:
+        </p>
+        <label>
+          Fill in the domain id of an existing user.<br>
+        </label>
+        <input class= "domain-id" id="domain" name="domain" type="text">
+        <wl-button class ="submit-button">Submit</wl-button>
+      </form>
+      <div style="padding-top: 48px">
+        <p>
+          Or click on any of the buttons for a blank domain
+        </p>
+        <wl-button class ="new-button" @click="${newDomain.bind(this)}">New Blank Domain</wl-button>
+      </div>
+    </div>
+
+
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotStart = _decorate([customElement('protobot-start')], function (_initialize, _GetPathMixin) {
+  class ProtobotStart extends _GetPathMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotStart,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$3(this);
+      }
+    }, {
+      kind: "method",
+      key: "submit",
+      value: function submit(event) {
+        event.preventDefault();
+        const {
+          target
+        } = event;
+        const {
+          domain
+        } = target;
+
+        if (domain.value) {
+          window.location.href = `/?domain=${domain.value}`;
+        }
+      }
+    }, {
+      kind: "method",
+      key: "newDomain",
+      value: async function newDomain() {
+        const {
+          key
+        } = database.ref('domains/data').push();
+        const updates = {};
+        updates[`domains/data/${key}`] = {
+          deployed: false,
+          desinger: '',
+          name: ''
+        };
+        await database.ref().update(updates);
+        window.location.href = `/?domain=${key}`;
+      }
+    }]
+  };
+}, GetPathMixin(LitElement));
+
+var styles$d = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: rgb(49, 63, 102);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:rgb(49, 63, 102);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  font-weight: bold;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background: rgb(74, 94, 150);\n}\n\nwl-button {\n  --button-border-radius\t: 0px;\n  --button-padding : 10px;\n  --button-font-size\t:10px;\n  --button-bg\t: rgb(182, 182, 182);\n  --button-bg-hover : rgb(71, 71, 71);\n}\n";
+
+var styles$e = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%;\n  font-size: 15px;\n}\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$4 = self => function () {
+  // @ts-ignore
+  const {
+    utterance,
+    utteranceTextChanged
+  } = this;
+  const {
+    text
+  } = utterance || {};
+  return html`
+    <style>
+      ${styles$e}
+    </style>
+
+    <div class="flex-area">
+      <div class="flex-1">
+        <input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">
+      </div>
+    </div>
+  `;
+}.bind(self)();
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetUtteranceMixin = base => _decorate(null, function (_initialize, _base) {
+  class _class extends _base {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "utteranceId",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "utterance",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "updated",
+      value: // @ts-ignore
+      // @ts-ignore
+      function updated(changedProps) {
+        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
+
+        if (changedProps.has('utteranceId')) {
+          this.getUtterance(this.utteranceId);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "getUtterance",
+      value: async function getUtterance(utteranceId) {
+        const snap = await database.ref(`utterances/data/${utteranceId}`).once('value');
+        this.utterance = snap.val() || null;
+      }
+    }]
+  };
+}, base);
+
+// @ts-ignore
+
+let ConversationalFlowUtterance = _decorate([customElement('conversational-flow-utterance')], function (_initialize, _GetUtteranceMixin) {
+  class ConversationalFlowUtterance extends _GetUtteranceMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ConversationalFlowUtterance,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$4(this);
+      }
+    }, {
+      kind: "method",
+      key: "utteranceTextChanged",
+      value: async function utteranceTextChanged(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.utterance.text !== value) {
+          await database.ref(`utterances/data/${this.utteranceId}/text`).set(value);
+        }
+      }
+    }]
+  };
+}, GetUtteranceMixin(LitElement));
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$5 = self => function () {
+  // @ts-ignore
+  const {
+    topic,
+    topicNameChanged,
+    mainUtteranceId,
+    newTopic,
+    subTopic,
+    deleteTopic,
+    sub
+  } = this;
+  const {
+    name
+  } = topic || {};
+  return html`
+    <style>
+      ${styles$d}
+    </style>
+
+    <div class="flex-area ${sub ? 'sub' : ''}">
+      <div class="flex-1">
+        <input class="text-area" type="text" value="${name}" placeholder="topic" @change="${topicNameChanged.bind(this)}">
+      </div>
+
+      <div class="flex-2">
+        <conversational-flow-utterance .utteranceId="${mainUtteranceId}" ></conversational-flow-utterance>
+      </div>
+
+
+      <!-- ternary expression -->
+      ${!sub ? html`
+        <wl-button type="button" @click="${newTopic.bind(this)}">New</wl-button>
+        <wl-button type="button" @click="${subTopic.bind(this)}">Sub</wl-button>
+      ` : html`
+        <wl-button type="button" @click="${subTopic.bind(this)}">New</wl-button>
+      `}
+
+      <wl-button type="button" @click="${deleteTopic.bind(this)}">Delete</wl-button>
+    </div>
+  `;
+}.bind(self)();
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetTopicMixin = base => _decorate(null, function (_initialize, _base) {
+  class _class extends _base {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "topicId",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "topic",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "mainUtteranceId",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "updated",
+      value: // @ts-ignore
+      // @ts-ignore
+      // @ts-ignore
+      function updated(changedProps) {
+        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
+
+        if (changedProps.has('topicId')) {
+          this.getTopic(this.topicId);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "getTopic",
+      value: async function getTopic(topicId) {
+        const snap = await database.ref(`labels/data/${topicId}`).once('value');
+        this.topic = snap.val() || null; // console.log('here!')
+        // console.log(this.topic)
+
+        const {
+          mainUtterance,
+          utterances
+        } = this.topic;
+        let utteranceId;
+
+        for (const utterance in utterances) {
+          utteranceId = utterance;
+          break;
+        }
+
+        this.mainUtteranceId = mainUtterance || utteranceId;
+      }
+    }]
+  };
+}, base);
+
+// @ts-ignore
+
+let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topic')], function (_initialize, _GetTopicMixin) {
+  class ConversationalFlowTopic extends _GetTopicMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ConversationalFlowTopic,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Number
+      })],
+      key: "index",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "sub",
+
+      value() {
+        return false;
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: // @ts-ignore
+      function render() {
+        return template$5(this);
+      }
+    }, {
+      kind: "method",
+      key: "topicNameChanged",
+      value: async function topicNameChanged(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.topic.name !== value) {
+          await database.ref(`labels/data/${this.topicId}/name`).set(value);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "newTopic",
+      value: function newTopic() {
+        this.createTopic();
+      }
+    }, {
+      kind: "method",
+      key: "subTopic",
+      value: function subTopic() {
+        this.createTopic(true);
+      }
+    }, {
+      kind: "method",
+      key: "createTopic",
+      value: async function createTopic(sub) {
+        const {
+          key: topicId
+        } = database.ref('labels/data').push();
+        const {
+          key: utteranceId
+        } = database.ref('utterances/data').push();
+        const {
+          domain
+        } = this.topic;
+        const updates = {};
+        const snap = await database.ref(`domains/data/${domain}`).once('value');
+        const {
+          topics
+        } = snap.val() || {
+          topics: {}
+        };
+        const array = [];
+
+        for (const topic in topics) {
+          array.push({
+            topic,
+            order: topics[topic]
+          });
+        }
+
+        const topicArray = array.sort((i, j) => i.order - j.order).map(i => i.topic);
+        const topic = {
+          domain,
+          name: 'Topic',
+          required: true,
+          mainUtterance: utteranceId,
+          utterances: {}
+        };
+        topic.utterances[utteranceId] = true;
+        const utterance = {
+          bot: true,
+          domain,
+          required: true,
+          text: 'Utterance',
+          topics: {}
+        };
+        utterance.topics[topicId] = true;
+        topicArray.splice(this.index + 1, 0, topicId);
+        const newTopics = {};
+
+        for (const i in topicArray) {
+          newTopics[topicArray[i]] = parseInt(i);
+        }
+
+        updates[`labels/data/${topicId}`] = topic;
+        updates[`utterances/data/${utteranceId}`] = utterance;
+        updates[`domains/data/${domain}/topics`] = newTopics;
+        updates[`domains/data/${domain}/subs/${topicId}`] = sub || false;
+        updates[`domains/data/${domain}/topicList/${topicId}`] = true;
+        await database.ref().update(updates);
+      }
+    }, {
+      kind: "method",
+      key: "deleteTopic",
+      value: async function deleteTopic() {
+        const {
+          topicId,
+          topic
+        } = this;
+        const {
+          domain
+        } = topic;
+        const updates = {};
+        const snap = await database.ref(`domains/data/${domain}`).once('value');
+        const {
+          topics
+        } = snap.val() || {
+          topics: {}
+        };
+        const array = [];
+
+        for (const topic in topics) {
+          array.push({
+            topic,
+            order: topics[topic]
+          });
+        }
+
+        const topicArray = array.sort((i, j) => i.order - j.order).map(i => i.topic);
+        topicArray.splice(this.index, 1);
+        const newTopics = {};
+
+        for (const i in topicArray) {
+          newTopics[topicArray[i]] = parseInt(i);
+        }
+
+        updates[`labels/data/${topicId}`] = null;
+        updates[`domains/data/${domain}/topics`] = newTopics;
+        updates[`domains/data/${domain}/topicList/${topicId}`] = null;
+        await database.ref().update(updates);
+      }
+    }]
+  };
+}, GetTopicMixin(LitElement));
+
+var styles$f = ".empty-box{\n  height: 30px;\n}\n\nh1 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$6 = self => function () {
+  // @ts-ignore
+  const {
+    topics,
+    swap
+  } = this;
+  return html`
+    <style>
+      ${styles$f}
+    </style>
+
+    <h1 style="text-align: center">
+      Conversational Flow
+    </h1>
+    <div class="empty-box"></div>
+    ${topics.map((topic, index) => html`
+      <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" index="${index}"></conversational-flow-topic>
+
+      ${index !== topics.length - 1 ? html`
+        <div style="text-align: center">
+          <wl-button class="swap-button" style="text-align: center" type="button" @click="${swap.bind(this)}" index="${index}">Swap</wl-button>
+        </div>
+      ` : ''}
+    `)}
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], function (_initialize, _GetDomainMixin) {
+  class ProtobotAuthoring extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotAuthoring,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$6(this);
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: async function domainChanged(domain) {
+        if (!domain) {
+          window.location.href = '/';
+        } else {
+          const {
+            deployed
+          } = domain;
+
+          if (deployed) {
+            const updates = {};
+            updates[`last-deployed/data/${this.domainId}/`] = domain;
+            updates[`domains/data/${this.domainId}/deployed`] = false;
+            await database.ref().update(updates);
+          }
+        } // if there is a domain...
+
+      }
+    }, {
+      kind: "method",
+      key: "swap",
+      value: async function swap(event) {
+        const {
+          target
+        } = event;
+        const updates = {};
+        const index = parseInt(target.getAttribute('index'));
+        const next = index + 1;
+        let swap1 = null;
+        let swap2 = null;
+
+        for (const i in this.domain.topics) {
+          if (this.domain.topics[i] === index) {
+            swap1 = i;
+          }
+
+          if (this.domain.topics[i] === next) {
+            swap2 = i;
+          }
+        }
+
+        if (swap1 && swap2) {
+          this.domain.topics[swap1] = next;
+          this.domain.topics[swap2] = index;
+        }
+
+        updates[`domains/data/${this.domainId}/topics`] = this.domain.topics;
+        await database.ref().update(updates);
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$g = ".flex-area {\n  display: flex;\n\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n}\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$7 = self => function () {
+  // @ts-ignore
+  const {
+    topic
+  } = this;
+  const {
+    name
+  } = topic || {};
+  return html`
+    <style>
+      ${styles$g}
+    </style>
+
+    ${name}
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let TopicListItem = _decorate([customElement('topic-list-item')], function (_initialize, _GetTopicMixin) {
+  class TopicListItem extends _GetTopicMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: TopicListItem,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Number
+      })],
+      key: "index",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "sub",
+
+      value() {
+        return false;
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: // @ts-ignore
+      function render() {
+        return template$7(this);
+      }
+    }, {
+      kind: "method",
+      key: "topicNameChanged",
+      value: async function topicNameChanged(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.topic.name !== value) {
+          await database.ref(`labels/data/${this.topicId}/name`).set(value);
+        }
+      }
+    }]
+  };
+}, GetTopicMixin(LitElement));
+
+var styles$h = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$8 = self => function () {
+  // @ts-ignore
+  const {
+    topics,
+    deploy,
+    domain,
+    handleCommitMsg
+  } = this;
+  const {
+    commitMessage
+  } = domain;
+  return html`
+    <style>
+      ${styles$h}
+    </style>
+    <h3>Current topic list</h3>
+
+    <ul class ="topic-list">
+    ${topics.map(topic => html`
+      <li>
+        <topic-list-item class="item" topicId="${topic.id}">
+        </topic-list-item>
+      </li>
+    `)}
+    </ul>
+
+    <div>
+      <h3>Leave Message Here</h3>
+      <wl-textarea outlined
+        class = "commit-input"
+        value="${commitMessage}"
+        @change="${handleCommitMsg.bind(this)}"
+        @submit="${deploy.bind(this)}">
+      </wl-textarea outlined>
+    </div>
+
+    <div class="button-container">
+      <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button>
+    </div>
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-sidebar')], function (_initialize, _GetDomainMixin) {
+  class ProtobotAuthoringSidebar extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotAuthoringSidebar,
+    d: [{
+      kind: "field",
+      decorators: [property()],
+      key: "commitMessage",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$8(this);
+      }
+    }, {
+      kind: "method",
+      key: "handleCommitMsg",
+      value: async function handleCommitMsg(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+        const updates = {};
+        updates[`domains/data/${this.domainId}/commitMessage`] = value || '';
+        await database.ref().update(updates);
+      }
+    }, {
+      kind: "method",
+      key: "deploy",
+      value: async function deploy() {
+        const updates = {};
+        const {
+          domain
+        } = this;
+        const {
+          commitMessage
+        } = domain;
+        const {
+          key: deployedVersion
+        } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+        updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
+          deployedVersion,
+          commitMessage: commitMessage || ''
+        };
+        updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
+          deployedVersion,
+          commitMessage: commitMessage || ''
+        };
+        updates[`domains/data/${this.domainId}/deployed`] = false;
+        updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
+        updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
+        await database.ref().update(updates);
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$i = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
+
+var styles$j = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n.utterance{\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
+
+// import '@polymer/paper-item/paper-item.js';
+// import '@polymer/paper-listbox/paper-listbox.js';
+// import '@vaadin/vaadin-button';
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$9 = self => function () {
+  // @ts-ignore
+  const {
+    utterance,
+    topics,
+    selectedTopic,
+    gettingTopic,
+    textInputVisible,
+    appendTopic
+  } = this;
+  const {
+    text,
+    bot,
+    topics: utteranceTopics
+  } = utterance || {};
+  return html`
+    <style>
+      ${styles$j}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+    </style>
+
+    ${utterance ? html`
+      <div class="feed ${!bot ? 'feed__right' : ''}">
+        <div>
+          <div class="label">${bot ? 'Bot' : 'User'}</div>
+          <div class ="utterance ${!bot ? 'utterance__right' : ''}"> ${text}</div>
+          <!-- <div>
+            ${utteranceTopics ? Object.keys(utteranceTopics).map(item => html`
+              <span>${until(gettingTopic(item), 'Loading...')}</span>
+            `) : ''}
+          </div> -->
+
+          <div class="select-container ${!bot ? 'select-container__right' : ''}">
+            <div class = "select-topic">
+              <select class="select-box" placeholder="Topic" @change=${selectedTopic.bind(this)}>
+                <option value="none">Choose the topic</option>
+                ${topics ? topics.map(item => html`<option value="${item.id}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
+                <option value="new-topic">New Topic</option>
+              </select>
+            </div>
+            ${textInputVisible ? html`
+              <div class="new-topic-input">
+                <input type="text" class="input-box" value="new label" @change=${appendTopic.bind(this)}>
+              </div>
+              ` : ''}
+          </div>
+        </div>
+      </div>
+    ` : ''}
+
+  `;
+}.bind(self)();
+/**
+ * <select @change=${selectedTopic.bind(this)}>
+            ${topics ? topics.map(item => html`<option value="${item.id}">${item.id}</option>`) : ''}
+            <option value="new-topic">New Topic</option>
+          </select>
+ */
+// theme= "${bot ? 'contrast' : ''} primary"
+
+// @ts-ignore
+
+let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], function (_initialize, _GetUtteranceMixin) {
+  class UtteranceReviewItem extends _GetUtteranceMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: UtteranceReviewItem,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "textInputVisible",
+
+      value() {
+        return false;
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$9(this);
+      }
+    }, {
+      kind: "method",
+      key: "selectedTopic",
+      value: async function selectedTopic({
+        target
+      }) {
+        const {
+          value
+        } = target;
+        const {
+          utteranceId,
+          utterance
+        } = this;
+        const {
+          domain
+        } = utterance;
+        const updates = {};
+        this.textInputVisible = false;
+
+        if (value === 'new-topic') {
+          this.textInputVisible = true;
+          return;
+        } // topic.utterances[utteranceId] = true;
+
+
+        utterance.topics[value] = true;
+        updates[`labels/data/${value}/utterances/${utteranceId}`] = true;
+        updates[`utterances/data/${utteranceId}`] = utterance;
+        updates[`domains/data/${domain}/topicList/${value}`] = true;
+        await database.ref().update(updates);
+      }
+    }, {
+      kind: "method",
+      key: "appendTopic",
+      value: async function appendTopic(event) {
+        const {
+          target
+        } = event;
+        const {
+          value: name
+        } = target;
+        const {
+          utteranceId,
+          utterance
+        } = this;
+        const {
+          domain
+        } = utterance;
+        const updates = {};
+
+        if (name && name !== 'new label') {
+          const {
+            key: topicId
+          } = database.ref('labels/data').push();
+          const topic = {
+            domain,
+            name,
+            required: false,
+            mainUtterance: utteranceId,
+            utterances: {}
+          };
+          topic.utterances[utteranceId] = true;
+          utterance.topics[topicId] = true;
+          updates[`labels/data/${topicId}`] = topic;
+          updates[`utterances/data/${utteranceId}`] = utterance;
+          updates[`domains/data/${domain}/topicList/${topicId}`] = true;
+          await database.ref().update(updates);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingTopic",
+      value: async function gettingTopic(id) {
+        return (await database.ref(`labels/data/${id}/name`).once('value')).val();
+      }
+    }]
+  };
+}, GetUtteranceMixin(GetDomainMixin(LitElement)));
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$a = self => function () {
+  // @ts-ignore
+  const {
+    crowdId,
+    topics,
+    utterances,
+    gettingCrowdId
+  } = this; // console.log(topics);
+  // const t = [];
+  // for (const i in topics) {
+  //   t.push(html`<vaadin-item>${topics[i].id}</vaadin-item>`);
+  // }
+
+  return html`
+    <style>
+      ${styles$i}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+    </style>
+
+    <h1>Micro Review</h1>
+    <!-- <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3> -->
+    <h3>Crowd name: ${until(gettingCrowdId(crowdId))}</h3>
+
+    <br>
+
+    ${utterances && utterances.length ? utterances.map(item => html`
+      <utterance-review-item .utteranceId="${item.id}"></utterance-review-item>
+    `) : ''}
+  `;
+}.bind(self)(); // ${[ t[0], t[1], t[2], t[3], t[4], t[5] ].map(item => html`<vaadin-item>${item.id}</vaadin-item>`)}
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetDomainUtterancesMixin = base => _decorate(null, function (_initialize, _GetPathMixin) {
+  class _class extends _GetPathMixin {
+    // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
+    constructor() {
+      super();
+
+      _initialize(this);
+
+      this.boundSaveDomainUtterances = this.saveDomainUtterances.bind(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "setId",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "crowdId",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "utterances",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "method",
+      key: "connectedCallback",
+      value: function connectedCallback() {
+        _get(_getPrototypeOf(_class.prototype), "connectedCallback", this).call(this); // @ts-ignore
+
+
+        const {
+          domain,
+          crowdId,
+          set,
+          page
+        } = this.queryObject || {
+          domain: null,
+          crowdId: null
+        };
+
+        if (!crowdId) {
+          window.location.href = `/?page=${page || 'micro'}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
+          return;
+        }
+
+        if (domain) {
+          this.getDomainUtterances(domain, crowdId, set);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "disconnectedCallback",
+      value: function disconnectedCallback() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
+          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
+        }
+
+        this.disconnectRef();
+      }
+    }, {
+      kind: "method",
+      key: "disconnectRef",
+      value: function disconnectRef() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
+
+        if (this.domainUtterancesRef) {
+          this.domainUtterancesRef.off('value', this.boundSaveDomainUtterances);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "getDomainUtterances",
+      value: function getDomainUtterances(id, crowdId, set = '1') {
+        this.disconnectRef(); // console.log(id, crowdId);
+
+        this.crowdId = crowdId;
+        this.setId = set;
+
+        if (id && crowdId && set) {
+          this.domainUtterancesRef = database.ref(`users/lists/domain-utterances/${crowdId}/${id}/${set}`);
+          this.domainUtterancesRef.on('value', this.boundSaveDomainUtterances);
+        } else {
+          console.log('No values for id-crowdId: ', id, crowdId);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveDomainUtterances",
+      value: function saveDomainUtterances(snap) {
+        const data = snap.val() || null; // console.log(data);
+
+        const array = [];
+
+        if (data) {
+          for (const utterance in data) {
+            array.push({
+              utterance,
+              order: data[utterance]
+            });
+          }
+
+          this.utterances = array.sort((i, j) => i.order - j.order).map(i => ({
+            id: i.utterance
+          }));
+          this.domainUtterancesChanged(this.utterances);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "domainUtterancesChanged",
+      value: function domainUtterancesChanged(data) {}
+    }]
+  };
+}, GetPathMixin(base));
+
+// Extend the LitElement base class
+// @ts-ignore
+
+let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_initialize, _GetDomainUtterancesM) {
+  class ProtobotMicro extends _GetDomainUtterancesM {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotMicro,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$a(this);
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingCrowdId",
+      value: async function gettingCrowdId(id) {
+        // console.log("here", id);
+        return (await database.ref(`users/data/${id}/name`).once('value')).val();
+      } // async createTopic (sub) {
+      //   const { key: topicId } = database.ref('labels/data').push();
+      //   const { key: utteranceId } = database.ref('utterances/data').push();
+      //   const { domain } = this.topic;
+      //   const updates = {};
+      //   const snap = await database.ref(`domains/data/${domain}`).once('value');
+      //   const { topics } = snap.val() || { topics: {} };
+      //   const array = [];
+      //   for (const topic in topics) {
+      //     array.push({ topic, order: topics[topic] });
+      //   }
+      //   const topicArray = array.sort((i, j) => (i.order - j.order)).map(i => i.topic);
+      //   const topic = {
+      //     domain,
+      //     name: 'Topic',
+      //     required: true,
+      //     mainUtterance: utteranceId,
+      //     utterances: {}
+      //   };
+      //   topic.utterances[utteranceId] = true;
+      //   const utterance = {
+      //     bot: true,
+      //     domain,
+      //     required: true,
+      //     text: 'Utterance',
+      //     topics: {}
+      //   };
+      //   utterance.topics[topicId] = true;
+      //   topicArray.splice(this.index + 1, 0, topicId);
+      //   const newTopics = {};
+      //   for (const i in topicArray) {
+      //     newTopics[topicArray[i]] = parseInt(i);
+      //   }
+      //   updates[`labels/data/${topicId}`] = topic;
+      //   updates[`utterances/data/${utteranceId}`] = utterance;
+      //   updates[`domains/data/${domain}/topics`] = newTopics;
+      //   updates[`domains/data/${domain}/subs/${topicId}`] = sub || false;
+      //   updates[`domains/data/${domain}/topicList/${topicId}`] = true;
+      //   await database.ref().update(updates);
+      // }
+
+    }]
+  };
+}, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
+
+var styles$k = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n.link:hover {\n  stroke-opacity: .5;\n}\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$b = self => function () {
+
+  return html`
+    <style>
+      ${styles$k}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+    </style>
+
+    <h1>Macro Review</h1>
+    <br>
+
+
+    <div class="sankey"></div>
+  `;
+}.bind(self)();
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetTreeStructureMixin = base => _decorate(null, function (_initialize, _GetDomainMixin) {
+  class _class extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "tree",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "updated",
+      value: // @ts-ignore
+      function updated(changedProps) {
+        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
+
+        if (changedProps.has('domainId')) {
+          this.getTreeStructure(this.domainId);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "getTreeStructure",
+      value: async function getTreeStructure(domainId) {
+        console.log(domainId);
+        const snap = await database.ref('tree-structure/data/').orderByChild('domain').equalTo(domainId) // .limitToFirst(10)
+        .once('value');
+        this.tree = snap.val() || null;
+        this.treeChanged(this.tree);
+      }
+    }, {
+      kind: "method",
+      key: "treeChanged",
+      value: function treeChanged(tree) {}
+    }]
+  };
+}, GetDomainMixin(base));
+
+/* googleCharts.js Version: 1.5.0 Built On: 2018-12-30 */
+const loadScript = Symbol('loadScript');
+const instance = Symbol('instance');
+
+let _instance;
+
+class GoogleChartsManager {
+  get [instance]() {
+    return _instance;
+  }
+
+  set [instance](value) {
+    _instance = value;
+  }
+
+  constructor() {
+    if (this[instance]) {
+      return this[instance];
+    }
+
+    this[instance] = this;
+  }
+
+  reset() {
+    _instance = null;
+  }
+
+  [loadScript]() {
+    if (!this.scriptPromise) {
+      this.scriptPromise = new Promise(resolve => {
+        const body = document.getElementsByTagName('body')[0];
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+
+        script.onload = function () {
+          GoogleCharts.api = window.google;
+          GoogleCharts.api.charts.load('current', {
+            packages: ['corechart', 'table']
+          });
+          GoogleCharts.api.charts.setOnLoadCallback(() => {
+            resolve();
+          });
+        };
+
+        script.src = 'https://www.gstatic.com/charts/loader.js';
+        body.appendChild(script);
+      });
+    }
+
+    return this.scriptPromise;
+  }
+
+  load(callback, type) {
+    return this[loadScript]().then(() => {
+      if (type) {
+        let config = {};
+
+        if (type instanceof Object) {
+          config = type;
+        } else if (Array.isArray(type)) {
+          config = {
+            packages: type
+          };
+        } else {
+          config = {
+            packages: [type]
+          };
+        }
+
+        this.api.charts.load('current', config);
+        this.api.charts.setOnLoadCallback(callback);
+      } else {
+        if (typeof callback != 'function') {
+          throw 'callback must be a function';
+        } else {
+          callback();
+        }
+      }
+    });
+  }
+
+}
+
+const GoogleCharts = new GoogleChartsManager();
+
+// import { d3sankey } from './sankey';
+// import { sankey as d3sankey } from 'd3-sankey';
+// import 'd3-sankey';
+// import { database } from '../../../firebase';
+// Extend the LitElement base class
+// @ts-ignore
+
+let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_initialize, _GetTreeStructureMixi) {
+  class ProtobotMacro extends _GetTreeStructureMixi {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotMacro,
+    d: [{
+      kind: "method",
+      key: "treeChanged",
+      value: function treeChanged(tree) {
+        if (tree) {
+          console.log(this.tree); // this.setSankey(this.tree);
+          // Load the charts library with a callback
+
+          GoogleCharts.load(this.drawChart.bind(this, tree), {
+            packages: ['sankey']
+          });
+        }
+      }
+    }, {
+      kind: "method",
+      key: "drawChart",
+      value: function drawChart(tree) {
+        const data = new GoogleCharts.api.visualization.DataTable();
+        data.addColumn('string', 'From');
+        data.addColumn('string', 'To');
+        data.addColumn('number', 'Weight');
+        const rows = []; // const { tree } = this;
+
+        console.log(tree);
+
+        if (tree) {
+          for (const i in tree) {
+            const row = [i];
+
+            for (const j in tree[i].children) {
+              row.push(j); // @ts-ignore
+
+              row.push(Object.keys(tree[i].utterances).length);
+            }
+
+            if (row.length === 3) {
+              rows.push(row);
+            }
+          }
+
+          data.addRows(rows);
+          const options = {
+            width: 600,
+            sankey: {
+              node: {
+                interactivity: true
+              }
+            }
+          };
+          const chart = new GoogleCharts.api.visualization.Sankey(this.shadowRoot.querySelector('.sankey'));
+          chart.draw(data, options);
+          GoogleCharts.api.visualization.events.addListener(chart, 'select', this.selectHandler.bind(this));
+        }
+
+        console.log(this.tree);
+      }
+    }, {
+      kind: "method",
+      key: "selectHandler",
+      value: function selectHandler(e) {
+        console.log(e);
+      } // async setSankey (tree) {
+      //   const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+      //   const width = this.getBoundingClientRect().width - margin.left - margin.right;
+      //   const height = 480 - margin.top - margin.bottom;
+      //   const x = this.shadowRoot.querySelector('.sankey');
+      //   if (x) {
+      //     x.innerHTML = '';
+      //   }
+      //   const svg = d3.select(this.shadowRoot).select('.sankey').append('svg')
+      //     .attr('width', '100vw')
+      //     .attr('height', '100vh')
+      //     .append('g')
+      //     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+      //   const color = d3.scaleOrdinal([
+      //     '#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#e6550d',
+      //     '#fd8d3c', '#fdae6b', '#fdd0a2', '#31a354', '#74c476',
+      //     '#a1d99b', '#c7e9c0', '#756bb1', '#9e9ac8', '#bcbddc',
+      //     '#dadaeb', '#636363', '#969696', '#bdbdbd', '#d9d9d9']);
+      //   const sankey = d3sankey()
+      //     .nodeWidth(36)
+      //     // @ts-ignore
+      //     .nodePadding(290)
+      //     .size([this.getBoundingClientRect().width, this.getBoundingClientRect().height]);
+      //   const graph = await d3.json('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_sankey.json');
+      //   // console.log(d3.json)
+      //   // console.log(graph);
+      //   const g = { nodes: [], links: [] };
+      //   let count = 0;
+      //   for (const i in tree) {
+      //     const node = {
+      //       node: count,
+      //       name: i
+      //     };
+      //     count++;
+      //     // @ts-ignore
+      //     g.nodes.push(node);
+      //   }
+      //   for (const i in tree) {
+      //     for (const j in tree[i].children) {
+      //       // @ts-ignore
+      //       const index = g.nodes.findIndex(item => item.name === i);
+      //       // @ts-ignore
+      //       const c = index > -1 ? g.nodes[index].node : null;
+      //       // @ts-ignore
+      //       const targetIndex = g.nodes.findIndex(item => item.name === j);
+      //       // @ts-ignore
+      //       const targetC = targetIndex > -1 ? g.nodes[targetIndex].node : null;
+      //       if (c && targetC) {
+      //         const link = {
+      //           source: c,
+      //           target: targetC,
+      //           value: Object.keys(tree[i].utterances).length
+      //         };
+      //         // @ts-ignore
+      //         g.links.push(link);
+      //       }
+      //     }
+      //   }
+      //   console.log(g)
+      //   // Constructs a new Sankey generator with the default settings.
+      //   sankey
+      //     .nodes(g.nodes)
+      //     .links(g.links)
+      //     .layout(1);
+      //   // add in the links
+      //   const link = svg.append('g')
+      //     .selectAll('.link')
+      //     .data(g.links)
+      //     .enter()
+      //     .append('path')
+      //     .attr('class', 'link')
+      //     .attr('d', sankey.link())
+      //     .style('stroke-width', function (d) { return Math.max(1, d.dy); })
+      //     .sort(function (a, b) { return b.dy - a.dy; });
+      //   // console.log(link);
+      //   // add in the nodes
+      //   const node = svg.append('g')
+      //     .selectAll('.node')
+      //     .data(g.nodes)
+      //     .enter().append('g')
+      //     .attr('class', 'node')
+      //     .attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; })
+      //     .call(d3.drag()
+      //       .subject(function (d) { return d; })
+      //       .on('start', function () { this.parentNode.appendChild(this); })
+      //       .on('drag', dragmove));
+      //   console.log(color);
+      //   // add the rectangles for the nodes
+      //   node
+      //     .append('rect')
+      //     .attr('height', function (d) { return d.dy; })
+      //     .attr('width', sankey.nodeWidth())
+      //     .style('fill', function (d) {
+      //       return color(d.name.replace(/ .*/, ''));
+      //     })
+      //     .style('stroke', function (d) { return d3.rgb(d.color).darker(2); })
+      //     // Add hover text
+      //     .append('title')
+      //     .text(function (d) { return d.name + '\n' + 'There is ' + d.value + ' stuff in this node'; });
+      //   // add in the title for the nodes
+      //   node
+      //     .append('text')
+      //     .attr('x', -6)
+      //     .attr('y', function (d) { return d.dy / 2; })
+      //     .attr('dy', '.35em')
+      //     .attr('text-anchor', 'end')
+      //     .attr('transform', null)
+      //     .text(function (d) { return d.name; })
+      //     .filter(function (d) { return d.x < width / 2; })
+      //     .attr('x', 6 + sankey.nodeWidth())
+      //     .attr('text-anchor', 'start');
+      //   // the function for moving the nodes
+      //   function dragmove (d) {
+      //     d3.select(this)
+      //       .attr('transform',
+      //         'translate(' +
+      //           d.x + ',' +
+      //           (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ')');
+      //     sankey.relayout();
+      //     link.attr('d', sankey.link());
+      //   }
+      // }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$b(this);
+      }
+    }]
+  };
+}, GetTreeStructureMixin(LitElement));
+
+var styles$l = "";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$c = self => function () {
+  // @ts-ignore
+  // const { topic } = this;
+  console.log(this);
+  return html`
+    <style>
+      ${styles$l}
+    </style>
+
+    History
+  `;
+}.bind(self)();
+
+// Extend the LitElement base class
+// @ts-ignore
+
+let ProtobotHistory = _decorate([customElement('protobot-history')], function (_initialize, _GetDomainMixin) {
+  class ProtobotHistory extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotHistory,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$c(this);
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$m = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$d = self => function () {
+  // @ts-ignore
+  const {
+    topics,
+    save,
+    addMemo,
+    memos,
+    domain
+  } = this;
+  const {
+    domainVersion: dv
+  } = domain;
+  const {
+    page: pageId,
+    crowdId: crowd
+  } = this.queryObject || {
+    page: null
+  };
+  return html`
+    <style>
+      ${styles$m}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+    </style>
+
+    <div class = "instruction">
+      <h3>Instruction</h3>
+      <p>In Macro Review, you can explore the whole conversation flows which are followed and prototyped by crowds.</p>
+    </div>
+    <br>
+    <h3>Current Topic List</h3>
+    <ul class ="topic-list">
+    ${topics.map(topic => html`
+      <li>
+        <topic-list-item class="item" topicId="${topic.id}">
+        </topic-list-item>
+      </li>
+    `)}
+    </ul>
+    <br>
+    <br>
+    ${memos.map(({
+    page,
+    crowdId,
+    memoId,
+    deployedVersion
+  }) => page === pageId && crowdId === crowd && deployedVersion === dv ? html`
+      <protobot-memo .memoId="${memoId}"></protobot-memo>
+    ` : '')}
+    <div class="add-container">
+      <button class="add-button" @click="${addMemo.bind(this)}">+</button>
+    </div>
+    <!-- <div class="button-container">
+      <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
+        Done with Labeling
+      </vaadin-button>
+    </div> -->
+
+
+  `;
+}.bind(self)();
+
+// Extend the LitElement base class
+// @ts-ignore
+
+let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], function (_initialize, _GetDomainMemosMixin) {
+  class ProtobotMacroSidebar extends _GetDomainMemosMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotMacroSidebar,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$d(this);
+      }
+    }, {
+      kind: "method",
+      key: "save",
+      value: function save() {}
+    }, {
+      kind: "method",
+      key: "addMemo",
+      value: async function addMemo() {
+        const updates = {};
+        const {
+          key: memoId
+        } = database.ref('memos/data').push();
+        const {
+          page,
+          crowdId
+        } = this.queryObject || {
+          page: null
+        };
+        const {
+          deployedVersion
+        } = this.domain;
+        const memo = {
+          text: '',
+          domainId: this.domainId,
+          crowdId: crowdId || null,
+          // can be null
+          page,
+          deployedVersion: deployedVersion || null
+        }; // console.log(this.memos)
+
+        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = {
+          page,
+          crowdId: crowdId || null,
+          deployedVersion: deployedVersion || null
+        };
+
+        if (crowdId) {
+          updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;
+        }
+
+        updates[`memos/data/${memoId}`] = memo; // this saves the memo in db
+
+        await database.ref().update(updates);
+      }
+    }]
+  };
+}, GetDomainMemosMixin(LitElement));
+
+var styles$n = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$e = self => function () {
+  // @ts-ignore
+  const {
+    topics,
+    save,
+    addMemo,
+    memos,
+    domain
+  } = this;
+  const {
+    queryObject
+  } = this;
+  const {
+    deployedVersion: dv
+  } = domain;
+  const {
+    page: pageId,
+    crowdId: crowd
+  } = queryObject;
+  return html`
+    <style>
+      ${styles$n}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+    </style>
+
+    <div class = "instruction">
+      <h3>Instruction</h3>
+      <p>In this stage, you can label the topic for each utterance.
+        Please click the select-box to label the topic.</p>
+    </div>
+    <br>
+    <h3>Current Topic List</h3>
+    <ul class ="topic-list">
+    ${topics.map(topic => html`
+      <li>
+        <topic-list-item class="item" .topicId="${topic.id}">
+        </topic-list-item>
+      </li>
+    `)}
+    </ul>
+    <br>
+    <br>
+    ${memos.map(({
+    page,
+    crowdId,
+    memoId,
+    deployedVersion
+  }) => page === pageId && crowdId === crowd && deployedVersion === dv ? html`
+      <protobot-memo .memoId="${memoId}"></protobot-memo>
+    ` : '')}
+    <div class="add-container">
+      <button class="add-button" @click="${addMemo.bind(this)}">+</button>
+    </div>
+    <!-- <div class="button-container">
+      <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
+        Done with Labeling
+      </vaadin-button>
+    </div> -->
+  `;
+}.bind(self)();
+
+// Extend the LitElement base class
+// @ts-ignore
+
+let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], function (_initialize, _GetDomainMemosMixin) {
+  class ProtobotMicroSidebar extends _GetDomainMemosMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotMicroSidebar,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: // @property({ type: Array })
+      // memos = [''];
+      function render() {
+        return template$e(this);
+      }
+    }, {
+      kind: "method",
+      key: "save",
+      value: function save() {}
+    }, {
+      kind: "method",
+      key: "addMemo",
+      value: async function addMemo() {
+        const updates = {};
+        const {
+          key: memoId
+        } = database.ref('memos/data').push();
+        const {
+          page,
+          crowdId
+        } = this.queryObject || {
+          page: null
+        };
+        const {
+          deployedVersion
+        } = this.domain;
+        const memo = {
+          text: '',
+          domainId: this.domainId,
+          crowdId: crowdId || null,
+          // can be null
+          page,
+          deployedVersion: deployedVersion || null
+        }; // console.log(this.memos)
+
+        updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = {
+          page,
+          crowdId: crowdId || null,
+          deployedVersion: deployedVersion || null
+        };
+
+        if (crowdId) {
+          updates[`memos/lists/domain-crowdid-memo/${this.domainId}/${this.crowdId}/${memoId}`] = page;
+        }
+
+        updates[`memos/data/${memoId}`] = memo; // this saves the memo in db
+
+        await database.ref().update(updates);
+      } // async save () {
+      //   const updates = {};
+      //   // updates[`last-deployed/data/${this.domainId}/`] = this.domain;
+      //   // updates[`domains/data/${this.domainId}/deployed`] = false;
+      //   // await database.ref().update(updates);
+      // }
+      // async addMemo (event) {
+      //   const { target } = event;
+      //   const { value } = target;
+      //   this.memos.push('');
+      //   this.requestUpdate();
+      //   // console.log(this.memos)
+      // }
+      // async updateMemo (idx, { detail: value }) {
+      //   this.memos[idx] = value;
+      //   console.log(this.memos);
+      // }
+
+    }]
+  };
+}, GetDomainMemosMixin(LitElement));
+
+var styles$o = "";
+
+var styles$p = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
+
+var styles$q = ``;
+
+var SwitchBehaviorEvent;
+
+(function (SwitchBehaviorEvent) {
+  SwitchBehaviorEvent['CHANGE'] = 'change';
+})(SwitchBehaviorEvent || (SwitchBehaviorEvent = {}));
+
+class SwitchBehavior extends FormElementBehavior {
+  constructor() {
+    super(...arguments);
+    this.checked = false;
+    this.ariaChecked = this.checked.toString();
+    this.role = 'checkbox';
+    this.formElementType = 'checkbox';
+  }
+
+  firstUpdated(props) {
+    super.firstUpdated(props);
+    this.onClick = this.onClick.bind(this);
+    this.onKeyDown = this.onKeyDown.bind(this);
+    this.attachListeners();
+  }
+
+  updated(props) {
+    super.updated(props);
+    this.updateAria(props);
+  }
+
+  updateAria(props) {
+    if (props.has('checked')) {
+      this.ariaChecked = this.checked.toString();
+    }
+  }
+
+  attachListeners() {
+    this.listeners.push(addListener(this, 'click', this.onClick.bind(this)), addListener(this, 'keydown', this.onKeyDown.bind(this)));
+  }
+
+  onClick(e) {
+    if (this.disabled) {
+      stopEvent(e);
+      return;
+    }
+
+    this.toggle();
+  }
+
+  toggle() {
+    this.checked = !this.checked;
+    this.dispatchChangeEvent();
+  }
+
+  dispatchChangeEvent() {
+    requestAnimationFrame(() => {
+      this.dispatchEvent(new CustomEvent(SwitchBehaviorEvent.CHANGE, {
+        composed: true,
+        bubbles: true
+      }));
+    });
+  }
+
+  onKeyDown(e) {
+    if (e.code === SPACE || e.code === ENTER) {
+      this.click();
+      stopEvent(e);
+    }
+  }
+
+  renderFormElement() {
+    return html` <input style="display: none;" id="${this.formElementId}" type="${this.formElementType}" ?checked="${this.checked}" ?required="${this.required}" ?disabled="${this.disabled}" ?readonly="${this.readonly}" .value="${ifDefined(this.value)}" name="${ifDefined(this.name)}" aria-hidden="true" tabindex="-1"> `;
+  }
+
+}
+
+SwitchBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$q)];
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], SwitchBehavior.prototype, 'checked', void 0);
+
+__decorate([property({
+  type: String,
+  reflect: true,
+  attribute: 'aria-checked'
+}), __metadata('design:type', String)], SwitchBehavior.prototype, 'ariaChecked', void 0);
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata('design:type', String)], SwitchBehavior.prototype, 'role', void 0);
+
+var styles$r = ``;
+
+class CheckboxBehavior extends SwitchBehavior {
+  constructor() {
+    super(...arguments);
+    this.indeterminate = false;
+  }
+
+  toggle() {
+    if (this.indeterminate) {
+      this.indeterminate = false;
+    }
+
+    this.checked = !this.checked;
+    this.dispatchChangeEvent();
+  }
+
+  updateAria(props) {
+    if (props.has('checked') || props.has('indeterminate')) {
+      this.ariaChecked = this.indeterminate ? `mixed` : this.checked.toString();
+    }
+  }
+
+}
+
+CheckboxBehavior.styles = [...SwitchBehavior.styles, cssResult(styles$r)];
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], CheckboxBehavior.prototype, 'indeterminate', void 0);
+
+var styles$s = `:host{--_checkbox-bg:var(--checkbox-bg,transparent);--_checkbox-color:var(--checkbox-color,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))));background:var(--_checkbox-bg);color:var(--_checkbox-color);width:var(--checkbox-size,1.25rem);height:var(--checkbox-size,1.25rem);border:var(--checkbox-border-config,.125rem solid) currentColor;border-radius:var(--checkbox-border-radius,.375rem);transition:var(--checkbox-transition,background var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)),border-color var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));position:relative;display:inline-flex;align-items:center;justify-content:center;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([disabled])){cursor:pointer}:host([checked]),:host([indeterminate]){--_checkbox-bg:var(--checkbox-bg-checked,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_checkbox-color:var(--checkbox-color-checked,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))))}:host([checked]:not([indeterminate])) #checkmark-path,:host([indeterminate]) #indeterminate-path{stroke-dashoffset:0}:host(:focus),:host(:hover){will-change:border,background}:host(:focus) #checkmark-path,:host(:hover) #checkmark-path{will-change:stroke-dashoffset}:host([disabled]){--_checkbox-bg:var(--checkbox-bg-disabled,transparent);--_checkbox-color:var(--checkbox-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));pointer-events:none}:host([disabled][checked]),:host([disabled][indeterminate]){--_checkbox-bg:var(--checkbox-bg-disabled-checked,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))));--_checkbox-color:var(--checkbox-color-disabled-checked,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))))}#checkmark{width:var(--checkbox-checkmark-size,.75rem);height:var(--checkbox-checkmark-size,.75rem)}#checkmark-path,#indeterminate-path{stroke-width:var(--checkbox-checkmark-path-width,.1875rem);stroke:var(--checkbox-checkmark-stroke-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));stroke-dasharray:var(--checkbox-checkmark-path-dasharray,30);stroke-dashoffset:var(--checkbox-checkmark-path-dasharray,30);transition:var(--checkbox-checkmark-transition,stroke-dashoffset var(--transition-duration-medium,.18s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)))}#checkmark-path{transition-delay:var(--checkbox-checkmark-path-delay,50ms)}#ripple{transform:var(--checkbox-ripple-transform,translate(-50%,-50%) scale(1.8))}`;
+
+let Checkbox = class Checkbox extends CheckboxBehavior {
+  render() {
+    return html` <svg id="checkmark" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 24 24"> <path id="checkmark-path" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path> <line id="indeterminate-path" fill="none" x1="0" y1="12.5" x2="24" y2="12.5"/> </svg> <wl-ripple id="ripple" .target="${this}" focusable overlay unbounded centered initialDuration="200"></wl-ripple> <slot></slot> ${this.renderFormElement()} `;
+  }
+
+};
+Checkbox.styles = [...SwitchBehavior.styles, cssResult(styles$s)];
+Checkbox = __decorate([customElement('wl-checkbox')], Checkbox);
+
+const $_documentContainer$3 = document.createElement('template');
+$_documentContainer$3.innerHTML = `<custom-style>
+  <style>
+    html {
+      --lumo-size-xs: 1.625rem;
+      --lumo-size-s: 1.875rem;
+      --lumo-size-m: 2.25rem;
+      --lumo-size-l: 2.75rem;
+      --lumo-size-xl: 3.5rem;
+
+      /* Icons */
+      --lumo-icon-size-s: 1.25em;
+      --lumo-icon-size-m: 1.5em;
+      --lumo-icon-size-l: 2.25em;
+      /* For backwards compatibility */
+      --lumo-icon-size: var(--lumo-icon-size-m);
+    }
+  </style>
+</custom-style>`;
+document.head.appendChild($_documentContainer$3.content);
+
+const $_documentContainer$4 = document.createElement('template');
+$_documentContainer$4.innerHTML = `<custom-style>
+  <style>
+    html {
+      /* Square */
+      --lumo-space-xs: 0.25rem;
+      --lumo-space-s: 0.5rem;
+      --lumo-space-m: 1rem;
+      --lumo-space-l: 1.5rem;
+      --lumo-space-xl: 2.5rem;
+
+      /* Wide */
+      --lumo-space-wide-xs: calc(var(--lumo-space-xs) / 2) var(--lumo-space-xs);
+      --lumo-space-wide-s: calc(var(--lumo-space-s) / 2) var(--lumo-space-s);
+      --lumo-space-wide-m: calc(var(--lumo-space-m) / 2) var(--lumo-space-m);
+      --lumo-space-wide-l: calc(var(--lumo-space-l) / 2) var(--lumo-space-l);
+      --lumo-space-wide-xl: calc(var(--lumo-space-xl) / 2) var(--lumo-space-xl);
+
+      /* Tall */
+      --lumo-space-tall-xs: var(--lumo-space-xs) calc(var(--lumo-space-xs) / 2);
+      --lumo-space-tall-s: var(--lumo-space-s) calc(var(--lumo-space-s) / 2);
+      --lumo-space-tall-m: var(--lumo-space-m) calc(var(--lumo-space-m) / 2);
+      --lumo-space-tall-l: var(--lumo-space-l) calc(var(--lumo-space-l) / 2);
+      --lumo-space-tall-xl: var(--lumo-space-xl) calc(var(--lumo-space-xl) / 2);
+    }
+  </style>
+</custom-style>`;
+document.head.appendChild($_documentContainer$4.content);
+
+const $_documentContainer$5 = document.createElement('template');
+$_documentContainer$5.innerHTML = `<custom-style>
+  <style>
+    html {
+      /* Font families */
+      --lumo-font-family: -apple-system, BlinkMacSystemFont, "Roboto", "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+      /* Font sizes */
+      --lumo-font-size-xxs: .75rem;
+      --lumo-font-size-xs: .8125rem;
+      --lumo-font-size-s: .875rem;
+      --lumo-font-size-m: 1rem;
+      --lumo-font-size-l: 1.125rem;
+      --lumo-font-size-xl: 1.375rem;
+      --lumo-font-size-xxl: 1.75rem;
+      --lumo-font-size-xxxl: 2.5rem;
+
+      /* Line heights */
+      --lumo-line-height-xs: 1.25;
+      --lumo-line-height-s: 1.375;
+      --lumo-line-height-m: 1.625;
+    }
+
+  </style>
+</custom-style><dom-module id="lumo-typography">
+  <template>
+    <style>
+      html {
+        font-family: var(--lumo-font-family);
+        font-size: var(--lumo-font-size, var(--lumo-font-size-m));
+        line-height: var(--lumo-line-height-m);
+        -webkit-text-size-adjust: 100%;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Can’t combine with the above selector because that doesn’t work in browsers without native shadow dom */
+      :host {
+        font-family: var(--lumo-font-family);
+        font-size: var(--lumo-font-size, var(--lumo-font-size-m));
+        line-height: var(--lumo-line-height-m);
+        -webkit-text-size-adjust: 100%;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      small,
+      [theme~="font-size-s"] {
+        font-size: var(--lumo-font-size-s);
+        line-height: var(--lumo-line-height-s);
+      }
+
+      [theme~="font-size-xs"] {
+        font-size: var(--lumo-font-size-xs);
+        line-height: var(--lumo-line-height-xs);
+      }
+
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        font-weight: 600;
+        line-height: var(--lumo-line-height-xs);
+        margin-top: 1.25em;
+      }
+
+      h1 {
+        font-size: var(--lumo-font-size-xxxl);
+        margin-bottom: 0.75em;
+      }
+
+      h2 {
+        font-size: var(--lumo-font-size-xxl);
+        margin-bottom: 0.5em;
+      }
+
+      h3 {
+        font-size: var(--lumo-font-size-xl);
+        margin-bottom: 0.5em;
+      }
+
+      h4 {
+        font-size: var(--lumo-font-size-l);
+        margin-bottom: 0.5em;
+      }
+
+      h5 {
+        font-size: var(--lumo-font-size-m);
+        margin-bottom: 0.25em;
+      }
+
+      h6 {
+        font-size: var(--lumo-font-size-xs);
+        margin-bottom: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+
+      p,
+      blockquote {
+        margin-top: 0.5em;
+        margin-bottom: 0.75em;
+      }
+
+      a {
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      hr {
+        display: block;
+        align-self: stretch;
+        height: 1px;
+        border: 0;
+        padding: 0;
+        margin: var(--lumo-space-s) calc(var(--lumo-border-radius-m) / 2);
+        background-color: var(--lumo-contrast-10pct);
+      }
+
+      blockquote {
+        border-left: 2px solid var(--lumo-contrast-30pct);
+      }
+
+      b,
+      strong {
+        font-weight: 600;
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$5.content);
+
+const $_documentContainer$6 = document.createElement('template');
+$_documentContainer$6.innerHTML = `<dom-module id="lumo-required-field">
+  <template>
+    <style>
+      [part="label"] {
+        align-self: flex-start;
+        color: var(--lumo-secondary-text-color);
+        font-weight: 500;
+        font-size: var(--lumo-font-size-s);
+        margin-left: calc(var(--lumo-border-radius-m) / 4);
+        transition: color 0.2s;
+        line-height: 1;
+        padding-bottom: 0.5em;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        position: relative;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+
+      :host([has-label])::before {
+        margin-top: calc(var(--lumo-font-size-s) * 1.5);
+      }
+
+      :host([has-label]) {
+        padding-top: var(--lumo-space-m);
+      }
+
+      :host([required]) [part="label"] {
+        padding-right: 1em;
+      }
+
+      [part="label"]::after {
+        content: var(--lumo-required-field-indicator, "•");
+        transition: opacity 0.2s;
+        opacity: 0;
+        color: var(--lumo-primary-text-color);
+        position: absolute;
+        right: 0;
+        width: 1em;
+        text-align: center;
+      }
+
+      :host([required]:not([has-value])) [part="label"]::after {
+        opacity: 1;
+      }
+
+      :host([invalid]) [part="label"]::after {
+        color: var(--lumo-error-text-color);
+      }
+
+      [part="error-message"] {
+        margin-left: calc(var(--lumo-border-radius-m) / 4);
+        font-size: var(--lumo-font-size-xs);
+        line-height: var(--lumo-line-height-xs);
+        color: var(--lumo-error-text-color);
+        will-change: max-height;
+        transition: 0.4s max-height;
+        max-height: 5em;
+      }
+
+      /* Margin that doesn’t reserve space when there’s no error message */
+      [part="error-message"]:not(:empty)::before,
+      [part="error-message"]:not(:empty)::after {
+        content: "";
+        display: block;
+        height: 0.4em;
+      }
+
+      :host(:not([invalid])) [part="error-message"] {
+        max-height: 0;
+        overflow: hidden;
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$6.content);
+
+const $_documentContainer$7 = document.createElement('template');
+$_documentContainer$7.innerHTML = `<custom-style>
+  <style>
+    @font-face {
+      font-family: 'lumo-icons';
+      src: url(data:application/font-woff;charset=utf-8;base64,d09GRgABAAAAABEgAAsAAAAAIiwAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABHU1VCAAABCAAAADsAAABUIIslek9TLzIAAAFEAAAAQwAAAFZAIUuKY21hcAAAAYgAAAD4AAADrsCU8d5nbHlmAAACgAAAC2MAABd4h9To2WhlYWQAAA3kAAAAMQAAADYSnCkuaGhlYQAADhgAAAAdAAAAJAbpA35obXR4AAAOOAAAABAAAACspBAAAGxvY2EAAA5IAAAAWAAAAFh55IAsbWF4cAAADqAAAAAfAAAAIAFKAXBuYW1lAAAOwAAAATEAAAIuUUJZCHBvc3QAAA/0AAABKwAAAelm8SzVeJxjYGRgYOBiMGCwY2BycfMJYeDLSSzJY5BiYGGAAJA8MpsxJzM9kYEDxgPKsYBpDiBmg4gCACY7BUgAeJxjYGS+yDiBgZWBgamKaQ8DA0MPhGZ8wGDIyAQUZWBlZsAKAtJcUxgcXjG+0mIO+p/FEMUcxDANKMwIkgMABn8MLQB4nO3SWW6DMABF0UtwCEnIPM/zhLK8LqhfXRybSP14XUYtHV9hGYQwQBNIo3cUIPkhQeM7rib1ekqnXg981XuC1qvy84lzojleh3puxL0hPjGjRU473teloEefAUNGjJkwZcacBUtWrNmwZceeA0dOnLlw5cadB09elPGhGf+j0NTI/65KfXerT6JhqKnpRKtgOpuqaTrtKjPUlqHmhto21I7pL6i6hlqY3q7qGWrfUAeGOjTUkaGODXViqFNDnRnq3FAXhro01JWhrg11Y6hbQ90Z6t5QD4Z6NNSToZ4N9WKoV0O9GerdUB+G+jTUl6GWRvkL24BkEXictVh9bFvVFb/nxvbz+7Rf/N6zHcd2bCfP+Wgc1Z9N0jpNnEL6kbRVS6HA2hQYGh9TGR1CbCqa2rXrWOkQE/sHNJgmtZvoVNZqE1B1DNHxzTQxCehUTYiJTQyENui0qSLezr3PduyQfgmRWOfde8+9551z7rnn/O4jLoJ/bRP0UaKQMLFJjpBAvphLZC3Dk0ok7WBzR2/upJs7Ryw/nfFbln/uuN/apCvwrKLrSvUqRufbm5pn0fs0w4gYxnGVP6qHnO4bWiDQGQgwtS6lm3lB3QoX1M2vwEmuzirF39y+Es2+DJ8d1pkyqBIqoze3D1+Zz4DrFoazxI8dWwMrDlZ2DMqQAR9AROsJU+2cmlTPazTco52F1xTa2a2+K8vvq92dVHmtLoPeQX/AZPRYGthDYOeZjBjKoFsVGulR3lWU95WeCK44qHU7MhWUGUKZDT3oKUcG2GWuh+EDDfUYA/jhAhl0TOsJNYSEu7mQmi3UzfXwZKA4BsVsHLXQYGgRW95uEtpJ1Vfn9XiLriRBlFEqxsDjA09yCNUoQxxwd7KWSTt2y3GTKiflqHRSoWZc3m11Wa/fJdFgXD4sSYfleJBKd8GMz7J8dZn/cGRCcKGDnA2Ge3fKzcvlnTDNthGWLXzX/WaXtUAmRgeLlHSr30r0G9UTXMb0AtmwzOoy73fkSlHZkduw/TYuU9cAD4YutPoxTTsA3797wVr4Z/1NC5zARHr4vtxJjxIfiZMhMkbWk+14BnJZKwqGZwDfswLyxWDSg11rFLJF7Nopxjd1h1/QOT+oezgfu3Yq+Hk+duf5x+40o1GTkaIgikK/IEnC6aYxCUBaZJSN4XTYFjU/YMNIKqJwhDGOCCI8FDXnXmXjtGhGJyShqjAOnBOkW2JG9S7GgYeMWAU5JzhnWmBOaOM+CKEPoqSfFDC2Unq+DLlUgUVUFFLZGJg6jtlojsdsa8kPObPuJdi5dnBdBsLJMGTWDa4t2JvtwuPo9s+Y86suv/W33QG1rAaOAUV+vx4K6f2D04PVKlC7WLSrZzAi45ZV6lIC7WoXqmRyvUqoVwrzUoVsIjeTXWQv+RH5GTlBXiB/In8ln0IbBCAFOajAJrgZYyOHWqOfUe/aHjI12R6OQo1jCgt215l+4f6XPb+0MNou0V+43n2F77tSfRb24d7zitgnKmvYHs69zugaPvBwv6ioXkb2LdL65Atw51uLkXlu1bhMMRcXSPcYoqKIRlh34lQP8/5JbuUFye4vxD6/6MxFF11C0uVLr9Ulgw44tS3pMViNLUExbycFgLIct+QDMibRimx1ydUz8FXZiuOIDBOMVX2nUZc+huNE5XUJ81uiJoiabwqaVF0uacKbau/pl4R2VW0XXlJra6boVrYG646TF5NYzwy4vjENVrDlcNpZPl8DH6XX8XWCx0mvWVZY6KFLrvsY66/zPict5FnxaNUR/juvZCM3TvD60E2W1tZizbXTPDuabcm0nbbzpWKpmA1ayBQ8giedLUM+A0kNjBjQjmuYz7YrgIXYvmF63ZLBwSXrpn9Tb9wwdd/U1H0PMQK3XcO8ul3WT7PyPPdpy0TemKxNRcJNauiXJnnUDpUppQWs4SnUIy0EESGYqJYQLGHxzaGWwVIaS6Y7mQFM8ZjYDQ3axjf61SWjU33JwOZA1pwaG1L9mzf71aHRdX1JHw6Fp0aXhNwbqyeGNg4NbdzGCBxoz4ZXjy4Nu69Zr6sDY6vMrLU5nA1P8JkbdWXJ6ERfMryvNh1JfQ9+T4dIhGvK9w3dxjBBzatsQ/MlOHVIDnYpDz6odAXlQ01t2Pa5Iafd8MMpxAeDKP0C6CjgVLT5osB6icUx01lWjXxzT/GyRF2welEM5Z/7jG3VjQ1SrNn5IbyzOG5dobB3/QHxyZvsXcoz8IoEwS7plCg+zxHQk424q9BfEpkESJbFHQusDBSWFkuBkoPO0kLKwRVYjxGXlHTcTDQMJ/H6TX9afkO7mnraTO1feTnZAXLu4cp7HAXMmNG1yeFk9TgS/NHhZR/4QoBTr/ZB+6hCgyl15Nq1UbN6nE1/ZnP1U2cizCBpvs8cJQZJ4LkYx5N/yZPAUZNQQ0V4f3BQllWrK3YRzl30dOT6RVn2upNur6woSa8CqpdT/aKnBM4o3jNur9d9xqtUT6veBEt9Ca9at+ERzEEhUkR8sa5mQ4aVvJoVeEA8zI4ei5mULXFGyU7z/6TAeYLVcpzSWZY8PYYF5yrTV60sT0+XV141vX++Wf16V2bFeGVPZXxFpkvyeKTWLlzfW0mnKxsY6Y3294/0998SCfX1blm5pbcvFGlq/r07MRAMhYIDiW5JFKWW3vdrEpCsZSJG+om7Zu/PSScZJhNkLbmW5Wsr12pWqW5zKtlwRS4bFOxUw17mCzy6lskCDl1WYOGWDYrADrMA7BDDweWWNd5koiJnR1dz+ytLP2q0SqPB1lnK2ccB7RYe4FSoPks3iB3t4txTSHctb2sy1ivk0pvHuCNm6w1f6wxv3+OCgN78LqdQnUVh7R0oTAp0zOf2rbW770Vu5C2dIyGdTnHo8zSji7dppj0USoVCz+lhRMTh53Teq9VbGfbjuSbAooSdXayY4PYHg374C6f7gl1B/DXuJ4/QXxOBdJFJspFsI3egpoWUUCjlTIFnNYNl+ZyZKmBeYKGHkD1QyDlhaKbKwKcIJqJ4TLJ2OmdY/JWXae4DdGBw8HZ7eXcgFF2zr2SoalDry5iKqoa0Puhe3hPQ2s3elTYM+MI+n3rK0KgL7/La3GeMLt6m7u912vGnvtORiIa0qBmhqVi+XW9XNBmqb8eVgKzIHfGI5bNoG7X0UCzeISmqIcO/nY8FH7U8avX9fx/ST+hx0sezPw9Qy8Mum3GWf2N4Uy/yIYGVBXbJHWIZp7dfTcptdMTr9Qmq7DaiK/ukqCL4kt4RUfS5XPnMtmT22/mQFqF7emSqtrlu8SVElxDRJrZODkpuwe0VfTfjdEp1f7A7v+fozNBXUJ/6WTuK2TtFlpFVZAZ3LcFvUi1Z2p2YT+EMAkGJVStOzLTAPg4IqWIAlzRSjOBkl2zxj3TKycpzT/MnvX3uaSMWM+gU0rkXjohhefVRMaps3/kLMSKv23lT23uxQrkQjyOJleMDsdhAnD6ZGElWZ5MjCXzCE/hkWX+WF4knzGhVOyK2eQZekV3eyo0zL8kuYWCnDCvjjhAkcTPOBDXVdoav3HVcFnQjLvtV9S2p0zA6JegPwMQxt+yFb3ll9zGlq/5dRKb3cEyQYoaNYpharJ7xCB7AWxsLY3jjZXY0XsZj0Wjwc9I6PP/dKABnCZaqHpaZEACxk4ZeLZSKNgZABl+lYQX1sJQOSX3n6r410evcoud5JeAGUXVP9H1tZOKejTq4Ono0z0erro1FrnOpohva1d/hTdtVsQdKN5W9RlT3NjD0nznyKNTgKAMfWNWcyodV0IGLPIHOF0o4JyqufaK4z6WIIzuGh3d8c8cwQg8ER+OVxyrjdm8vNuhts4LoOihGxIMuUdgzwiYN7xhh1+oZnJNuTG7gQZvu4XWZ9GAZZjGEubwePqYhtKDTH+9VQkl17/iGybsnJ+8+sKtyPrcll9ty65Zsdst/9iqpEKh7M5VdBxh3csOdNc6tW3I1uyM1PzOXegSOrLFsFNI2O27M+TF2ApnN9MUv5ud6LjxIvEQnHRzxIu4IsA9MLFkJn2tcZoZ7ON7dXe7ujrc8HrusPKamlqXwd77lQUuLpilau4PUMapueBb7irU4RoUXEYXuVuIGlRGmOp+2lNkaRPVziOqmlaZvaqG4dFgSj0jxEJWrv12IUWntmw+rfQarRE0Aph4ocI6nlUlGqs+u3/+T/ethW62PpHp2eHbZstnh/wOO95yDAHicY2BkYGAAYi2NOJ94fpuvDNzML4AiDNc/fzqEoP+/Zp7KdAvI5WBgAokCAGkcDfgAAAB4nGNgZGBgDvqfBSRfMAAB81QGRgZUoA0AVvYDbwAAAHicY2BgYGB+MTQwAM8EJo8AAAAAAE4AmgDoAQoBLAFOAXABmgHEAe4CGgKcAugEmgS8BNYE8gUOBSoFegXQBf4GRAZmBrYHGAeQCBgIUghqCP4JRgm+CdoKBAo8CoIKuArwC1ALlgu8eJxjYGRgYNBmTGEQZQABJiDmAkIGhv9gPgMAGJQBvAB4nG2RPU7DMBiG3/QP0UoIBGJh8QILavozdmRo9w7d09RpUzlx5LgVvQMn4BAcgoEzcAgOwVvzSZVQbcnf48fvFysJgGt8IcJxROiG9TgauODuj5ukG+EW+UG4jR4ehTv0Q+EunjER7uEWmk+IWpc0d3gVbuAKb8JN+nfhFvlDuI17fAp36L+Fu1jgR7iHp+jF7Arbz1Nb1nO93pnEncSJFtrVuS3VKB6e5EyX2iVer9TyoOr9eux9pjJnCzW1pdfGWFU5u9WpjzfeV5PBIBMfp7aAwQ4FLPrIkbKWqDHn+67pDRK4s4lzbsEux5qHvcIIMb/nueSMyTKkE3jWFdNLHLjW2PPmMa1Hxn3GjGW/wjT0HtOG09JU4WxLk9LH2ISuiv9twJn9y8fh9uIXI+BknAAAAHicbY7ZboMwEEW5CVBCSLrv+76kfJRjTwHFsdGAG+Xvy5JUfehIHp0rnxmNN/D6ir3/a4YBhvARIMQOIowQY4wEE0yxiz3s4wCHOMIxTnCKM5zjApe4wjVucIs73OMBj3jCM17wije84wMzfHqJ0EVmUkmmJo77oOmrHvfIRZbXsTCZplTZldlgb3TYGVHProwFs11t1A57tcON2rErR3PBqcwF1/6ctI6k0GSU4JHMSS6WghdJQ99sTbfuN7QLJ9vQ37dNrgyktnIxlDYLJNuqitpRbYWKFNuyDT6pog6oOYKHtKakeakqKjHXpPwlGRcsC+OqxLIiJpXqoqqDMreG2l5bv9Ri3TRX+c23DZna9WFFgmXuO6Ps1Jm/w6ErW8N3FbHn/QC444j0AA==) format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    html {
+      --lumo-icons-align-center: "\\ea01";
+      --lumo-icons-align-left: "\\ea02";
+      --lumo-icons-align-right: "\\ea03";
+      --lumo-icons-angle-down: "\\ea04";
+      --lumo-icons-angle-left: "\\ea05";
+      --lumo-icons-angle-right: "\\ea06";
+      --lumo-icons-angle-up: "\\ea07";
+      --lumo-icons-arrow-down: "\\ea08";
+      --lumo-icons-arrow-left: "\\ea09";
+      --lumo-icons-arrow-right: "\\ea0a";
+      --lumo-icons-arrow-up: "\\ea0b";
+      --lumo-icons-bar-chart: "\\ea0c";
+      --lumo-icons-bell: "\\ea0d";
+      --lumo-icons-calendar: "\\ea0e";
+      --lumo-icons-checkmark: "\\ea0f";
+      --lumo-icons-chevron-down: "\\ea10";
+      --lumo-icons-chevron-left: "\\ea11";
+      --lumo-icons-chevron-right: "\\ea12";
+      --lumo-icons-chevron-up: "\\ea13";
+      --lumo-icons-clock: "\\ea14";
+      --lumo-icons-cog: "\\ea15";
+      --lumo-icons-cross: "\\ea16";
+      --lumo-icons-download: "\\ea17";
+      --lumo-icons-dropdown: "\\ea18";
+      --lumo-icons-edit: "\\ea19";
+      --lumo-icons-error: "\\ea1a";
+      --lumo-icons-eye: "\\ea1b";
+      --lumo-icons-eye-disabled: "\\ea1c";
+      --lumo-icons-menu: "\\ea1d";
+      --lumo-icons-minus: "\\ea1e";
+      --lumo-icons-ordered-list: "\\ea1f";
+      --lumo-icons-phone: "\\ea20";
+      --lumo-icons-photo: "\\ea21";
+      --lumo-icons-play: "\\ea22";
+      --lumo-icons-plus: "\\ea23";
+      --lumo-icons-redo: "\\ea24";
+      --lumo-icons-reload: "\\ea25";
+      --lumo-icons-search: "\\ea26";
+      --lumo-icons-undo: "\\ea27";
+      --lumo-icons-unordered-list: "\\ea28";
+      --lumo-icons-upload: "\\ea29";
+      --lumo-icons-user: "\\ea2a";
+    }
+  </style>
+</custom-style>`;
+document.head.appendChild($_documentContainer$7.content);
+
+const $_documentContainer$8 = document.createElement('template');
+$_documentContainer$8.innerHTML = `<dom-module id="lumo-field-button">
+  <template>
+    <style>
+      [part\$="button"] {
+        flex: none;
+        width: 1em;
+        height: 1em;
+        line-height: 1;
+        font-size: var(--lumo-icon-size-m);
+        text-align: center;
+        color: var(--lumo-contrast-60pct);
+        transition: 0.2s color;
+        cursor: var(--lumo-clickable-cursor);
+      }
+
+      :host(:not([readonly])) [part\$="button"]:hover {
+        color: var(--lumo-contrast-90pct);
+      }
+
+      :host([disabled]) [part\$="button"],
+      :host([readonly]) [part\$="button"] {
+        color: var(--lumo-contrast-20pct);
+      }
+
+      [part\$="button"]::before {
+        font-family: "lumo-icons";
+        display: block;
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$8.content);
+
+const $_documentContainer$9 = html$1`<dom-module id="lumo-text-field" theme-for="vaadin-text-field">
+  <template>
+    <style include="lumo-required-field lumo-field-button">
+      :host {
+        --lumo-text-field-size: var(--lumo-size-m);
+        color: var(--lumo-body-text-color);
+        font-size: var(--lumo-font-size-m);
+        font-family: var(--lumo-font-family);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-tap-highlight-color: transparent;
+        padding: var(--lumo-space-xs) 0;
+      }
+
+      :host::before {
+        height: var(--lumo-text-field-size);
+        box-sizing: border-box;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      :host([focused]:not([readonly])) [part="label"] {
+        color: var(--lumo-primary-text-color);
+      }
+
+      [part="value"],
+      [part="input-field"] ::slotted(input),
+      [part="input-field"] ::slotted(textarea),
+      /* Slotted by vaadin-select-text-field */
+      [part="input-field"] ::slotted([part="value"]) {
+        cursor: inherit;
+        min-height: var(--lumo-text-field-size);
+        padding: 0 0.25em;
+        --_lumo-text-field-overflow-mask-image: linear-gradient(to left, transparent, #000 1.25em);
+        -webkit-mask-image: var(--_lumo-text-field-overflow-mask-image);
+      }
+
+      [part="value"]:focus,
+      [part="input-field"] ::slotted(input):focus,
+      [part="input-field"] ::slotted(textarea):focus {
+        -webkit-mask-image: none;
+        mask-image: none;
+      }
+
+      /*
+        TODO: CSS custom property in \`mask-image\` causes crash in Edge
+        see https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/15415089/
+      */
+      @-moz-document url-prefix() {
+        [part="value"],
+        [part="input-field"] ::slotted(input),
+        [part="input-field"] ::slotted(textarea),
+        [part="input-field"] ::slotted([part="value"]) {
+          mask-image: var(--_lumo-text-field-overflow-mask-image);
+        }
+      }
+
+      [part="value"]::-webkit-input-placeholder {
+        color: inherit;
+        transition: opacity 0.175s 0.05s;
+        opacity: 0.5;
+      }
+
+      [part="value"]:-ms-input-placeholder {
+        color: inherit;
+        opacity: 0.5;
+      }
+
+      [part="value"]::-moz-placeholder {
+        color: inherit;
+        transition: opacity 0.175s 0.05s;
+        opacity: 0.5;
+      }
+
+      [part="value"]::placeholder {
+        color: inherit;
+        transition: opacity 0.175s 0.1s;
+        opacity: 0.5;
+      }
+
+      [part="input-field"] {
+        border-radius: var(--lumo-border-radius);
+        background-color: var(--lumo-contrast-10pct);
+        padding: 0 calc(0.375em + var(--lumo-border-radius) / 4 - 1px);
+        font-weight: 500;
+        line-height: 1;
+        position: relative;
+        cursor: text;
+        box-sizing: border-box;
+      }
+
+      /* Used for hover and activation effects */
+      [part="input-field"]::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        border-radius: inherit;
+        pointer-events: none;
+        background-color: var(--lumo-contrast-50pct);
+        opacity: 0;
+        transition: transform 0.15s, opacity 0.2s;
+        transform-origin: 100% 0;
+      }
+
+      /* Hover */
+
+      :host(:hover:not([readonly]):not([focused])) [part="label"] {
+        color: var(--lumo-body-text-color);
+      }
+
+      :host(:hover:not([readonly]):not([focused])) [part="input-field"]::after {
+        opacity: 0.1;
+      }
+
+      /* Touch device adjustment */
+      @media (pointer: coarse) {
+        :host(:hover:not([readonly]):not([focused])) [part="label"] {
+          color: var(--lumo-secondary-text-color);
+        }
+
+        :host(:hover:not([readonly]):not([focused])) [part="input-field"]::after {
+          opacity: 0;
+        }
+
+        :host(:active:not([readonly]):not([focused])) [part="input-field"]::after {
+          opacity: 0.2;
+        }
+      }
+
+      /* Trigger when not focusing using the keyboard */
+      :host([focused]:not([focus-ring]):not([readonly])) [part="input-field"]::after {
+        transform: scaleX(0);
+        transition-duration: 0.15s, 1s;
+      }
+
+      /* Focus-ring */
+
+      :host([focus-ring]) [part="input-field"] {
+        box-shadow: 0 0 0 2px var(--lumo-primary-color-50pct);
+      }
+
+      /* Read-only and disabled */
+      :host([readonly]) [part="value"]::-webkit-input-placeholder,
+      :host([disabled]) [part="value"]::-webkit-input-placeholder {
+        opacity: 0;
+      }
+
+      :host([readonly]) [part="value"]:-ms-input-placeholder,
+      :host([disabled]) [part="value"]:-ms-input-placeholder {
+        opacity: 0;
+      }
+
+      :host([readonly]) [part="value"]::-moz-placeholder,
+      :host([disabled]) [part="value"]::-moz-placeholder {
+        opacity: 0;
+      }
+
+      :host([readonly]) [part="value"]::placeholder,
+      :host([disabled]) [part="value"]::placeholder {
+        opacity: 0;
+      }
+
+      /* Read-only */
+
+      :host([readonly]) [part="input-field"] {
+        color: var(--lumo-secondary-text-color);
+        background-color: transparent;
+        cursor: default;
+      }
+
+      :host([readonly]) [part="input-field"]::after {
+        background-color: transparent;
+        opacity: 1;
+        border: 1px dashed var(--lumo-contrast-30pct);
+      }
+
+      /* Disabled style */
+
+      :host([disabled]) {
+        pointer-events: none;
+      }
+
+      :host([disabled]) [part="input-field"] {
+        background-color: var(--lumo-contrast-5pct);
+      }
+
+      :host([disabled]) [part="label"],
+      :host([disabled]) [part="value"],
+      :host([disabled]) [part="input-field"] ::slotted(*) {
+        color: var(--lumo-disabled-text-color);
+        -webkit-text-fill-color: var(--lumo-disabled-text-color);
+      }
+
+      /* Invalid style */
+
+      :host([invalid]) [part="input-field"] {
+        background-color: var(--lumo-error-color-10pct);
+      }
+
+      :host([invalid]) [part="input-field"]::after {
+        background-color: var(--lumo-error-color-50pct);
+      }
+
+      :host([invalid][focus-ring]) [part="input-field"] {
+        box-shadow: 0 0 0 2px var(--lumo-error-color-50pct);
+      }
+
+      :host([input-prevented]) [part="input-field"] {
+        color: var(--lumo-error-text-color);
+      }
+
+      /* Small theme */
+
+      :host([theme~="small"]) {
+        font-size: var(--lumo-font-size-s);
+        --lumo-text-field-size: var(--lumo-size-s);
+      }
+
+      :host([theme~="small"][has-label]) [part="label"] {
+        font-size: var(--lumo-font-size-xs);
+      }
+
+      :host([theme~="small"][has-label]) [part="error-message"] {
+        font-size: var(--lumo-font-size-xxs);
+      }
+
+      /* Text align */
+
+      :host([theme~="align-center"]) [part="value"] {
+        text-align: center;
+        --_lumo-text-field-overflow-mask-image: none;
+      }
+
+      :host([theme~="align-right"]) [part="value"] {
+        text-align: right;
+        --_lumo-text-field-overflow-mask-image: none;
+      }
+
+      @-moz-document url-prefix() {
+        /* Firefox is smart enough to align overflowing text to right */
+        :host([theme~="align-right"]) [part="value"] {
+          --_lumo-text-field-overflow-mask-image: linear-gradient(to right, transparent 0.25em, #000 1.5em);
+        }
+      }
+
+      /* Slotted content */
+
+      [part="input-field"] ::slotted(:not([part]):not(iron-icon):not(input):not(textarea)) {
+        color: var(--lumo-secondary-text-color);
+        font-weight: 400;
+      }
+
+      /* Slotted icons */
+
+      [part="input-field"] ::slotted(iron-icon) {
+        color: var(--lumo-contrast-60pct);
+        width: var(--lumo-icon-size-m);
+        height: var(--lumo-icon-size-m);
+      }
+
+      /* Vaadin icons are based on a 16x16 grid (unlike Lumo and Material icons with 24x24), so they look too big by default */
+      [part="input-field"] ::slotted(iron-icon[icon^="vaadin:"]) {
+        padding: 0.25em;
+        box-sizing: border-box !important;
+      }
+
+      [part="clear-button"]::before {
+        content: var(--lumo-icons-cross);
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$9.content);
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+const $_documentContainer$a = document.createElement('template');
+$_documentContainer$a.innerHTML = `<dom-module id="vaadin-text-field-shared-styles">
+  <template>
+    <style>
+      :host {
+        display: inline-flex;
+        outline: none;
+      }
+
+      :host::before {
+        content: "\\2003";
+        width: 0;
+        display: inline-block;
+        /* Size and position this element on the same vertical position as the input-field element
+           to make vertical align for the host element work as expected */
+      }
+
+      :host([hidden]) {
+        display: none !important;
+      }
+
+      .vaadin-text-field-container,
+      .vaadin-text-area-container {
+        display: flex;
+        flex-direction: column;
+        min-width: 100%;
+        max-width: 100%;
+        width: var(--vaadin-text-field-default-width, 12em);
+      }
+
+      [part="label"]:empty {
+        display: none;
+      }
+
+      [part="input-field"] {
+        display: flex;
+        align-items: center;
+        flex: auto;
+      }
+
+      .vaadin-text-field-container [part="input-field"] {
+        flex-grow: 0;
+      }
+
+      /* Reset the native input styles */
+      [part="value"],
+      [part="input-field"] ::slotted(input),
+      [part="input-field"] ::slotted(textarea) {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        outline: none;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        min-width: 0;
+        font: inherit;
+        font-size: 1em;
+        line-height: normal;
+        color: inherit;
+        background-color: transparent;
+        /* Disable default invalid style in Firefox */
+        box-shadow: none;
+      }
+
+      [part="input-field"] ::slotted(*) {
+        flex: none;
+      }
+
+      [part="value"],
+      [part="input-field"] ::slotted(input),
+      [part="input-field"] ::slotted(textarea),
+      /* Slotted by vaadin-select-text-field */
+      [part="input-field"] ::slotted([part="value"]) {
+        flex: auto;
+        white-space: nowrap;
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+      }
+
+      [part="input-field"] ::slotted(textarea) {
+        resize: none;
+      }
+
+      [part="value"]::-ms-clear,
+      [part="input-field"] ::slotted(input)::-ms-clear {
+        display: none;
+      }
+
+      [part="clear-button"] {
+        cursor: default;
+      }
+
+      [part="clear-button"]::before {
+        content: "✕";
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$a.content);
+const HOST_PROPS = {
+  default: ['list', 'autofocus', 'pattern', 'autocapitalize', 'autocorrect', 'maxlength', 'minlength', 'name', 'placeholder', 'autocomplete', 'title'],
+  accessible: ['disabled', 'readonly', 'required', 'invalid']
+};
+const PROP_TYPE = {
+  DEFAULT: 'default',
+  ACCESSIBLE: 'accessible'
+};
+/**
+ * @polymerMixin
+ * @mixes Vaadin.ControlStateMixin
+ */
+
+const TextFieldMixin = subclass => class VaadinTextFieldMixin extends ControlStateMixin(subclass) {
+  static get properties() {
+    return {
+      /**
+       * Whether the value of the control can be automatically completed by the browser.
+       * List of available options at:
+       * https://developer.mozilla.org/en/docs/Web/HTML/Element/input#attr-autocomplete
+       */
+      autocomplete: {
+        type: String
+      },
+
+      /**
+       * This is a property supported by Safari that is used to control whether
+       * autocorrection should be enabled when the user is entering/editing the text.
+       * Possible values are:
+       * on: Enable autocorrection.
+       * off: Disable autocorrection.
+       */
+      autocorrect: {
+        type: String
+      },
+
+      /**
+       * This is a property supported by Safari and Chrome that is used to control whether
+       * autocapitalization should be enabled when the user is entering/editing the text.
+       * Possible values are:
+       * characters: Characters capitalization.
+       * words: Words capitalization.
+       * sentences: Sentences capitalization.
+       * none: No capitalization.
+       */
+      autocapitalize: {
+        type: String
+      },
+
+      /**
+       * Specify that the value should be automatically selected when the field gains focus.
+       */
+      autoselect: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Set to true to display the clear icon which clears the input.
+       */
+      clearButtonVisible: {
+        type: Boolean,
+        value: false
+      },
+
+      /**
+       * Error to show when the input value is invalid.
+       */
+      errorMessage: {
+        type: String,
+        value: ''
+      },
+
+      /**
+       * Object with translated strings used for localization. Has
+       * the following structure and default values:
+       *
+       * ```
+       * {
+       *   // Translation of the clear icon button accessible label
+       *   clear: 'Clear'
+       * }
+       * ```
+       */
+      i18n: {
+        type: Object,
+        value: () => {
+          return {
+            clear: 'Clear'
+          };
+        }
+      },
+
+      /**
+       * String used for the label element.
+       */
+      label: {
+        type: String,
+        value: '',
+        observer: '_labelChanged'
+      },
+
+      /**
+       * Maximum number of characters (in Unicode code points) that the user can enter.
+       */
+      maxlength: {
+        type: Number
+      },
+
+      /**
+       * Minimum number of characters (in Unicode code points) that the user can enter.
+       */
+      minlength: {
+        type: Number
+      },
+
+      /**
+       * The name of the control, which is submitted with the form data.
+       */
+      name: {
+        type: String
+      },
+
+      /**
+       * A hint to the user of what can be entered in the control.
+       */
+      placeholder: {
+        type: String
+      },
+
+      /**
+       * This attribute indicates that the user cannot modify the value of the control.
+       */
+      readonly: {
+        type: Boolean,
+        reflectToAttribute: true
+      },
+
+      /**
+       * Specifies that the user must fill in a value.
+       */
+      required: {
+        type: Boolean,
+        reflectToAttribute: true
+      },
+
+      /**
+       * The initial value of the control.
+       * It can be used for two-way data binding.
+       */
+      value: {
+        type: String,
+        value: '',
+        observer: '_valueChanged',
+        notify: true
+      },
+
+      /**
+       * This property is set to true when the control value is invalid.
+       */
+      invalid: {
+        type: Boolean,
+        reflectToAttribute: true,
+        notify: true,
+        value: false
+      },
+
+      /**
+       * Specifies that the text field has value.
+       */
+      hasValue: {
+        type: Boolean,
+        reflectToAttribute: true
+      },
+
+      /**
+       * When set to true, user is prevented from typing a value that
+       * conflicts with the given `pattern`.
+       */
+      preventInvalidInput: {
+        type: Boolean
+      },
+      _labelId: String,
+      _errorId: String,
+      _inputId: String
+    };
+  }
+
+  static get observers() {
+    return ['_stateChanged(disabled, readonly, clearButtonVisible, hasValue)', '_hostPropsChanged(' + HOST_PROPS.default.join(', ') + ')', '_hostAccessiblePropsChanged(' + HOST_PROPS.accessible.join(', ') + ')', '_getActiveErrorId(invalid, errorMessage, _errorId)', '_getActiveLabelId(label, _labelId, _inputId)', '__observeOffsetHeight(errorMessage, invalid, label)'];
+  }
+
+  get focusElement() {
+    if (!this.shadowRoot) {
+      return;
+    }
+
+    const slotted = this.querySelector(`${this._slottedTagName}[slot="${this._slottedTagName}"]`);
+
+    if (slotted) {
+      return slotted;
+    }
+
+    return this.shadowRoot.querySelector('[part="value"]');
+  }
+  /**
+   * @private
+   */
+
+
+  get inputElement() {
+    return this.focusElement;
+  }
+
+  get _slottedTagName() {
+    return 'input';
+  }
+
+  _createConstraintsObserver() {
+    // This complex observer needs to be added dynamically here (instead of defining it above in the `get observers()`)
+    // so that it runs after complex observers of inheriting classes. Otherwise e.g. `_stepOrMinChanged()` observer of
+    // vaadin-number-field would run after this and the `min` and `step` properties would not yet be propagated to
+    // the `inputElement` when this runs.
+    this._createMethodObserver('_constraintsChanged(required, minlength, maxlength, pattern)');
+  }
+
+  _onInput(e) {
+    if (this.__preventInput) {
+      e.stopImmediatePropagation();
+      this.__preventInput = false;
+      return;
+    }
+
+    if (this.preventInvalidInput) {
+      const input = this.inputElement;
+
+      if (input.value.length > 0 && !this.checkValidity()) {
+        input.value = this.value || ''; // add input-prevented attribute for 200ms
+
+        this.setAttribute('input-prevented', '');
+        this._inputDebouncer = Debouncer.debounce(this._inputDebouncer, timeOut.after(200), () => {
+          this.removeAttribute('input-prevented');
+        });
+        return;
+      }
+    }
+
+    if (!e.__fromClearButton) {
+      this.__userInput = true;
+    }
+
+    this.value = e.target.value;
+  } // NOTE(yuriy): Workaround needed for IE11 and Edge for proper displaying
+  // of the clear button instead of setting display property for it depending on state.
+
+
+  _stateChanged(disabled, readonly, clearButtonVisible, hasValue) {
+    if (!disabled && !readonly && clearButtonVisible && hasValue) {
+      this.$.clearButton.removeAttribute('hidden');
+    } else {
+      this.$.clearButton.setAttribute('hidden', true);
+    }
+  }
+
+  _onChange(e) {
+    if (this._valueClearing) {
+      return;
+    } // In the Shadow DOM, the `change` event is not leaked into the
+    // ancestor tree, so we must do this manually.
+
+
+    const changeEvent = new CustomEvent('change', {
+      detail: {
+        sourceEvent: e
+      },
+      bubbles: e.bubbles,
+      cancelable: e.cancelable
+    });
+    this.dispatchEvent(changeEvent);
+  }
+
+  _valueChanged(newVal, oldVal) {
+    // setting initial value to empty string, skip validation
+    if (newVal === '' && oldVal === undefined) {
+      return;
+    }
+
+    if (newVal !== '' && newVal != null) {
+      this.hasValue = true;
+    } else {
+      this.hasValue = false;
+    }
+
+    if (this.__userInput) {
+      this.__userInput = false;
+      return;
+    } else if (newVal !== undefined) {
+      this.inputElement.value = newVal;
+    } else {
+      this.value = this.inputElement.value = '';
+    }
+
+    if (this.invalid) {
+      this.validate();
+    }
+  }
+
+  _labelChanged(label) {
+    if (label !== '' && label != null) {
+      this.setAttribute('has-label', '');
+    } else {
+      this.removeAttribute('has-label');
+    }
+  }
+
+  _onSlotChange() {
+    const slotted = this.querySelector(`${this._slottedTagName}[slot="${this._slottedTagName}"]`);
+
+    if (this.value) {
+      this.inputElement.value = this.value;
+      this.validate();
+    }
+
+    if (slotted && !this._slottedInput) {
+      this._validateSlottedValue(slotted);
+
+      this._addInputListeners(slotted);
+
+      this._addIEListeners(slotted);
+
+      this._slottedInput = slotted;
+    } else if (!slotted && this._slottedInput) {
+      this._removeInputListeners(this._slottedInput);
+
+      this._removeIEListeners(this._slottedInput);
+
+      this._slottedInput = undefined;
+    }
+
+    Object.keys(PROP_TYPE).map(key => PROP_TYPE[key]).forEach(type => this._propagateHostAttributes(HOST_PROPS[type].map(attr => this[attr]), type));
+  }
+
+  _hostPropsChanged(...attributesValues) {
+    this._propagateHostAttributes(attributesValues, PROP_TYPE.DEFAULT);
+  }
+
+  _hostAccessiblePropsChanged(...attributesValues) {
+    this._propagateHostAttributes(attributesValues, PROP_TYPE.ACCESSIBLE);
+  }
+
+  _validateSlottedValue(slotted) {
+    if (slotted.value !== this.value) {
+      console.warn('Please define value on the vaadin-text-field component!');
+      slotted.value = '';
+    }
+  }
+
+  _propagateHostAttributes(attributesValues, type) {
+    const input = this.inputElement;
+    const attributeNames = HOST_PROPS[type];
+
+    if (type === 'accessible') {
+      attributeNames.forEach((attr, index) => {
+        this._setOrToggleAttribute(attr, attributesValues[index], input);
+
+        this._setOrToggleAttribute(`aria-${attr}`, attributesValues[index], input);
+      });
+    } else {
+      attributeNames.forEach((attr, index) => {
+        this._setOrToggleAttribute(attr, attributesValues[index], input);
+      });
+    }
+  }
+
+  _setOrToggleAttribute(name, value, node) {
+    if (!name || !node) {
+      return;
+    }
+
+    if (value) {
+      node.setAttribute(name, typeof value === 'boolean' ? '' : value);
+    } else {
+      node.removeAttribute(name);
+    }
+  }
+
+  _constraintsChanged(required, minlength, maxlength, pattern) {
+    if (!this.invalid) {
+      return;
+    }
+
+    if (!required && !minlength && !maxlength && !pattern) {
+      this.invalid = false;
+    } else {
+      this.validate();
+    }
+  }
+  /**
+   * Returns true if the current input value satisfies all constraints (if any)
+   * @returns {boolean}
+   */
+
+
+  checkValidity() {
+    if (this.required || this.pattern || this.maxlength || this.minlength) {
+      return this.inputElement.checkValidity();
+    } else {
+      return !this.invalid;
+    }
+  }
+
+  _addInputListeners(node) {
+    node.addEventListener('input', this._boundOnInput);
+    node.addEventListener('change', this._boundOnChange);
+    node.addEventListener('blur', this._boundOnBlur);
+    node.addEventListener('focus', this._boundOnFocus);
+  }
+
+  _removeInputListeners(node) {
+    node.removeEventListener('input', this._boundOnInput);
+    node.removeEventListener('change', this._boundOnChange);
+    node.removeEventListener('blur', this._boundOnBlur);
+    node.removeEventListener('focus', this._boundOnFocus);
+  }
+
+  ready() {
+    super.ready();
+
+    this._createConstraintsObserver();
+
+    this._boundOnInput = this._onInput.bind(this);
+    this._boundOnChange = this._onChange.bind(this);
+    this._boundOnBlur = this._onBlur.bind(this);
+    this._boundOnFocus = this._onFocus.bind(this);
+    const defaultInput = this.shadowRoot.querySelector('[part="value"]');
+    this._slottedInput = this.querySelector(`${this._slottedTagName}[slot="${this._slottedTagName}"]`);
+
+    this._addInputListeners(defaultInput);
+
+    this._addIEListeners(defaultInput);
+
+    if (this._slottedInput) {
+      this._addIEListeners(this._slottedInput);
+
+      this._addInputListeners(this._slottedInput);
+    }
+
+    this.shadowRoot.querySelector('[name="input"], [name="textarea"]').addEventListener('slotchange', this._onSlotChange.bind(this));
+
+    if (!(window.ShadyCSS && window.ShadyCSS.nativeCss)) {
+      this.updateStyles();
+    }
+
+    this.$.clearButton.addEventListener('mousedown', () => this._valueClearing = true);
+    this.$.clearButton.addEventListener('mouseleave', () => this._valueClearing = false);
+    this.$.clearButton.addEventListener('click', this._onClearButtonClick.bind(this));
+    this.addEventListener('keydown', this._onKeyDown.bind(this));
+    var uniqueId = TextFieldMixin._uniqueId = 1 + TextFieldMixin._uniqueId || 0;
+    this._errorId = `${this.constructor.is}-error-${uniqueId}`;
+    this._labelId = `${this.constructor.is}-label-${uniqueId}`;
+    this._inputId = `${this.constructor.is}-input-${uniqueId}`; // Lumo theme defines a max-height transition for the "error-message"
+    // part on invalid state change.
+
+    this.shadowRoot.querySelector('[part="error-message"]').addEventListener('transitionend', () => {
+      this.__observeOffsetHeight();
+    });
+  }
+  /**
+   * Returns true if `value` is valid.
+   * `<iron-form>` uses this to check the validity for all its elements.
+   *
+   * @return {boolean} True if the value is valid.
+   */
+
+
+  validate() {
+    return !(this.invalid = !this.checkValidity());
+  }
+
+  clear() {
+    this.value = '';
+  }
+
+  _onBlur() {
+    this.validate();
+  }
+
+  _onFocus() {
+    if (this.autoselect) {
+      this.inputElement.select(); // iOS 9 workaround: https://stackoverflow.com/a/7436574
+
+      setTimeout(() => {
+        try {
+          this.inputElement.setSelectionRange(0, 9999);
+        } catch (e) {// The workaround may cause errors on different input types.
+          // Needs to be suppressed. See https://github.com/vaadin/flow/issues/6070
+        }
+      });
+    }
+  }
+
+  _onClearButtonClick(e) {
+    e.preventDefault(); // NOTE(yuriy): This line won't affect focus on the host. Cannot be properly tested.
+
+    this.inputElement.focus();
+    this.clear();
+    this._valueClearing = false;
+
+    if (navigator.userAgent.match(/Trident/)) {
+      // Disable IE input" event prevention here, we want the input event from
+      // below to propagate normally.
+      this.__preventInput = false;
+    }
+
+    const inputEvent = new Event('input', {
+      bubbles: true,
+      composed: true
+    });
+    inputEvent.__fromClearButton = true;
+    const changeEvent = new Event('change', {
+      bubbles: !this._slottedInput
+    });
+    changeEvent.__fromClearButton = true;
+    this.inputElement.dispatchEvent(inputEvent);
+    this.inputElement.dispatchEvent(changeEvent);
+  }
+
+  _onKeyDown(e) {
+    if (e.keyCode === 27 && this.clearButtonVisible) {
+      const dispatchChange = !!this.value;
+      this.clear();
+      dispatchChange && this.inputElement.dispatchEvent(new Event('change', {
+        bubbles: !this._slottedInput
+      }));
+    }
+  }
+
+  _addIEListeners(node) {
+    /* istanbul ignore if */
+    if (navigator.userAgent.match(/Trident/)) {
+      // IE11 dispatches `input` event in following cases:
+      // - focus or blur, when placeholder attribute is set
+      // - placeholder attribute value changed
+      // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/101220/
+      this._shouldPreventInput = () => {
+        this.__preventInput = true;
+        requestAnimationFrame(() => {
+          this.__preventInput = false;
+        });
+      };
+
+      node.addEventListener('focusin', this._shouldPreventInput);
+      node.addEventListener('focusout', this._shouldPreventInput);
+
+      this._createPropertyObserver('placeholder', this._shouldPreventInput);
+    }
+  }
+
+  _removeIEListeners(node) {
+    /* istanbul ignore if */
+    if (navigator.userAgent.match(/Trident/)) {
+      node.removeEventListener('focusin', this._shouldPreventInput);
+      node.removeEventListener('focusout', this._shouldPreventInput);
+    }
+  }
+
+  _getActiveErrorId(invalid, errorMessage, errorId) {
+    this._setOrToggleAttribute('aria-describedby', errorMessage && invalid ? errorId : undefined, this.focusElement);
+  }
+
+  _getActiveLabelId(label, _labelId, _inputId) {
+    let ids = _inputId;
+
+    if (label) {
+      ids = `${_labelId} ${_inputId}`;
+    }
+
+    this.focusElement.setAttribute('aria-labelledby', ids);
+  }
+
+  _getErrorMessageAriaHidden(invalid, errorMessage, errorId) {
+    return (!(errorMessage && invalid ? errorId : undefined)).toString();
+  }
+
+  _dispatchIronResizeEventIfNeeded(sizePropertyName, value) {
+    const previousSizePropertyName = '__previous' + sizePropertyName;
+
+    if (this[previousSizePropertyName] !== undefined && this[previousSizePropertyName] !== value) {
+      this.dispatchEvent(new CustomEvent('iron-resize', {
+        bubbles: true
+      }));
+    }
+
+    this[previousSizePropertyName] = value;
+  }
+
+  __observeOffsetHeight() {
+    this._dispatchIronResizeEventIfNeeded('Height', this.offsetHeight);
+  }
+  /**
+   * @protected
+   */
+
+
+  attributeChangedCallback(prop, oldVal, newVal) {
+    super.attributeChangedCallback(prop, oldVal, newVal); // Needed until Edge has CSS Custom Properties (present in Edge Preview)
+
+    /* istanbul ignore if */
+
+    if (!(window.ShadyCSS && window.ShadyCSS.nativeCss) && /^(focused|focus-ring|invalid|disabled|placeholder|has-value)$/.test(prop)) {
+      this.updateStyles();
+    } // Safari has an issue with repainting shadow root element styles when a host attribute changes.
+    // Need this workaround (toggle any inline css property on and off) until the issue gets fixed.
+
+
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    /* istanbul ignore if */
+
+    if (isSafari && this.root) {
+      const WEBKIT_PROPERTY = '-webkit-backface-visibility';
+      this.root.querySelectorAll('*').forEach(el => {
+        el.style[WEBKIT_PROPERTY] = 'visible';
+        el.style[WEBKIT_PROPERTY] = '';
+      });
+    }
+  }
+  /**
+   * Fired when the user commits a value change.
+   *
+   * @event change
+   */
+
+  /**
+   * Fired when the value is changed by the user: on every typing keystroke,
+   * and the value is cleared using the clear button.
+   *
+   * @event input
+   */
+
+  /**
+   * Fired when the size of the element changes.
+   *
+   * @event iron-resize
+   */
+
+
+};
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+/**
+ * `<vaadin-text-field>` is a Web Component for text field control in forms.
+ *
+ * ```html
+ * <vaadin-text-field label="First Name">
+ * </vaadin-text-field>
+ * ```
+ *
+ * ### Prefixes and suffixes
+ *
+ * These are child elements of a `<vaadin-text-field>` that are displayed
+ * inline with the input, before or after.
+ * In order for an element to be considered as a prefix, it must have the slot
+ * attribute set to `prefix` (and similarly for `suffix`).
+ *
+ * ```html
+ * <vaadin-text-field label="Email address">
+ *   <div slot="prefix">Sent to:</div>
+ *   <div slot="suffix">@vaadin.com</div>
+ * </vaadin-text-area>
+ * ```
+ *
+ * ### Styling
+ *
+ * The following custom properties are available for styling:
+ *
+ * Custom property | Description | Default
+ * ----------------|-------------|-------------
+ * `--vaadin-text-field-default-width` | Set the default width of the input field | `12em`
+ *
+ * The following shadow DOM parts are available for styling:
+ *
+ * Part name | Description
+ * ----------------|----------------
+ * `label` | The label element
+ * `input-field` | The element that wraps prefix, value and suffix
+ * `value` | The text value element inside the `input-field` element
+ * `error-message` | The error message element
+ *
+ * The following state attributes are available for styling:
+ *
+ * Attribute    | Description | Part name
+ * -------------|-------------|------------
+ * `disabled` | Set to a disabled text field | :host
+ * `has-value` | Set when the element has a value | :host
+ * `has-label` | Set when the element has a label | :host
+ * `invalid` | Set when the element is invalid | :host
+ * `input-prevented` | Temporarily set when invalid input is prevented | :host
+ * `focused` | Set when the element is focused | :host
+ * `focus-ring` | Set when the element is keyboard focused | :host
+ * `readonly` | Set to a readonly text field | :host
+ *
+ * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
+ *
+ * @memberof Vaadin
+ * @mixes Vaadin.TextFieldMixin
+ * @mixes Vaadin.ThemableMixin
+ * @demo demo/index.html
+ */
+
+class TextFieldElement extends ElementMixin$1(TextFieldMixin(ThemableMixin(PolymerElement))) {
+  static get template() {
+    return html$1`
+    <style include="vaadin-text-field-shared-styles">
+      /* polymer-cli linter breaks with empty line */
+    </style>
+
+    <div class="vaadin-text-field-container">
+
+      <label part="label" on-click="focus" id="[[_labelId]]">[[label]]</label>
+
+      <div part="input-field" id="[[_inputId]]">
+
+        <slot name="prefix"></slot>
+
+        <slot name="input">
+          <input part="value">
+        </slot>
+
+        <div part="clear-button" id="clearButton" role="button" aria-label\$="[[i18n.clear]]"></div>
+        <slot name="suffix"></slot>
+
+      </div>
+
+      <div part="error-message" id="[[_errorId]]" aria-live="assertive" aria-hidden\$="[[_getErrorMessageAriaHidden(invalid, errorMessage, _errorId)]]">[[errorMessage]]</div>
+
+    </div>
+`;
+  }
+
+  static get is() {
+    return 'vaadin-text-field';
+  }
+
+  static get version() {
+    return '2.4.12';
+  }
+
+  static get properties() {
+    return {
+      /**
+       * Identifies a list of pre-defined options to suggest to the user.
+       * The value must be the id of a <datalist> element in the same document.
+       */
+      list: {
+        type: String
+      },
+
+      /**
+       * A regular expression that the value is checked against.
+       * The pattern must match the entire value, not just some subset.
+       */
+      pattern: {
+        type: String
+      },
+
+      /**
+       * Message to show to the user when validation fails.
+       */
+      title: {
+        type: String
+      }
+    };
+  }
+
+}
+
+customElements.define(TextFieldElement.is, TextFieldElement);
+
+const $_documentContainer$b = html$1`<dom-module id="lumo-button" theme-for="vaadin-button">
+  <template>
+    <style>
+      :host {
+        /* Sizing */
+        --lumo-button-size: var(--lumo-size-m);
+        min-width: calc(var(--lumo-button-size) * 2);
+        height: var(--lumo-button-size);
+        padding: 0 calc(var(--lumo-button-size) / 3 + var(--lumo-border-radius) / 2);
+        margin: var(--lumo-space-xs) 0;
+        box-sizing: border-box;
+        /* Style */
+        font-family: var(--lumo-font-family);
+        font-size: var(--lumo-font-size-m);
+        font-weight: 500;
+        color: var(--_lumo-button-color, var(--lumo-primary-text-color));
+        background-color: var(--_lumo-button-background-color, var(--lumo-contrast-5pct));
+        border-radius: var(--lumo-border-radius);
+        cursor: default;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* Set only for the internal parts so we don’t affect the host vertical alignment */
+      [part="label"],
+      [part="prefix"],
+      [part="suffix"] {
+        line-height: var(--lumo-line-height-xs);
+      }
+
+      [part="label"] {
+        padding: calc(var(--lumo-button-size) / 6) 0;
+      }
+
+      :host([theme~="small"]) {
+        font-size: var(--lumo-font-size-s);
+        --lumo-button-size: var(--lumo-size-s);
+      }
+
+      :host([theme~="large"]) {
+        font-size: var(--lumo-font-size-l);
+        --lumo-button-size: var(--lumo-size-l);
+      }
+
+      /* This needs to be the last selector for it to take priority */
+      :host([disabled][disabled]) {
+        pointer-events: none;
+        color: var(--lumo-disabled-text-color);
+        background-color: var(--lumo-contrast-5pct);
+      }
+
+      /* For interaction states */
+      :host::before,
+      :host::after {
+        content: "";
+        /* We rely on the host always being relative */
+        position: absolute;
+        z-index: 1;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: currentColor;
+        border-radius: inherit;
+        opacity: 0;
+        transition: opacity 0.2s;
+        pointer-events: none;
+      }
+
+      /* Hover */
+
+      :host(:hover)::before {
+        opacity: 0.05;
+      }
+
+      /* Disable hover for touch devices */
+      @media (pointer: coarse) {
+        :host(:not([active]):hover)::before {
+          opacity: 0;
+        }
+      }
+
+      /* Active */
+
+      :host::after {
+        transition: opacity 1.4s, transform 0.1s;
+        filter: blur(8px);
+      }
+
+      :host([active])::before {
+        opacity: 0.1;
+        transition-duration: 0s;
+      }
+
+      :host([active])::after {
+        opacity: 0.1;
+        transition-duration: 0s, 0s;
+        transform: scale(0);
+      }
+
+      /* Keyboard focus */
+
+      :host([focus-ring]) {
+        box-shadow: 0 0 0 2px var(--lumo-primary-color-50pct);
+      }
+
+      /* Types (primary, tertiary, tertiary-inline */
+
+      :host([theme~="tertiary"]),
+      :host([theme~="tertiary-inline"]) {
+        background-color: transparent !important;
+        transition: opacity 0.2s;
+        min-width: 0;
+      }
+
+      :host([theme~="tertiary"])::before,
+      :host([theme~="tertiary-inline"])::before {
+        display: none;
+      }
+
+      :host([theme~="tertiary"]) {
+        padding: 0 calc(var(--lumo-button-size) / 6);
+      }
+
+      @media (hover: hover) {
+        :host([theme*="tertiary"]:not([active]):hover) {
+          opacity: 0.8;
+        }
+      }
+
+      :host([theme~="tertiary"][active]),
+      :host([theme~="tertiary-inline"][active]) {
+        opacity: 0.5;
+        transition-duration: 0s;
+      }
+
+      :host([theme~="tertiary-inline"]) {
+        margin: 0;
+        height: auto;
+        padding: 0;
+        line-height: inherit;
+        font-size: inherit;
+      }
+
+      :host([theme~="tertiary-inline"]) [part="label"] {
+        padding: 0;
+        overflow: visible;
+        line-height: inherit;
+      }
+
+      :host([theme~="primary"]) {
+        background-color: var(--_lumo-button-primary-background-color, var(--lumo-primary-color));
+        color: var(--_lumo-button-primary-color, var(--lumo-primary-contrast-color));
+        font-weight: 600;
+        min-width: calc(var(--lumo-button-size) * 2.5);
+      }
+
+      :host([theme~="primary"][disabled]) {
+        background-color: var(--lumo-primary-color-50pct);
+        color: var(--lumo-primary-contrast-color);
+      }
+
+      :host([theme~="primary"]:hover)::before {
+        opacity: 0.1;
+      }
+
+      :host([theme~="primary"][active])::before {
+        background-color: var(--lumo-shade-20pct);
+      }
+
+      @media (pointer: coarse) {
+        :host([theme~="primary"][active])::before {
+          background-color: var(--lumo-shade-60pct);
+        }
+
+        :host([theme~="primary"]:not([active]):hover)::before {
+          opacity: 0;
+        }
+      }
+
+      :host([theme~="primary"][active])::after {
+        opacity: 0.2;
+      }
+
+      /* Colors (success, error, contrast) */
+
+      :host([theme~="success"]) {
+        color: var(--lumo-success-text-color);
+      }
+
+      :host([theme~="success"][theme~="primary"]) {
+        background-color: var(--lumo-success-color);
+        color: var(--lumo-success-contrast-color);
+      }
+
+      :host([theme~="success"][theme~="primary"][disabled]) {
+        background-color: var(--lumo-success-color-50pct);
+      }
+
+      :host([theme~="error"]) {
+        color: var(--lumo-error-text-color);
+      }
+
+      :host([theme~="error"][theme~="primary"]) {
+        background-color: var(--lumo-error-color);
+        color: var(--lumo-error-contrast-color);
+      }
+
+      :host([theme~="error"][theme~="primary"][disabled]) {
+        background-color: var(--lumo-error-color-50pct);
+      }
+
+      :host([theme~="contrast"]) {
+        color: var(--lumo-contrast);
+      }
+
+      :host([theme~="contrast"][theme~="primary"]) {
+        background-color: var(--lumo-contrast);
+        color: var(--lumo-base-color);
+      }
+
+      :host([theme~="contrast"][theme~="primary"][disabled]) {
+        background-color: var(--lumo-contrast-50pct);
+      }
+
+      /* Icons */
+
+      [part] ::slotted(iron-icon) {
+        display: inline-block;
+        width: var(--lumo-icon-size-m);
+        height: var(--lumo-icon-size-m);
+      }
+
+      /* Vaadin icons are based on a 16x16 grid (unlike Lumo and Material icons with 24x24), so they look too big by default */
+      [part] ::slotted(iron-icon[icon^="vaadin:"]) {
+        padding: 0.25em;
+        box-sizing: border-box !important;
+      }
+
+      [part="prefix"] {
+        margin-left: -0.25em;
+        margin-right: 0.25em;
+      }
+
+      [part="suffix"] {
+        margin-left: 0.25em;
+        margin-right: -0.25em;
+      }
+
+      /* Icon-only */
+
+      :host([theme~="icon"]:not([theme~="tertiary-inline"])) {
+        min-width: var(--lumo-button-size);
+        padding-left: calc(var(--lumo-button-size) / 4);
+        padding-right: calc(var(--lumo-button-size) / 4);
+      }
+
+      :host([theme~="icon"]) [part="prefix"],
+      :host([theme~="icon"]) [part="suffix"] {
+        margin-left: 0;
+        margin-right: 0;
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$b.content);
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+/**
+ * `<vaadin-button>` is a Web Component providing an accessible and customizable button.
+ *
+ * ```html
+ * <vaadin-button>
+ * </vaadin-button>
+ * ```
+ *
+ * ```js
+ * document.querySelector('vaadin-button').addEventListener('click', () => alert('Hello World!'));
+ * ```
+ *
+ * ### Styling
+ *
+ * The following shadow DOM parts are exposed for styling:
+ *
+ * Part name | Description
+ * ----------------|----------------
+ * `label` | The label (text) inside the button
+ * `prefix` | A slot for e.g. an icon before the label
+ * `suffix` | A slot for e.g. an icon after the label
+ *
+ *
+ * The following attributes are exposed for styling:
+ *
+ * Attribute | Description
+ * --------- | -----------
+ * `active` | Set when the button is pressed down, either with mouse, touch or the keyboard.
+ * `disabled` | Set when the button is disabled.
+ * `focus-ring` | Set when the button is focused using the keyboard.
+ * `focused` | Set when the button is focused.
+ *
+ * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
+ *
+ * @memberof Vaadin
+ * @mixes Vaadin.ElementMixin
+ * @mixes Vaadin.ControlStateMixin
+ * @mixes Vaadin.ThemableMixin
+ * @mixes Polymer.GestureEventListeners
+ * @demo demo/index.html
+ */
+
+class ButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(GestureEventListeners(PolymerElement)))) {
+  static get template() {
+    return html$1`
+    <style>
+      :host {
+        display: inline-block;
+        position: relative;
+        outline: none;
+        white-space: nowrap;
+      }
+
+      :host([hidden]) {
+        display: none !important;
+      }
+
+      /* Ensure the button is always aligned on the baseline */
+      .vaadin-button-container::before {
+        content: "\\2003";
+        display: inline-block;
+        width: 0;
+      }
+
+      .vaadin-button-container {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+        height: 100%;
+        min-height: inherit;
+        text-shadow: inherit;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      [part="prefix"],
+      [part="suffix"] {
+        flex: none;
+      }
+
+      [part="label"] {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      #button {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: inherit;
+      }
+    </style>
+    <div class="vaadin-button-container">
+      <div part="prefix">
+        <slot name="prefix"></slot>
+      </div>
+      <div part="label">
+        <slot></slot>
+      </div>
+      <div part="suffix">
+        <slot name="suffix"></slot>
+      </div>
+    </div>
+    <button id="button" type="button"></button>
+`;
+  }
+
+  static get is() {
+    return 'vaadin-button';
+  }
+
+  static get version() {
+    return '2.2.1';
+  }
+
+  ready() {
+    super.ready(); // Leaving default role in the native button, makes navigation announcement
+    // being different when using focus navigation (tab) versus using normal
+    // navigation (arrows). The first way announces the label on a button
+    // since the focus is moved programmatically, and the second on a group.
+
+    this.setAttribute('role', 'button');
+    this.$.button.setAttribute('role', 'presentation');
+
+    this._addActiveListeners();
+  }
+  /**
+   * @protected
+   */
+
+
+  disconnectedCallback() {
+    super.disconnectedCallback(); // `active` state is preserved when the element is disconnected between keydown and keyup events.
+    // reproducible in `<vaadin-date-picker>` when closing on `Cancel` or `Today` click.
+
+    if (this.hasAttribute('active')) {
+      this.removeAttribute('active');
+    }
+  }
+
+  _addActiveListeners() {
+    addListener$1(this, 'down', () => !this.disabled && this.setAttribute('active', ''));
+    addListener$1(this, 'up', () => this.removeAttribute('active'));
+    this.addEventListener('keydown', e => !this.disabled && [13, 32].indexOf(e.keyCode) >= 0 && this.setAttribute('active', ''));
+    this.addEventListener('keyup', () => this.removeAttribute('active'));
+    this.addEventListener('blur', () => this.removeAttribute('active'));
+  }
+  /**
+   * @protected
+   */
+
+
+  get focusElement() {
+    return this.$.button;
+  }
+
+}
+
+customElements.define(ButtonElement.is, ButtonElement);
 
 const $_documentContainer$c = html$1`<dom-module id="lumo-radio-button" theme-for="vaadin-radio-button">
   <template>

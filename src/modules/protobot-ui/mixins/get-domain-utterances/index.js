@@ -89,5 +89,5 @@ export const GetDomainUtterancesMixin = (base) => (class extends GetPathMixin(ba
     }
   }
 
-  domainUtterancesChanged (data) { console.log(data); }
+  domainUtterancesChanged (data) { }
 });

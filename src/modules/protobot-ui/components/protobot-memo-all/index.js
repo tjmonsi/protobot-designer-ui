@@ -29,8 +29,6 @@ class ProtobotMemoAll extends GetDomainMemosMixin(LitElement) {
     // console.log(`${id}`);
     return (await database.ref(`memos/data/${memoId}/page`).once('value')).val();
   }
-
-
 }
 
 export { ProtobotMemoAll };

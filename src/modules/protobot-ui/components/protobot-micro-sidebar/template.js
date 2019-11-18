@@ -10,11 +10,10 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topics, save, addMemo, memos } = this;
+  const { topics, save, addMemo, memos, domain } = this;
   const { queryObject } = this;
+  const { deployedVersion: dv } = domain;
   const { page: pageId, crowdId: crowd } = queryObject;
-
-  console.log(crowd, pageId);
 
   return html`
     <style>
@@ -41,7 +40,7 @@ export const template = self => function () {
     </ul>
     <br>
     <br>
-    ${memos.map(({ page, crowdId, memoId }) => page === pageId && crowdId === crowd ? html`
+    ${memos.map(({ page, crowdId, memoId, deployedVersion }) => page === pageId && crowdId === crowd && deployedVersion === dv ? html`
       <protobot-memo .memoId="${memoId}"></protobot-memo>
     ` : '')}
     <div class="add-container">

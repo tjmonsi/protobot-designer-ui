@@ -23,6 +23,7 @@ class ProtobotMicroSidebar extends GetDomainMemosMixin(LitElement) {
     const { key: memoId } = database.ref('memos/data').push();
     const { page, crowdId } = this.queryObject || { page: null };
     const { deployedVersion } = this.domain;
+
     const memo = {
       text: '',
       domainId: this.domainId,
@@ -33,7 +34,8 @@ class ProtobotMicroSidebar extends GetDomainMemosMixin(LitElement) {
     // console.log(this.memos)
     updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = {
       page,
-      crowdId: crowdId || null
+      crowdId: crowdId || null,
+      deployedVersion: deployedVersion || null
     };
 
     if (crowdId) {

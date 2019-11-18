@@ -4,14 +4,13 @@ import styles from './style.css';
 import 'weightless/button';
 import 'weightless/textarea';
 
-
 /**
  *
  * @param {any} self
  */
 export const template = self => function () {
   // @ts-ignore
-  const { submit } = this;
+  const { submit, newDomain } = this;
 
   return html`
     <style>
@@ -34,7 +33,7 @@ export const template = self => function () {
         <p>
           Or click on any of the buttons for a blank domain
         </p>
-        <wl-button class ="new-button">New Blank Domain</wl-button>
+        <wl-button class ="new-button" @click="${newDomain.bind(this)}">New Blank Domain</wl-button>
       </div>
     </div>
 

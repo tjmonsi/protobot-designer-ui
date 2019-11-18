@@ -30,7 +30,8 @@ class ProtobotMacroSidebar extends GetDomainMemosMixin(LitElement) {
     // console.log(this.memos)
     updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = {
       page,
-      crowdId: crowdId || null
+      crowdId: crowdId || null,
+      deployedVersion: deployedVersion || null
     };
 
     if (crowdId) {

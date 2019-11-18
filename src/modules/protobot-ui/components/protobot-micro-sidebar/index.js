@@ -22,7 +22,7 @@ class ProtobotMicroSidebar extends GetDomainMemosMixin(LitElement) {
     const updates = {};
     const { key: memoId } = database.ref('memos/data').push();
     const { page, crowdId } = this.queryObject || { page: null };
-    const { deployedVersion } = this.domain;
+    const { deployedVersion } = this.domain || { deployedVersion: null };
 
     const memo = {
       text: '',

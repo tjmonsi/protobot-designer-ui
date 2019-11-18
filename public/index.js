@@ -11513,6 +11513,7 @@ const GetDomainMixin = base => _decorate(null, function (_initialize, _GetPathMi
     // @ts-ignore
     // @ts-ignore
     // @ts-ignore
+    // @ts-ignore
     constructor() {
       super();
 
@@ -11553,6 +11554,17 @@ const GetDomainMixin = base => _decorate(null, function (_initialize, _GetPathMi
         type: Array
       })],
       key: "topics",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "topicList",
 
       value() {
         return [];
@@ -11622,7 +11634,8 @@ const GetDomainMixin = base => _decorate(null, function (_initialize, _GetPathMi
         };
         const {
           topics,
-          subs
+          subs,
+          topicList
         } = this.domain;
         const array = [];
 
@@ -11638,6 +11651,25 @@ const GetDomainMixin = base => _decorate(null, function (_initialize, _GetPathMi
           id: i.topic,
           sub: i.sub
         }));
+        const arraytwo = [];
+
+        for (const topic in topics) {
+          arraytwo.push({
+            id: topic,
+            included: true
+          });
+        }
+
+        for (const topic in topicList) {
+          if (arraytwo.findIndex(item => item.id === topic) < 0) {
+            arraytwo.push({
+              id: topic,
+              included: false
+            });
+          }
+        }
+
+        this.topicList = arraytwo;
         this.domainChanged(this.domain);
       }
     }, {
@@ -24346,7 +24378,8 @@ var styles$g = ".flex-area {\n  display: flex;\n\n  margin: 20px auto;\n  max-wi
 const template$7 = self => function () {
   // @ts-ignore
   const {
-    topic
+    topic,
+    included
   } = this;
   const {
     name
@@ -24357,6 +24390,8 @@ const template$7 = self => function () {
     </style>
 
     ${name}
+
+    ${!included ? ' - not included' : ''}
   `;
 }.bind(self)();
 
@@ -24387,6 +24422,17 @@ let TopicListItem = _decorate([customElement('topic-list-item')], function (_ini
         type: Boolean
       })],
       key: "sub",
+
+      value() {
+        return false;
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "included",
 
       value() {
         return false;
@@ -24428,7 +24474,7 @@ var styles$h = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list 
 const template$8 = self => function () {
   // @ts-ignore
   const {
-    topics,
+    topicList,
     deploy,
     domain,
     handleCommitMsg
@@ -24443,9 +24489,9 @@ const template$8 = self => function () {
     <h3>Current topic list</h3>
 
     <ul class ="topic-list">
-    ${topics.map(topic => html`
+    ${topicList.map(topic => html`
       <li>
-        <topic-list-item class="item" topicId="${topic.id}">
+        <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}">
         </topic-list-item>
       </li>
     `)}
@@ -25425,7 +25471,7 @@ var styles$m = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sa
 const template$d = self => function () {
   // @ts-ignore
   const {
-    topics,
+    topicList,
     save,
     addMemo,
     memos,
@@ -25433,7 +25479,9 @@ const template$d = self => function () {
   } = this;
   const {
     domainVersion: dv
-  } = domain;
+  } = domain || {
+    deployedVersion: null
+  };
   const {
     page: pageId,
     crowdId: crowd
@@ -25455,9 +25503,9 @@ const template$d = self => function () {
     <br>
     <h3>Current Topic List</h3>
     <ul class ="topic-list">
-    ${topics.map(topic => html`
+    ${topicList.map(topic => html`
       <li>
-        <topic-list-item class="item" topicId="${topic.id}">
+        <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}">
         </topic-list-item>
       </li>
     `)}
@@ -25526,7 +25574,9 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
         };
         const {
           deployedVersion
-        } = this.domain;
+        } = this.domain || {
+          deployedVersion: null
+        };
         const memo = {
           text: '',
           domainId: this.domainId,
@@ -25564,7 +25614,7 @@ var styles$n = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sa
 const template$e = self => function () {
   // @ts-ignore
   const {
-    topics,
+    topicList,
     save,
     addMemo,
     memos,
@@ -25575,7 +25625,9 @@ const template$e = self => function () {
   } = this;
   const {
     deployedVersion: dv
-  } = domain;
+  } = domain || {
+    deployedVersion: null
+  };
   const {
     page: pageId,
     crowdId: crowd
@@ -25596,9 +25648,9 @@ const template$e = self => function () {
     <br>
     <h3>Current Topic List</h3>
     <ul class ="topic-list">
-    ${topics.map(topic => html`
+    ${topicList.map(topic => html`
       <li>
-        <topic-list-item class="item" .topicId="${topic.id}">
+        <topic-list-item class="item" .topicId="${topic.id}" .included="${topic.included}">
         </topic-list-item>
       </li>
     `)}
@@ -25667,7 +25719,9 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
         };
         const {
           deployedVersion
-        } = this.domain;
+        } = this.domain || {
+          deployedVersion: null
+        };
         const memo = {
           text: '',
           domainId: this.domainId,

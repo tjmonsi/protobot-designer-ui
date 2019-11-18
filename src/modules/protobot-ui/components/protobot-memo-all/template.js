@@ -2,6 +2,8 @@ import { html } from 'lit-element';
 // @ts-ignore
 import styles from './style.css';
 import { until } from 'lit-html/directives/until';
+import '@vaadin/vaadin-checkbox';
+
 
 /**
  *
@@ -18,12 +20,12 @@ export const template = self => function () {
     </style>
 
     <h3>All memos</h3>
-    <ul class = "memo-list">
+    <div class = "memo-list">
       ${memos ? memos.map(item => html`
-      <li class = "${until(gettingMemoPage(item.memoId), '')}">
+      <vaadin-checkbox class = "${until(gettingMemoPage(item.memoId), '')}">
         ${until(gettingMemo(item.memoId), 'Loading...')}
-      </li>`) : ''}
-    </ul>
+      </vaadin-checkbox>`) : ''}
+    </div>
 
   `;
 }.bind(self)();

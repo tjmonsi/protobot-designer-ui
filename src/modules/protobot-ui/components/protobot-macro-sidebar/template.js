@@ -10,8 +10,8 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topics, save, addMemo, memos, domain } = this;
-  const { domainVersion: dv } = domain;
+  const { topicList, save, addMemo, memos, domain } = this;
+  const { domainVersion: dv } = domain || { deployedVersion: null };
   const { page: pageId, crowdId: crowd } = this.queryObject || { page: null };
 
   return html`
@@ -29,9 +29,9 @@ export const template = self => function () {
     <br>
     <h3>Current Topic List</h3>
     <ul class ="topic-list">
-    ${topics.map(topic => html`
+    ${topicList.map(topic => html`
       <li>
-        <topic-list-item class="item" topicId="${topic.id}">
+        <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}">
         </topic-list-item>
       </li>
     `)}

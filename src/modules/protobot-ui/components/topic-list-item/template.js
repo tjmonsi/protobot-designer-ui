@@ -7,7 +7,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topic } = this;
+  const { topic, included } = this;
   const { name } = topic || {};
 
   return html`
@@ -16,5 +16,7 @@ export const template = self => function () {
     </style>
 
     ${name}
+
+    ${!included ? ' - not included' : ''}
   `;
 }.bind(self)();

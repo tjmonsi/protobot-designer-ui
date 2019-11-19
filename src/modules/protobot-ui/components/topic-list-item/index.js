@@ -15,6 +15,9 @@ class TopicListItem extends GetTopicMixin(LitElement) {
   @property({ type: Boolean })
   sub = false;
 
+  @property({ type: Boolean })
+  included = false;
+
   render () {
     return template(this);
   }

@@ -11,7 +11,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topics, deploy, domain, handleCommitMsg } = this;
+  const { topicList, deploy, domain, handleCommitMsg } = this;
   const { commitMessage } = domain;
 
   return html`
@@ -21,9 +21,9 @@ export const template = self => function () {
     <h3>Current topic list</h3>
 
     <ul class ="topic-list">
-    ${topics.map(topic => html`
+    ${topicList.map(topic => html`
       <li>
-        <topic-list-item class="item" topicId="${topic.id}">
+        <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}">
         </topic-list-item>
       </li>
     `)}

@@ -23800,7 +23800,7 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
         const updates = {};
         updates[`domains/data/${key}`] = {
           deployed: false,
-          desinger: '',
+          designer: '',
           name: ''
         };
         await database.ref().update(updates);

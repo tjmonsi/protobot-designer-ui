@@ -28,7 +28,7 @@ class ProtobotStart extends GetPathMixin(LitElement) {
 
     updates[`domains/data/${key}`] = {
       deployed: false,
-      desinger: '',
+      designer: '',
       name: ''
     };
 

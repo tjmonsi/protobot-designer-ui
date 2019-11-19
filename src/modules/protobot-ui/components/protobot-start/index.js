@@ -24,13 +24,50 @@ class ProtobotStart extends GetPathMixin(LitElement) {
 
   async newDomain () {
     const { key } = database.ref('domains/data').push();
+    const { key: utteranceId } = database.ref('utterances/data').push();
+    const { key: topicId } = database.ref('labels/data').push();
+    // const snap = await database.ref(`domains/data/${domain}`).once('value');
     const updates = {};
 
-    updates[`domains/data/${key}`] = {
+    const obj = {
       deployed: false,
       designer: '',
-      name: ''
+      name: '',
+      topics: {},
+      topicList: {},
+      subs: {}
     };
+
+    obj.topics[topicId] = 0;
+    obj.topicList[topicId] = true;
+    obj.subs[topicId] = false;
+
+    const topic = {
+      domain: key,
+      name: 'Topic',
+      required: true,
+      mainUtterance: utteranceId,
+      utterances: {}
+    };
+
+    topic.utterances[utteranceId] = true;
+
+    const utterance = {
+      bot: true,
+      domain: key,
+      required: true,
+      text: 'Utterance',
+      topics: {}
+    };
+
+    utterance.topics[topicId] = true;
+
+    const newTopics = {};
+    newTopics[topicId] = 0;
+
+    updates[`labels/data/${topicId}`] = topic;
+    updates[`utterances/data/${utteranceId}`] = utterance;
+    updates[`domains/data/${key}`] = obj;
 
     await database.ref().update(updates);
     window.location.href = `/?domain=${key}`;

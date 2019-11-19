@@ -11765,7 +11765,8 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
         console.log('saved!'); // this is where you get the unique memo id
 
         const updates = {};
-        updates[`memos/data/${this.memoId}/text`] = value; // this saves the memo in db
+        updates[`memos/data/${this.memoId}/text`] = value;
+        updates[`memos/lists/domain-memo/${this.domainId}/${this.memoId}/hasText`] = value.length > 0; // this saves the memo in db
 
         await database.ref().update(updates);
       }
@@ -23345,10 +23346,10 @@ const template$1 = self => function () {
 
     <h3>All memos</h3>
     <div class = "memo-list">
-      ${memos ? memos.map(item => html`
+      ${memos ? memos.map(item => item.hasText ? html`
         <vaadin-checkbox class = "${until(gettingMemoPage(item.memoId), '')}">
           ${until(gettingMemo(item.memoId), 'Loading...')}
-        </vaadin-checkbox>`) : ''}
+        </vaadin-checkbox>` : '') : ''}
     </div>
 
   `;
@@ -23965,12 +23966,44 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
         const {
           key
         } = database.ref('domains/data').push();
+        const {
+          key: utteranceId
+        } = database.ref('utterances/data').push();
+        const {
+          key: topicId
+        } = database.ref('labels/data').push(); // const snap = await database.ref(`domains/data/${domain}`).once('value');
+
         const updates = {};
-        updates[`domains/data/${key}`] = {
+        const obj = {
           deployed: false,
           designer: '',
-          name: ''
+          name: '',
+          topics: {},
+          topicList: {},
+          subs: {}
         };
+        obj.topics[topicId] = 0;
+        obj.topicList[topicId] = true;
+        obj.subs[topicId] = false;
+        const topic = {
+          domain: key,
+          name: 'Topic',
+          required: true,
+          mainUtterance: utteranceId,
+          utterances: {}
+        };
+        topic.utterances[utteranceId] = true;
+        const utterance = {
+          bot: true,
+          domain: key,
+          required: true,
+          text: 'Utterance',
+          topics: {}
+        };
+        utterance.topics[topicId] = true;
+        updates[`labels/data/${topicId}`] = topic;
+        updates[`utterances/data/${utteranceId}`] = utterance;
+        updates[`domains/data/${key}`] = obj;
         await database.ref().update(updates);
         window.location.href = `/?domain=${key}`;
       }
@@ -24770,7 +24803,7 @@ const template$9 = self => function () {
             <div class = "select-topic">
               <select class="select-box" placeholder="Topic" @change=${selectedTopic.bind(this)}>
                 <option value="none">Choose the topic</option>
-                ${topics ? topics.map(item => html`<option value="${item.id}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
+                ${topics ? topics.map(item => html`<option value="${item.id}" ?selected="${utterance.topics && utterance.topics[item.id]}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
                 <option value="new-topic">New Topic</option>
               </select>
             </div>
@@ -24823,7 +24856,6 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
       kind: "method",
       key: "render",
       value: function render() {
-        this.defaultTopic();
         return template$9(this);
       }
     }, {
@@ -24851,6 +24883,7 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
         } // topic.utterances[utteranceId] = true;
 
 
+        utterance.topics = {};
         utterance.topics[value] = true;
         updates[`labels/data/${value}/utterances/${utteranceId}`] = true;
         updates[`utterances/data/${utteranceId}`] = utterance;
@@ -24888,28 +24921,24 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
             utterances: {}
           };
           topic.utterances[utteranceId] = true;
+          utterance.topics = {};
           utterance.topics[topicId] = true;
           updates[`labels/data/${topicId}`] = topic;
           updates[`utterances/data/${utteranceId}`] = utterance;
           updates[`domains/data/${domain}/topicList/${topicId}`] = true;
           await database.ref().update(updates);
         }
-      }
-    }, {
-      kind: "method",
-      key: "defaultTopic",
-      value: async function defaultTopic() {
-        // call the default topic which appends the topic from
-        const {
-          utteranceId
-        } = this;
-        const ret = (await database.ref(`utterances/data/${utteranceId}/topics`).once('value')).val();
+      } // async defaultTopic () {
+      //   // call the default topic which appends the topic from
+      //   const { utteranceId } = this;
+      //   const ret = (await database.ref(`utterances/data/${utteranceId}/topics`).once('value')).val()
+      //   if (ret !== null) {
+      //     // option that has same topic would be selected
+      //     for(let idx in Object.keys(ret))
+      //       console.log(`${Object.keys(ret)[idx]} : ${ret[Object.keys(ret)[idx]]}`)
+      //   }
+      // }
 
-        if (ret !== null) {
-          // option that has same topic would be selected
-          for (let idx in Object.keys(ret)) console.log(`${Object.keys(ret)[idx]} : ${ret[Object.keys(ret)[idx]]}`);
-        }
-      }
       /**
        *
        * @param {String} id
@@ -25630,7 +25659,7 @@ const template$d = self => function () {
     domain
   } = this;
   const {
-    domainVersion: dv
+    deployedVersion: dv
   } = domain || {
     deployedVersion: null
   };
@@ -25640,6 +25669,7 @@ const template$d = self => function () {
   } = this.queryObject || {
     page: null
   };
+  console.log(dv);
   return html`
     <style>
       ${styles$p}

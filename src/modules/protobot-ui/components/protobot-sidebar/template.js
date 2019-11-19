@@ -36,7 +36,7 @@ export const template = self => function () {
       <li><a href="/?domain=${this.domainId}&page=authoring">Design and Revise</a></li>
       <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
     </ul>
-    ${ page === 'micro' ? html`
+    ${page === 'micro' ? html`
       <h3>Crowd list</h3>
       <ul class = "crowd-link">
         ${users ? users.map(item => html`
@@ -46,7 +46,7 @@ export const template = self => function () {
       </ul>
     ` : ''}
 
-    ${ page === 'authoring' ? html`
+    ${page === 'authoring' ? html`
       <protobot-memo-all></protobot-memo-all>
     ` : ''}
   `;

@@ -11,8 +11,10 @@ import styles from './style.css';
 export const template = self => function () {
   // @ts-ignore
   const { topicList, save, addMemo, memos, domain } = this;
-  const { domainVersion: dv } = domain || { deployedVersion: null };
+  const { deployedVersion: dv } = domain || { deployedVersion: null };
   const { page: pageId, crowdId: crowd } = this.queryObject || { page: null };
+
+  console.log(dv)
 
   return html`
     <style>

@@ -17,6 +17,7 @@ class ProtobotMemo extends GetMemoMixin(GetDomainMixin(LitElement)) {
     // this is where you get the unique memo id
     const updates = {};
     updates[`memos/data/${this.memoId}/text`] = value;
+    updates[`memos/lists/domain-memo/${this.domainId}/${this.memoId}/hasText`] = value.length > 0;
     // this saves the memo in db
     await database.ref().update(updates);
   }

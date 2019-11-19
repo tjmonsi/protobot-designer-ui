@@ -22,10 +22,10 @@ export const template = self => function () {
 
     <h3>All memos</h3>
     <div class = "memo-list">
-      ${memos ? memos.map(item=> html`
+      ${memos ? memos.map(item => item.hasText ? html`
         <vaadin-checkbox class = "${until(gettingMemoPage(item.memoId), '')}">
           ${until(gettingMemo(item.memoId), 'Loading...')}
-        </vaadin-checkbox>`) : ''}
+        </vaadin-checkbox>` : '') : ''}
     </div>
 
   `;

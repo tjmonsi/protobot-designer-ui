@@ -14,7 +14,9 @@ class UtteranceReviewItem extends GetUtteranceMixin(GetDomainMixin(LitElement)) 
   textInputVisible = false;
 
   render () {
+    this.defaultTopic()
     return template(this);
+
   }
 
   async selectedTopic ({ target }) {
@@ -69,6 +71,16 @@ class UtteranceReviewItem extends GetUtteranceMixin(GetDomainMixin(LitElement)) 
     }
   }
 
+  async defaultTopic () {
+    // call the default topic which appends the topic from
+    const { utteranceId } = this;
+    const ret = (await database.ref(`utterances/data/${utteranceId}/topics`).once('value')).val()
+    if (ret !== null) {
+      // option that has same topic would be selected
+      for(let idx in Object.keys(ret))
+        console.log(`${Object.keys(ret)[idx]} : ${ret[Object.keys(ret)[idx]]}`)
+    }
+  }
   /**
    *
    * @param {String} id

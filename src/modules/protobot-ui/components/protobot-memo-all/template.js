@@ -3,6 +3,7 @@ import { html } from 'lit-element';
 import styles from './style.css';
 import { until } from 'lit-html/directives/until';
 import '@vaadin/vaadin-checkbox';
+import 'weightless/checkbox';
 
 
 /**
@@ -21,10 +22,10 @@ export const template = self => function () {
 
     <h3>All memos</h3>
     <div class = "memo-list">
-      ${memos ? memos.map(item => html`
-      <vaadin-checkbox class = "${until(gettingMemoPage(item.memoId), '')}">
-        ${until(gettingMemo(item.memoId), 'Loading...')}
-      </vaadin-checkbox>`) : ''}
+      ${memos ? memos.map(item=> html`
+        <vaadin-checkbox class = "${until(gettingMemoPage(item.memoId), '')}">
+          ${until(gettingMemo(item.memoId), 'Loading...')}
+        </vaadin-checkbox>`) : ''}
     </div>
 
   `;

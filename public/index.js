@@ -24650,7 +24650,7 @@ const template$8 = self => function () {
   } = this;
   const {
     commitMessage
-  } = domain;
+  } = domain || {};
   return html`
     <style>
       ${styles$k}
@@ -24729,24 +24729,27 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
         const {
           domain
         } = this;
-        const {
-          commitMessage
-        } = domain;
-        const {
-          key: deployedVersion
-        } = database.ref(`deployed-history/data/${this.domainId}/`).push();
-        updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
-          deployedVersion,
-          commitMessage: commitMessage || ''
-        };
-        updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
-          deployedVersion,
-          commitMessage: commitMessage || ''
-        };
-        updates[`domains/data/${this.domainId}/deployed`] = false;
-        updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
-        updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
-        await database.ref().update(updates);
+
+        if (domain) {
+          const {
+            commitMessage
+          } = domain;
+          const {
+            key: deployedVersion
+          } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+          updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
+            deployedVersion,
+            commitMessage: commitMessage || ''
+          };
+          updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
+            deployedVersion,
+            commitMessage: commitMessage || ''
+          };
+          updates[`domains/data/${this.domainId}/deployed`] = false;
+          updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
+          updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
+          await database.ref().update(updates);
+        }
       }
     }]
   };
@@ -24769,7 +24772,7 @@ const template$9 = self => function () {
   // @ts-ignore
   const {
     utterance,
-    topics,
+    topicList,
     selectedTopic,
     gettingTopic,
     textInputVisible,
@@ -24803,7 +24806,7 @@ const template$9 = self => function () {
             <div class = "select-topic">
               <select class="select-box" placeholder="Topic" @change=${selectedTopic.bind(this)}>
                 <option value="none">Choose the topic</option>
-                ${topics ? topics.map(item => html`<option value="${item.id}" ?selected="${utterance.topics && utterance.topics[item.id]}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
+                ${topicList ? topicList.map(item => html`<option value="${item.id}" ?selected="${utterance.topics && utterance.topics[item.id]}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
                 <option value="new-topic">New Topic</option>
               </select>
             </div>
@@ -25430,17 +25433,15 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
 
         if (tree) {
           for (const i in tree) {
-            const row = [i];
-
-            for (const j in tree[i].children) {
-              row.push(j); // @ts-ignore
-
-              row.push(Object.keys(tree[i].utterances).length);
-            }
-
-            if (row.length === 3) {
-              rows.push(row);
-            }
+            console.log(tree[i]); // const row = [i];
+            // for (const j in tree[i].children) {
+            //   row.push(j);
+            //   // @ts-ignore
+            //   row.push(Object.keys(tree[i].utterances).length);
+            // }
+            // if (row.length === 3) {
+            //   rows.push(row);
+            // }
           }
 
           data.addRows(rows);

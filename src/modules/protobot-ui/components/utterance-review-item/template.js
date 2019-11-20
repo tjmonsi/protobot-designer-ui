@@ -14,7 +14,7 @@ import { until } from 'lit-html/directives/until';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { utterance, topics, selectedTopic, gettingTopic, textInputVisible, appendTopic } = this;
+  const { utterance, topicList, selectedTopic, gettingTopic, textInputVisible, appendTopic } = this;
   const { text, bot, topics: utteranceTopics } = utterance || {};
 
   return html`
@@ -40,7 +40,7 @@ export const template = self => function () {
             <div class = "select-topic">
               <select class="select-box" placeholder="Topic" @change=${selectedTopic.bind(this)}>
                 <option value="none">Choose the topic</option>
-                ${topics ? topics.map(item => html`<option value="${item.id}" ?selected="${utterance.topics && utterance.topics[item.id]}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
+                ${topicList ? topicList.map(item => html`<option value="${item.id}" ?selected="${utterance.topics && utterance.topics[item.id]}">${until(gettingTopic(item.id), 'Loading...')}</option>`) : ''}
                 <option value="new-topic">New Topic</option>
               </select>
             </div>

@@ -36,17 +36,19 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
 
     if (tree) {
       for (const i in tree) {
-        const row = [i];
+        console.log(tree[i])
 
-        for (const j in tree[i].children) {
-          row.push(j);
-          // @ts-ignore
-          row.push(Object.keys(tree[i].utterances).length);
-        }
+        // const row = [i];
 
-        if (row.length === 3) {
-          rows.push(row);
-        }
+        // for (const j in tree[i].children) {
+        //   row.push(j);
+        //   // @ts-ignore
+        //   row.push(Object.keys(tree[i].utterances).length);
+        // }
+
+        // if (row.length === 3) {
+        //   rows.push(row);
+        // }
       }
 
       data.addRows(rows);

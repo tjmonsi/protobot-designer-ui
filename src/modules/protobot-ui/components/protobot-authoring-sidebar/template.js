@@ -12,7 +12,7 @@ import styles from './style.css';
 export const template = self => function () {
   // @ts-ignore
   const { topicList, deploy, domain, handleCommitMsg } = this;
-  const { commitMessage } = domain;
+  const { commitMessage } = domain || {};
 
   return html`
     <style>

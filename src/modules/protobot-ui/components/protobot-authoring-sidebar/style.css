@@ -25,6 +25,11 @@ h3 {
   flex:1;
 }
 
+.explore, .verify {
+  color: white;
+  font-family: 'Open Sans', sans-serif;
+}
+
 .button {
   color: white;
   font-size: 20px;

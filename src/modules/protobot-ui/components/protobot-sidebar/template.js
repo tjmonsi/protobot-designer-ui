@@ -31,7 +31,7 @@ export const template = self => function () {
     <br>
     <h3>Pages</h3>
     <ul class = "review-link">
-      <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=micro">Micro Review</a></li>
       <li><a href="/?domain=${this.domainId}&page=macro">Macro Review</a></li>
       <li><a href="/?domain=${this.domainId}&page=authoring">Design and Revise</a></li>
       <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->

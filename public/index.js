@@ -25865,6 +25865,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
         const tpromises = [];
         const utteranceTree = {};
         const utteranceTopicMap = {};
+        const utteranceName = {};
 
         if (tree) {
           for (const i in tree) {
@@ -25901,8 +25902,10 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             };
             const {
               topics,
-              utteranceId
+              utteranceId,
+              text
             } = utterance;
+            utteranceName[utteranceId] = text;
 
             for (const topic in topics) {
               utteranceTopicMap[utteranceId] = topic;
@@ -25942,12 +25945,12 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
 
           for (const topic in topicGraph) {
             for (const t in topicGraph[topic]) {
-              const row = [topicMap[topic] || 'No Topic', topicMap[t] || 'No Topic', topicGraph[topic][t].length];
+              const row = [topicMap[topic] || 'No Topic', topicMap[t] || 'No Topic', topicGraph[topic][t]];
               rows.push(row);
             }
           }
 
-          this.setSankey(rows); // data.addRows(rows);
+          this.setSankey(rows, utteranceName); // data.addRows(rows);
           // const options = {
           //   width: '100vw',
           //   height: 500,
@@ -25976,10 +25979,11 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
     }, {
       kind: "method",
       key: "setSankey",
-      value: function setSankey(rows) {
+      value: function setSankey(rows, utteranceName) {
         const graph = {
           nodes: [{
-            name: 'No Topic'
+            name: 'No Topic',
+            utterances: []
           }],
           links: []
         };
@@ -25989,17 +25993,30 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           graph.links.push({
             source: row[0] || 'No Topic',
             target: row[1] || 'No Topic',
-            value: row[2]
+            value: row[2].length
           }); // @ts-ignore
 
-          if (graph.nodes.findIndex(item => item.name === row[0]) < 0) {
-            // @ts-ignore
-            graph.nodes.push({
-              name: row[0]
-            });
-          }
-        } // @ts-ignore
+          const index = graph.nodes.findIndex(item => item.name === row[0]);
+          const array = [];
 
+          for (const u of row[2]) {
+            array.push(utteranceName[u]);
+          }
+
+          if (index < 0) {
+            const obj = {
+              name: row[0],
+              utterances: array
+            }; // @ts-ignore
+
+            graph.nodes.push(obj);
+          } else {
+            // @ts-ignore
+            graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
+          }
+        }
+
+        console.log(graph); // @ts-ignore
 
         const {
           d3
@@ -26072,13 +26089,24 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           return d.name + '\n' + format(d.value);
         }); // add in the title for the nodes
 
-        node.append('text').attr('x', -6).attr('y', function (d) {
+        const text = node.append('text').attr('x', -6).attr('y', function (d) {
           return d.dy / 2;
-        }).attr('dy', '.35em').attr('text-anchor', 'end').attr('transform', null).text(function (d) {
-          return d.name;
+        }).attr('dy', '.35em').attr('text-anchor', 'end').attr('transform', null);
+        text.text(function (d) {
+          d.utterances.map(item => addTspan(item));
+          return `${d.name}`;
         }).filter(function (d) {
           return d.x < width / 2;
-        }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start'); // the function for moving the nodes
+        }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start');
+
+        function addTspan(item) {
+          text.append('tspan').attr('x', -6).attr('dy', '1.5em').attr('text-anchor', 'end').attr('transform', null).text(function (d) {
+            return item;
+          }).filter(function (d) {
+            return d.x < width / 2;
+          }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start');
+        } // the function for moving the nodes
+
 
         function dragmove(d) {
           d3.select(this).attr('transform', 'translate(' + (d.x = Math.max(0, Math.min(width - d.dx, d3.event.x))) + ',' + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ')');

@@ -25745,7 +25745,7 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
   };
 }, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
 
-var styles$p = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n.link:hover {\n  stroke-opacity: .5;\n}\n";
+var styles$p = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n";
 
 /**
  *
@@ -25823,91 +25823,6 @@ const GetTreeStructureMixin = base => _decorate(null, function (_initialize, _Ge
   };
 }, GetDomainMixin(base));
 
-/* googleCharts.js Version: 1.5.0 Built On: 2018-12-30 */
-const loadScript = Symbol('loadScript');
-const instance = Symbol('instance');
-
-let _instance;
-
-class GoogleChartsManager {
-  get [instance]() {
-    return _instance;
-  }
-
-  set [instance](value) {
-    _instance = value;
-  }
-
-  constructor() {
-    if (this[instance]) {
-      return this[instance];
-    }
-
-    this[instance] = this;
-  }
-
-  reset() {
-    _instance = null;
-  }
-
-  [loadScript]() {
-    if (!this.scriptPromise) {
-      this.scriptPromise = new Promise(resolve => {
-        const body = document.getElementsByTagName('body')[0];
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-
-        script.onload = function () {
-          GoogleCharts.api = window.google;
-          GoogleCharts.api.charts.load('current', {
-            packages: ['corechart', 'table']
-          });
-          GoogleCharts.api.charts.setOnLoadCallback(() => {
-            resolve();
-          });
-        };
-
-        script.src = 'https://www.gstatic.com/charts/loader.js';
-        body.appendChild(script);
-      });
-    }
-
-    return this.scriptPromise;
-  }
-
-  load(callback, type) {
-    return this[loadScript]().then(() => {
-      if (type) {
-        let config = {};
-
-        if (type instanceof Object) {
-          config = type;
-        } else if (Array.isArray(type)) {
-          config = {
-            packages: type
-          };
-        } else {
-          config = {
-            packages: [type]
-          };
-        }
-
-        this.api.charts.load('current', config);
-        this.api.charts.setOnLoadCallback(callback);
-      } else {
-        if (typeof callback != 'function') {
-          throw 'callback must be a function';
-        } else {
-          callback();
-        }
-      }
-    });
-  }
-
-}
-
-const GoogleCharts = new GoogleChartsManager();
-
 // @ts-ignore
 
 let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_initialize, _GetTreeStructureMixi) {
@@ -25929,20 +25844,21 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
         if (tree) {
           console.log(this.tree); // this.setSankey(this.tree);
           // Load the charts library with a callback
+          // GoogleCharts.load(this.drawChart.bind(this, tree), {
+          //   packages: ['sankey']
+          // });
 
-          GoogleCharts.load(this.drawChart.bind(this, tree), {
-            packages: ['sankey']
-          });
+          this.drawChart(this.tree);
         }
       }
     }, {
       kind: "method",
       key: "drawChart",
       value: async function drawChart(tree) {
-        const data = new GoogleCharts.api.visualization.DataTable();
-        data.addColumn('string', 'From');
-        data.addColumn('string', 'To');
-        data.addColumn('number', 'Weight');
+        // const data = new GoogleCharts.api.visualization.DataTable();
+        // data.addColumn('string', 'From');
+        // data.addColumn('string', 'To');
+        // data.addColumn('number', 'Weight');
         const rows = [];
         const promises = [];
         const topicMap = {};
@@ -26031,21 +25947,21 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             }
           }
 
-          data.addRows(rows);
-          const options = {
-            width: '100vw',
-            height: 500,
-            sankey: {
-              node: {
-                nodePadding: 30,
-                interactivity: true
-              }
-            }
-          };
-          if (this.chart) this.chart.clearChart();
-          this.chart = new GoogleCharts.api.visualization.Sankey(this.shadowRoot.querySelector('.sankey'));
-          this.chart.draw(data, options);
-          GoogleCharts.api.visualization.events.addListener(this.chart, 'select', this.selectHandler.bind(this));
+          this.setSankey(rows); // data.addRows(rows);
+          // const options = {
+          //   width: '100vw',
+          //   height: 500,
+          //   sankey: {
+          //     node: {
+          //       nodePadding: 30,
+          //       interactivity: true
+          //     }
+          //   }
+          // };
+          // if (this.chart) this.chart.clearChart();
+          // this.chart = new GoogleCharts.api.visualization.Sankey(this.shadowRoot.querySelector('.sankey'));
+          // this.chart.draw(data, options);
+          // GoogleCharts.api.visualization.events.addListener(this.chart, 'select', this.selectHandler.bind(this));
         }
       }
     }, {
@@ -26055,6 +25971,119 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
         if (this.chart) {
           const select = this.chart.getSelection();
           console.log(select);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "setSankey",
+      value: function setSankey(rows) {
+        const graph = {
+          nodes: [{
+            name: 'No Topic'
+          }],
+          links: []
+        };
+
+        for (const row of rows) {
+          // @ts-ignore
+          graph.links.push({
+            source: row[0] || 'No Topic',
+            target: row[1] || 'No Topic',
+            value: row[2]
+          }); // @ts-ignore
+
+          if (graph.nodes.findIndex(item => item.name === row[0]) < 0) {
+            // @ts-ignore
+            graph.nodes.push({
+              name: row[0]
+            });
+          }
+        } // @ts-ignore
+
+
+        const {
+          d3
+        } = window;
+        var units = 'Widgets';
+        var margin = {
+          top: 10,
+          right: 10,
+          bottom: 10,
+          left: 10
+        };
+        const width = this.getBoundingClientRect().width - margin.left - margin.right;
+        const height = 740 - margin.top - margin.bottom;
+        var formatNumber = d3.format(',.0f');
+
+        const format = function (d) {
+          return formatNumber(d) + ' ' + units;
+        };
+
+        const color = d3.scale.category20(); // append the svg canvas to the page
+
+        var svg = d3.select(this.shadowRoot).select('.sankey').append('svg').attr('width', width + margin.left + margin.right).attr('height', height + margin.top + margin.bottom).append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'); // Set the sankey diagram properties
+
+        var sankey = d3.sankey().nodeWidth(36).nodePadding(10).size([width, height]);
+        var path = sankey.link(); // load the data
+
+        var nodeMap = {}; // @ts-ignore
+
+        graph.nodes.forEach(function (x) {
+          nodeMap[x.name] = x;
+        }); // @ts-ignore
+
+        graph.links = graph.links.map(function (x) {
+          return {
+            // @ts-ignore
+            source: nodeMap[x.source],
+            // @ts-ignore
+            target: nodeMap[x.target],
+            // @ts-ignore
+            value: x.value
+          };
+        });
+        sankey.nodes(graph.nodes).links(graph.links).layout(32); // add in the links
+
+        var link = svg.append('g').selectAll('.link').data(graph.links).enter().append('path').attr('class', 'link').attr('d', path).style('stroke-width', function (d) {
+          return Math.max(1, d.dy);
+        }).sort(function (a, b) {
+          return b.dy - a.dy;
+        }); // add the link titles
+
+        link.append('title').text(function (d) {
+          return d.source.name + ' → ' + d.target.name + '\n' + format(d.value);
+        }); // add in the nodes
+
+        var node = svg.append('g').selectAll('.node').data(graph.nodes).enter().append('g').attr('class', 'node').attr('transform', function (d) {
+          return 'translate(' + d.x + ',' + d.y + ')';
+        }).call(d3.behavior.drag().origin(function (d) {
+          return d;
+        }).on('dragstart', function () {
+          this.parentNode.appendChild(this);
+        }).on('drag', dragmove)); // add the rectangles for the nodes
+
+        node.append('rect').attr('height', function (d) {
+          return d.dy;
+        }).attr('width', sankey.nodeWidth()).style('fill', function (d) {
+          return color(d.name.replace(/ .*/, ''));
+        }).style('stroke', function (d) {
+          return d3.rgb(d.color).darker(2);
+        }).append('title').text(function (d) {
+          return d.name + '\n' + format(d.value);
+        }); // add in the title for the nodes
+
+        node.append('text').attr('x', -6).attr('y', function (d) {
+          return d.dy / 2;
+        }).attr('dy', '.35em').attr('text-anchor', 'end').attr('transform', null).text(function (d) {
+          return d.name;
+        }).filter(function (d) {
+          return d.x < width / 2;
+        }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start'); // the function for moving the nodes
+
+        function dragmove(d) {
+          d3.select(this).attr('transform', 'translate(' + (d.x = Math.max(0, Math.min(width - d.dx, d3.event.x))) + ',' + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ')');
+          sankey.relayout();
+          link.attr('d', path);
         }
       } // async setSankey (tree) {
       //   const margin = { top: 10, right: 10, bottom: 10, left: 10 };

@@ -25387,11 +25387,6 @@ class GoogleChartsManager {
 
 const GoogleCharts = new GoogleChartsManager();
 
-// import { d3sankey } from './sankey';
-// import { sankey as d3sankey } from 'd3-sankey';
-// import 'd3-sankey';
-// import { database } from '../../../firebase';
-// Extend the LitElement base class
 // @ts-ignore
 
 let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_initialize, _GetTreeStructureMixi) {
@@ -25422,49 +25417,124 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
     }, {
       kind: "method",
       key: "drawChart",
-      value: function drawChart(tree) {
+      value: async function drawChart(tree) {
         const data = new GoogleCharts.api.visualization.DataTable();
         data.addColumn('string', 'From');
         data.addColumn('string', 'To');
         data.addColumn('number', 'Weight');
-        const rows = []; // const { tree } = this;
-
-        console.log(tree);
+        const rows = [];
+        const promises = [];
+        const topicMap = {};
+        const tpromises = [];
+        const utteranceTree = {};
+        const utteranceTopicMap = {};
 
         if (tree) {
           for (const i in tree) {
-            console.log(tree[i]); // const row = [i];
-            // for (const j in tree[i].children) {
-            //   row.push(j);
-            //   // @ts-ignore
-            //   row.push(Object.keys(tree[i].utterances).length);
-            // }
-            // if (row.length === 3) {
-            //   rows.push(row);
-            // }
+            // console.log(tree[i])
+            const {
+              utterances,
+              parent
+            } = tree[i];
+
+            for (const utteranceId in utterances) {
+              promises.push(database.ref(`utterances/data/${utteranceId}`).once('value'));
+            }
+
+            if (parent && tree[parent]) {
+              const {
+                utterances: utteranceParent
+              } = tree[parent];
+
+              for (const utteranceId in utteranceParent) {
+                if (!utteranceTree[utteranceId]) utteranceTree[utteranceId] = [];
+
+                for (const utteranceId2 in utterances) {
+                  utteranceTree[utteranceId].push(utteranceId2);
+                }
+              }
+            }
+          }
+
+          const results = await Promise.all(promises);
+
+          for (const i in results) {
+            const utterance = { ...results[i].val(),
+              utteranceId: results[i].key
+            };
+            const {
+              topics,
+              utteranceId
+            } = utterance;
+
+            for (const topic in topics) {
+              utteranceTopicMap[utteranceId] = topic;
+              topicMap[topic] = true;
+              break;
+            }
+          }
+
+          for (const t in topicMap) {
+            tpromises.push(database.ref(`labels/data/${t}`).once('value'));
+          }
+
+          const tresults = await Promise.all(tpromises);
+
+          for (const tr in tresults) {
+            const {
+              name
+            } = tresults[tr].val();
+            topicMap[tresults[tr].key] = name;
+          }
+
+          const topicGraph = {};
+
+          for (const utteranceId in utteranceTree) {
+            const topic = utteranceTopicMap[utteranceId] || 'No Topic';
+
+            for (const u of utteranceTree[utteranceId]) {
+              const t = utteranceTopicMap[u] || 'No Topic';
+
+              if (topic !== t) {
+                topicGraph[topic] = topicGraph[topic] || {};
+                topicGraph[topic][t] = topicGraph[topic][t] || [];
+                topicGraph[topic][t].push(u);
+              }
+            }
+          }
+
+          for (const topic in topicGraph) {
+            for (const t in topicGraph[topic]) {
+              const row = [topicMap[topic] || 'No Topic', topicMap[t] || 'No Topic', topicGraph[topic][t].length];
+              rows.push(row);
+            }
           }
 
           data.addRows(rows);
           const options = {
-            width: 600,
+            width: '100vw',
+            height: 500,
             sankey: {
               node: {
+                nodePadding: 30,
                 interactivity: true
               }
             }
           };
-          const chart = new GoogleCharts.api.visualization.Sankey(this.shadowRoot.querySelector('.sankey'));
-          chart.draw(data, options);
-          GoogleCharts.api.visualization.events.addListener(chart, 'select', this.selectHandler.bind(this));
+          if (this.chart) this.chart.clearChart();
+          this.chart = new GoogleCharts.api.visualization.Sankey(this.shadowRoot.querySelector('.sankey'));
+          this.chart.draw(data, options);
+          GoogleCharts.api.visualization.events.addListener(this.chart, 'select', this.selectHandler.bind(this));
         }
-
-        console.log(this.tree);
       }
     }, {
       kind: "method",
       key: "selectHandler",
-      value: function selectHandler(e) {
-        console.log(e);
+      value: function selectHandler() {
+        if (this.chart) {
+          const select = this.chart.getSelection();
+          console.log(select);
+        }
       } // async setSankey (tree) {
       //   const margin = { top: 10, right: 10, bottom: 10, left: 10 };
       //   const width = this.getBoundingClientRect().width - margin.left - margin.right;

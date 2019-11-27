@@ -27,8 +27,16 @@ h3 {
   font-family: 'Open Sans', sans-serif;
 }
 
-a {
+a:link {
+  color:cornflowerblue;
+}
+
+a:visited {
   color:rgb(146, 146, 146);
+}
+
+a:active {
+  color: lemonchiffon;
 }
 
 /* a:visited {

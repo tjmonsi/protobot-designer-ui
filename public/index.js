@@ -3360,7 +3360,7 @@ LitElement['finalized'] = true;
 
 LitElement.render = render$1;
 
-var styles = ":host {\n  margin: 40px;\n}\n\nh1 {\n  color: rgb(255, 245, 152);\n  font-family: 'Josefin Sans', sans-serif;\n  font-weight: bold;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.left-side-text {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.review-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.crowd-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\na {\n  color:rgb(146, 146, 146);\n}\n\n/* a:visited {\n  color: white;\n} */";
+var styles = ":host {\n  margin: 40px;\n}\n\nh1 {\n  color: rgb(255, 245, 152);\n  font-family: 'Josefin Sans', sans-serif;\n  font-weight: bold;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.left-side-text {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.review-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.crowd-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\na:link {\n  color:cornflowerblue;\n}\n\na:visited {\n  color:rgb(146, 146, 146);\n}\n\na:active {\n  color: lemonchiffon;\n}\n\n/* a:visited {\n  color: white;\n} */";
 
 /**
  * @license
@@ -3473,6 +3473,21 @@ function renderAttributes(element, attrMap) {
       element.removeAttribute(a);
     }
   }
+}
+
+function queryParentRoots($elem, query) {
+  if ($elem.shadowRoot == null) {
+    return [];
+  }
+
+  const $root = $elem.shadowRoot.host.getRootNode();
+  const matches = $root.querySelectorAll(query);
+
+  if (matches.length > 0) {
+    return Array.from(matches);
+  }
+
+  return queryParentRoots($root, query);
 }
 
 function isHidden($elem, style) {
@@ -3915,6 +3930,10 @@ __decorate([property({
 
 const SPACE = 'Space';
 const ENTER = 'Enter';
+const ARROW_RIGHT = 'ArrowRight';
+const ARROW_LEFT = 'ArrowLeft';
+const ARROW_UP = 'ArrowUp';
+const ARROW_DOWN = 'ArrowDown';
 
 var styles$4 = `:host{--_input-state-color:var(--input-state-color-inactive,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));--_input-padding-left-right:var(--input-padding-left-right,0);--_input-bg:var(--input-bg,transparent);--_input-border-radius:0;--_input-color:var(--input-color,hsl(var(--foreground,var(--foreground-hue,230),var(--foreground-saturation,70%),var(--foreground-lightness,5%))));--_input-label-color:var(--input-label-color,hsl(var(--shade-600,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,35%))));--_input-border-style:var(--input-border-style,solid);transform:translateZ(0);display:block;outline:none}:host([disabled]){pointer-events:none;--_input-state-color:var(--input-state-color-disabled,hsl(var(--shade-300,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,75%))));--_input-label-color:var(--input-label-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));--_input-color:var(--input-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));--_input-border-style:var(--input-border-style-disabled,dashed)}#container{background:var(--_input-bg);color:var(--_input-color);border-radius:var(--_input-border-radius);font-size:var(--input-font-size,1rem);font-family:var(--input-font-family,var(--font-family-serif,"Roboto Slab",times,serif));border-bottom:var(--input-border-width,.0625rem) var(--_input-border-style) var(--_input-state-color);transition:var(--input-transition,border-color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));position:relative;display:flex;align-items:center;overflow:hidden}#wrapper{position:relative;flex-grow:1}#label{left:var(--_input-padding-left-right);color:var(--_input-label-color);transition:var(--input-label-transition,top var(--transition-duration-fast,.12s) var(--transition-timing-function-linear,linear),font-size var(--transition-duration-fast,.12s) var(--transition-timing-function-linear,linear),transform var(--transition-duration-fast,.12s) var(--transition-timing-function-linear,linear));font-family:var(--input-font-family,var(--font-family-serif,"Roboto Slab",times,serif));top:50%;transform:translateY(-50%);z-index:1;position:absolute;pointer-events:none;font-size:inherit;line-height:1;white-space:nowrap;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:hover){--_input-state-color:var(--input-state-border-color-hover,hsl(var(--shade-600,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,35%))))}:host([filled]),:host([outlined]){--_input-padding-left-right:var(--input-padding-left-right-outlined,0.75rem)}:host([filled]){--_input-border-radius:var(--input-border-radius-outlined,0.5rem 0.5rem 0 0);--_input-bg:var(--input-bg,hsl(var(--shade-200,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,85%))))}:host([filled]:hover){--_input-bg:var(--input-bg-filled-hover,hsla(var(--shade-200,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,85%)),0.5))}:host([outlined]){--_input-border-radius:var(--input-border-radius-outlined,0.5rem)}:host([outlined]) #container{border:var(--input-border-width,.0625rem) var(--_input-border-style) var(--_input-state-color)}:host(:focus-within){--_input-state-color:var(--input-state-color-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))))}:host(:focus-within) #label,:host([dirty]) #label,:host([type=color]) #label,:host([type=date]) #label,:host([type=file]) #label,:host([type=range]) #label{font-size:var(--input-label-font-size,.75rem);top:var(--input-padding-top-bottom,.5rem);transform:translateY(0)}#slot-wrapper,::slotted(input),::slotted(select),::slotted(textarea){caret-color:var(--_input-color-state);padding:var(--input-padding-top-bottom,.5rem) var(--_input-padding-left-right);font-family:var(--input-font-family,var(--font-family-serif,"Roboto Slab",times,serif));font-size:var(--input-font-size,1rem);-webkit-tap-highlight-color:rgba(0,0,0,0);-webkit-tap-highlight-color:transparent;box-sizing:border-box;display:block;color:inherit;-webkit-overflow-scrolling:touch;position:relative;-webkit-appearance:none;-moz-appearance:none;appearance:none;border:none;outline:none;margin:0;background:transparent;width:100%}:host([label]) #slot-wrapper,:host([label]) ::slotted(input),:host([label]) ::slotted(select),:host([label]) ::slotted(textarea){padding-top:calc(var(--input-label-space, .875rem) + var(--input-padding-top-bottom, .5rem))}:host([invalid]){--_input-state-color:var(--input-state-color-invalid,hsl(var(--error-500,var(--error-hue,3),var(--error-saturation,80%),var(--error-lightness,54%))))}::slotted(input[type=color]){height:3.75rem;cursor:pointer}::slotted([slot=after]),::slotted([slot=before]){color:var(--input-before-after-color,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))))}:host(:not([outlined]):not([filled])) ::slotted([slot=before]){margin-right:var(--input-padding-left-right-outlined,.75rem)}:host(:not([outlined]):not([filled])) ::slotted([slot=after]),:host([filled]) ::slotted([slot=before]),:host([outlined]) ::slotted([slot=before]){margin-left:var(--input-padding-left-right-outlined,.75rem)}:host([filled]) ::slotted([slot=after]),:host([outlined]) ::slotted([slot=after]){margin-right:var(--input-padding-left-right-outlined,.75rem)}`;
 
@@ -11774,7 +11793,7 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
   };
 }, GetMemoMixin(GetDomainMixin(LitElement)));
 
-var styles$8 = ".memo-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n\n.micro {\n  color: red;\n}\n\n.macro {\n  color: yellow;\n}\n\nvaadin-checkbox {\n  color: white;\n}";
+var styles$8 = ".memo-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n\n.micro {\n  background-color:rgb(253, 200, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.macro {\n  background-color:rgb(253, 228, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nvaadin-checkbox {\n  color: white;\n}";
 
 class Lumo extends HTMLElement {
   static get version() {
@@ -23544,7 +23563,7 @@ const template$2 = self => function () {
     <br>
     <h3>Pages</h3>
     <ul class = "review-link">
-      <li><a href="/?domain=${this.domainId}&page=micro">Micro review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=micro">Micro Review</a></li>
       <li><a href="/?domain=${this.domainId}&page=macro">Macro Review</a></li>
       <li><a href="/?domain=${this.domainId}&page=authoring">Design and Revise</a></li>
       <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
@@ -24633,7 +24652,499 @@ let TopicListItem = _decorate([customElement('topic-list-item')], function (_ini
   };
 }, GetTopicMixin(LitElement));
 
-var styles$k = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
+function row(element, e) {
+  const group = element.queryGroup();
+  const currentIndex = group.indexOf(element);
+  const newIndex = nextIndex(group, currentIndex, e.code);
+
+  if (newIndex != null) {
+    const newCheckedRadio = group[newIndex];
+    element.rowToElement(newCheckedRadio);
+    stopEvent(e);
+  }
+}
+
+function nextIndex(group, currentIndex, keyCode) {
+  if (group.length == 0) {
+    return null;
+  }
+
+  switch (keyCode) {
+    case ARROW_RIGHT:
+    case ARROW_DOWN:
+      return currentIndex + 1 > group.length - 1 ? 0 : currentIndex + 1;
+
+    case ARROW_LEFT:
+    case ARROW_UP:
+      return currentIndex - 1 < 0 ? group.length - 1 : currentIndex - 1;
+  }
+
+  return null;
+}
+
+var styles$k = ``;
+
+class RadioBehavior extends SwitchBehavior {
+  constructor() {
+    super(...arguments);
+    this.role = 'radio';
+    this.formElementType = 'radio';
+  }
+
+  queryGroup() {
+    if (this.name != null) {
+      return queryParentRoots(this, `${this.nodeName.toLowerCase()}[name=${this.name}]:not([disabled])`);
+    }
+
+    return [];
+  }
+
+  rowToElement(elem) {
+    elem.click();
+    elem.focus();
+  }
+
+  toggle() {
+    this.checked = true;
+    this.dispatchChangeEvent();
+  }
+
+  updateTabindex(props) {
+    if (props.has('disabled') || props.has('checked')) {
+      updateTabindex(this, this.disabled || !this.checked && this.isGroupedChecked());
+    }
+
+    if (props.has('checked') && this.checked) {
+      this.uncheckGroup();
+    }
+  }
+
+  isGroupedChecked() {
+    return this.queryGroup().find(radio => radio.checked) != null;
+  }
+
+  uncheckGroup() {
+    const group = this.queryGroup();
+
+    for (const radio of group) {
+      if (radio === this) continue;
+      radio.checked = false;
+      radio.tabIndex = -1;
+    }
+  }
+
+  onKeyDown(e) {
+    super.onKeyDown(e);
+    row(this, e);
+  }
+
+}
+
+RadioBehavior.styles = [...SwitchBehavior.styles, cssResult(styles$k)];
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata('design:type', String)], RadioBehavior.prototype, 'role', void 0);
+
+var styles$l = `:host{--_radio-bg:var(--radio-bg,transparent);--_radio-color:var(--radio-color,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))));background:var(--_radio-bg);color:var(--_radio-color);width:var(--radio-size,1.25rem);height:var(--radio-size,1.25rem);border:var(--radio-border-config,.125rem solid) currentColor;border-radius:var(--radio-border-radius,100%);transition:var(--radio-transition,background var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)),border-color var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));position:relative;display:inline-flex;align-items:center;justify-content:center;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([disabled])){cursor:pointer}:host([checked]){--_radio-bg:var(--radio-bg-checked,transparent);--_radio-color:var(--radio-color-checked,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))))}:host([checked]) #dot{transform:scale(1)}:host(:focus),:host(:hover){will-change:border,background}:host(:focus) #dot,:host(:hover) #dot{will-change:transform,background}:host([disabled]){--_radio-bg:var(--radio-bg-disabled,transparent);--_radio-color:var(--radio-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));pointer-events:none}:host([disabled][checked]){--_radio-bg:var(--radio-bg-disabled-checked,transparent);--_radio-color:var(--radio-color-disabled-checked,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))))}#dot{background:currentColor;width:var(--radio-dot-size,.625rem);height:var(--radio-dot-size,.625rem);border-radius:var(--radio-dot-border-radius,100%);transition:var(--radio-dot-transition,transform var(--transition-duration-medium,.18s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));transform:scale(0)}#ripple{transform:var(--radio-ripple-transform,translate(-50%,-50%) scale(1.8))}`;
+
+let Radio = class Radio extends RadioBehavior {
+  render() {
+    return html` <div id="dot"></div> <wl-ripple id="ripple" .target="${this}" focusable overlay unbounded centered initialDuration="200"></wl-ripple> <slot></slot> ${this.renderFormElement()} `;
+  }
+
+};
+Radio.styles = [...RadioBehavior.styles, cssResult(styles$l)];
+Radio = __decorate([customElement('wl-radio')], Radio);
+
+const $_documentContainer$3 = html$1`<dom-module id="lumo-radio-button" theme-for="vaadin-radio-button">
+  <template>
+    <style>
+      :host {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        cursor: default;
+        outline: none;
+      }
+
+      [part="label"]:not([empty]) {
+        margin: 0.1875em 0.875em 0.1875em 0.375em;
+      }
+
+      [part="radio"] {
+        width: calc(1em + 2px);
+        height: calc(1em + 2px);
+        margin: 0.1875em;
+        position: relative;
+        border-radius: 50%;
+        background-color: var(--lumo-contrast-20pct);
+        transition: transform 0.2s cubic-bezier(.12, .32, .54, 2), background-color 0.15s;
+        pointer-events: none;
+        will-change: transform;
+        line-height: 1.2;
+        transform: translateZ(0); /* Workaround IE11 jumpiness */
+      }
+
+      /* Used for activation "halo" */
+      [part="radio"]::before {
+        /* Needed to align the radio-button nicely on the baseline */
+        content: "\\2003";
+        color: transparent;
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+        border-radius: inherit;
+        background-color: inherit;
+        transform: scale(1.4);
+        opacity: 0;
+        transition: transform 0.1s, opacity 0.8s;
+        will-change: transform, opacity;
+      }
+
+      /* Used for the dot */
+      [part="radio"]::after {
+        content: "";
+        width: 0;
+        height: 0;
+        border: 3px solid var(--lumo-primary-contrast-color);
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        transition: 0.25s transform;
+        will-change: transform;
+        background-clip: content-box;
+      }
+
+      :host([checked]) [part="radio"] {
+        background-color: var(--lumo-primary-color);
+      }
+
+      :host([checked]) [part="radio"]::after {
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      :host(:not([checked]):not([indeterminate]):not([disabled]):hover) [part="radio"] {
+        background-color: var(--lumo-contrast-30pct);
+      }
+
+      :host([active]) [part="radio"] {
+        transform: scale(0.9);
+        transition-duration: 0.05s;
+      }
+
+      :host([active][checked]) [part="radio"] {
+        transform: scale(1.1);
+      }
+
+      :host([active]:not([checked])) [part="radio"]::before {
+        transition-duration: 0.01s, 0.01s;
+        transform: scale(0);
+        opacity: 0.4;
+      }
+
+      :host([focus-ring]) [part="radio"] {
+        box-shadow: 0 0 0 3px var(--lumo-primary-color-50pct);
+      }
+
+      :host([disabled]) {
+        pointer-events: none;
+        color: var(--lumo-disabled-text-color);
+      }
+
+      :host([disabled]) ::slotted(*) {
+        color: inherit;
+      }
+
+      :host([disabled]) [part="radio"] {
+        background-color: var(--lumo-contrast-10pct);
+      }
+
+      :host([disabled]) [part="radio"]::after {
+        border-color: var(--lumo-contrast-30pct);
+      }
+
+      /* IE11 only */
+      ::-ms-backdrop,
+      [part="radio"] {
+        line-height: 1;
+      }
+    </style>
+  </template>
+</dom-module>`;
+document.head.appendChild($_documentContainer$3.content);
+
+/**
+@license
+Copyright (c) 2017 Vaadin Ltd.
+This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
+*/
+/**
+ * `<vaadin-radio-button>` is a Web Component for radio buttons.
+ *
+ * ```html
+ * <vaadin-radio-button value="foo">Foo</vaadin-radio-button>
+ * ```
+ *
+ * ### Styling
+ *
+ * The following shadow DOM parts are available for styling:
+ *
+ * Part name         | Description
+ * ------------------|----------------
+ * `radio`           | The radio button element
+ * `label`           | The label content element
+ *
+ * The following state attributes are available for styling:
+ *
+ * Attribute  | Description | Part name
+ * -----------|-------------|------------
+ * `disabled`   | Set when the radio button is disabled. | :host
+ * `focus-ring` | Set when the radio button is focused using the keyboard. | :host
+ * `focused`    | Set when the radio button is focused. | :host
+ * `checked`    | Set when the radio button is checked. | :host
+ * `empty`      | Set when there is no label provided. | label
+ *
+ * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
+ *
+ * @memberof Vaadin
+ * @mixes Vaadin.ElementMixin
+ * @mixes Vaadin.ControlStateMixin
+ * @mixes Vaadin.ThemableMixin
+ * @mixes Polymer.GestureEventListeners
+ * @element vaadin-radio-button
+ * @demo demo/index.html
+ */
+
+class RadioButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(GestureEventListeners(PolymerElement)))) {
+  static get template() {
+    return html$1`
+    <style>
+      :host {
+        display: inline-block;
+      }
+
+      label {
+        display: inline-flex;
+        align-items: baseline;
+        outline: none;
+      }
+
+      [part="radio"] {
+        position: relative;
+        display: inline-block;
+        flex: none;
+      }
+
+      input[type="radio"] {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: inherit;
+        margin: 0;
+      }
+
+      :host([disabled]) {
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+
+    <label>
+      <span part="radio">
+        <input type="radio" checked="{{checked::change}}" disabled\$="[[disabled]]" role="presentation" on-change="_onChange" tabindex="-1">
+      </span>
+
+      <span part="label">
+        <slot></slot>
+      </span>
+    </label>
+`;
+  }
+
+  static get is() {
+    return 'vaadin-radio-button';
+  }
+
+  static get version() {
+    return '1.2.3';
+  }
+
+  static get properties() {
+    return {
+      /**
+       * True if the radio button is checked.
+       */
+      checked: {
+        type: Boolean,
+        value: false,
+        notify: true,
+        observer: '_checkedChanged',
+        reflectToAttribute: true
+      },
+
+      /**
+       * Name of the element.
+       */
+      name: String,
+
+      /**
+       * The value for this element.
+       */
+      value: {
+        type: String,
+        value: 'on'
+      }
+    };
+  }
+
+  get name() {
+    return this.checked ? this._storedName : '';
+  }
+
+  set name(name) {
+    this._storedName = name;
+  }
+  /**
+   * @protected
+   */
+
+
+  attributeChangedCallback(prop, oldVal, newVal) {
+    super.attributeChangedCallback(prop, oldVal, newVal); // Needed until Edge has CSS Custom Properties (present in Edge Preview)
+
+    /* istanbul ignore if */
+
+    if (/^(disabled|checked)$/.test(prop)) {
+      // iOS 10.3 Safari has an issue with repainting shadow root element styles when a host attribute changes.
+      // Need this workaround (toggle any inline css property on and off) until we drop iOS 10.
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      /* istanbul ignore if */
+
+      if (isIOS && this.shadowRoot && parseInt(navigator.appVersion.match(/OS (\d+)_(\d+)_?(\d+)?/)[1], 10)) {
+        const WEBKIT_PROPERTY = '-webkit-backface-visibility';
+        this.shadowRoot.querySelectorAll('*').forEach(el => {
+          el.style[WEBKIT_PROPERTY] = 'visible';
+          el.style[WEBKIT_PROPERTY] = '';
+        });
+      }
+    }
+  }
+
+  ready() {
+    super.ready();
+    this.setAttribute('role', 'radio');
+
+    this._addListeners();
+
+    const attrName = this.getAttribute('name');
+
+    if (attrName) {
+      this.name = attrName;
+    }
+
+    this.shadowRoot.querySelector('[part~="label"]').querySelector('slot').addEventListener('slotchange', this._updateLabelAttribute.bind(this));
+
+    this._updateLabelAttribute();
+  }
+
+  _updateLabelAttribute() {
+    const label = this.shadowRoot.querySelector('[part~="label"]');
+    const assignedNodes = label.firstElementChild.assignedNodes();
+
+    if (this._isAssignedNodesEmpty(assignedNodes)) {
+      label.setAttribute('empty', '');
+    } else {
+      label.removeAttribute('empty');
+    }
+  }
+
+  _isAssignedNodesEmpty(nodes) {
+    // The assigned nodes considered to be empty if there is no slotted content or only one empty text node
+    return nodes.length === 0 || nodes.length == 1 && nodes[0].nodeType == Node.TEXT_NODE && nodes[0].textContent.trim() === '';
+  }
+
+  _checkedChanged(checked) {
+    this.setAttribute('aria-checked', checked);
+  }
+
+  _addListeners() {
+    this._addEventListenerToNode(this, 'down', e => {
+      if (!this.disabled) {
+        this.setAttribute('active', '');
+      }
+    });
+
+    this._addEventListenerToNode(this, 'up', e => {
+      this.removeAttribute('active');
+
+      if (!this.checked && !this.disabled) {
+        this.checked = true;
+      }
+    });
+
+    this.addEventListener('keydown', e => {
+      if (!this.disabled && e.keyCode === 32) {
+        e.preventDefault();
+        this.setAttribute('active', '');
+      }
+    });
+    this.addEventListener('keyup', e => {
+      if (!this.disabled && e.keyCode === 32) {
+        e.preventDefault();
+        this.click();
+        this.removeAttribute('active');
+      }
+    });
+  }
+  /**
+   * Toggles the radio button, so that the native `change` event
+   * is dispatched. Overrides the standard `HTMLElement.prototype.click`.
+   * @protected
+   */
+
+
+  click() {
+    this.shadowRoot.querySelector('input').click();
+  }
+  /** @protected */
+
+
+  get focusElement() {
+    return this.shadowRoot.querySelector('input');
+  }
+
+  _onChange(e) {
+    // In the Shadow DOM, the `change` event is not leaked into the
+    // ancestor tree, so we must do this manually.
+    const changeEvent = new CustomEvent('change', {
+      detail: {
+        sourceEvent: e
+      },
+      bubbles: e.bubbles,
+      cancelable: e.cancelable
+    });
+    this.dispatchEvent(changeEvent);
+  }
+
+}
+/**
+ * Fired when the user toggles the radio button.
+ *
+ * @event change
+ */
+
+
+customElements.define(RadioButtonElement.is, RadioButtonElement);
+
+var styles$m = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
 /**
  *
@@ -24653,7 +25164,7 @@ const template$8 = self => function () {
   } = domain || {};
   return html`
     <style>
-      ${styles$k}
+      ${styles$m}
     </style>
     <h3>Current topic list</h3>
 
@@ -24667,6 +25178,14 @@ const template$8 = self => function () {
     </ul>
 
     <div>
+      <h3>Testing methods</h3>
+      <vaadin-radio-group>
+        <vaadin-radio-button class="explore">Exploration</vaadin-radio-button>
+        <vaadin-radio-button class="verify">Verification</vaadin-radio-button>
+      </vaadin-radio-group>
+    </div>
+
+    <div>
       <h3>Leave Message Here</h3>
       <wl-textarea outlined
         class = "commit-input"
@@ -24675,6 +25194,8 @@ const template$8 = self => function () {
         @submit="${deploy.bind(this)}">
       </wl-textarea outlined>
     </div>
+
+
 
     <div class="button-container">
       <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button>
@@ -24755,9 +25276,9 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   };
 }, GetDomainMixin(LitElement));
 
-var styles$l = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
+var styles$n = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
 
-var styles$m = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n.utterance{\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
+var styles$o = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n.utterance{\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
 
 // import '@polymer/paper-item/paper-item.js';
 // import '@polymer/paper-listbox/paper-listbox.js';
@@ -24785,7 +25306,7 @@ const template$9 = self => function () {
   } = utterance || {};
   return html`
     <style>
-      ${styles$m}
+      ${styles$o}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -24977,7 +25498,7 @@ const template$a = self => function () {
 
   return html`
     <style>
-      ${styles$l}
+      ${styles$n}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -25224,7 +25745,7 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
   };
 }, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
 
-var styles$n = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n.link:hover {\n  stroke-opacity: .5;\n}\n";
+var styles$p = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n.link:hover {\n  stroke-opacity: .5;\n}\n";
 
 /**
  *
@@ -25235,7 +25756,7 @@ const template$b = self => function () {
 
   return html`
     <style>
-      ${styles$n}
+      ${styles$p}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -25668,7 +26189,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
   };
 }, GetTreeStructureMixin(LitElement));
 
-var styles$o = "";
+var styles$q = "";
 
 /**
  *
@@ -25681,7 +26202,7 @@ const template$c = self => function () {
   console.log(this);
   return html`
     <style>
-      ${styles$o}
+      ${styles$q}
     </style>
 
     History
@@ -25713,7 +26234,7 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
   };
 }, GetDomainMixin(LitElement));
 
-var styles$p = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$r = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
@@ -25743,7 +26264,7 @@ const template$d = self => function () {
   console.log(dv);
   return html`
     <style>
-      ${styles$p}
+      ${styles$r}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -25857,7 +26378,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$q = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$s = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
@@ -25887,7 +26408,7 @@ const template$e = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$q}
+      ${styles$s}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -26019,12 +26540,12 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$r = "";
+var styles$t = "";
 
-var styles$s = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
+var styles$u = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
 
-const $_documentContainer$3 = document.createElement('template');
-$_documentContainer$3.innerHTML = `<custom-style>
+const $_documentContainer$4 = document.createElement('template');
+$_documentContainer$4.innerHTML = `<custom-style>
   <style>
     html {
       --lumo-size-xs: 1.625rem;
@@ -26042,10 +26563,10 @@ $_documentContainer$3.innerHTML = `<custom-style>
     }
   </style>
 </custom-style>`;
-document.head.appendChild($_documentContainer$3.content);
+document.head.appendChild($_documentContainer$4.content);
 
-const $_documentContainer$4 = document.createElement('template');
-$_documentContainer$4.innerHTML = `<custom-style>
+const $_documentContainer$5 = document.createElement('template');
+$_documentContainer$5.innerHTML = `<custom-style>
   <style>
     html {
       /* Square */
@@ -26071,10 +26592,10 @@ $_documentContainer$4.innerHTML = `<custom-style>
     }
   </style>
 </custom-style>`;
-document.head.appendChild($_documentContainer$4.content);
+document.head.appendChild($_documentContainer$5.content);
 
-const $_documentContainer$5 = document.createElement('template');
-$_documentContainer$5.innerHTML = `<custom-style>
+const $_documentContainer$6 = document.createElement('template');
+$_documentContainer$6.innerHTML = `<custom-style>
   <style>
     html {
       /* Font families */
@@ -26208,10 +26729,10 @@ $_documentContainer$5.innerHTML = `<custom-style>
     </style>
   </template>
 </dom-module>`;
-document.head.appendChild($_documentContainer$5.content);
+document.head.appendChild($_documentContainer$6.content);
 
-const $_documentContainer$6 = document.createElement('template');
-$_documentContainer$6.innerHTML = `<dom-module id="lumo-required-field">
+const $_documentContainer$7 = document.createElement('template');
+$_documentContainer$7.innerHTML = `<dom-module id="lumo-required-field">
   <template>
     <style>
       [part="label"] {
@@ -26287,10 +26808,10 @@ $_documentContainer$6.innerHTML = `<dom-module id="lumo-required-field">
     </style>
   </template>
 </dom-module>`;
-document.head.appendChild($_documentContainer$6.content);
+document.head.appendChild($_documentContainer$7.content);
 
-const $_documentContainer$7 = document.createElement('template');
-$_documentContainer$7.innerHTML = `<custom-style>
+const $_documentContainer$8 = document.createElement('template');
+$_documentContainer$8.innerHTML = `<custom-style>
   <style>
     @font-face {
       font-family: 'lumo-icons';
@@ -26345,10 +26866,10 @@ $_documentContainer$7.innerHTML = `<custom-style>
     }
   </style>
 </custom-style>`;
-document.head.appendChild($_documentContainer$7.content);
+document.head.appendChild($_documentContainer$8.content);
 
-const $_documentContainer$8 = document.createElement('template');
-$_documentContainer$8.innerHTML = `<dom-module id="lumo-field-button">
+const $_documentContainer$9 = document.createElement('template');
+$_documentContainer$9.innerHTML = `<dom-module id="lumo-field-button">
   <template>
     <style>
       [part\$="button"] {
@@ -26379,9 +26900,9 @@ $_documentContainer$8.innerHTML = `<dom-module id="lumo-field-button">
     </style>
   </template>
 </dom-module>`;
-document.head.appendChild($_documentContainer$8.content);
+document.head.appendChild($_documentContainer$9.content);
 
-const $_documentContainer$9 = html$1`<dom-module id="lumo-text-field" theme-for="vaadin-text-field">
+const $_documentContainer$a = html$1`<dom-module id="lumo-text-field" theme-for="vaadin-text-field">
   <template>
     <style include="lumo-required-field lumo-field-button">
       :host {
@@ -26656,15 +27177,15 @@ const $_documentContainer$9 = html$1`<dom-module id="lumo-text-field" theme-for=
     </style>
   </template>
 </dom-module>`;
-document.head.appendChild($_documentContainer$9.content);
+document.head.appendChild($_documentContainer$a.content);
 
 /**
 @license
 Copyright (c) 2017 Vaadin Ltd.
 This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
 */
-const $_documentContainer$a = document.createElement('template');
-$_documentContainer$a.innerHTML = `<dom-module id="vaadin-text-field-shared-styles">
+const $_documentContainer$b = document.createElement('template');
+$_documentContainer$b.innerHTML = `<dom-module id="vaadin-text-field-shared-styles">
   <template>
     <style>
       :host {
@@ -26763,7 +27284,7 @@ $_documentContainer$a.innerHTML = `<dom-module id="vaadin-text-field-shared-styl
     </style>
   </template>
 </dom-module>`;
-document.head.appendChild($_documentContainer$a.content);
+document.head.appendChild($_documentContainer$b.content);
 const HOST_PROPS = {
   default: ['list', 'autofocus', 'pattern', 'autocapitalize', 'autocorrect', 'maxlength', 'minlength', 'name', 'placeholder', 'autocomplete', 'title'],
   accessible: ['disabled', 'readonly', 'required', 'invalid']
@@ -27546,7 +28067,7 @@ class TextFieldElement extends ElementMixin$1(TextFieldMixin(ThemableMixin(Polym
 
 customElements.define(TextFieldElement.is, TextFieldElement);
 
-const $_documentContainer$b = html$1`<dom-module id="lumo-button" theme-for="vaadin-button">
+const $_documentContainer$c = html$1`<dom-module id="lumo-button" theme-for="vaadin-button">
   <template>
     <style>
       :host {
@@ -27812,7 +28333,7 @@ const $_documentContainer$b = html$1`<dom-module id="lumo-button" theme-for="vaa
     </style>
   </template>
 </dom-module>`;
-document.head.appendChild($_documentContainer$b.content);
+document.head.appendChild($_documentContainer$c.content);
 
 /**
 @license
@@ -27985,392 +28506,6 @@ class ButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(Gestu
 }
 
 customElements.define(ButtonElement.is, ButtonElement);
-
-const $_documentContainer$c = html$1`<dom-module id="lumo-radio-button" theme-for="vaadin-radio-button">
-  <template>
-    <style>
-      :host {
-        -webkit-tap-highlight-color: transparent;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-        cursor: default;
-        outline: none;
-      }
-
-      [part="label"]:not([empty]) {
-        margin: 0.1875em 0.875em 0.1875em 0.375em;
-      }
-
-      [part="radio"] {
-        width: calc(1em + 2px);
-        height: calc(1em + 2px);
-        margin: 0.1875em;
-        position: relative;
-        border-radius: 50%;
-        background-color: var(--lumo-contrast-20pct);
-        transition: transform 0.2s cubic-bezier(.12, .32, .54, 2), background-color 0.15s;
-        pointer-events: none;
-        will-change: transform;
-        line-height: 1.2;
-        transform: translateZ(0); /* Workaround IE11 jumpiness */
-      }
-
-      /* Used for activation "halo" */
-      [part="radio"]::before {
-        /* Needed to align the radio-button nicely on the baseline */
-        content: "\\2003";
-        color: transparent;
-        display: inline-block;
-        width: 100%;
-        height: 100%;
-        border-radius: inherit;
-        background-color: inherit;
-        transform: scale(1.4);
-        opacity: 0;
-        transition: transform 0.1s, opacity 0.8s;
-        will-change: transform, opacity;
-      }
-
-      /* Used for the dot */
-      [part="radio"]::after {
-        content: "";
-        width: 0;
-        height: 0;
-        border: 3px solid var(--lumo-primary-contrast-color);
-        border-radius: 50%;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) scale(0);
-        transition: 0.25s transform;
-        will-change: transform;
-        background-clip: content-box;
-      }
-
-      :host([checked]) [part="radio"] {
-        background-color: var(--lumo-primary-color);
-      }
-
-      :host([checked]) [part="radio"]::after {
-        transform: translate(-50%, -50%) scale(1);
-      }
-
-      :host(:not([checked]):not([indeterminate]):not([disabled]):hover) [part="radio"] {
-        background-color: var(--lumo-contrast-30pct);
-      }
-
-      :host([active]) [part="radio"] {
-        transform: scale(0.9);
-        transition-duration: 0.05s;
-      }
-
-      :host([active][checked]) [part="radio"] {
-        transform: scale(1.1);
-      }
-
-      :host([active]:not([checked])) [part="radio"]::before {
-        transition-duration: 0.01s, 0.01s;
-        transform: scale(0);
-        opacity: 0.4;
-      }
-
-      :host([focus-ring]) [part="radio"] {
-        box-shadow: 0 0 0 3px var(--lumo-primary-color-50pct);
-      }
-
-      :host([disabled]) {
-        pointer-events: none;
-        color: var(--lumo-disabled-text-color);
-      }
-
-      :host([disabled]) ::slotted(*) {
-        color: inherit;
-      }
-
-      :host([disabled]) [part="radio"] {
-        background-color: var(--lumo-contrast-10pct);
-      }
-
-      :host([disabled]) [part="radio"]::after {
-        border-color: var(--lumo-contrast-30pct);
-      }
-
-      /* IE11 only */
-      ::-ms-backdrop,
-      [part="radio"] {
-        line-height: 1;
-      }
-    </style>
-  </template>
-</dom-module>`;
-document.head.appendChild($_documentContainer$c.content);
-
-/**
-@license
-Copyright (c) 2017 Vaadin Ltd.
-This program is available under Apache License Version 2.0, available at https://vaadin.com/license/
-*/
-/**
- * `<vaadin-radio-button>` is a Web Component for radio buttons.
- *
- * ```html
- * <vaadin-radio-button value="foo">Foo</vaadin-radio-button>
- * ```
- *
- * ### Styling
- *
- * The following shadow DOM parts are available for styling:
- *
- * Part name         | Description
- * ------------------|----------------
- * `radio`           | The radio button element
- * `label`           | The label content element
- *
- * The following state attributes are available for styling:
- *
- * Attribute  | Description | Part name
- * -----------|-------------|------------
- * `disabled`   | Set when the radio button is disabled. | :host
- * `focus-ring` | Set when the radio button is focused using the keyboard. | :host
- * `focused`    | Set when the radio button is focused. | :host
- * `checked`    | Set when the radio button is checked. | :host
- * `empty`      | Set when there is no label provided. | label
- *
- * See [ThemableMixin – how to apply styles for shadow parts](https://github.com/vaadin/vaadin-themable-mixin/wiki)
- *
- * @memberof Vaadin
- * @mixes Vaadin.ElementMixin
- * @mixes Vaadin.ControlStateMixin
- * @mixes Vaadin.ThemableMixin
- * @mixes Polymer.GestureEventListeners
- * @element vaadin-radio-button
- * @demo demo/index.html
- */
-
-class RadioButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(GestureEventListeners(PolymerElement)))) {
-  static get template() {
-    return html$1`
-    <style>
-      :host {
-        display: inline-block;
-      }
-
-      label {
-        display: inline-flex;
-        align-items: baseline;
-        outline: none;
-      }
-
-      [part="radio"] {
-        position: relative;
-        display: inline-block;
-        flex: none;
-      }
-
-      input[type="radio"] {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        cursor: inherit;
-        margin: 0;
-      }
-
-      :host([disabled]) {
-        -webkit-tap-highlight-color: transparent;
-      }
-    </style>
-
-    <label>
-      <span part="radio">
-        <input type="radio" checked="{{checked::change}}" disabled\$="[[disabled]]" role="presentation" on-change="_onChange" tabindex="-1">
-      </span>
-
-      <span part="label">
-        <slot></slot>
-      </span>
-    </label>
-`;
-  }
-
-  static get is() {
-    return 'vaadin-radio-button';
-  }
-
-  static get version() {
-    return '1.2.3';
-  }
-
-  static get properties() {
-    return {
-      /**
-       * True if the radio button is checked.
-       */
-      checked: {
-        type: Boolean,
-        value: false,
-        notify: true,
-        observer: '_checkedChanged',
-        reflectToAttribute: true
-      },
-
-      /**
-       * Name of the element.
-       */
-      name: String,
-
-      /**
-       * The value for this element.
-       */
-      value: {
-        type: String,
-        value: 'on'
-      }
-    };
-  }
-
-  get name() {
-    return this.checked ? this._storedName : '';
-  }
-
-  set name(name) {
-    this._storedName = name;
-  }
-  /**
-   * @protected
-   */
-
-
-  attributeChangedCallback(prop, oldVal, newVal) {
-    super.attributeChangedCallback(prop, oldVal, newVal); // Needed until Edge has CSS Custom Properties (present in Edge Preview)
-
-    /* istanbul ignore if */
-
-    if (/^(disabled|checked)$/.test(prop)) {
-      // iOS 10.3 Safari has an issue with repainting shadow root element styles when a host attribute changes.
-      // Need this workaround (toggle any inline css property on and off) until we drop iOS 10.
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-      /* istanbul ignore if */
-
-      if (isIOS && this.shadowRoot && parseInt(navigator.appVersion.match(/OS (\d+)_(\d+)_?(\d+)?/)[1], 10)) {
-        const WEBKIT_PROPERTY = '-webkit-backface-visibility';
-        this.shadowRoot.querySelectorAll('*').forEach(el => {
-          el.style[WEBKIT_PROPERTY] = 'visible';
-          el.style[WEBKIT_PROPERTY] = '';
-        });
-      }
-    }
-  }
-
-  ready() {
-    super.ready();
-    this.setAttribute('role', 'radio');
-
-    this._addListeners();
-
-    const attrName = this.getAttribute('name');
-
-    if (attrName) {
-      this.name = attrName;
-    }
-
-    this.shadowRoot.querySelector('[part~="label"]').querySelector('slot').addEventListener('slotchange', this._updateLabelAttribute.bind(this));
-
-    this._updateLabelAttribute();
-  }
-
-  _updateLabelAttribute() {
-    const label = this.shadowRoot.querySelector('[part~="label"]');
-    const assignedNodes = label.firstElementChild.assignedNodes();
-
-    if (this._isAssignedNodesEmpty(assignedNodes)) {
-      label.setAttribute('empty', '');
-    } else {
-      label.removeAttribute('empty');
-    }
-  }
-
-  _isAssignedNodesEmpty(nodes) {
-    // The assigned nodes considered to be empty if there is no slotted content or only one empty text node
-    return nodes.length === 0 || nodes.length == 1 && nodes[0].nodeType == Node.TEXT_NODE && nodes[0].textContent.trim() === '';
-  }
-
-  _checkedChanged(checked) {
-    this.setAttribute('aria-checked', checked);
-  }
-
-  _addListeners() {
-    this._addEventListenerToNode(this, 'down', e => {
-      if (!this.disabled) {
-        this.setAttribute('active', '');
-      }
-    });
-
-    this._addEventListenerToNode(this, 'up', e => {
-      this.removeAttribute('active');
-
-      if (!this.checked && !this.disabled) {
-        this.checked = true;
-      }
-    });
-
-    this.addEventListener('keydown', e => {
-      if (!this.disabled && e.keyCode === 32) {
-        e.preventDefault();
-        this.setAttribute('active', '');
-      }
-    });
-    this.addEventListener('keyup', e => {
-      if (!this.disabled && e.keyCode === 32) {
-        e.preventDefault();
-        this.click();
-        this.removeAttribute('active');
-      }
-    });
-  }
-  /**
-   * Toggles the radio button, so that the native `change` event
-   * is dispatched. Overrides the standard `HTMLElement.prototype.click`.
-   * @protected
-   */
-
-
-  click() {
-    this.shadowRoot.querySelector('input').click();
-  }
-  /** @protected */
-
-
-  get focusElement() {
-    return this.shadowRoot.querySelector('input');
-  }
-
-  _onChange(e) {
-    // In the Shadow DOM, the `change` event is not leaked into the
-    // ancestor tree, so we must do this manually.
-    const changeEvent = new CustomEvent('change', {
-      detail: {
-        sourceEvent: e
-      },
-      bubbles: e.bubbles,
-      cancelable: e.cancelable
-    });
-    this.dispatchEvent(changeEvent);
-  }
-
-}
-/**
- * Fired when the user toggles the radio button.
- *
- * @event change
- */
-
-
-customElements.define(RadioButtonElement.is, RadioButtonElement);
 
 const $_documentContainer$d = html$1`<dom-module id="lumo-radio-group" theme-for="vaadin-radio-group">
   <template>
@@ -29483,7 +29618,7 @@ customElements.define(RadioGroupElement.is, RadioGroupElement);
 const template$f = self => function () {
   return html`
   <style>
-    ${styles$s}
+    ${styles$u}
   </style>
 
   <h2>Planning for revision</h2>
@@ -29597,7 +29732,7 @@ const template$g = self => function () {
   // const {} = this;
   return html`
     <style>
-      ${styles$r}
+      ${styles$t}
     </style>
 
     <to-do-list></to-do-list>
@@ -29627,7 +29762,7 @@ let ProtobotHistorySidebar = _decorate([customElement('protobot-history-sidebar'
   };
 }, GetDomainMixin(LitElement));
 
-var styles$t = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 1fr 3fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n.left {\n  /* background: rgb(94, 94, 94); */\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$v = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 1fr 3fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n.left {\n  /* background: rgb(94, 94, 94); */\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
 
 /**
  *
@@ -29645,7 +29780,7 @@ const template$h = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$t}
+      ${styles$v}
       @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
     </style>
 

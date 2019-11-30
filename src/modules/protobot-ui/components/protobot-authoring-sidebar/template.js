@@ -32,13 +32,13 @@ export const template = self => function () {
     `)}
     </ul>
 
-    <div>
+    <!-- <div>
       <h3>Testing methods</h3>
       <vaadin-radio-group>
         <vaadin-radio-button class="explore">Exploration</vaadin-radio-button>
         <vaadin-radio-button class="verify">Verification</vaadin-radio-button>
       </vaadin-radio-group>
-    </div>
+    </div> -->
 
     <div>
       <h3>Leave Message Here</h3>

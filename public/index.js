@@ -23925,14 +23925,14 @@ const template$3 = self => function () {
           For Designers:
         </p>
         <label>
-          Fill in the domain id of an existing user.<br>
+          Fill in the your ID<br>
         </label>
         <input class= "domain-id" id="domain" name="domain" type="text">
         <wl-button class ="submit-button">Submit</wl-button>
       </form>
       <div style="padding-top: 48px">
         <p>
-          Or click on any of the buttons for a blank domain
+          Or click on button below to create new ID
         </p>
         <wl-button class ="new-button" @click="${newDomain.bind(this)}">New Blank Domain</wl-button>
       </div>
@@ -25177,13 +25177,13 @@ const template$8 = self => function () {
     `)}
     </ul>
 
-    <div>
+    <!-- <div>
       <h3>Testing methods</h3>
       <vaadin-radio-group>
         <vaadin-radio-button class="explore">Exploration</vaadin-radio-button>
         <vaadin-radio-button class="verify">Verification</vaadin-radio-button>
       </vaadin-radio-group>
-    </div>
+    </div> -->
 
     <div>
       <h3>Leave Message Here</h3>

@@ -5,6 +5,8 @@ import 'weightless/button';
 import 'weightless/textarea';
 import { classMap } from 'lit-html/directives/class-Map';
 import '@vaadin/vaadin-radio-button';
+import '@vaadin/vaadin-button';
+
 
 /**
  *
@@ -12,7 +14,7 @@ import '@vaadin/vaadin-radio-button';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { submit, newDomain, numUser, changeNumUser, numSession, changeNumSession} = this;
+  const { submit, newDomain, numUser, changeNumUser, numSession, changeNumSession, opened} = this;
 
   return html`
     <style>
@@ -20,32 +22,37 @@ export const template = self => function () {
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
-    <div class ="${classMap({dialog: true, opened: !this.opened, closed: this.opened})}">
-      <h1 class="title">How to deploy?</h1>
-      <div class = "param1">
-        <h3>Number of users<h3>
-        <input class="num-users" type="text" value="${numUser}" @change="${changeNumUser.bind(this)}">
+    <div class ="${classMap({dialog: true, opened: opened, closed: !opened})}">
+      <div class="dialog-window">
+        <h1 class="title">How to deploy?</h1>
+        <div class = "param1">
+          <h3>Number of users<h3>
+          <input class="num-users" type="text" value="${numUser}">
+        </div>
+        <div class = "param2">
+          <h3>Number of sessions<h3>
+          <input class="num-session" type="text" value="${numSession}">
+        </div>
+        <div class = "param3">
+          <h3>Testing methods</h3>
+          <vaadin-radio-group class = "amt">
+            <vaadin-radio-button class="mturk">Amazon Mechanical Turk</vaadin-radio-button>
+            <vaadin-radio-button class="link-share">Share Online by myself</vaadin-radio-button>
+          </vaadin-radio-group>
+        </div>
+        <div class = "param4">
+          <h3>Show other's responses?</h3>
+          <vaadin-radio-group class= "other-response">
+            <vaadin-radio-button class="show">Show</vaadin-radio-button>
+            <vaadin-radio-button class="hide">Hide</vaadin-radio-button>
+          </vaadin-radio-group>
+        </div>
+        <div class="button-container">
+          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new CustomEvent('dialog.cancel'))}">Cancel</vaadin-button>
+          <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new CustomEvent('dialog.accept'))}">Deploy</vaadin-button>
+        </div>
+        </div>
       </div>
-      <div class = "param2">
-        <h3>Number of sessions<h3>
-        <input class="num-session" type="text" value="${numSession}" @change="${changeNumSession.bind(this)}">
-      </div>
-      <div class = "param3">
-        <h3>Testing methods</h3>
-        <vaadin-radio-group>
-          <vaadin-radio-button class="mturk">Amazon Mechanical Turk</vaadin-radio-button>
-          <vaadin-radio-button class="link-share">Share Online by myself</vaadin-radio-button>
-        </vaadin-radio-group>
-      </div>
-      <div class = "param4">
-        <h3>Show other's responses?</h3>
-        <vaadin-radio-group>
-          <vaadin-radio-button class="show">Show</vaadin-radio-button>
-          <vaadin-radio-button class="hide">Hide</vaadin-radio-button>
-        </vaadin-radio-group>
-      </div>
-      <div class="button-container">
-        <button class="save-button" @click="${() => this.dispatchEvent(new CustomEvent('dialog.cancel'))}">Save</button>
-      </div>
+    </div>
   `;
 }.bind(self)();

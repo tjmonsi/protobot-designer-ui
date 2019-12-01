@@ -11,6 +11,9 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
   @property()
   commitMessage;
 
+  @property({type: Boolean})
+  dialogVisible;
+
   render () {
     return template(this);
   }
@@ -23,7 +26,7 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
     await database.ref().update(updates);
   }
 
-  async deploy () {
+  async deploy () { // need to update all the testing parameters(numUser, otherResponse, numSession, amt) in last-deployed
     const updates = {};
     const { domain } = this;
 
@@ -39,6 +42,30 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
       await database.ref().update(updates);
     }
   }
+
+  async toggleDialog (e) {
+    this.dialogVisible = !this.dialogVisible
+  }
+
+  async closeDialog (e) {
+    this.dialogVisible = false
+  }
+
+  async urlGenerator (e) {
+    // with the domainId and chosen parameters, generating the URL
+
+    // domainID
+    // param1: num-users (number)
+    // param2: num-sessions (number)
+    // [x] param3: amt (boolean) -- we do not need for link
+    //                              but we need it for showing the link or not
+    //                              amt = true: just deploying, amt = false: showing up link
+    // param4: other-response (boolean)
+
+    // example URL:
+    // https://protobot-rawdata.firebaseapp.com/?domain={domainId}&numUser={N}&numSession={N}&otherResponse=true
+  }
+
 }
 
 export { ProtobotAuthoringSidebar };

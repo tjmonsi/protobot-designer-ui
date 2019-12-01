@@ -4,6 +4,7 @@ import 'weightless/textarea';
 import 'weightless/button';
 import 'weightless/radio';
 import '@vaadin/vaadin-radio-button';
+import '../protobot-deploy-modal';
 // import '@vaadin/vaadin-radio-group';
 
 // @ts-ignore
@@ -14,7 +15,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topicList, deploy, domain, handleCommitMsg } = this;
+  const { topicList, deploy, domain, handleCommitMsg, dialogVisible, toggleDialog, closeDialog, urlGenerator } = this;
   const { commitMessage } = domain || {};
 
   return html`
@@ -50,10 +51,13 @@ export const template = self => function () {
       </wl-textarea outlined>
     </div>
 
-
-
     <div class="button-container">
-      <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button>
+      <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->
+      <wl-button class="button" type="button" @click="${toggleDialog.bind(this)}">Ready to Deploy</wl-button>
+      <protobot-deploy-modal ?opened="${dialogVisible}"
+        @dialog.accept="${this.urlGenerator.bind(this)}"
+        @dialog.cancel="${this.closeDialog.bind(this)}">
+      </protobot-deploy-modal>
     </div>
   `;
 }.bind(self)();

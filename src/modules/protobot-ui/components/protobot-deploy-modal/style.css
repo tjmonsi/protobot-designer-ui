@@ -1,19 +1,43 @@
 
-.center-modal {
-  background: #221f4d;
-  font-family: 'Open Sans', sans-serif;
-  font-size: 20px;
-  color: white;
-  padding: 60px 20px;
-  text-align: center;
+.dialog.opened {
+  display: flex;
+}
+.dialog.closed {
+  display: none;
 }
 
-.domain-id {
-  font-size: 18px;
-  font-family: 'Open Sans', sans-serif;
-  margin: 10px;
+.dialog-window {
+  position: relative;
+  flex-direction: column;
+  /* border: 2px outset black; */
+  padding: 30px;
+  border-radius: 10px;
+  margin: 1em;
+  background: #fff;
+  color: #000;
+}
+.dialog{
+  position: fixed;
+  width:100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background: rgba(10,10,10,0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.new-button {
-  --button-bg	: rgb(78, 91, 150);
+.button-container {
+  display: flex;
+  flex-direction: row-reverse;
+}
+.accept {
+  justify-content: space-around;
+  align-content: space-around;
+}
+.cancel {
+  justify-content: space-around;
+  align-content: space-around;
 }

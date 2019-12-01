@@ -26,7 +26,8 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
     await database.ref().update(updates);
   }
 
-  async deploy () { // need to update all the testing parameters(numUser, otherResponse, numSession, amt) in last-deployed
+  async deploy () {
+    // need to update all the testing parameters(numUser, otherResponse, numSession, amt) in last-deployed
     const updates = {};
     const { domain } = this;
 
@@ -57,10 +58,11 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
     // domainID
     // param1: num-users (number)
     // param2: num-sessions (number)
-    // [x] param3: amt (boolean) -- we do not need for link
+    // param3: other-response (boolean)
+
+    // [x] param4: amt (boolean) -- we do not need for link
     //                              but we need it for showing the link or not
     //                              amt = true: just deploying, amt = false: showing up link
-    // param4: other-response (boolean)
 
     // example URL:
     // https://protobot-rawdata.firebaseapp.com/?domain={domainId}&numUser={N}&numSession={N}&otherResponse=true

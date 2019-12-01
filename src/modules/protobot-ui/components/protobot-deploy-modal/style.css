@@ -1,3 +1,6 @@
+h3 {
+  color: rgb(72, 114, 193);
+}
 
 .dialog.opened {
   display: flex;
@@ -16,6 +19,7 @@
   background: #fff;
   color: #000;
 }
+
 .dialog{
   position: fixed;
   width:100%;

@@ -24556,7 +24556,7 @@ let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], functio
   };
 }, GetDomainMixin(LitElement));
 
-var styles$j = ".flex-area {\n  display: flex;\n\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n}\n";
+var styles$j = "/* .flex-area {\n  display: flex;\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n} */\n\n.new-label {\n  background-color: rgb(82, 108, 255);\n  border: none;\n  border-radius: 4px;\n  color: white;\n  font-weight: bold;\n  font-size: 15px;\n  font-family: 'Raleway', sans-serif;\n  padding: 3px;\n}\n";
 
 /**
  *
@@ -24575,11 +24575,15 @@ const template$7 = self => function () {
   return html`
     <style>
       ${styles$j}
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
     ${name}
 
-    ${!included ? ' - not included' : ''}
+    <!-- ${!included ? ' - not included' : ''} -->
+    ${!included ? html`<button class='new-label'>NEW</button>` : ''}
+
   `;
 }.bind(self)();
 
@@ -25144,7 +25148,7 @@ class RadioButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(
 
 customElements.define(RadioButtonElement.is, RadioButtonElement);
 
-var styles$m = "\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n}\n.dialog{\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
+var styles$m = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n}\n\n.dialog{\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
 
 /**
  * @license
@@ -25884,19 +25888,20 @@ const template$8 = self => function () {
           <input class="num-session" type="text" value="${numSession}">
         </div>
         <div class = "param3">
-          <h3>Testing methods</h3>
-          <vaadin-radio-group class = "amt">
-            <vaadin-radio-button class="mturk">Amazon Mechanical Turk</vaadin-radio-button>
-            <vaadin-radio-button class="link-share">Share Online by myself</vaadin-radio-button>
-          </vaadin-radio-group>
-        </div>
-        <div class = "param4">
           <h3>Show other's responses?</h3>
           <vaadin-radio-group class= "other-response">
             <vaadin-radio-button class="show">Show</vaadin-radio-button>
             <vaadin-radio-button class="hide">Hide</vaadin-radio-button>
           </vaadin-radio-group>
         </div>
+        <div class = "param4">
+          <h3>Testing methods</h3>
+          <vaadin-radio-group class = "amt">
+            <vaadin-radio-button class="mturk">Amazon Mechanical Turk</vaadin-radio-button>
+            <vaadin-radio-button class="link-share">Share Online by myself</vaadin-radio-button>
+          </vaadin-radio-group>
+        </div>
+
         <div class="button-container">
           <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new CustomEvent('dialog.cancel'))}">Cancel</vaadin-button>
           <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new CustomEvent('dialog.accept'))}">Deploy</vaadin-button>
@@ -26101,10 +26106,10 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
         // domainID
         // param1: num-users (number)
         // param2: num-sessions (number)
-        // [x] param3: amt (boolean) -- we do not need for link
+        // param3: other-response (boolean)
+        // [x] param4: amt (boolean) -- we do not need for link
         //                              but we need it for showing the link or not
         //                              amt = true: just deploying, amt = false: showing up link
-        // param4: other-response (boolean)
         // example URL:
         // https://protobot-rawdata.firebaseapp.com/?domain={domainId}&numUser={N}&numSession={N}&otherResponse=true
       }
@@ -27271,7 +27276,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$t = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$t = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *

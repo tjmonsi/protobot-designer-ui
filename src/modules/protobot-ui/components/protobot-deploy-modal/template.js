@@ -34,19 +34,20 @@ export const template = self => function () {
           <input class="num-session" type="text" value="${numSession}">
         </div>
         <div class = "param3">
-          <h3>Testing methods</h3>
-          <vaadin-radio-group class = "amt">
-            <vaadin-radio-button class="mturk">Amazon Mechanical Turk</vaadin-radio-button>
-            <vaadin-radio-button class="link-share">Share Online by myself</vaadin-radio-button>
-          </vaadin-radio-group>
-        </div>
-        <div class = "param4">
           <h3>Show other's responses?</h3>
           <vaadin-radio-group class= "other-response">
             <vaadin-radio-button class="show">Show</vaadin-radio-button>
             <vaadin-radio-button class="hide">Hide</vaadin-radio-button>
           </vaadin-radio-group>
         </div>
+        <div class = "param4">
+          <h3>Testing methods</h3>
+          <vaadin-radio-group class = "amt">
+            <vaadin-radio-button class="mturk">Amazon Mechanical Turk</vaadin-radio-button>
+            <vaadin-radio-button class="link-share">Share Online by myself</vaadin-radio-button>
+          </vaadin-radio-group>
+        </div>
+
         <div class="button-container">
           <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new CustomEvent('dialog.cancel'))}">Cancel</vaadin-button>
           <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new CustomEvent('dialog.accept'))}">Deploy</vaadin-button>

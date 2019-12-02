@@ -17,11 +17,17 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
   @property()
   numSession = '';
 
-  @property()
-  otherResponse = ''
+  @property({type: Boolean})
+  otherResponse
+
+  @property({type: Boolean})
+  amtOption
+
+  @property({ type: Number })
+  stage;
 
   @property()
-  amtOption = ''
+  deployUrl;
 
   render () {
     return template(this);

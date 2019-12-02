@@ -14,6 +14,12 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
   @property({ type: Boolean })
   dialogVisible;
 
+  @property({ type: Number})
+  dialogStage=0;
+
+  @property()
+  deployUrl = ''
+
   render () {
     return template(this);
   }
@@ -46,15 +52,25 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
 
   async toggleDialog () {
     this.dialogVisible = !this.dialogVisible;
+    if(!this.dialogVisible){
+      this.dialogStage = 0;
+      this.deployUrl = '';
+    }
   }
 
   async closeDialog () {
     this.dialogVisible = false;
+    this.dialogStage = 0;
+    this.deployUrl = '';
+  }
+
+  async nextDialogStage() {
+    this.dialogStage++;
+    this.dialogStage = Math.max(this.dialogStage, 1)
   }
 
   async urlGenerator (event) {
-    alert('hey');
-
+    const { numUser, numSession, otherResponse } = event.detail.parameters
     // with the domainId and chosen parameters, generating the URL
 
     // domainID
@@ -67,7 +83,9 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
     //                              amt = true: just deploying, amt = false: showing up link
 
     // example URL:
-    // https://protobot-rawdata.firebaseapp.com/?domain=${domainId}&deployedVersion=${domain.deployedVersion}&numUser=${N}&numSession=${N}&otherResponse=true
+    this.deployUrl = `https://protobot-rawdata.firebaseapp.com/?domain=${this.domainId}&deployedVersion=${this.domain.deployedVersion}&numUser=${numUser}&numSession=${numSession}&otherResponse=${otherResponse}`
+    this.nextDialogStage();
+    // this.closeDialog();
   }
 }
 

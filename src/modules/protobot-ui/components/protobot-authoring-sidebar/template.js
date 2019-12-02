@@ -15,7 +15,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topicList, deploy, domain, handleCommitMsg, dialogVisible, toggleDialog, closeDialog, urlGenerator } = this;
+  const { topicList, deploy, domain, handleCommitMsg, dialogVisible, dialogStage, deployUrl, nextDialogStage, toggleDialog, closeDialog, urlGenerator } = this;
   const { commitMessage } = domain || {};
 
   return html`
@@ -54,7 +54,8 @@ export const template = self => function () {
     <div class="button-container">
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->
       <wl-button class="button" type="button" @click="${toggleDialog.bind(this)}">Ready to Deploy</wl-button>
-      <protobot-deploy-modal ?opened="${dialogVisible}"
+      <protobot-deploy-modal ?opened="${dialogVisible}" stage="${dialogStage}" deployUrl="${deployUrl}"
+        @dialog-next="${nextDialogStage.bind(this)}"
         @dialog-accept="${urlGenerator.bind(this)}"
         @dialog-cancel="${closeDialog.bind(this)}">
       </protobot-deploy-modal>

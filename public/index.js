@@ -25866,6 +25866,8 @@ const template$8 = self => function () {
     numSession,
     changeNumSession,
     opened,
+    stage,
+    deployUrl,
     otherResponse,
     changeOtherResponse,
     amtOption,
@@ -25883,7 +25885,8 @@ const template$8 = self => function () {
     opened: opened,
     closed: !opened
   })}">
-      <div class="dialog-window">
+      ${stage == 0 ? html`
+        <div class="dialog-window">
         <h1 class="title">How to deploy?</h1>
         <div class = "param1">
           <h3>Number of users<h3>
@@ -25910,9 +25913,27 @@ const template$8 = self => function () {
         <div class="button-container">
           <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-cancel'))}">Cancel</vaadin-button>
           <vaadin-button class="deploy" @click="${deploy.bind(this)}">Deploy</vaadin-button>
+          <!-- <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-next'))}">Deploy</vaadin-button> -->
+        </div>
+        </div>
+      </div>` : html`
+
+        <div class="dialog-window">
+        <h1 class="title">Success</h1>
+
+        <div class = "param4">
+          <h3>Copy below link!</h3>
+          <div>${deployUrl}</div>
+        </div>
+        <div class="button-container">
+          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-cancel'))}">Close</vaadin-button>
+          <!-- <vaadin-button class="deploy" @click="${deploy.bind(this)}">Deploy</vaadin-button> -->
+          <!-- <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-next'))}">Deploy</vaadin-button> -->
         </div>
         </div>
       </div>
+      `}
+
     </div>
   `;
 }.bind(self)();
@@ -25958,22 +25979,30 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
 
     }, {
       kind: "field",
-      decorators: [property()],
+      decorators: [property({
+        type: Boolean
+      })],
       key: "otherResponse",
-
-      value() {
-        return '';
-      }
-
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "amtOption",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Number
+      })],
+      key: "stage",
+      value: void 0
     }, {
       kind: "field",
       decorators: [property()],
-      key: "amtOption",
-
-      value() {
-        return '';
-      }
-
+      key: "deployUrl",
+      value: void 0
     }, {
       kind: "method",
       key: "render",
@@ -26099,6 +26128,9 @@ const template$9 = self => function () {
     domain,
     handleCommitMsg,
     dialogVisible,
+    dialogStage,
+    deployUrl,
+    nextDialogStage,
     toggleDialog,
     closeDialog,
     urlGenerator
@@ -26142,7 +26174,8 @@ const template$9 = self => function () {
     <div class="button-container">
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->
       <wl-button class="button" type="button" @click="${toggleDialog.bind(this)}">Ready to Deploy</wl-button>
-      <protobot-deploy-modal ?opened="${dialogVisible}"
+      <protobot-deploy-modal ?opened="${dialogVisible}" stage="${dialogStage}" deployUrl="${deployUrl}"
+        @dialog-next="${nextDialogStage.bind(this)}"
         @dialog-accept="${urlGenerator.bind(this)}"
         @dialog-cancel="${closeDialog.bind(this)}">
       </protobot-deploy-modal>
@@ -26176,6 +26209,26 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       })],
       key: "dialogVisible",
       value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Number
+      })],
+      key: "dialogStage",
+
+      value() {
+        return 0;
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property()],
+      key: "deployUrl",
+
+      value() {
+        return '';
+      }
+
     }, {
       kind: "method",
       key: "render",
@@ -26232,18 +26285,36 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       key: "toggleDialog",
       value: async function toggleDialog() {
         this.dialogVisible = !this.dialogVisible;
+
+        if (!this.dialogVisible) {
+          this.dialogStage = 0;
+          this.deployUrl = '';
+        }
       }
     }, {
       kind: "method",
       key: "closeDialog",
       value: async function closeDialog() {
         this.dialogVisible = false;
+        this.dialogStage = 0;
+        this.deployUrl = '';
+      }
+    }, {
+      kind: "method",
+      key: "nextDialogStage",
+      value: async function nextDialogStage() {
+        this.dialogStage++;
+        this.dialogStage = Math.max(this.dialogStage, 1);
       }
     }, {
       kind: "method",
       key: "urlGenerator",
       value: async function urlGenerator(event) {
-        alert('hey'); // with the domainId and chosen parameters, generating the URL
+        const {
+          numUser,
+          numSession,
+          otherResponse
+        } = event.detail.parameters; // with the domainId and chosen parameters, generating the URL
         // domainID
         // param1: num-users (number)
         // param2: num-sessions (number)
@@ -26252,7 +26323,9 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
         //                              but we need it for showing the link or not
         //                              amt = true: just deploying, amt = false: showing up link
         // example URL:
-        // https://protobot-rawdata.firebaseapp.com/?domain=${domainId}&deployedVersion=${domain.deployedVersion}&numUser=${N}&numSession=${N}&otherResponse=true
+
+        this.deployUrl = `https://protobot-rawdata.firebaseapp.com/?domain=${this.domainId}&deployedVersion=${this.domain.deployedVersion}&numUser=${numUser}&numSession=${numSession}&otherResponse=${otherResponse}`;
+        this.nextDialogStage(); // this.closeDialog();
       }
     }]
   };

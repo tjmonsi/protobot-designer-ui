@@ -25866,7 +25866,9 @@ const template$8 = self => function () {
     numSession,
     changeNumSession,
     opened,
+    otherResponse,
     changeOtherResponse,
+    amtOption,
     changeAmtOption
   } = this;
   return html`
@@ -25892,16 +25894,16 @@ const template$8 = self => function () {
         </div>
         <div class = "param3">
           <h3>Show other's responses?</h3>
-          <vaadin-radio-group class= "other-response" @click="${changeOtherResponse.bind(this)}">
-            <vaadin-radio-button class="show">Show</vaadin-radio-button>
-            <vaadin-radio-button class="hide">Hide</vaadin-radio-button>
+          <vaadin-radio-group class= "other-response" value="${otherResponse}" @value-changed="${changeOtherResponse.bind(this)}">
+            <vaadin-radio-button value="show">Show</vaadin-radio-button>
+            <vaadin-radio-button value="hide">Hide</vaadin-radio-button>
           </vaadin-radio-group>
         </div>
         <div class = "param4">
           <h3>Testing methods</h3>
-          <vaadin-radio-group class = "amt" @click="${changeAmtOption.bind(this)}">
-            <vaadin-radio-button class="mturk">Amazon Mechanical Turk</vaadin-radio-button>
-            <vaadin-radio-button class="link-share">Share Online by myself</vaadin-radio-button>
+          <vaadin-radio-group class = "amt" value="${amtOption}" @value-changed="${changeAmtOption.bind(this)}">
+            <vaadin-radio-button value="amt">Amazon Mechanical Turk</vaadin-radio-button>
+            <vaadin-radio-button value="link-share">Share Online by myself</vaadin-radio-button>
           </vaadin-radio-group>
         </div>
 
@@ -25955,6 +25957,24 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
       }
 
     }, {
+      kind: "field",
+      decorators: [property()],
+      key: "otherResponse",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property()],
+      key: "amtOption",
+
+      value() {
+        return '';
+      }
+
+    }, {
       kind: "method",
       key: "render",
       value: function render() {
@@ -25973,7 +25993,7 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
 
         if (this.numUser !== value) {
           console.log(this.deployedVersion);
-          await database.ref(`deployed-history/data/${this.domainId}/${this.deployedVersion}/parameters/numUser`).set(value);
+          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/numUser`).set(value);
         }
       }
     }, {
@@ -25988,17 +26008,49 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
         } = target;
 
         if (this.numSession !== value) {
-          await database.ref(`deployed-history/data/${this.domainId}/${this.deployedVersion}/parameter/numSession`).set(value);
+          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/numSession`).set(value);
         }
       }
     }, {
       kind: "method",
       key: "changeOtherResponse",
-      value: async function changeOtherResponse() {}
+      value: async function changeOtherResponse(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+        this.otherResponse = value;
+
+        if (this.otherResponse == "show") {
+          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/otherResponse`).set("True");
+        }
+
+        if (this.otherResponse == "hide") {
+          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/otherResponse`).set("False");
+        }
+      }
     }, {
       kind: "method",
       key: "changeAmtOption",
-      value: async function changeAmtOption() {}
+      value: async function changeAmtOption(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+        this.amtOption = value;
+
+        if (this.amtOption == "amt") {
+          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("True");
+        }
+
+        if (this.amtOption == "link-share") {
+          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("False");
+        }
+      }
     }]
   };
 }, GetDomainMixin(LitElement));

@@ -17,6 +17,12 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
   @property ()
   numSession = '';
 
+  @property ()
+  otherResponse = ''
+
+  @property ()
+  amtOption = ''
+
   render () {
     return template(this);
   }
@@ -27,7 +33,7 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
 
     if (this.numUser !== value) {
       console.log(this.deployedVersion)
-      await database.ref(`deployed-history/data/${this.domainId}/${this.deployedVersion}/parameters/numUser`).set(value);
+      await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/numUser`).set(value);
     }
   }
 
@@ -36,16 +42,36 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
     const { value } = target;
 
     if (this.numSession !== value) {
-      await database.ref(`deployed-history/data/${this.domainId}/${this.deployedVersion}/parameter/numSession`).set(value);
+      await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/numSession`).set(value);
     }
   }
 
-  async changeOtherResponse () {
+  async changeOtherResponse (event) {
+    const { target } = event;
+    const { value } = target;
+    this.otherResponse = value;
 
+    if (this.otherResponse == "show") {
+      await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/otherResponse`).set("True");
+    }
+
+    if (this.otherResponse == "hide") {
+      await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/otherResponse`).set("False");
+    }
   }
 
-  async changeAmtOption() {
+  async changeAmtOption(event) {
+    const { target } = event;
+    const { value } = target;
+    this.amtOption = value;
 
+    if (this.amtOption == "amt") {
+      await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("True");
+    }
+
+    if (this.amtOption == "link-share") {
+      await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("False");
+    }
   }
 }
 

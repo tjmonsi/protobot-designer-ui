@@ -14,7 +14,7 @@ import '@vaadin/vaadin-button';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { deployedVersion, submit, newDomain, numUser, changeNumUser, numSession, changeNumSession, opened, changeOtherResponse, changeAmtOption } = this;
+  const { deployedVersion, submit, newDomain, numUser, changeNumUser, numSession, changeNumSession, opened, otherResponse, changeOtherResponse, amtOption, changeAmtOption } = this;
 
   return html`
     <style>
@@ -35,16 +35,16 @@ export const template = self => function () {
         </div>
         <div class = "param3">
           <h3>Show other's responses?</h3>
-          <vaadin-radio-group class= "other-response" @click="${changeOtherResponse.bind(this)}">
-            <vaadin-radio-button class="show">Show</vaadin-radio-button>
-            <vaadin-radio-button class="hide">Hide</vaadin-radio-button>
+          <vaadin-radio-group class= "other-response" value="${otherResponse}" @value-changed="${changeOtherResponse.bind(this)}">
+            <vaadin-radio-button value="show">Show</vaadin-radio-button>
+            <vaadin-radio-button value="hide">Hide</vaadin-radio-button>
           </vaadin-radio-group>
         </div>
         <div class = "param4">
           <h3>Testing methods</h3>
-          <vaadin-radio-group class = "amt" @click="${changeAmtOption.bind(this)}">
-            <vaadin-radio-button class="mturk">Amazon Mechanical Turk</vaadin-radio-button>
-            <vaadin-radio-button class="link-share">Share Online by myself</vaadin-radio-button>
+          <vaadin-radio-group class = "amt" value="${amtOption}" @value-changed="${changeAmtOption.bind(this)}">
+            <vaadin-radio-button value="amt">Amazon Mechanical Turk</vaadin-radio-button>
+            <vaadin-radio-button value="link-share">Share Online by myself</vaadin-radio-button>
           </vaadin-radio-group>
         </div>
 

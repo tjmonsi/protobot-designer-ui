@@ -25982,6 +25982,36 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
       }
     }, {
       kind: "method",
+      key: "deploy",
+      value: async function deploy() {
+        const updates = {};
+        const {
+          domain
+        } = this;
+
+        if (domain) {
+          const {
+            commitMessage
+          } = domain;
+          const {
+            key: deployedVersion
+          } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+          updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
+            deployedVersion,
+            commitMessage: commitMessage || ''
+          };
+          updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
+            deployedVersion,
+            commitMessage: commitMessage || ''
+          };
+          updates[`domains/data/${this.domainId}/deployed`] = false;
+          updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
+          updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
+          await database.ref().update(updates);
+        }
+      }
+    }, {
+      kind: "method",
       key: "changeNumUser",
       value: async function changeNumUser(event) {
         const {
@@ -26049,36 +26079,6 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
 
         if (this.amtOption == "link-share") {
           await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("False");
-        }
-      }
-    }, {
-      kind: "method",
-      key: "deploy",
-      value: async function deploy() {
-        const updates = {};
-        const {
-          domain
-        } = this;
-
-        if (domain) {
-          const {
-            commitMessage
-          } = domain;
-          const {
-            key: deployedVersion
-          } = database.ref(`deployed-history/data/${this.domainId}/`).push();
-          updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
-            deployedVersion,
-            commitMessage: commitMessage || ''
-          };
-          updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
-            deployedVersion,
-            commitMessage: commitMessage || ''
-          };
-          updates[`domains/data/${this.domainId}/deployed`] = false;
-          updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
-          updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
-          await database.ref().update(updates);
         }
       }
     }]

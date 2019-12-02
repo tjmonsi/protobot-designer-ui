@@ -11,7 +11,7 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
   @property()
   commitMessage;
 
-  @property({type: Boolean})
+  @property({ type: Boolean })
   dialogVisible;
 
   render () {
@@ -45,14 +45,16 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
   }
 
   async toggleDialog () {
-    this.dialogVisible = !this.dialogVisible
+    this.dialogVisible = !this.dialogVisible;
   }
 
   async closeDialog () {
-    this.dialogVisible = false
+    this.dialogVisible = false;
   }
 
-  async urlGenerator () {
+  async urlGenerator (event) {
+    alert('hey');
+
     // with the domainId and chosen parameters, generating the URL
 
     // domainID

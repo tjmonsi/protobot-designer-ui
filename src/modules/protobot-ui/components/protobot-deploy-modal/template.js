@@ -22,7 +22,7 @@ export const template = self => function () {
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
-    <div class ="${classMap({dialog: true, opened: opened, closed: !opened})}">
+    <div class ="${classMap({ dialog: true, opened: opened, closed: !opened })}">
       <div class="dialog-window">
         <h1 class="title">How to deploy?</h1>
         <div class = "param1">
@@ -48,7 +48,7 @@ export const template = self => function () {
           </vaadin-radio-group>
         </div>
         <div class="button-container">
-          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new CustomEvent('dialog.cancel'))}">Cancel</vaadin-button>
+          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-cancel'))}">Cancel</vaadin-button>
           <vaadin-button class="deploy" @click="${deploy.bind(this)}">Deploy</vaadin-button>
         </div>
         </div>

@@ -25908,7 +25908,7 @@ const template$8 = self => function () {
           </vaadin-radio-group>
         </div>
         <div class="button-container">
-          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new CustomEvent('dialog.cancel'))}">Cancel</vaadin-button>
+          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-cancel'))}">Cancel</vaadin-button>
           <vaadin-button class="deploy" @click="${deploy.bind(this)}">Deploy</vaadin-button>
         </div>
         </div>
@@ -25996,18 +25996,25 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
           const {
             key: deployedVersion
           } = database.ref(`deployed-history/data/${this.domainId}/`).push();
-          updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
+          const obj = { ...this.domain,
             deployedVersion,
-            commitMessage: commitMessage || ''
+            commitMessage: commitMessage || '',
+            parameters: {
+              numUser: this.numUser,
+              numSession: this.numSession,
+              otherResponse: this.otherResponse === 'show',
+              amtOption: this.amtOption === 'amt'
+            }
           };
-          updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
-            deployedVersion,
-            commitMessage: commitMessage || ''
-          };
+          updates[`last-deployed/data/${this.domainId}/`] = obj;
+          updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = obj;
           updates[`domains/data/${this.domainId}/deployed`] = false;
           updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
           updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
           await database.ref().update(updates);
+          this.dispatchEvent(new window.CustomEvent('dialog-accept', {
+            detail: obj
+          }));
         }
       }
     }, {
@@ -26020,11 +26027,10 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
         const {
           value
         } = target;
-
-        if (this.numUser !== value) {
-          console.log(this.deployedVersion);
-          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/numUser`).set(value);
-        }
+        this.numUser = value; // if (this.numUser !== value) {
+        //   console.log(this.deployedVersion)
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/numUser`).set(value);
+        // }
       }
     }, {
       kind: "method",
@@ -26036,10 +26042,9 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
         const {
           value
         } = target;
-
-        if (this.numSession !== value) {
-          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/numSession`).set(value);
-        }
+        this.numSession = value; // if (this.numSession !== value) {
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/numSession`).set(value);
+        // }
       }
     }, {
       kind: "method",
@@ -26051,15 +26056,12 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
         const {
           value
         } = target;
-        this.otherResponse = value;
-
-        if (this.otherResponse == "show") {
-          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/otherResponse`).set("True");
-        }
-
-        if (this.otherResponse == "hide") {
-          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/otherResponse`).set("False");
-        }
+        this.otherResponse = value; // if (this.otherResponse == "show") {
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/otherResponse`).set("True");
+        // }
+        // if (this.otherResponse == "hide") {
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/otherResponse`).set("False");
+        // }
       }
     }, {
       kind: "method",
@@ -26071,15 +26073,12 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
         const {
           value
         } = target;
-        this.amtOption = value;
-
-        if (this.amtOption == "amt") {
-          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("True");
-        }
-
-        if (this.amtOption == "link-share") {
-          await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("False");
-        }
+        this.amtOption = value; // if (this.amtOption == "amt") {
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("True");
+        // }
+        // if (this.amtOption == "link-share") {
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("False");
+        // }
       }
     }]
   };
@@ -26136,7 +26135,7 @@ const template$9 = self => function () {
         class = "commit-input"
         value="${commitMessage}"
         @change="${handleCommitMsg.bind(this)}"
-        @submit="${deploy.bind(this)}">
+        @submit="${handleCommitMsg.bind(this)}">
       </wl-textarea outlined>
     </div>
 
@@ -26144,8 +26143,8 @@ const template$9 = self => function () {
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->
       <wl-button class="button" type="button" @click="${toggleDialog.bind(this)}">Ready to Deploy</wl-button>
       <protobot-deploy-modal ?opened="${dialogVisible}"
-        @dialog.accept="${urlGenerator.bind(this)}"
-        @dialog.cancel="${closeDialog.bind(this)}">
+        @dialog-accept="${urlGenerator.bind(this)}"
+        @dialog-cancel="${closeDialog.bind(this)}">
       </protobot-deploy-modal>
     </div>
   `;
@@ -26243,7 +26242,8 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
     }, {
       kind: "method",
       key: "urlGenerator",
-      value: async function urlGenerator() {// with the domainId and chosen parameters, generating the URL
+      value: async function urlGenerator(event) {
+        alert('hey'); // with the domainId and chosen parameters, generating the URL
         // domainID
         // param1: num-users (number)
         // param2: num-sessions (number)

@@ -47,7 +47,7 @@ export const template = self => function () {
         class = "commit-input"
         value="${commitMessage}"
         @change="${handleCommitMsg.bind(this)}"
-        @submit="${deploy.bind(this)}">
+        @submit="${handleCommitMsg.bind(this)}">
       </wl-textarea outlined>
     </div>
 
@@ -55,8 +55,8 @@ export const template = self => function () {
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->
       <wl-button class="button" type="button" @click="${toggleDialog.bind(this)}">Ready to Deploy</wl-button>
       <protobot-deploy-modal ?opened="${dialogVisible}"
-        @dialog.accept="${urlGenerator.bind(this)}"
-        @dialog.cancel="${closeDialog.bind(this)}">
+        @dialog-accept="${urlGenerator.bind(this)}"
+        @dialog-cancel="${closeDialog.bind(this)}">
       </protobot-deploy-modal>
     </div>
   `;

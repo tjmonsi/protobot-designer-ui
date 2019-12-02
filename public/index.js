@@ -25869,7 +25869,8 @@ const template$8 = self => function () {
     otherResponse,
     changeOtherResponse,
     amtOption,
-    changeAmtOption
+    changeAmtOption,
+    deploy
   } = this;
   return html`
     <style>
@@ -25906,10 +25907,9 @@ const template$8 = self => function () {
             <vaadin-radio-button value="link-share">Share Online by myself</vaadin-radio-button>
           </vaadin-radio-group>
         </div>
-
         <div class="button-container">
           <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new CustomEvent('dialog.cancel'))}">Cancel</vaadin-button>
-          <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new CustomEvent('dialog.accept'))}">Deploy</vaadin-button>
+          <vaadin-button class="deploy" @click="${deploy.bind(this)}">Deploy</vaadin-button>
         </div>
         </div>
       </div>
@@ -26051,6 +26051,36 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
           await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("False");
         }
       }
+    }, {
+      kind: "method",
+      key: "deploy",
+      value: async function deploy() {
+        const updates = {};
+        const {
+          domain
+        } = this;
+
+        if (domain) {
+          const {
+            commitMessage
+          } = domain;
+          const {
+            key: deployedVersion
+          } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+          updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
+            deployedVersion,
+            commitMessage: commitMessage || ''
+          };
+          updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
+            deployedVersion,
+            commitMessage: commitMessage || ''
+          };
+          updates[`domains/data/${this.domainId}/deployed`] = false;
+          updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
+          updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
+          await database.ref().update(updates);
+        }
+      }
     }]
   };
 }, GetDomainMixin(LitElement));
@@ -26114,8 +26144,8 @@ const template$9 = self => function () {
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->
       <wl-button class="button" type="button" @click="${toggleDialog.bind(this)}">Ready to Deploy</wl-button>
       <protobot-deploy-modal ?opened="${dialogVisible}"
-        @dialog.accept="${this.urlGenerator.bind(this)}"
-        @dialog.cancel="${this.closeDialog.bind(this)}">
+        @dialog.accept="${urlGenerator.bind(this)}"
+        @dialog.cancel="${closeDialog.bind(this)}">
       </protobot-deploy-modal>
     </div>
   `;
@@ -26201,19 +26231,19 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
     }, {
       kind: "method",
       key: "toggleDialog",
-      value: async function toggleDialog(e) {
+      value: async function toggleDialog() {
         this.dialogVisible = !this.dialogVisible;
       }
     }, {
       kind: "method",
       key: "closeDialog",
-      value: async function closeDialog(e) {
+      value: async function closeDialog() {
         this.dialogVisible = false;
       }
     }, {
       kind: "method",
       key: "urlGenerator",
-      value: async function urlGenerator(e) {// with the domainId and chosen parameters, generating the URL
+      value: async function urlGenerator() {// with the domainId and chosen parameters, generating the URL
         // domainID
         // param1: num-users (number)
         // param2: num-sessions (number)
@@ -26222,7 +26252,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
         //                              but we need it for showing the link or not
         //                              amt = true: just deploying, amt = false: showing up link
         // example URL:
-        // https://protobot-rawdata.firebaseapp.com/?domain={domainId}&numUser={N}&numSession={N}&otherResponse=true
+        // https://protobot-rawdata.firebaseapp.com/?domain=${domainId}&deployedVersion=${domain.deployedVersion}&numUser=${N}&numSession=${N}&otherResponse=true
       }
     }]
   };

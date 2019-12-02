@@ -73,6 +73,24 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
       await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("False");
     }
   }
+
+  async deploy () {
+    const updates = {};
+    const { domain } = this;
+
+    if (domain) {
+      const { commitMessage } = domain;
+      const { key: deployedVersion } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+
+      updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain, deployedVersion, commitMessage: commitMessage || '' };
+      updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain, deployedVersion, commitMessage: commitMessage || '' };
+      updates[`domains/data/${this.domainId}/deployed`] = false;
+      updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
+      updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
+      await database.ref().update(updates);
+    }
+  }
+
 }
 
 export { ProtobotDeployModal };

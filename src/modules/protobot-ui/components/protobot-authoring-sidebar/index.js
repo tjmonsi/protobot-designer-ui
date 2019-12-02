@@ -44,15 +44,15 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
     }
   }
 
-  async toggleDialog (e) {
+  async toggleDialog () {
     this.dialogVisible = !this.dialogVisible
   }
 
-  async closeDialog (e) {
+  async closeDialog () {
     this.dialogVisible = false
   }
 
-  async urlGenerator (e) {
+  async urlGenerator () {
     // with the domainId and chosen parameters, generating the URL
 
     // domainID
@@ -65,9 +65,8 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
     //                              amt = true: just deploying, amt = false: showing up link
 
     // example URL:
-    // https://protobot-rawdata.firebaseapp.com/?domain={domainId}&numUser={N}&numSession={N}&otherResponse=true
+    // https://protobot-rawdata.firebaseapp.com/?domain=${domainId}&deployedVersion=${domain.deployedVersion}&numUser=${N}&numSession=${N}&otherResponse=true
   }
-
 }
 
 export { ProtobotAuthoringSidebar };

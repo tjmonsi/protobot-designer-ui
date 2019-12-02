@@ -14,7 +14,7 @@ import '@vaadin/vaadin-button';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { deployedVersion, submit, newDomain, numUser, changeNumUser, numSession, changeNumSession, opened, otherResponse, changeOtherResponse, amtOption, changeAmtOption } = this;
+  const { deployedVersion, submit, newDomain, numUser, changeNumUser, numSession, changeNumSession, opened, otherResponse, changeOtherResponse, amtOption, changeAmtOption, deploy } = this;
 
   return html`
     <style>
@@ -47,10 +47,9 @@ export const template = self => function () {
             <vaadin-radio-button value="link-share">Share Online by myself</vaadin-radio-button>
           </vaadin-radio-group>
         </div>
-
         <div class="button-container">
           <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new CustomEvent('dialog.cancel'))}">Cancel</vaadin-button>
-          <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new CustomEvent('dialog.accept'))}">Deploy</vaadin-button>
+          <vaadin-button class="deploy" @click="${deploy.bind(this)}">Deploy</vaadin-button>
         </div>
         </div>
       </div>

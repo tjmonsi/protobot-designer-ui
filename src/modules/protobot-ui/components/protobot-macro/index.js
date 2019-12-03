@@ -169,7 +169,7 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
 
     // @ts-ignore
     const { d3 } = window;
-    var units = 'Widgets';
+    var units = 'Utterances';
     var margin = { top: 10, right: 10, bottom: 10, left: 10 };
     const width = this.getBoundingClientRect().width - margin.left - margin.right;
     const height = 740 - margin.top - margin.bottom;
@@ -272,7 +272,8 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
         .text(function (d) { return item; })
         .filter(function (d) { return d.x < width / 2; })
         .attr('x', 6 + sankey.nodeWidth())
-        .attr('text-anchor', 'start');
+        .attr('text-anchor', 'start')
+        // .attr('display', 'none');
     }
 
     // the function for moving the nodes

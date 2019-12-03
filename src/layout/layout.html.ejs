@@ -178,15 +178,34 @@
             nextNodes,
             x = 0;
 
+        var flag = false;
+        var paths = {};
+
         while (remainingNodes.length) {
+          // console.log(remainingNodes)
           nextNodes = [];
           remainingNodes.forEach(function(node) {
             node.x = x;
             node.dx = nodeWidth;
             node.sourceLinks.forEach(function(link) {
-              nextNodes.push(link.target);
+              if (flag) {
+                if (paths[link.target.name] !== node.name) {
+                  nextNodes.push(link.target);
+                  paths[link.target.name] = node.name;
+                }
+              } else {
+                nextNodes.push(link.target);
+                paths[link.target.name] = node.name;
+              }
+
+              // console.log(node.name, link.target.name)
             });
           });
+          if (flag) {
+            flag = false;
+          } else if (remainingNodes.length === nextNodes.length) {
+            flag = true;
+          }
           remainingNodes = nextNodes;
           ++x;
         }

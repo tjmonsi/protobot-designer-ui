@@ -27076,7 +27076,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
         const {
           d3
         } = window;
-        var units = 'Widgets';
+        var units = 'Utterances';
         var margin = {
           top: 10,
           right: 10,
@@ -27159,7 +27159,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             return item;
           }).filter(function (d) {
             return d.x < width / 2;
-          }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start');
+          }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start'); // .attr('display', 'none');
         } // the function for moving the nodes
 
 

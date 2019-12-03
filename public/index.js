@@ -26808,6 +26808,10 @@ var styles$q = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-s
  */
 
 const template$c = self => function () {
+  // @ts-ignore
+  const {
+    closeTooltip
+  } = this; // console.log(this);
 
   return html`
     <style>
@@ -26822,6 +26826,9 @@ const template$c = self => function () {
 
 
     <div class="sankey"></div>
+
+    <div class="tooltip" @click="${closeTooltip.bind(this)}">
+    </div>
   `;
 }.bind(self)();
 
@@ -27069,9 +27076,9 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             // @ts-ignore
             graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
           }
-        }
+        } // console.log(graph)
+        // @ts-ignore
 
-        console.log(graph); // @ts-ignore
 
         const {
           d3
@@ -27114,7 +27121,9 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             value: x.value
           };
         });
-        sankey.nodes(graph.nodes).links(graph.links).layout(32); // add in the links
+        sankey.nodes(graph.nodes).links(graph.links).layout(32); // console.log(graph)
+
+        const tooltip = this.shadowRoot.querySelector('.tooltip'); // add in the links
 
         var link = svg.append('g').selectAll('.link').data(graph.links).enter().append('path').attr('class', 'link').attr('d', path).style('stroke-width', function (d) {
           return Math.max(1, d.dy);
@@ -27128,7 +27137,28 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
 
         var node = svg.append('g').selectAll('.node').data(graph.nodes).enter().append('g').attr('class', 'node').attr('transform', function (d) {
           return 'translate(' + d.x + ',' + d.y + ')';
-        }).call(d3.behavior.drag().origin(function (d) {
+        }).on('mousedown', function (d) {
+          // console.log(this)
+          if (this.getAttribute('toggle') === 'False') {
+            this.setAttribute('toggle', 'True');
+            tooltip.style.display = null;
+          } else {
+            this.setAttribute('toggle', 'False');
+            tooltip.style.display = 'none';
+          }
+
+          const {
+            x,
+            y
+          } = this.getBoundingClientRect();
+          tooltip.style.position = 'absolute';
+          tooltip.style.top = y + 'px';
+          tooltip.style.left = x + 'px';
+          tooltip.style.background = 'white';
+          tooltip.style.padding = '12px';
+          tooltip.innerHTML = d.utterances.join('<br>'); //
+          // console.log(this);
+        }).attr('toggle', 'False').call(d3.behavior.drag().origin(function (d) {
           return d;
         }).on('dragstart', function () {
           this.parentNode.appendChild(this);
@@ -27146,22 +27176,19 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
 
         const text = node.append('text').attr('x', -6).attr('y', function (d) {
           return d.dy / 2;
-        }).attr('dy', '.35em').attr('text-anchor', 'end').attr('transform', null);
-        text.text(function (d) {
-          d.utterances.map(item => addTspan(item));
+        }).attr('dy', '.35em').attr('text-anchor', 'end').attr('transform', null).text(function (d) {
           return `${d.name}`;
         }).filter(function (d) {
           return d.x < width / 2;
-        }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start');
+        }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start').attr('name', function (d) {
+          return d.name;
+        }); // function dragobj
 
-        function addTspan(item) {
-          text.append('tspan').attr('x', -6).attr('dy', '1.5em').attr('text-anchor', 'end').attr('transform', null).text(function (d) {
-            return item;
-          }).filter(function (d) {
-            return d.x < width / 2;
-          }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start'); // .attr('display', 'none');
-        } // the function for moving the nodes
-
+        text.append('tspan').attr('x', -6).attr('y', function (d) {
+          return d.dy / 2;
+        }).attr('dy', '1.55em').attr('text-anchor', 'start').attr('x', 6 + sankey.nodeWidth()).text(function (d) {
+          return `${d.utterances.length} utterances`;
+        }); // the function for moving the nodes
 
         function dragmove(d) {
           d3.select(this).attr('transform', 'translate(' + (d.x = Math.max(0, Math.min(width - d.dx, d3.event.x))) + ',' + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ')');
@@ -27296,6 +27323,14 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
       key: "render",
       value: function render() {
         return template$c(this);
+      }
+    }, {
+      kind: "method",
+      key: "closeTooltip",
+      value: function closeTooltip({
+        target
+      }) {
+        target.style.display = 'none';
       }
     }]
   };

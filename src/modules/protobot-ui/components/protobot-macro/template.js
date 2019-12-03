@@ -8,7 +8,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topics } = this;
+  const { closeTooltip } = this;
   // console.log(this);
 
   return html`
@@ -24,5 +24,8 @@ export const template = self => function () {
 
 
     <div class="sankey"></div>
+
+    <div class="tooltip" @click="${closeTooltip.bind(this)}">
+    </div>
   `;
 }.bind(self)();

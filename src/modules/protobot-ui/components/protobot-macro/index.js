@@ -165,7 +165,7 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
       }
     }
 
-    console.log(graph)
+    // console.log(graph)
 
     // @ts-ignore
     const { d3 } = window;
@@ -214,6 +214,10 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
       .links(graph.links)
       .layout(32);
 
+    // console.log(graph)
+
+    const tooltip = this.shadowRoot.querySelector('.tooltip');
+
     // add in the links
     var link = svg.append('g').selectAll('.link')
       .data(graph.links)
@@ -233,6 +237,28 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
       .enter().append('g')
       .attr('class', 'node')
       .attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; })
+      .on('mousedown', function (d) {
+        // console.log(this)
+        if (this.getAttribute('toggle') === 'False') {
+          this.setAttribute('toggle', 'True');
+          tooltip.style.display = null;
+        } else {
+          this.setAttribute('toggle', 'False');
+          tooltip.style.display = 'none';
+        }
+
+        const { x, y } = this.getBoundingClientRect();
+
+        tooltip.style.position = 'absolute';
+        tooltip.style.top = y + 'px';
+        tooltip.style.left = x + 'px';
+        tooltip.style.background = 'white';
+        tooltip.style.padding = '12px';
+        tooltip.innerHTML = d.utterances.join('<br>');
+        //
+        // console.log(this);
+      })
+      .attr('toggle', 'False')
       .call(d3.behavior.drag()
         .origin(function (d) { return d; })
         .on('dragstart', function () { this.parentNode.appendChild(this); })
@@ -245,7 +271,7 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
       .style('fill', function (d) { return color(d.name.replace(/ .*/, '')); })
       .style('stroke', function (d) { return d3.rgb(d.color).darker(2); })
       .append('title')
-      .text(function (d) { return d.name + '\n' + format(d.value); });
+      .text(function (d) { return d.name + '\n' + format(d.value); })
 
     // add in the title for the nodes
     const text = node.append('text')
@@ -253,28 +279,21 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
       .attr('y', function (d) { return d.dy / 2; })
       .attr('dy', '.35em')
       .attr('text-anchor', 'end')
-      .attr('transform', null);
-
-    text.text(function (d) {
-      d.utterances.map((item) => addTspan(item));
-      return `${d.name}`;
-    })
+      .attr('transform', null)
+      .text(function (d) { return `${d.name}`; })
       .filter(function (d) { return d.x < width / 2; })
       .attr('x', 6 + sankey.nodeWidth())
-      .attr('text-anchor', 'start');
+      .attr('text-anchor', 'start')
+      .attr('name', function (d) { return d.name; });
 
-    function addTspan (item) {
-      text.append('tspan')
-        .attr('x', -6)
-        .attr('dy', '1.5em')
-        .attr('text-anchor', 'end')
-        .attr('transform', null)
-        .text(function (d) { return item; })
-        .filter(function (d) { return d.x < width / 2; })
-        .attr('x', 6 + sankey.nodeWidth())
-        .attr('text-anchor', 'start')
-        // .attr('display', 'none');
-    }
+    // function dragobj
+    text.append('tspan')
+      .attr('x', -6)
+      .attr('y', function (d) { return d.dy / 2; })
+      .attr('dy', '1.55em')
+      .attr('text-anchor', 'start')
+      .attr('x', 6 + sankey.nodeWidth())
+      .text(function (d) { return `${d.utterances.length} utterances`; })
 
     // the function for moving the nodes
     function dragmove (d) {
@@ -433,6 +452,10 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
 
   render () {
     return template(this);
+  }
+
+  closeTooltip ({ target }) {
+    target.style.display = 'none';
   }
 }
 

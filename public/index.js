@@ -26325,7 +26325,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
         //                              amt = true: just deploying, amt = false: showing up link
         // example URL:
 
-        this.deployUrl = `https://protobot-rawdata.firebaseapp.com/?domain=${this.domainId}&deployedVersion=${this.domain.deployedVersion}&numUser=${numUser}&numSession=${numSession}&otherResponse=${otherResponse}`;
+        this.deployUrl = `https://protobot-rawdata.firebaseapp.com/?domain=${this.domainId}&deployedVersion=${event.detail.deployedVersion}&numUser=${numUser}&numSession=${numSession}&otherResponse=${otherResponse}`;
         this.nextDialogStage(); // this.closeDialog();
       }
     }]

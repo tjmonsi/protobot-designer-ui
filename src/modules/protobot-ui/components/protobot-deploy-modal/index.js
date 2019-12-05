@@ -17,10 +17,10 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
   @property()
   numSession = '';
 
-  @property({type: Boolean})
+  @property({ type: Boolean })
   otherResponse
 
-  @property({type: Boolean})
+  @property({ type: Boolean })
   amtOption
 
   @property({ type: Number })
@@ -38,11 +38,10 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
     const { domain } = this;
 
     if (domain) {
-      const { commitMessage } = domain;
-      const { key: deployedVersion } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+      const { commitMessage, deployedVersion } = domain;
+      const { key } = database.ref(`deployed-history/data/${this.domainId}/`).push();
       const obj = {
         ...this.domain,
-        deployedVersion,
         commitMessage: commitMessage || '',
         parameters: {
           numUser: this.numUser,
@@ -54,8 +53,9 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
       updates[`last-deployed/data/${this.domainId}/`] = obj;
       updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = obj;
       updates[`domains/data/${this.domainId}/deployed`] = false;
-      updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
+      updates[`domains/data/${this.domainId}/deployedVersion`] = key;
       updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
+      updates[`deployed-history/lists/${this.domainId}/${deployedVersion}`] = true;
       await database.ref().update(updates);
 
       this.dispatchEvent(new window.CustomEvent('dialog-accept', { detail: obj }));

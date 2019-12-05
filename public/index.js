@@ -23422,7 +23422,7 @@ const GetDomainMemosMixin = base => _decorate(null, function (_initialize, _GetD
         _get(_getPrototypeOf(_class.prototype), "domainChanged", this).call(this, data);
 
         if (data) {
-          this.getDomainMemos(this.domainId);
+          this.getDomainMemos(this.domainId, data);
         }
       }
     }, {
@@ -23443,11 +23443,11 @@ const GetDomainMemosMixin = base => _decorate(null, function (_initialize, _GetD
     }, {
       kind: "method",
       key: "getDomainMemos",
-      value: function getDomainMemos(id) {
+      value: function getDomainMemos(id, data) {
         this.disconnectRef();
 
-        if (id) {
-          this.domainMemosRef = database.ref(`memos/lists/domain-memo/${id}`);
+        if (id && data) {
+          this.domainMemosRef = database.ref(`memos/lists/domain-memo/${id}`).orderByChild('deployedVersion').equalTo(data.deployedVersion);
           this.domainMemosRef.on('value', this.boundSaveDomainMemos);
         } else {
           console.log('No values for id-crowdId: ', id);
@@ -26020,13 +26020,13 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
 
         if (domain) {
           const {
-            commitMessage
+            commitMessage,
+            deployedVersion
           } = domain;
           const {
-            key: deployedVersion
+            key
           } = database.ref(`deployed-history/data/${this.domainId}/`).push();
           const obj = { ...this.domain,
-            deployedVersion,
             commitMessage: commitMessage || '',
             parameters: {
               numUser: this.numUser,
@@ -26038,8 +26038,9 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
           updates[`last-deployed/data/${this.domainId}/`] = obj;
           updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = obj;
           updates[`domains/data/${this.domainId}/deployed`] = false;
-          updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
+          updates[`domains/data/${this.domainId}/deployedVersion`] = key;
           updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
+          updates[`deployed-history/lists/${this.domainId}/${deployedVersion}`] = true;
           await database.ref().update(updates);
           this.dispatchEvent(new window.CustomEvent('dialog-accept', {
             detail: obj
@@ -26644,7 +26645,7 @@ const GetDomainUtterancesMixin = base => _decorate(null, function (_initialize, 
         };
 
         if (!crowdId) {
-          window.location.href = `/?page=${page || 'micro'}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
+          // window.location.href = `/?page=${page || 'micro'}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
           return;
         }
 

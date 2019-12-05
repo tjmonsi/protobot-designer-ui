@@ -32,7 +32,8 @@ export const GetDomainUtterancesMixin = (base) => (class extends GetPathMixin(ba
     const { domain, crowdId, set, page } = this.queryObject || { domain: null, crowdId: null };
 
     if (!crowdId) {
-      window.location.href = `/?page=${page || 'micro'}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
+      // window.location.href = `/?page=${page || 'micro'}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
+
       return;
     }
 

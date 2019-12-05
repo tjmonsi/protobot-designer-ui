@@ -52,7 +52,7 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
 
   async toggleDialog () {
     this.dialogVisible = !this.dialogVisible;
-    if(!this.dialogVisible){
+    if (!this.dialogVisible) {
       this.dialogStage = 0;
       this.deployUrl = '';
     }
@@ -64,13 +64,13 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
     this.deployUrl = '';
   }
 
-  async nextDialogStage() {
+  async nextDialogStage () {
     this.dialogStage++;
-    this.dialogStage = Math.max(this.dialogStage, 1)
+    this.dialogStage = Math.max(this.dialogStage, 1);
   }
 
   async urlGenerator (event) {
-    const { numUser, numSession, otherResponse } = event.detail.parameters
+    const { numUser, numSession, otherResponse } = event.detail.parameters;
     // with the domainId and chosen parameters, generating the URL
 
     // domainID

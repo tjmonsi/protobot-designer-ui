@@ -28,7 +28,7 @@ export const GetDomainMemosMixin = (base) => (class extends GetDomainMixin(base)
   domainChanged (data) {
     super.domainChanged(data);
     if (data) {
-      this.getDomainMemos(this.domainId);
+      this.getDomainMemos(this.domainId, data);
     }
   }
 
@@ -44,11 +44,11 @@ export const GetDomainMemosMixin = (base) => (class extends GetDomainMixin(base)
    *
    * @param {String} id
    */
-  getDomainMemos (id) {
+  getDomainMemos (id, data) {
     this.disconnectRef();
 
-    if (id) {
-      this.domainMemosRef = database.ref(`memos/lists/domain-memo/${id}`);
+    if (id && data) {
+      this.domainMemosRef = database.ref(`memos/lists/domain-memo/${id}`).orderByChild('deployedVersion').equalTo(data.deployedVersion);
       this.domainMemosRef.on('value', this.boundSaveDomainMemos);
     } else {
       console.log('No values for id-crowdId: ', id);

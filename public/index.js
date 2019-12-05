@@ -27169,7 +27169,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           tooltip.style.left = x + 'px';
           tooltip.style.background = 'white';
           tooltip.style.padding = '12px';
-          tooltip.innerHTML = d.utterances.map(item => `<a href="/?domain=${domainId}&page=micro&set=1&crowdId=${item.userId}">${item.text}</a>`).join('<br>'); //
+          tooltip.innerHTML = d.utterances.map(item => `<a href="/?domain=${domainId}&page=${item.userId ? `micro&set=1&crowdId=${item.userId}` : 'authoring'}">${!item.userId ? 'Part of Authoring -' : ''}${item.text}</a>`).join('<br>'); //
           // console.log(this);
         }).attr('toggle', 'False').call(d3.behavior.drag().origin(function (d) {
           return d;

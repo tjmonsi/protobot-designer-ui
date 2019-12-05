@@ -256,7 +256,7 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
         tooltip.style.left = x + 'px';
         tooltip.style.background = 'white';
         tooltip.style.padding = '12px';
-        tooltip.innerHTML = d.utterances.map(item => `<a href="/?domain=${domainId}&page=micro&set=1&crowdId=${item.userId}">${item.text}</a>`).join('<br>');
+        tooltip.innerHTML = d.utterances.map(item => `<a href="/?domain=${domainId}&page=${item.userId ? `micro&set=1&crowdId=${item.userId}` : 'authoring'}">${!item.userId ? 'Part of Authoring -' : ''}${item.text}</a>`).join('<br>');
         //
         // console.log(this);
       })

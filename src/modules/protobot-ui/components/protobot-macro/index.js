@@ -64,9 +64,9 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
 
       for (const i in results) {
         const utterance = { ...results[i].val(), utteranceId: results[i].key };
-        const { topics, utteranceId, text } = utterance;
+        const { topics, utteranceId, text, userId, version } = utterance;
 
-        utteranceName[utteranceId] = text;
+        utteranceName[utteranceId] = { text, userId, version };
 
         for (const topic in topics) {
           utteranceTopicMap[utteranceId] = topic;
@@ -144,6 +144,8 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
       nodes: [{ name: 'No Topic', utterances: [] }],
       links: []
     };
+
+    const { domainId } = this;
 
     for (const row of rows) {
       // @ts-ignore
@@ -254,7 +256,7 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
         tooltip.style.left = x + 'px';
         tooltip.style.background = 'white';
         tooltip.style.padding = '12px';
-        tooltip.innerHTML = d.utterances.join('<br>');
+        tooltip.innerHTML = d.utterances.map(item => `<a href="/?domain=${domainId}&page=micro&set=1&crowdId=${item.userId}">${item.text}</a>`).join('<br>');
         //
         // console.log(this);
       })

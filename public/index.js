@@ -24359,7 +24359,8 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
         const updates = {};
         const snap = await database.ref(`domains/data/${domain}`).once('value');
         const {
-          topics
+          topics,
+          deployedVersion
         } = snap.val() || {
           topics: {}
         };
@@ -24386,6 +24387,7 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
           domain,
           required: true,
           text: 'Utterance',
+          version: deployedVersion,
           topics: {}
         };
         utterance.topics[topicId] = true;
@@ -26306,6 +26308,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       value: async function nextDialogStage() {
         this.dialogStage++;
         this.dialogStage = Math.max(this.dialogStage, 1);
+        window.location.reload();
       }
     }, {
       kind: "method",
@@ -26966,9 +26969,15 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             const {
               topics,
               utteranceId,
-              text
+              text,
+              userId,
+              version
             } = utterance;
-            utteranceName[utteranceId] = text;
+            utteranceName[utteranceId] = {
+              text,
+              userId,
+              version
+            };
 
             for (const topic in topics) {
               utteranceTopicMap[utteranceId] = topic;
@@ -27050,6 +27059,9 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           }],
           links: []
         };
+        const {
+          domainId
+        } = this;
 
         for (const row of rows) {
           // @ts-ignore
@@ -27157,7 +27169,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           tooltip.style.left = x + 'px';
           tooltip.style.background = 'white';
           tooltip.style.padding = '12px';
-          tooltip.innerHTML = d.utterances.join('<br>'); //
+          tooltip.innerHTML = d.utterances.map(item => `<a href="/?domain=${domainId}&page=micro&set=1&crowdId=${item.userId}">${item.text}</a>`).join('<br>'); //
           // console.log(this);
         }).attr('toggle', 'False').call(d3.behavior.drag().origin(function (d) {
           return d;

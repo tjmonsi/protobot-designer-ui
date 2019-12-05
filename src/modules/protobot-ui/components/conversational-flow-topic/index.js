@@ -42,7 +42,7 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
     const { domain } = this.topic;
     const updates = {};
     const snap = await database.ref(`domains/data/${domain}`).once('value');
-    const { topics } = snap.val() || { topics: {} };
+    const { topics, deployedVersion } = snap.val() || { topics: {} };
     const array = [];
     for (const topic in topics) {
       array.push({ topic, order: topics[topic] });
@@ -64,6 +64,7 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
       domain,
       required: true,
       text: 'Utterance',
+      version: deployedVersion,
       topics: {}
     };
 

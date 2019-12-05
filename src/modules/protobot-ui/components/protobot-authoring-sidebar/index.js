@@ -67,6 +67,7 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
   async nextDialogStage () {
     this.dialogStage++;
     this.dialogStage = Math.max(this.dialogStage, 1);
+    window.location.reload();
   }
 
   async urlGenerator (event) {

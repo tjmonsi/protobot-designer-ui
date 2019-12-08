@@ -28,7 +28,7 @@ export const GetDomainUsersMixin = (base) => (class extends GetDomainMixin(base)
   domainChanged (data) {
     super.domainChanged(data);
     if (data) {
-      this.getDomainUsers(data);
+      this.getDomainUsers(this.domainId, data);
     }
   }
 
@@ -41,14 +41,15 @@ export const GetDomainUsersMixin = (base) => (class extends GetDomainMixin(base)
   }
 
   /**
-   *
    * @param {String} id
+   * @param {Object} domain
    */
-  getDomainUsers (id) {
+  getDomainUsers (id, domain) {
     this.disconnectRef();
 
-    if (id) {
-      this.domainUsersRef = database.ref('users/lists/domain-utterances/');
+    if (id && domain) {
+      console.log(`users/lists/domains/${id}/${domain.deployedVersion}`)
+      this.domainUsersRef = database.ref(`users/lists/domains/${id}/${domain.deployedVersion}`);
       this.domainUsersRef.on('value', this.boundSaveDomainUsers);
     } else {
       console.log('No values for id-crowdId: ', id);
@@ -58,11 +59,10 @@ export const GetDomainUsersMixin = (base) => (class extends GetDomainMixin(base)
   saveDomainUsers (snap) {
     const data = snap.val() || null;
     const array = [];
+    console.log(data, snap.path)
     if (data) {
       for (const user in data) {
-        if (data[user][this.domainId]) {
-          array.push(user);
-        }
+        array.push(user);
       }
       this.users = array;
       this.domainUsersChanged(this.users);

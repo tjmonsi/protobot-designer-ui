@@ -58,6 +58,10 @@ export const GetDomainUtterancesMixin = (base) => (class extends GetPathMixin(ba
     }
   }
 
+  getDefaultUser (domainId, domain) {
+
+  }
+
   /**
    *
    * @param {String} id

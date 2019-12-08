@@ -23,9 +23,24 @@ class ProtobotStart extends GetPathMixin(LitElement) {
   }
 
   async newDomain () {
-    const { key } = database.ref('domains/data').push();
+    // const { key } = database.ref('domains/data').push();
     const { key: utteranceId } = database.ref('utterances/data').push();
     const { key: topicId } = database.ref('labels/data').push();
+    let flag = false;
+    let number = 0;
+
+    do {
+      // @ts-ignore
+      number = parseInt(Math.random() * 100);
+      console.log(number);
+      const snap = await database.ref(`labales/data/domain${number}`).once('value');
+      flag = snap.exists();
+    } while (flag);
+
+    const key = `domain${number}`;
+
+    const { key: deployedVersion } = database.ref(`domains-history/data/${key}`).push();
+    // return;
     // const snap = await database.ref(`domains/data/${domain}`).once('value');
     const updates = {};
 
@@ -35,6 +50,7 @@ class ProtobotStart extends GetPathMixin(LitElement) {
       name: '',
       topics: {},
       topicList: {},
+      deployedVersion,
       subs: {}
     };
 
@@ -57,6 +73,7 @@ class ProtobotStart extends GetPathMixin(LitElement) {
       domain: key,
       required: true,
       text: 'Utterance',
+      version: deployedVersion,
       topics: {}
     };
 
@@ -68,6 +85,7 @@ class ProtobotStart extends GetPathMixin(LitElement) {
     updates[`labels/data/${topicId}`] = topic;
     updates[`utterances/data/${utteranceId}`] = utterance;
     updates[`domains/data/${key}`] = obj;
+    updates[`domains/lists/domain-list/${key}`] = obj.name;
 
     await database.ref().update(updates);
     window.location.href = `/?domain=${key}`;

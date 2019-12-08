@@ -23632,7 +23632,7 @@ const GetDomainUsersMixin = base => _decorate(null, function (_initialize, _GetD
         _get(_getPrototypeOf(_class.prototype), "domainChanged", this).call(this, data);
 
         if (data) {
-          this.getDomainUsers(data);
+          this.getDomainUsers(this.domainId, data);
         }
       }
     }, {
@@ -23646,18 +23646,19 @@ const GetDomainUsersMixin = base => _decorate(null, function (_initialize, _GetD
         }
       }
       /**
-       *
        * @param {String} id
+       * @param {Object} domain
        */
 
     }, {
       kind: "method",
       key: "getDomainUsers",
-      value: function getDomainUsers(id) {
+      value: function getDomainUsers(id, domain) {
         this.disconnectRef();
 
-        if (id) {
-          this.domainUsersRef = database.ref('users/lists/domain-utterances/');
+        if (id && domain) {
+          console.log(`users/lists/domains/${id}/${domain.deployedVersion}`);
+          this.domainUsersRef = database.ref(`users/lists/domains/${id}/${domain.deployedVersion}`);
           this.domainUsersRef.on('value', this.boundSaveDomainUsers);
         } else {
           console.log('No values for id-crowdId: ', id);
@@ -23669,12 +23670,11 @@ const GetDomainUsersMixin = base => _decorate(null, function (_initialize, _GetD
       value: function saveDomainUsers(snap) {
         const data = snap.val() || null;
         const array = [];
+        console.log(data, snap.path);
 
         if (data) {
           for (const user in data) {
-            if (data[user][this.domainId]) {
-              array.push(user);
-            }
+            array.push(user);
           }
 
           this.users = array;
@@ -23982,15 +23982,29 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
       kind: "method",
       key: "newDomain",
       value: async function newDomain() {
-        const {
-          key
-        } = database.ref('domains/data').push();
+        // const { key } = database.ref('domains/data').push();
         const {
           key: utteranceId
         } = database.ref('utterances/data').push();
         const {
           key: topicId
-        } = database.ref('labels/data').push(); // const snap = await database.ref(`domains/data/${domain}`).once('value');
+        } = database.ref('labels/data').push();
+        let flag = false;
+        let number = 0;
+
+        do {
+          // @ts-ignore
+          number = parseInt(Math.random() * 100);
+          console.log(number);
+          const snap = await database.ref(`labales/data/domain${number}`).once('value');
+          flag = snap.exists();
+        } while (flag);
+
+        const key = `domain${number}`;
+        const {
+          key: deployedVersion
+        } = database.ref(`domains-history/data/${key}`).push(); // return;
+        // const snap = await database.ref(`domains/data/${domain}`).once('value');
 
         const updates = {};
         const obj = {
@@ -23999,6 +24013,7 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
           name: '',
           topics: {},
           topicList: {},
+          deployedVersion,
           subs: {}
         };
         obj.topics[topicId] = 0;
@@ -24017,12 +24032,14 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
           domain: key,
           required: true,
           text: 'Utterance',
+          version: deployedVersion,
           topics: {}
         };
         utterance.topics[topicId] = true;
         updates[`labels/data/${topicId}`] = topic;
         updates[`utterances/data/${utteranceId}`] = utterance;
         updates[`domains/data/${key}`] = obj;
+        updates[`domains/lists/domain-list/${key}`] = obj.name;
         await database.ref().update(updates);
         window.location.href = `/?domain=${key}`;
       }
@@ -26028,6 +26045,7 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
             key
           } = database.ref(`deployed-history/data/${this.domainId}/`).push();
           const obj = { ...this.domain,
+            deployedVersion: key,
             commitMessage: commitMessage || '',
             parameters: {
               numUser: this.numUser,
@@ -26685,6 +26703,10 @@ const GetDomainUtterancesMixin = base => _decorate(null, function (_initialize, 
           this.domainUtterancesRef.off('value', this.boundSaveDomainUtterances);
         }
       }
+    }, {
+      kind: "method",
+      key: "getDefaultUser",
+      value: function getDefaultUser(domainId, domain) {}
       /**
        *
        * @param {String} id

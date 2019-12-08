@@ -42,6 +42,7 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
       const { key } = database.ref(`deployed-history/data/${this.domainId}/`).push();
       const obj = {
         ...this.domain,
+        deployedVersion: key,
         commitMessage: commitMessage || '',
         parameters: {
           numUser: this.numUser,
@@ -49,7 +50,7 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
           otherResponse: this.otherResponse === 'show',
           amtOption: this.amtOption === 'amt'
         }
-      }
+      };
       updates[`last-deployed/data/${this.domainId}/`] = obj;
       updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = obj;
       updates[`domains/data/${this.domainId}/deployed`] = false;

@@ -88,7 +88,7 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
   }
 
   async deleteTopic () {
-    const { topicId, topic } = this;
+    const { topic } = this;
     const { domain } = topic;
     const updates = {};
     const snap = await database.ref(`domains/data/${domain}`).once('value');
@@ -107,9 +107,9 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
       newTopics[topicArray[i]] = parseInt(i);
     }
 
-    updates[`labels/data/${topicId}`] = null;
+    // updates[`labels/data/${topicId}`] = null;
     updates[`domains/data/${domain}/topics`] = newTopics;
-    updates[`domains/data/${domain}/topicList/${topicId}`] = null;
+    // updates[`domains/data/${domain}/topicList/${topicId}`] = null;
 
     await database.ref().update(updates);
   }

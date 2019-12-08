@@ -64,10 +64,17 @@ class ProtobotAuthoringSidebar extends GetDomainMixin(LitElement) {
     this.deployUrl = '';
   }
 
+  async closeTwoDialog () {
+    this.dialogVisible = false;
+    this.dialogStage = 0;
+    this.deployUrl = '';
+    window.location.reload();
+  }
+
   async nextDialogStage () {
     this.dialogStage++;
     this.dialogStage = Math.max(this.dialogStage, 1);
-    window.location.reload();
+    // window.location.reload();
   }
 
   async urlGenerator (event) {

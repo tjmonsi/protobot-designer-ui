@@ -24410,7 +24410,6 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
       key: "deleteTopic",
       value: async function deleteTopic() {
         const {
-          topicId,
           topic
         } = this;
         const {
@@ -24438,11 +24437,11 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
 
         for (const i in topicArray) {
           newTopics[topicArray[i]] = parseInt(i);
-        }
+        } // updates[`labels/data/${topicId}`] = null;
 
-        updates[`labels/data/${topicId}`] = null;
-        updates[`domains/data/${domain}/topics`] = newTopics;
-        updates[`domains/data/${domain}/topicList/${topicId}`] = null;
+
+        updates[`domains/data/${domain}/topics`] = newTopics; // updates[`domains/data/${domain}/topicList/${topicId}`] = null;
+
         await database.ref().update(updates);
       }
     }]
@@ -25887,7 +25886,7 @@ const template$8 = self => function () {
     opened: opened,
     closed: !opened
   })}">
-      ${stage == 0 ? html`
+      ${stage === 0 ? html`
         <div class="dialog-window">
         <h1 class="title">How to deploy?</h1>
         <div class = "param1">
@@ -25928,7 +25927,7 @@ const template$8 = self => function () {
           <div>${deployUrl}</div>
         </div>
         <div class="button-container">
-          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-cancel'))}">Close</vaadin-button>
+          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-close-2'))}">Close</vaadin-button>
           <!-- <vaadin-button class="deploy" @click="${deploy.bind(this)}">Deploy</vaadin-button> -->
           <!-- <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-next'))}">Deploy</vaadin-button> -->
         </div>
@@ -26136,7 +26135,8 @@ const template$9 = self => function () {
     nextDialogStage,
     toggleDialog,
     closeDialog,
-    urlGenerator
+    urlGenerator,
+    closeTwoDialog
   } = this;
   const {
     commitMessage
@@ -26180,7 +26180,8 @@ const template$9 = self => function () {
       <protobot-deploy-modal ?opened="${dialogVisible}" stage="${dialogStage}" deployUrl="${deployUrl}"
         @dialog-next="${nextDialogStage.bind(this)}"
         @dialog-accept="${urlGenerator.bind(this)}"
-        @dialog-cancel="${closeDialog.bind(this)}">
+        @dialog-cancel="${closeDialog.bind(this)}"
+        @dialog-close-2="${closeTwoDialog.bind(this)}">
       </protobot-deploy-modal>
     </div>
   `;
@@ -26304,11 +26305,19 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       }
     }, {
       kind: "method",
+      key: "closeTwoDialog",
+      value: async function closeTwoDialog() {
+        this.dialogVisible = false;
+        this.dialogStage = 0;
+        this.deployUrl = '';
+        window.location.reload();
+      }
+    }, {
+      kind: "method",
       key: "nextDialogStage",
       value: async function nextDialogStage() {
         this.dialogStage++;
-        this.dialogStage = Math.max(this.dialogStage, 1);
-        window.location.reload();
+        this.dialogStage = Math.max(this.dialogStage, 1); // window.location.reload();
       }
     }, {
       kind: "method",
@@ -26993,9 +27002,10 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           const tresults = await Promise.all(tpromises);
 
           for (const tr in tresults) {
+            // console.log(tresults[tr].val(), tr);
             const {
               name
-            } = tresults[tr].val();
+            } = tresults[tr].val() || {};
             topicMap[tresults[tr].key] = name;
           }
 
@@ -27064,7 +27074,8 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
         } = this;
 
         for (const row of rows) {
-          // @ts-ignore
+          console.log(row); // @ts-ignore
+
           graph.links.push({
             source: row[0] || 'No Topic',
             target: row[1] || 'No Topic',
@@ -27072,6 +27083,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           }); // @ts-ignore
 
           const index = graph.nodes.findIndex(item => item.name === row[0]);
+          const index2 = graph.nodes.findIndex(item => item.name === row[1]);
           const array = [];
 
           for (const u of row[2]) {
@@ -27081,13 +27093,26 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           if (index < 0) {
             const obj = {
               name: row[0],
+              utterances: []
+            }; // @ts-ignore
+
+            graph.nodes.push(obj);
+          } //  else {
+          //   // @ts-ignore
+          //   graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
+          // }
+
+
+          if (index2 < 0) {
+            const obj = {
+              name: row[1],
               utterances: array
             }; // @ts-ignore
 
             graph.nodes.push(obj);
           } else {
             // @ts-ignore
-            graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
+            graph.nodes[index2].utterances = [...graph.nodes[index2].utterances, ...array];
           }
         } // console.log(graph)
         // @ts-ignore
@@ -27134,6 +27159,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             value: x.value
           };
         });
+        console.log(graph);
         sankey.nodes(graph.nodes).links(graph.links).layout(32); // console.log(graph)
 
         const tooltip = this.shadowRoot.querySelector('.tooltip'); // add in the links

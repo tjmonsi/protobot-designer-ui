@@ -82,7 +82,8 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
       const tresults = await Promise.all(tpromises);
 
       for (const tr in tresults) {
-        const { name } = tresults[tr].val();
+        // console.log(tresults[tr].val(), tr);
+        const { name } = tresults[tr].val() || {};
         topicMap[tresults[tr].key] = name;
       }
 
@@ -148,22 +149,34 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
     const { domainId } = this;
 
     for (const row of rows) {
+      console.log(row)
       // @ts-ignore
       graph.links.push({ source: row[0] || 'No Topic', target: row[1] || 'No Topic', value: row[2].length });
       // @ts-ignore
       const index = graph.nodes.findIndex(item => item.name === row[0]);
+      const index2 = graph.nodes.findIndex(item => item.name === row[1]);
       const array = [];
       for (const u of row[2]) {
         array.push(utteranceName[u]);
       }
 
       if (index < 0) {
-        const obj = { name: row[0], utterances: array };
+        const obj = { name: row[0], utterances: [] };
+        // @ts-ignore
+        graph.nodes.push(obj);
+      }
+      //  else {
+      //   // @ts-ignore
+      //   graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
+      // }
+
+      if (index2 < 0) {
+        const obj = { name: row[1], utterances: array };
         // @ts-ignore
         graph.nodes.push(obj);
       } else {
         // @ts-ignore
-        graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
+        graph.nodes[index2].utterances = [...graph.nodes[index2].utterances, ...array];
       }
     }
 
@@ -210,6 +223,8 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
         value: x.value
       };
     });
+
+    console.log(graph)
 
     sankey
       .nodes(graph.nodes)

@@ -22,7 +22,7 @@ export const template = self => function () {
     </style>
 
     <div class ="${classMap({ dialog: true, opened: opened, closed: !opened })}">
-      ${stage == 0 ? html`
+      ${stage === 0 ? html`
         <div class="dialog-window">
         <h1 class="title">How to deploy?</h1>
         <div class = "param1">
@@ -64,7 +64,7 @@ export const template = self => function () {
           <div>${deployUrl}</div>
         </div>
         <div class="button-container">
-          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-cancel'))}">Close</vaadin-button>
+          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-close-2'))}">Close</vaadin-button>
           <!-- <vaadin-button class="deploy" @click="${deploy.bind(this)}">Deploy</vaadin-button> -->
           <!-- <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-next'))}">Deploy</vaadin-button> -->
         </div>

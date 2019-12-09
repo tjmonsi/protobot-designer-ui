@@ -5,6 +5,7 @@ import 'weightless/button';
 import 'weightless/radio';
 import '@vaadin/vaadin-radio-button';
 import '../protobot-deploy-modal';
+import '../version-list';
 // import '@vaadin/vaadin-radio-group';
 
 // @ts-ignore
@@ -50,6 +51,8 @@ export const template = self => function () {
         @submit="${handleCommitMsg.bind(this)}">
       </wl-textarea outlined>
     </div>
+
+    <version-list></version-list>
 
     <div class="button-container">
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->

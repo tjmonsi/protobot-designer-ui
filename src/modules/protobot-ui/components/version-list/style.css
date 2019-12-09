@@ -1,0 +1,8 @@
+:host {
+  overflow-y: auto;
+  height: 250px;
+}
+
+a {
+  color: white
+}

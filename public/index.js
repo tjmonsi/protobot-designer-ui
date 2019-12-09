@@ -26138,7 +26138,7 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
   };
 }, GetDomainMixin(LitElement));
 
-var styles$n = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
+var styles$n = ":host {\n  overflow-y: auto;\n  height: 250px;\n}\n\na {\n  color: white\n}\n";
 
 /**
  *
@@ -26146,6 +26146,200 @@ var styles$n = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list 
  */
 
 const template$9 = self => function () {
+  // @ts-ignore
+  const {
+    versions,
+    gettingDomainName,
+    changeVersion
+  } = this; // const { name } = topic || {};
+
+  return html`
+    <style>
+      ${styles$n}
+    </style>
+
+    <h2>Versions: </h2>
+    <ul>
+    ${versions && versions.length ? versions.map(item => html`
+      <li>
+        <a href="#" @click="${changeVersion}" data-id="${item}">${until(gettingDomainName(item, this.domainId), 'Loading...')}</a>
+      </li>
+    `) : ''}
+    </ul>
+  `;
+}.bind(self)();
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _GetPathMixin) {
+  class _class extends _GetPathMixin {
+    // @ts-ignore
+    constructor() {
+      super();
+
+      _initialize(this);
+
+      this.boundSaveDomainVersions = this.saveDomainVersions.bind(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "versions",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "domainId",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "connectedCallback",
+      value: function connectedCallback() {
+        _get(_getPrototypeOf(_class.prototype), "connectedCallback", this).call(this); // @ts-ignore
+
+
+        const {
+          domain
+        } = this.queryObject || {
+          domain: null
+        };
+
+        if (domain) {
+          this.domainId = domain;
+          this.getDomainName(domain);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "disconnectedCallback",
+      value: function disconnectedCallback() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
+          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
+        }
+
+        this.disconnectRef();
+      }
+    }, {
+      kind: "method",
+      key: "disconnectRef",
+      value: function disconnectRef() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
+
+        if (this.domainVersionsRef) {
+          this.domainVersionsRef.off('value', this.boundSaveDomainVersions);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "getDomainName",
+      value: function getDomainName(id) {
+        this.disconnectRef();
+
+        if (id) {
+          this.domainVersionsRef = database.ref(`deployed-history/lists/${id}`);
+          this.domainVersionsRef.on('value', this.boundSaveDomainVersions);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveDomainVersions",
+      value: function saveDomainVersions(snap) {
+        const data = snap.val();
+
+        if (data) {
+          this.versions = Object.keys(data);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: function domainChanged(domain) {}
+    }]
+  };
+}, GetPathMixin(base));
+
+// @ts-ignore
+
+let VersionList = _decorate([customElement('version-list')], function (_initialize, _GetDomainVersionsMix) {
+  class VersionList extends _GetDomainVersionsMix {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: VersionList,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$9(this);
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion({
+        target
+      }) {
+        const id = target.getAttribute('data-id');
+        const updates = {};
+        const snap = await database.ref(`deployed-history/data/${this.domainId}/${id}/`).once('value');
+        const obj = snap.val();
+
+        if (obj) {
+          updates[`domains/data/${this.domainId}/`] = obj;
+          await database.ref().update(updates); // window.location.reload();
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingDomainName",
+      value: async function gettingDomainName(id, domainId) {
+        // console.log(`${id}`);
+        console.log(`deployed-history/data/${domainId}/${id}/commitMessage`);
+        return (await database.ref(`deployed-history/data/${domainId}/${id}/commitMessage`).once('value')).val();
+      }
+    }]
+  };
+}, GetDomainVersionsMixin(LitElement));
+
+var styles$o = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$a = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -26166,7 +26360,7 @@ const template$9 = self => function () {
   } = domain || {};
   return html`
     <style>
-      ${styles$n}
+      ${styles$o}
     </style>
     <h3>Current topic list</h3>
 
@@ -26196,6 +26390,8 @@ const template$9 = self => function () {
         @submit="${handleCommitMsg.bind(this)}">
       </wl-textarea outlined>
     </div>
+
+    <version-list></version-list>
 
     <div class="button-container">
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->
@@ -26260,7 +26456,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       kind: "method",
       key: "render",
       value: function render() {
-        return template$9(this);
+        return template$a(this);
       }
     }, {
       kind: "method",
@@ -26367,9 +26563,9 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   };
 }, GetDomainMixin(LitElement));
 
-var styles$o = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
+var styles$p = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
 
-var styles$p = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n.utterance{\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
+var styles$q = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n.utterance{\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
 
 // import '@polymer/paper-item/paper-item.js';
 // import '@polymer/paper-listbox/paper-listbox.js';
@@ -26380,7 +26576,7 @@ var styles$p = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-directi
  * @param {any} self
  */
 
-const template$a = self => function () {
+const template$b = self => function () {
   // @ts-ignore
   const {
     utterance,
@@ -26397,7 +26593,7 @@ const template$a = self => function () {
   } = utterance || {};
   return html`
     <style>
-      ${styles$p}
+      ${styles$q}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -26471,7 +26667,7 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
       kind: "method",
       key: "render",
       value: function render() {
-        return template$a(this);
+        return template$b(this);
       }
     }, {
       kind: "method",
@@ -26574,7 +26770,7 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
  * @param {any} self
  */
 
-const template$b = self => function () {
+const template$c = self => function () {
   // @ts-ignore
   const {
     crowdId,
@@ -26589,7 +26785,7 @@ const template$b = self => function () {
 
   return html`
     <style>
-      ${styles$o}
+      ${styles$p}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -26800,7 +26996,7 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
       kind: "method",
       key: "render",
       value: function render() {
-        return template$b(this);
+        return template$c(this);
       }
       /**
        *
@@ -26858,14 +27054,14 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
   };
 }, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
 
-var styles$q = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n";
+var styles$r = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$c = self => function () {
+const template$d = self => function () {
   // @ts-ignore
   const {
     closeTooltip
@@ -26873,7 +27069,7 @@ const template$c = self => function () {
 
   return html`
     <style>
-      ${styles$q}
+      ${styles$r}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -27406,7 +27602,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
       kind: "method",
       key: "render",
       value: function render() {
-        return template$c(this);
+        return template$d(this);
       }
     }, {
       kind: "method",
@@ -27420,20 +27616,20 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
   };
 }, GetTreeStructureMixin(LitElement));
 
-var styles$r = "";
+var styles$s = "";
 
 /**
  *
  * @param {any} self
  */
 
-const template$d = self => function () {
+const template$e = self => function () {
   // @ts-ignore
   // const { topic } = this;
   console.log(this);
   return html`
     <style>
-      ${styles$r}
+      ${styles$s}
     </style>
 
     History
@@ -27459,20 +27655,20 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
       kind: "method",
       key: "render",
       value: function render() {
-        return template$d(this);
+        return template$e(this);
       }
     }]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$s = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$t = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$e = self => function () {
+const template$f = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -27495,7 +27691,7 @@ const template$e = self => function () {
   console.log(dv);
   return html`
     <style>
-      ${styles$s}
+      ${styles$t}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -27557,7 +27753,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
       kind: "method",
       key: "render",
       value: function render() {
-        return template$e(this);
+        return template$f(this);
       }
     }, {
       kind: "method",
@@ -27609,14 +27805,14 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$t = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$u = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$f = self => function () {
+const template$g = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -27639,7 +27835,7 @@ const template$f = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$t}
+      ${styles$u}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -27702,7 +27898,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
       value: // @property({ type: Array })
       // memos = [''];
       function render() {
-        return template$f(this);
+        return template$g(this);
       }
     }, {
       kind: "method",
@@ -27771,9 +27967,9 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$u = "";
+var styles$v = "";
 
-var styles$v = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
+var styles$w = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
 
 const $_documentContainer$8 = document.createElement('template');
 $_documentContainer$8.innerHTML = `<dom-module id="lumo-required-field">
@@ -30219,10 +30415,10 @@ customElements.define(RadioGroupElement.is, RadioGroupElement);
  * @param {any} self
  */
 
-const template$g = self => function () {
+const template$h = self => function () {
   return html`
   <style>
-    ${styles$v}
+    ${styles$w}
   </style>
 
   <h2>Planning for revision</h2>
@@ -30290,7 +30486,7 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
       kind: "method",
       key: "render",
       value: function render() {
-        return template$g(this);
+        return template$h(this);
       }
     }, {
       kind: "method",
@@ -30332,11 +30528,11 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
  * @param {any} self
  */
 
-const template$h = self => function () {
+const template$i = self => function () {
   // const {} = this;
   return html`
     <style>
-      ${styles$u}
+      ${styles$v}
     </style>
 
     <to-do-list></to-do-list>
@@ -30360,20 +30556,20 @@ let ProtobotHistorySidebar = _decorate([customElement('protobot-history-sidebar'
       kind: "method",
       key: "render",
       value: function render() {
-        return template$h(this);
+        return template$i(this);
       }
     }]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$w = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 1fr 3fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n.left {\n  /* background: rgb(94, 94, 94); */\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$x = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 1fr 3fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n.left {\n  /* background: rgb(94, 94, 94); */\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$i = self => function () {
+const template$j = self => function () {
   // @ts-ignore
   const {
     queryObject
@@ -30384,7 +30580,7 @@ const template$i = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$w}
+      ${styles$x}
       @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
     </style>
 
@@ -30452,7 +30648,7 @@ let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], func
       kind: "method",
       key: "render",
       value: function render() {
-        return template$i(this);
+        return template$j(this);
       }
     }]
   };

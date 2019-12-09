@@ -11793,7 +11793,7 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
   };
 }, GetMemoMixin(GetDomainMixin(LitElement)));
 
-var styles$8 = ".memo-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n\n.micro {\n  background-color:rgb(253, 200, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.macro {\n  background-color:rgb(253, 228, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nvaadin-checkbox {\n  color: white;\n}";
+var styles$8 = ".memo-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.micro {\n  background-color:rgb(253, 200, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.macro {\n  background-color:rgb(253, 228, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nvaadin-checkbox {\n  color: white;\n}";
 
 class Lumo extends HTMLElement {
   static get version() {

@@ -4,6 +4,9 @@
   margin: 10px;
 }
 
+h3 {
+  font-family: 'Open Sans', sans-serif;
+}
 
 .micro {
   background-color:rgb(253, 200, 85);

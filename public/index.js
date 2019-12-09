@@ -25944,9 +25944,11 @@ const template$8 = self => function () {
         <div class="dialog-window">
         <h1 class="title">Success</h1>
 
-        <div class = "param4">
-          <h3>Copy below link!</h3>
-          <div>${deployUrl}</div>
+        <div class = "deploy-before">
+          ${amtOption === "amt" ? html`
+            <p>Are you sure to deploy?</p>
+            <p>You would spend ${numSession}*${numUser} dolloars!</p>` : html`<h3>Copy below link!</h3>
+          <div>${deployUrl}</div>`}
         </div>
         <div class="button-container">
           <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-close-2'))}">Close</vaadin-button>

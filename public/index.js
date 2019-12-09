@@ -24228,8 +24228,8 @@ const template$5 = self => function () {
  * @param {*} base
  */
 
-const GetTopicMixin = base => _decorate(null, function (_initialize, _base) {
-  class _class extends _base {
+const GetTopicMixin = base => _decorate(null, function (_initialize, _GetPathMixin) {
+  class _class extends _GetPathMixin {
     constructor(...args) {
       super(...args);
 
@@ -24297,7 +24297,7 @@ const GetTopicMixin = base => _decorate(null, function (_initialize, _base) {
       }
     }]
   };
-}, base);
+}, GetPathMixin(base));
 
 // @ts-ignore
 
@@ -24590,7 +24590,8 @@ const template$7 = self => function () {
   // @ts-ignore
   const {
     topic,
-    included
+    included,
+    addTopic
   } = this;
   const {
     name
@@ -24605,7 +24606,13 @@ const template$7 = self => function () {
     ${name}
 
     <!-- ${!included ? ' - not included' : ''} -->
-    ${!included ? html`<button class='new-label'>NEW</button>` : ''}
+    ${!included ? html`
+      ${this.queryObject.page === 'authoring' ? html`
+        <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Add to Conversational Flow</button>
+      ` : html`
+        <button class='new-label' >New</button>
+      `}
+    ` : ''}
 
   `;
 }.bind(self)();
@@ -24674,6 +24681,46 @@ let TopicListItem = _decorate([customElement('topic-list-item')], function (_ini
         if (this.topic.name !== value) {
           await database.ref(`labels/data/${this.topicId}/name`).set(value);
         }
+      }
+    }, {
+      kind: "method",
+      key: "addTopic",
+      value: async function addTopic({
+        target
+      }) {
+        const topicId = target.getAttribute('data-id');
+        const {
+          domain
+        } = this.queryObject;
+        const snap = await database.ref(`domains/data/${domain}`).once('value');
+        const {
+          topics
+        } = snap.val() || {
+          topics: {}
+        };
+        const array = [];
+
+        for (const topic in topics) {
+          array.push({
+            topic,
+            order: topics[topic]
+          });
+        }
+
+        const topicArray = array.sort((i, j) => i.order - j.order).map(i => i.topic);
+        topicArray.push(topicId);
+        const newTopics = {};
+
+        for (const i in topicArray) {
+          newTopics[topicArray[i]] = parseInt(i);
+        }
+
+        const updates = {};
+        updates[`domains/data/${domain}/topics`] = newTopics;
+        updates[`domains/data/${domain}/subs/${topicId}`] = false;
+        updates[`domains/data/${domain}/topicList/${topicId}`] = true; // console.log(updates);
+
+        await database.ref().update(updates);
       }
     }]
   };

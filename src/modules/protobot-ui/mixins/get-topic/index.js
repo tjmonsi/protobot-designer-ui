@@ -1,12 +1,13 @@
 // @ts-ignore
 import { property } from 'lit-element';
+import { GetPathMixin } from '../get-path/index';
 import { database } from '../../../firebase';
 
 /**
  *
  * @param {*} base
  */
-export const GetTopicMixin = (base) => (class extends base {
+export const GetTopicMixin = (base) => (class extends GetPathMixin(base) {
   // @ts-ignore
   @property({ type: String })
   topicId;

@@ -8,7 +8,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topic, included } = this;
+  const { topic, included, addTopic } = this;
   const { name } = topic || {};
 
   return html`
@@ -21,7 +21,13 @@ export const template = self => function () {
     ${name}
 
     <!-- ${!included ? ' - not included' : ''} -->
-    ${!included ? html`<button class='new-label'>NEW</button>` : ''}
+    ${!included ? html`
+      ${this.queryObject.page === 'authoring' ? html`
+        <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Add to Conversational Flow</button>
+      ` : html`
+        <button class='new-label' >New</button>
+      `}
+    ` : ''}
 
   `;
 }.bind(self)();

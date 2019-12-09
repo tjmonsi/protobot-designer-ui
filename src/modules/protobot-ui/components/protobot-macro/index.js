@@ -21,7 +21,17 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
       // GoogleCharts.load(this.drawChart.bind(this, tree), {
       //   packages: ['sankey']
       // });
-      this.drawChart(this.tree);
+      const newTree = {};
+
+      for (const i in this.tree) {
+        console.log(this.domain.deployedVersion, this.tree[i].version)
+        if (this.domain.deployedVersion === this.tree[i].version) {
+
+          newTree[i] = this.tree[i];
+        }
+      }
+      console.log(newTree)
+      this.drawChart(newTree);
     }
   }
 

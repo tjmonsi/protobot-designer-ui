@@ -20,7 +20,7 @@ export const GetTreeStructureMixin = (base) => (class extends GetDomainMixin(bas
   }
 
   async getTreeStructure (domainId) {
-    console.log(domainId);
+    // console.log(domainId);
     const snap = await database.ref('tree-structure/data/').orderByChild('domain').equalTo(domainId)
       // .limitToFirst(10)
       .once('value');

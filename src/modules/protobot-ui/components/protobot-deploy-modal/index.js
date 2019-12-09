@@ -55,7 +55,7 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
       updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = obj;
       updates[`domains/data/${this.domainId}/deployed`] = false;
       updates[`domains/data/${this.domainId}/deployedVersion`] = key;
-      updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
+      updates[`domains/data/${this.domainId}/commitMessage`] = '';
       updates[`deployed-history/lists/${this.domainId}/${deployedVersion}`] = true;
       await database.ref().update(updates);
 

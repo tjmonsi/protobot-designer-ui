@@ -26063,7 +26063,7 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
           updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = obj;
           updates[`domains/data/${this.domainId}/deployed`] = false;
           updates[`domains/data/${this.domainId}/deployedVersion`] = key;
-          updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
+          updates[`domains/data/${this.domainId}/commitMessage`] = '';
           updates[`deployed-history/lists/${this.domainId}/${deployedVersion}`] = true;
           await database.ref().update(updates);
           this.dispatchEvent(new window.CustomEvent('dialog-accept', {
@@ -27125,7 +27125,7 @@ const GetTreeStructureMixin = base => _decorate(null, function (_initialize, _Ge
       kind: "method",
       key: "getTreeStructure",
       value: async function getTreeStructure(domainId) {
-        console.log(domainId);
+        // console.log(domainId);
         const snap = await database.ref('tree-structure/data/').orderByChild('domain').equalTo(domainId) // .limitToFirst(10)
         .once('value');
         this.tree = snap.val() || null;
@@ -27164,7 +27164,18 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           //   packages: ['sankey']
           // });
 
-          this.drawChart(this.tree);
+          const newTree = {};
+
+          for (const i in this.tree) {
+            console.log(this.domain.deployedVersion, this.tree[i].version);
+
+            if (this.domain.deployedVersion === this.tree[i].version) {
+              newTree[i] = this.tree[i];
+            }
+          }
+
+          console.log(newTree);
+          this.drawChart(newTree);
         }
       }
     }, {

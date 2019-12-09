@@ -26680,7 +26680,9 @@ const GetDomainUtterancesMixin = base => _decorate(null, function (_initialize, 
         };
 
         if (!crowdId) {
-          // window.location.href = `/?page=${page || 'micro'}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
+          console.log(crowdId); // window.location.href = `/?page=${page || 'micro'}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
+
+          this.getDefaultUser(domain, page);
           return;
         }
 
@@ -26711,7 +26713,23 @@ const GetDomainUtterancesMixin = base => _decorate(null, function (_initialize, 
     }, {
       kind: "method",
       key: "getDefaultUser",
-      value: function getDefaultUser(domainId, domain) {}
+      value: async function getDefaultUser(domainId, page) {
+        if (domainId) {
+          const dsnap = await database.ref(`domains/data/${domainId}`).once('value');
+          const domain = dsnap.val() || null;
+
+          if (domain) {
+            const snap = await database.ref(`users/lists/domains/${domainId}/${domain.deployedVersion}`).once('value');
+            const data = snap.val() || null;
+            console.log(data, domain, domainId);
+
+            if (data) {
+              const array = Object.keys(data);
+              window.location.href = `/?page=${page || 'micro'}&domain=${domainId}&crowdId=${array[0]}&set=1`;
+            }
+          }
+        }
+      }
       /**
        *
        * @param {String} id

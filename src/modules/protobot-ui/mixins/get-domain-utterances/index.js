@@ -32,8 +32,9 @@ export const GetDomainUtterancesMixin = (base) => (class extends GetPathMixin(ba
     const { domain, crowdId, set, page } = this.queryObject || { domain: null, crowdId: null };
 
     if (!crowdId) {
+      console.log(crowdId);
       // window.location.href = `/?page=${page || 'micro'}&domain=${domain}&crowdId=-Lr7LknQcW1sqZd1dzDZ&set=1`;
-
+      this.getDefaultUser(domain, page);
       return;
     }
 
@@ -58,8 +59,21 @@ export const GetDomainUtterancesMixin = (base) => (class extends GetPathMixin(ba
     }
   }
 
-  getDefaultUser (domainId, domain) {
+  async getDefaultUser (domainId, page) {
 
+    if (domainId) {
+      const dsnap = await database.ref(`domains/data/${domainId}`).once('value');
+      const domain = dsnap.val() || null;
+      if (domain) {
+        const snap = await database.ref(`users/lists/domains/${domainId}/${domain.deployedVersion}`).once('value');
+        const data = snap.val() || null;
+        console.log(data, domain, domainId);
+        if (data) {
+          const array = Object.keys(data);
+          window.location.href = `/?page=${page || 'micro'}&domain=${domainId}&crowdId=${array[0]}&set=1`;
+        }
+      }
+    }
   }
 
   /**

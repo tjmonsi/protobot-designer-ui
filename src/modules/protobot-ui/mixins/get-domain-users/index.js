@@ -62,7 +62,7 @@ export const GetDomainUsersMixin = (base) => (class extends GetDomainMixin(base)
     console.log(data, snap.path)
     if (data) {
       for (const user in data) {
-        array.push(user);
+        array.push({ user, data: data[user] });
       }
       this.users = array;
       this.domainUsersChanged(this.users);

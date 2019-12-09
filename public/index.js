@@ -23573,7 +23573,9 @@ const template$2 = self => function () {
       <ul class = "crowd-link">
         ${users ? users.map(item => html`
         <li>
-          <a href="/?domain=${this.domainId}&page=micro&crowdId=${item}&set=1">${until(gettingCrowdId(item), 'Loading...')}</a>
+          <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=1">${until(gettingCrowdId(item.user), 'Loading...')}</a> ${item.data ? Object.keys(item.data).map(i => html`
+              <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=${i}">${i}</a>
+          `) : ''}
         </li>`) : ''}
       </ul>
     ` : ''}
@@ -23674,7 +23676,10 @@ const GetDomainUsersMixin = base => _decorate(null, function (_initialize, _GetD
 
         if (data) {
           for (const user in data) {
-            array.push(user);
+            array.push({
+              user,
+              data: data[user]
+            });
           }
 
           this.users = array;

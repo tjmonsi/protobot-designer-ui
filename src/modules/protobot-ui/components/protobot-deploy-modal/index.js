@@ -41,7 +41,7 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
     const { length } = Object.keys(list);
 
     if (domain) {
-      const { commitMessage, deployedVersion } = domain;
+      const { commitMessage } = domain;
       const { key } = database.ref(`deployed-history/data/${this.domainId}/`).push();
       const obj = {
         ...this.domain,
@@ -56,11 +56,11 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
         }
       };
       updates[`last-deployed/data/${this.domainId}/`] = obj;
-      updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = obj;
+      updates[`deployed-history/data/${this.domainId}/${key}`] = obj;
       updates[`domains/data/${this.domainId}/deployed`] = false;
       updates[`domains/data/${this.domainId}/deployedVersion`] = key;
       updates[`domains/data/${this.domainId}/commitMessage`] = '';
-      updates[`deployed-history/lists/${this.domainId}/${deployedVersion}`] = true;
+      updates[`deployed-history/lists/${this.domainId}/${key}`] = true;
       await database.ref().update(updates);
 
       this.dispatchEvent(new window.CustomEvent('dialog-accept', { detail: obj }));

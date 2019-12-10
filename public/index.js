@@ -26305,8 +26305,7 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
 
         if (domain) {
           const {
-            commitMessage,
-            deployedVersion
+            commitMessage
           } = domain;
           const {
             key
@@ -26323,11 +26322,11 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
             }
           };
           updates[`last-deployed/data/${this.domainId}/`] = obj;
-          updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = obj;
+          updates[`deployed-history/data/${this.domainId}/${key}`] = obj;
           updates[`domains/data/${this.domainId}/deployed`] = false;
           updates[`domains/data/${this.domainId}/deployedVersion`] = key;
           updates[`domains/data/${this.domainId}/commitMessage`] = '';
-          updates[`deployed-history/lists/${this.domainId}/${deployedVersion}`] = true;
+          updates[`deployed-history/lists/${this.domainId}/${key}`] = true;
           await database.ref().update(updates);
           this.dispatchEvent(new window.CustomEvent('dialog-accept', {
             detail: obj

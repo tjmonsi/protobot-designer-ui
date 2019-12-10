@@ -3,12 +3,17 @@ h2 {
   font-family: 'Open Sans', sans-serif;
 }
 
+h3 {
+  font-family: 'Open Sans', sans-serif;
+}
+
 p {
   font-size: 15px;
   font-family: 'Open Sans', sans-serif;
 }
 
 .topic-list {
+  margin-left: -10px;
   font-size: 15px;
   font-family: 'Open Sans', sans-serif;
 }

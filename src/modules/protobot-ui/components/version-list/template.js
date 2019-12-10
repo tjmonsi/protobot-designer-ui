@@ -20,7 +20,7 @@ export const template = self => function () {
       ${styles}
     </style>
 
-    <h2>Versions: </h2>
+    <h3>Versions: </h3>
     <ul>
     ${versions && versions.length ? versions.map(item => html`
       <li>

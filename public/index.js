@@ -11793,7 +11793,7 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
   };
 }, GetMemoMixin(GetDomainMixin(LitElement)));
 
-var styles$8 = ".memo-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.micro {\n  background-color:rgb(253, 200, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.macro {\n  background-color:rgb(253, 228, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nvaadin-checkbox {\n  color: white;\n}";
+var styles$8 = ".memo-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.micro {\n  background-color:rgb(253, 200, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.macro {\n  background-color:rgb(253, 228, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nvaadin-checkbox {\n  color: white;\n}";
 
 class Lumo extends HTMLElement {
   static get version() {
@@ -24470,7 +24470,7 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
   };
 }, GetTopicMixin(LitElement));
 
-var styles$i = ".empty-box{\n  height: 30px;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
+var styles$i = ".empty-box{\n  height: 30px;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n  font-weight: bold;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
 
 /**
  *
@@ -24489,7 +24489,7 @@ const template$6 = self => function () {
     </style>
 
     <h1 style="text-align: center">
-      Conversational Flow
+      Conversation Flow
     </h1>
     <div class="empty-box"></div>
     ${topics.map((topic, index) => html`
@@ -24608,7 +24608,7 @@ const template$7 = self => function () {
     <!-- ${!included ? ' - not included' : ''} -->
     ${!included ? html`
       ${this.queryObject.page === 'authoring' ? html`
-        <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Add to Conversational Flow</button>
+        <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Add</button>
       ` : html`
         <button class='new-label' >New</button>
       `}
@@ -26187,7 +26187,7 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
   };
 }, GetDomainMixin(LitElement));
 
-var styles$n = ":host {\n  overflow-y: auto;\n  height: 250px;\n}\n\na {\n  color: white\n}\n";
+var styles$n = ":host {\n  overflow-y: auto;\n  height: 250px;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\nul {\n  font-family: 'Open Sans', sans-serif;\n  font-size: 15px;\n}\n\na {\n  color: white;\n}\n";
 
 /**
  *
@@ -26207,7 +26207,7 @@ const template$9 = self => function () {
       ${styles$n}
     </style>
 
-    <h2>Versions: </h2>
+    <h3>Versions: </h3>
     <ul>
     ${versions && versions.length ? versions.map(item => html`
       <li>
@@ -27721,7 +27721,7 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
   };
 }, GetDomainMixin(LitElement));
 
-var styles$t = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$t = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
@@ -27865,7 +27865,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$u = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$u = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *

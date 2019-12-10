@@ -11793,7 +11793,7 @@ let ProtobotMemo = _decorate([customElement('protobot-memo')], function (_initia
   };
 }, GetMemoMixin(GetDomainMixin(LitElement)));
 
-var styles$8 = ".memo-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.micro {\n  background-color:rgb(253, 200, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.macro {\n  background-color:rgb(253, 228, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nvaadin-checkbox {\n  color: white;\n}";
+var styles$8 = ".memo-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.micro {\n  background-color:rgb(253, 200, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.macro {\n  background-color:rgb(253, 228, 85);\n  color:black;\n  padding: 6px;\n  border-radius: 4px;\n  margin-bottom: 5px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nvaadin-checkbox {\n  color: white;\n}";
 
 class Lumo extends HTMLElement {
   static get version() {
@@ -24678,7 +24678,11 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
   };
 }, GetTopicMixin(LitElement));
 
+<<<<<<< HEAD
+var styles$i = ".empty-box{\n  height: 30px;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n  font-weight: bold;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
+=======
 var styles$j = ".empty-box{\n  height: 30px;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
+>>>>>>> 9138c98f74ef12ed6962e6af84b762458b745efc
 
 /**
  *
@@ -24697,7 +24701,7 @@ const template$7 = self => function () {
     </style>
 
     <h1 style="text-align: center">
-      Conversational Flow
+      Conversation Flow
     </h1>
     <div class="empty-box"></div>
     ${topics.map((topic, index) => html`
@@ -24816,7 +24820,7 @@ const template$8 = self => function () {
     <!-- ${!included ? ' - not included' : ''} -->
     ${!included ? html`
       ${this.queryObject.page === 'authoring' ? html`
-        <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Add to Conversational Flow</button>
+        <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Add</button>
       ` : html`
         <button class='new-label' >New</button>
       `}
@@ -26400,6 +26404,203 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
   };
 }, GetDomainMixin(LitElement));
 
+<<<<<<< HEAD
+var styles$n = ":host {\n  overflow-y: auto;\n  height: 250px;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\nul {\n  font-family: 'Open Sans', sans-serif;\n  font-size: 15px;\n}\n\na {\n  color: white;\n}\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$9 = self => function () {
+  // @ts-ignore
+  const {
+    versions,
+    gettingDomainName,
+    changeVersion
+  } = this; // const { name } = topic || {};
+
+  return html`
+    <style>
+      ${styles$n}
+    </style>
+
+    <h3>Versions: </h3>
+    <ul>
+    ${versions && versions.length ? versions.map(item => html`
+      <li>
+        <a href="#" @click="${changeVersion}" data-id="${item}">${until(gettingDomainName(item, this.domainId), 'Loading...')}</a>
+      </li>
+    `) : ''}
+    </ul>
+  `;
+}.bind(self)();
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _GetPathMixin) {
+  class _class extends _GetPathMixin {
+    // @ts-ignore
+    constructor() {
+      super();
+
+      _initialize(this);
+
+      this.boundSaveDomainVersions = this.saveDomainVersions.bind(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "versions",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "domainId",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "connectedCallback",
+      value: function connectedCallback() {
+        _get(_getPrototypeOf(_class.prototype), "connectedCallback", this).call(this); // @ts-ignore
+
+
+        const {
+          domain
+        } = this.queryObject || {
+          domain: null
+        };
+
+        if (domain) {
+          this.domainId = domain;
+          this.getDomainName(domain);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "disconnectedCallback",
+      value: function disconnectedCallback() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
+          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
+        }
+
+        this.disconnectRef();
+      }
+    }, {
+      kind: "method",
+      key: "disconnectRef",
+      value: function disconnectRef() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
+
+        if (this.domainVersionsRef) {
+          this.domainVersionsRef.off('value', this.boundSaveDomainVersions);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "getDomainName",
+      value: function getDomainName(id) {
+        this.disconnectRef();
+
+        if (id) {
+          this.domainVersionsRef = database.ref(`deployed-history/lists/${id}`);
+          this.domainVersionsRef.on('value', this.boundSaveDomainVersions);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveDomainVersions",
+      value: function saveDomainVersions(snap) {
+        const data = snap.val();
+
+        if (data) {
+          this.versions = Object.keys(data);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: function domainChanged(domain) {}
+    }]
+  };
+}, GetPathMixin(base));
+
+// @ts-ignore
+
+let VersionList = _decorate([customElement('version-list')], function (_initialize, _GetDomainVersionsMix) {
+  class VersionList extends _GetDomainVersionsMix {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: VersionList,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$9(this);
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion({
+        target
+      }) {
+        const id = target.getAttribute('data-id');
+        const updates = {};
+        const snap = await database.ref(`deployed-history/data/${this.domainId}/${id}/`).once('value');
+        const obj = snap.val();
+
+        if (obj) {
+          updates[`domains/data/${this.domainId}/`] = obj;
+          await database.ref().update(updates); // window.location.reload();
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingDomainName",
+      value: async function gettingDomainName(id, domainId) {
+        // console.log(`${id}`);
+        console.log(`deployed-history/data/${domainId}/${id}/commitMessage`);
+        return (await database.ref(`deployed-history/data/${domainId}/${id}/commitMessage`).once('value')).val();
+      }
+    }]
+  };
+}, GetDomainVersionsMixin(LitElement));
+
+=======
+>>>>>>> 9138c98f74ef12ed6962e6af84b762458b745efc
 var styles$o = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
 /**
@@ -27740,7 +27941,7 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
   };
 }, GetDomainMixin(LitElement));
 
-var styles$t = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$t = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
@@ -27884,7 +28085,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$u = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$u = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *

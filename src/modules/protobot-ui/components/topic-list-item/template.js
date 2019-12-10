@@ -23,7 +23,7 @@ export const template = self => function () {
     <!-- ${!included ? ' - not included' : ''} -->
     ${!included ? html`
       ${this.queryObject.page === 'authoring' ? html`
-        <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Add to Conversational Flow</button>
+        <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Add</button>
       ` : html`
         <button class='new-label' >New</button>
       `}

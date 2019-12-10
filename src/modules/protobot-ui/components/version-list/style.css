@@ -3,6 +3,15 @@
   height: 250px;
 }
 
+h3 {
+  font-family: 'Open Sans', sans-serif;
+}
+
+ul {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 15px;
+}
+
 a {
-  color: white
+  color: white;
 }

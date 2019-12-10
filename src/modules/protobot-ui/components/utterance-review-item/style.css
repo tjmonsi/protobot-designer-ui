@@ -50,6 +50,9 @@
   margin-bottom: 10px;
   /* font-family: 'Noto Sans', sans-serif; */
 }
+.utterance.utterance__no_label {
+  color: yellow;
+}
 
 .utterance.utterance__right{
   background:black;

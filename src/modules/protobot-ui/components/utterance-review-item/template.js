@@ -14,7 +14,7 @@ import { until } from 'lit-html/directives/until';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { utterance, topicList, selectedTopic, gettingTopic, textInputVisible, appendTopic } = this;
+  const { utterance, topicList, selectedTopic, gettingTopic, textInputVisible, appendTopic, defaultTopic } = this;
   const { text, bot, topics: utteranceTopics } = utterance || {};
 
   return html`
@@ -29,7 +29,7 @@ export const template = self => function () {
       <div class="feed ${!bot ? 'feed__right' : ''}">
         <div>
           <div class="label">${bot ? 'Bot' : 'User'}</div>
-          <div class ="utterance ${!bot ? 'utterance__right' : ''}"> ${text}</div>
+          <div class ="utterance ${!bot ? 'utterance__right' : ''} ${defaultTopic ? 'utterance__no_label' : ''}"> ${text}</div>
           <!-- <div>
             ${utteranceTopics ? Object.keys(utteranceTopics).map(item => html`
               <span>${until(gettingTopic(item), 'Loading...')}</span>

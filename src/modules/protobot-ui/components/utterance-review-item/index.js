@@ -13,6 +13,9 @@ class UtteranceReviewItem extends GetUtteranceMixin(GetDomainMixin(LitElement)) 
   @property({ type: Boolean })
   textInputVisible = false;
 
+  @property({ type: Boolean })
+  defaultTopic = false;
+
   render () {
     return template(this);
   }
@@ -23,9 +26,21 @@ class UtteranceReviewItem extends GetUtteranceMixin(GetDomainMixin(LitElement)) 
     const { domain } = utterance;
     const updates = {};
     this.textInputVisible = false;
+    this.defaultTopic = false;
     if (value === 'new-topic') {
       this.textInputVisible = true;
+      this.defaultTopic = false;
       return;
+    }
+
+    else if (value === 'none') {
+      this.defaultTopic = true;
+      console.log(this.defaultTopic)
+    }
+
+    else {
+      this.defaultTopic = false;
+      console.log(this.defaultTopic);
     }
 
     // topic.utterances[utteranceId] = true;

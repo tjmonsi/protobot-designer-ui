@@ -36,7 +36,8 @@
   font-family: 'Open Sans', sans-serif;
 } */
 
-.utterance{
+
+.utterance {
   font-family: 'Montserrat', sans-serif;
   border-radius: 10px;
   font-size: 12pt;
@@ -50,9 +51,16 @@
   margin-bottom: 10px;
   /* font-family: 'Noto Sans', sans-serif; */
 }
+
 .utterance.utterance__no_label {
-  color: yellow;
+  background: rgb(214, 146, 0);
+  font-weight: 800;
 }
+.utterance.utterance__right.utterance__no_label {
+  background: rgb(214, 146, 0);
+  font-weight: 800;
+}
+
 
 .utterance.utterance__right{
   background:black;

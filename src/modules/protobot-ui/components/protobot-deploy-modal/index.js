@@ -36,6 +36,9 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
   async deploy () {
     const updates = {};
     const { domain } = this;
+    const snap2 = await database.ref(`deployed-history/lists/${this.domainId}`).once('value');
+    const list = snap2.val() || {};
+    const { length } = Object.keys(list);
 
     if (domain) {
       const { commitMessage, deployedVersion } = domain;
@@ -44,6 +47,7 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
         ...this.domain,
         deployedVersion: key,
         commitMessage: commitMessage || '',
+        versionNumber: length,
         parameters: {
           numUser: this.numUser,
           numSession: this.numSession,

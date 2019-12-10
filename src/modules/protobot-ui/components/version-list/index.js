@@ -30,8 +30,14 @@ class VersionList extends GetDomainVersionsMixin(LitElement) {
    */
   async gettingDomainName (id, domainId) {
     // console.log(`${id}`);
-    console.log(`deployed-history/data/${domainId}/${id}/commitMessage`)
+    // console.log(`deployed-history/data/${domainId}/${id}/versionNumber`)
     return (await database.ref(`deployed-history/data/${domainId}/${id}/commitMessage`).once('value')).val();
+  }
+
+  async gettingDomainVersion (id, domainId) {
+    // console.log(`${id}`);
+    // console.log(`deployed-history/data/${domainId}/${id}/versionNumber`)
+    return (await database.ref(`deployed-history/data/${domainId}/${id}/versionNumber`).once('value')).val();
   }
 }
 

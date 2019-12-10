@@ -29,7 +29,7 @@ export const template = self => function () {
       <p>In Macro Review, you can explore the whole conversation flows which are followed and prototyped by crowds.</p>
     </div>
     <br>
-    <h3>Current Topic List</h3>
+    <h3>Existing Topic List</h3>
     <ul class ="topic-list">
     ${topicList.map(topic => html`
       <li>
@@ -40,6 +40,7 @@ export const template = self => function () {
     </ul>
     <br>
     <br>
+    <h3>Add Message</h3>
     ${memos.map(({ page, crowdId, memoId, deployedVersion }) => page === pageId && crowdId === crowd && deployedVersion === dv ? html`
       <protobot-memo .memoId="${memoId}"></protobot-memo>
     ` : '')}

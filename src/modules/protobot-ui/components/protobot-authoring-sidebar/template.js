@@ -23,7 +23,7 @@ export const template = self => function () {
     <style>
       ${styles}
     </style>
-    <h3>Current topic list</h3>
+    <h3>Existing Topic List</h3>
 
     <ul class ="topic-list">
     ${topicList.map(topic => html`
@@ -43,7 +43,7 @@ export const template = self => function () {
     </div> -->
 
     <div>
-      <h3>Leave Message Here</h3>
+      <h3>Commit Message</h3>
       <wl-textarea outlined
         class = "commit-input"
         value="${commitMessage}"

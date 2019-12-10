@@ -4223,7 +4223,7 @@ const template = self => function () {
     </style>
 
     <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
-    label="Leave Memo Here" value="${text}" @change="${saveMemo.bind(this)}"></wl-textarea>
+    label="Memo" value="${text}" @change="${saveMemo.bind(this)}"></wl-textarea>
     <br>
   `;
 }.bind(self)();
@@ -26430,7 +26430,7 @@ const template$a = self => function () {
     <style>
       ${styles$o}
     </style>
-    <h3>Current topic list</h3>
+    <h3>Existing Topic List</h3>
 
     <ul class ="topic-list">
     ${topicList.map(topic => html`
@@ -26450,7 +26450,7 @@ const template$a = self => function () {
     </div> -->
 
     <div>
-      <h3>Leave Message Here</h3>
+      <h3>Commit Message</h3>
       <wl-textarea outlined
         class = "commit-input"
         value="${commitMessage}"
@@ -27801,7 +27801,7 @@ const template$f = self => function () {
       <p>In Macro Review, you can explore the whole conversation flows which are followed and prototyped by crowds.</p>
     </div>
     <br>
-    <h3>Current Topic List</h3>
+    <h3>Existing Topic List</h3>
     <ul class ="topic-list">
     ${topicList.map(topic => html`
       <li>
@@ -27812,6 +27812,7 @@ const template$f = self => function () {
     </ul>
     <br>
     <br>
+    <h3>Add Message</h3>
     ${memos.map(({
     page,
     crowdId,
@@ -27957,6 +27958,7 @@ const template$g = self => function () {
     </ul>
     <br>
     <br>
+    <h3>Add Message</h3>
     ${memos.map(({
     page,
     crowdId,

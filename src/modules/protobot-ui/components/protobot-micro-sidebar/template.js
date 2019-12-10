@@ -40,6 +40,7 @@ export const template = self => function () {
     </ul>
     <br>
     <br>
+    <h3>Add Message</h3>
     ${memos.map(({ page, crowdId, memoId, deployedVersion }) => page === pageId && crowdId === crowd && deployedVersion === dv ? html`
       <protobot-memo .memoId="${memoId}"></protobot-memo>
     ` : '')}

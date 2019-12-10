@@ -20,7 +20,7 @@ export const template = self => function () {
     </style>
 
     <wl-textarea outlined class="memo" style="--primary-hue: 46;  --primary-saturation: 100%;"
-    label="Leave Memo Here" value="${text}" @change="${saveMemo.bind(this)}"></wl-textarea>
+    label="Memo" value="${text}" @change="${saveMemo.bind(this)}"></wl-textarea>
     <br>
   `;
 }.bind(self)();

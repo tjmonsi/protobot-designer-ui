@@ -4,6 +4,7 @@ import styles from './style.css';
 import { until } from 'lit-html/directives/until';
 import '../protobot-memo';
 import '../protobot-memo-all';
+import '../version-list';
 
 /**
  *
@@ -46,6 +47,11 @@ export const template = self => function () {
           `) : ''}
         </li>`) : ''}
       </ul>
+      <version-list></version-list>
+    ` : ''}
+
+    ${page === 'macro' ? html`
+      <version-list></version-list>
     ` : ''}
 
     ${page === 'authoring' ? html`

@@ -23527,12 +23527,443 @@ let ProtobotMemoAll = _decorate([customElement('protobot-memo-all')], function (
   };
 }, GetDomainMemosMixin(LitElement));
 
+var styles$d = ":host {\n  overflow-y: auto;\n  height: 250px;\n}\n\na {\n  color: white\n}\n";
+
+var styles$e = ``;
+
+class ButtonBehavior extends FormElementBehavior {
+  constructor() {
+    super(...arguments);
+    this.type = 'submit';
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.listeners.push(addListener(this, 'click', this.onClick.bind(this)), addListener(this, 'keydown', this.onKeyDown.bind(this)));
+  }
+
+  onKeyDown(e) {
+    if (e.code === ENTER || e.code === SPACE) {
+      this.click();
+      stopEvent(e);
+
+      if (this.$ripple != null) {
+        this.$ripple.spawnRipple(undefined, {
+          autoRelease: true
+        });
+      }
+    }
+  }
+
+  onClick(e) {
+    if (this.disabled) {
+      stopEvent(e);
+      return;
+    }
+
+    if (e.target == this && !e.defaultPrevented) {
+      this.$formElement.dispatchEvent(new MouseEvent('click', {
+        relatedTarget: this,
+        composed: true
+      }));
+    }
+  }
+
+  renderFormElement() {
+    return html` <button style="display: none;" id="${this.formElementId}" aria-hidden="true" tabindex="-1" type="${this.type}" ?disabled="${this.disabled}" name="${ifDefined(this.name)}" value="${ifDefined(this.value)}"> </button> `;
+  }
+
+}
+
+ButtonBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$e)];
+
+__decorate([property({
+  type: String
+}), __metadata('design:type', String)], ButtonBehavior.prototype, 'type', void 0);
+
+var styles$f = `:host{--_button-color:var(--button-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_button-shadow-color:var(--button-shadow-color,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.2));color:var(--_button-color);background:var(--_button-bg);box-shadow:var(--elevation-1,0 .3125rem .625rem -.125rem var(--_button-shadow-color));padding:var(--button-padding,.75rem 1.5rem);font-size:var(--button-font-size,1rem);border-radius:var(--button-border-radius,.5rem);font-family:var(--button-font-family,var(--font-family-sans-serif,"Roboto Condensed",helvetica,sans-serif));transition:var(--button-transition,box-shadow var(--transition-duration-slow,.25s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));letter-spacing:var(--button-letter-spacing,.125rem);line-height:1;text-transform:uppercase;cursor:pointer;text-align:center;-webkit-user-select:none;-moz-user-select:none;user-select:none;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:0}:host,:host([fab]){display:inline-flex;align-items:center;justify-content:center}:host([fab]){width:var(--button-fab-size,2.5rem);height:var(--button-fab-size,2.5rem);padding:0;letter-spacing:0;border-radius:100%}:host([inverted]){color:var(--_button-bg);background:var(--_button-color)}:host([outlined]){border:var(--button-border-outlined,.125rem solid currentColor)}:host(:focus),:host(:hover){--_button-color:var(--button-color-hover,hsl(var(--primary-400-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-hover,hsl(var(--primary-400,var(--primary-hue,224),var(--primary-saturation,42%),var(--primary-lightness,52%))));--_button-shadow-color:var(--button-shadow-color-hover,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.5));will-change:background,color,box-shadow}:host(:active){--_button-color:var(--button-color-active,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));box-shadow:var(--elevation-4,0 .5rem 1rem -.125rem var(--_button-shadow-color))}:host([flat]:focus){background:var(--button-bg-active-flat,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),.08))}:host([disabled]){--_button-color:var(--button-color-disabled,hsl(var(--shade-400-contrast,var(--shade-hue-contrast,0),var(--shade-saturation-contrast,100%),var(--shade-lightness-contrast,100%))));--_button-bg:var(--button-bg-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));box-shadow:none;cursor:default;pointer-events:none}:host([flat]){box-shadow:none;background:none}#ripple{z-index:-1}`;
+
+let Button = class Button extends ButtonBehavior {
+  constructor() {
+    super(...arguments);
+    this.inverted = false;
+    this.fab = false;
+    this.outlined = false;
+    this.noRipple = false;
+    this.flat = false;
+    this.role = 'button';
+  }
+
+  render() {
+    return html` <wl-ripple id="ripple" overlay .target="${this}" ?disabled="${this.disabled || this.noRipple}"></wl-ripple> <slot></slot> ${this.renderFormElement()} `;
+  }
+
+};
+Button.styles = [...ButtonBehavior.styles, cssResult(styles$f)];
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'inverted', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'fab', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'outlined', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'noRipple', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'flat', void 0);
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata('design:type', String)], Button.prototype, 'role', void 0);
+
+__decorate([query('#ripple'), __metadata('design:type', Ripple)], Button.prototype, '$ripple', void 0);
+
+Button = __decorate([customElement('wl-button')], Button);
+
+var styles$g = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%;\n  font-size: 15px;\n}\n";
+
 /**
  *
  * @param {any} self
  */
 
 const template$2 = self => function () {
+  // @ts-ignore
+  const {
+    utterance,
+    utteranceTextChanged
+  } = this;
+  const {
+    text
+  } = utterance || {};
+  return html`
+    <style>
+      ${styles$g}
+    </style>
+
+    <div class="flex-area">
+      <div class="flex-1">
+        <input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">
+      </div>
+    </div>
+  `;
+}.bind(self)();
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetUtteranceMixin = base => _decorate(null, function (_initialize, _base) {
+  class _class extends _base {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "utteranceId",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "utterance",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "updated",
+      value: // @ts-ignore
+      // @ts-ignore
+      function updated(changedProps) {
+        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
+
+        if (changedProps.has('utteranceId')) {
+          this.getUtterance(this.utteranceId);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "getUtterance",
+      value: async function getUtterance(utteranceId) {
+        const snap = await database.ref(`utterances/data/${utteranceId}`).once('value');
+        this.utterance = snap.val() || null;
+      }
+    }]
+  };
+}, base);
+
+// @ts-ignore
+
+let ConversationalFlowUtterance = _decorate([customElement('conversational-flow-utterance')], function (_initialize, _GetUtteranceMixin) {
+  class ConversationalFlowUtterance extends _GetUtteranceMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ConversationalFlowUtterance,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$2(this);
+      }
+    }, {
+      kind: "method",
+      key: "utteranceTextChanged",
+      value: async function utteranceTextChanged(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.utterance.text !== value) {
+          await database.ref(`utterances/data/${this.utteranceId}/text`).set(value);
+        }
+      }
+    }]
+  };
+}, GetUtteranceMixin(LitElement));
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$3 = self => function () {
+  // @ts-ignore
+  const {
+    versions,
+    gettingDomainName,
+    changeVersion,
+    gettingDomainVersion
+  } = this; // const { name } = topic || {};
+
+  return html`
+    <style>
+      ${styles$d}
+    </style>
+
+    <h2>Versions: </h2>
+    <ul>
+    ${versions && versions.length ? versions.map(item => html`
+      <li>
+        <a href="#" @click="${changeVersion}" data-id="${item}">V.${until(gettingDomainVersion(item, this.domainId), 'Loading...')} - ${until(gettingDomainName(item, this.domainId), 'Loading...')}</a>
+      </li>
+    `) : ''}
+    </ul>
+  `;
+}.bind(self)();
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _GetPathMixin) {
+  class _class extends _GetPathMixin {
+    // @ts-ignore
+    constructor() {
+      super();
+
+      _initialize(this);
+
+      this.boundSaveDomainVersions = this.saveDomainVersions.bind(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "versions",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "domainId",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "connectedCallback",
+      value: function connectedCallback() {
+        _get(_getPrototypeOf(_class.prototype), "connectedCallback", this).call(this); // @ts-ignore
+
+
+        const {
+          domain
+        } = this.queryObject || {
+          domain: null
+        };
+
+        if (domain) {
+          this.domainId = domain;
+          this.getDomainName(domain);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "disconnectedCallback",
+      value: function disconnectedCallback() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
+          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
+        }
+
+        this.disconnectRef();
+      }
+    }, {
+      kind: "method",
+      key: "disconnectRef",
+      value: function disconnectRef() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
+
+        if (this.domainVersionsRef) {
+          this.domainVersionsRef.off('value', this.boundSaveDomainVersions);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "getDomainName",
+      value: function getDomainName(id) {
+        this.disconnectRef();
+
+        if (id) {
+          this.domainVersionsRef = database.ref(`deployed-history/lists/${id}`);
+          this.domainVersionsRef.on('value', this.boundSaveDomainVersions);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveDomainVersions",
+      value: function saveDomainVersions(snap) {
+        const data = snap.val();
+
+        if (data) {
+          this.versions = Object.keys(data);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: function domainChanged(domain) {}
+    }]
+  };
+}, GetPathMixin(base));
+
+// @ts-ignore
+
+let VersionList = _decorate([customElement('version-list')], function (_initialize, _GetDomainVersionsMix) {
+  class VersionList extends _GetDomainVersionsMix {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: VersionList,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$3(this);
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion({
+        target
+      }) {
+        const id = target.getAttribute('data-id');
+        const updates = {};
+        const snap = await database.ref(`deployed-history/data/${this.domainId}/${id}/`).once('value');
+        const obj = snap.val();
+
+        if (obj) {
+          updates[`domains/data/${this.domainId}/`] = obj;
+          await database.ref().update(updates); // window.location.reload();
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingDomainName",
+      value: async function gettingDomainName(id, domainId) {
+        // console.log(`${id}`);
+        // console.log(`deployed-history/data/${domainId}/${id}/versionNumber`)
+        return (await database.ref(`deployed-history/data/${domainId}/${id}/commitMessage`).once('value')).val();
+      }
+    }, {
+      kind: "method",
+      key: "gettingDomainVersion",
+      value: async function gettingDomainVersion(id, domainId) {
+        // console.log(`${id}`);
+        // console.log(`deployed-history/data/${domainId}/${id}/versionNumber`)
+        return (await database.ref(`deployed-history/data/${domainId}/${id}/versionNumber`).once('value')).val();
+      }
+    }]
+  };
+}, GetDomainVersionsMixin(LitElement));
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$4 = self => function () {
   // @ts-ignore
   const {
     domainName,
@@ -23578,6 +24009,11 @@ const template$2 = self => function () {
           `) : ''}
         </li>`) : ''}
       </ul>
+      <version-list></version-list>
+    ` : ''}
+
+    ${page === 'macro' ? html`
+      <version-list></version-list>
     ` : ''}
 
     ${page === 'authoring' ? html`
@@ -23730,7 +24166,7 @@ let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_
       kind: "method",
       key: "render",
       value: function render() {
-        return template$2(this);
+        return template$4(this);
       }
     }, {
       kind: "method",
@@ -23799,120 +24235,14 @@ let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_
   };
 }, GetDomainUsersMixin(LitElement));
 
-var styles$d = "\n.center-modal {\n  background: #221f4d;\n  font-family: 'Open Sans', sans-serif;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n}\n\n.domain-id {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n  margin: 10px;\n}\n\n.new-button {\n  --button-bg\t: rgb(78, 91, 150);\n}";
-
-var styles$e = ``;
-
-class ButtonBehavior extends FormElementBehavior {
-  constructor() {
-    super(...arguments);
-    this.type = 'submit';
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.listeners.push(addListener(this, 'click', this.onClick.bind(this)), addListener(this, 'keydown', this.onKeyDown.bind(this)));
-  }
-
-  onKeyDown(e) {
-    if (e.code === ENTER || e.code === SPACE) {
-      this.click();
-      stopEvent(e);
-
-      if (this.$ripple != null) {
-        this.$ripple.spawnRipple(undefined, {
-          autoRelease: true
-        });
-      }
-    }
-  }
-
-  onClick(e) {
-    if (this.disabled) {
-      stopEvent(e);
-      return;
-    }
-
-    if (e.target == this && !e.defaultPrevented) {
-      this.$formElement.dispatchEvent(new MouseEvent('click', {
-        relatedTarget: this,
-        composed: true
-      }));
-    }
-  }
-
-  renderFormElement() {
-    return html` <button style="display: none;" id="${this.formElementId}" aria-hidden="true" tabindex="-1" type="${this.type}" ?disabled="${this.disabled}" name="${ifDefined(this.name)}" value="${ifDefined(this.value)}"> </button> `;
-  }
-
-}
-
-ButtonBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$e)];
-
-__decorate([property({
-  type: String
-}), __metadata('design:type', String)], ButtonBehavior.prototype, 'type', void 0);
-
-var styles$f = `:host{--_button-color:var(--button-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_button-shadow-color:var(--button-shadow-color,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.2));color:var(--_button-color);background:var(--_button-bg);box-shadow:var(--elevation-1,0 .3125rem .625rem -.125rem var(--_button-shadow-color));padding:var(--button-padding,.75rem 1.5rem);font-size:var(--button-font-size,1rem);border-radius:var(--button-border-radius,.5rem);font-family:var(--button-font-family,var(--font-family-sans-serif,"Roboto Condensed",helvetica,sans-serif));transition:var(--button-transition,box-shadow var(--transition-duration-slow,.25s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));letter-spacing:var(--button-letter-spacing,.125rem);line-height:1;text-transform:uppercase;cursor:pointer;text-align:center;-webkit-user-select:none;-moz-user-select:none;user-select:none;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:0}:host,:host([fab]){display:inline-flex;align-items:center;justify-content:center}:host([fab]){width:var(--button-fab-size,2.5rem);height:var(--button-fab-size,2.5rem);padding:0;letter-spacing:0;border-radius:100%}:host([inverted]){color:var(--_button-bg);background:var(--_button-color)}:host([outlined]){border:var(--button-border-outlined,.125rem solid currentColor)}:host(:focus),:host(:hover){--_button-color:var(--button-color-hover,hsl(var(--primary-400-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-hover,hsl(var(--primary-400,var(--primary-hue,224),var(--primary-saturation,42%),var(--primary-lightness,52%))));--_button-shadow-color:var(--button-shadow-color-hover,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.5));will-change:background,color,box-shadow}:host(:active){--_button-color:var(--button-color-active,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));box-shadow:var(--elevation-4,0 .5rem 1rem -.125rem var(--_button-shadow-color))}:host([flat]:focus){background:var(--button-bg-active-flat,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),.08))}:host([disabled]){--_button-color:var(--button-color-disabled,hsl(var(--shade-400-contrast,var(--shade-hue-contrast,0),var(--shade-saturation-contrast,100%),var(--shade-lightness-contrast,100%))));--_button-bg:var(--button-bg-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));box-shadow:none;cursor:default;pointer-events:none}:host([flat]){box-shadow:none;background:none}#ripple{z-index:-1}`;
-
-let Button = class Button extends ButtonBehavior {
-  constructor() {
-    super(...arguments);
-    this.inverted = false;
-    this.fab = false;
-    this.outlined = false;
-    this.noRipple = false;
-    this.flat = false;
-    this.role = 'button';
-  }
-
-  render() {
-    return html` <wl-ripple id="ripple" overlay .target="${this}" ?disabled="${this.disabled || this.noRipple}"></wl-ripple> <slot></slot> ${this.renderFormElement()} `;
-  }
-
-};
-Button.styles = [...ButtonBehavior.styles, cssResult(styles$f)];
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'inverted', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'fab', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'outlined', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'noRipple', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'flat', void 0);
-
-__decorate([property({
-  type: String,
-  reflect: true
-}), __metadata('design:type', String)], Button.prototype, 'role', void 0);
-
-__decorate([query('#ripple'), __metadata('design:type', Ripple)], Button.prototype, '$ripple', void 0);
-
-Button = __decorate([customElement('wl-button')], Button);
+var styles$h = "\n.center-modal {\n  background: #221f4d;\n  font-family: 'Open Sans', sans-serif;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n}\n\n.domain-id {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n  margin: 10px;\n}\n\n.new-button {\n  --button-bg\t: rgb(78, 91, 150);\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$3 = self => function () {
+const template$5 = self => function () {
   // @ts-ignore
   const {
     submit,
@@ -23920,7 +24250,7 @@ const template$3 = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$d}
+      ${styles$h}
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
@@ -23965,7 +24295,7 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
       kind: "method",
       key: "render",
       value: function render() {
-        return template$3(this);
+        return template$5(this);
       }
     }, {
       kind: "method",
@@ -24052,136 +24382,14 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
   };
 }, GetPathMixin(LitElement));
 
-var styles$g = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: rgb(49, 63, 102);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:rgb(49, 63, 102);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  font-weight: bold;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background: rgb(74, 94, 150);\n}\n\nwl-button {\n  --button-border-radius\t: 0px;\n  --button-padding : 10px;\n  --button-font-size\t:10px;\n  --button-bg\t: rgb(182, 182, 182);\n  --button-bg-hover : rgb(71, 71, 71);\n}\n";
-
-var styles$h = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%;\n  font-size: 15px;\n}\n";
+var styles$i = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: rgb(49, 63, 102);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:rgb(49, 63, 102);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  font-weight: bold;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background: rgb(74, 94, 150);\n}\n\nwl-button {\n  --button-border-radius\t: 0px;\n  --button-padding : 10px;\n  --button-font-size\t:10px;\n  --button-bg\t: rgb(182, 182, 182);\n  --button-bg-hover : rgb(71, 71, 71);\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$4 = self => function () {
-  // @ts-ignore
-  const {
-    utterance,
-    utteranceTextChanged
-  } = this;
-  const {
-    text
-  } = utterance || {};
-  return html`
-    <style>
-      ${styles$h}
-    </style>
-
-    <div class="flex-area">
-      <div class="flex-1">
-        <input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">
-      </div>
-    </div>
-  `;
-}.bind(self)();
-
-/**
- *
- * @param {*} base
- */
-
-const GetUtteranceMixin = base => _decorate(null, function (_initialize, _base) {
-  class _class extends _base {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: _class,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: String
-      })],
-      key: "utteranceId",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: Object
-      })],
-      key: "utterance",
-      value: void 0
-    }, {
-      kind: "method",
-      key: "updated",
-      value: // @ts-ignore
-      // @ts-ignore
-      function updated(changedProps) {
-        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
-
-        if (changedProps.has('utteranceId')) {
-          this.getUtterance(this.utteranceId);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "getUtterance",
-      value: async function getUtterance(utteranceId) {
-        const snap = await database.ref(`utterances/data/${utteranceId}`).once('value');
-        this.utterance = snap.val() || null;
-      }
-    }]
-  };
-}, base);
-
-// @ts-ignore
-
-let ConversationalFlowUtterance = _decorate([customElement('conversational-flow-utterance')], function (_initialize, _GetUtteranceMixin) {
-  class ConversationalFlowUtterance extends _GetUtteranceMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ConversationalFlowUtterance,
-    d: [{
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$4(this);
-      }
-    }, {
-      kind: "method",
-      key: "utteranceTextChanged",
-      value: async function utteranceTextChanged(event) {
-        const {
-          target
-        } = event;
-        const {
-          value
-        } = target;
-
-        if (this.utterance.text !== value) {
-          await database.ref(`utterances/data/${this.utteranceId}/text`).set(value);
-        }
-      }
-    }]
-  };
-}, GetUtteranceMixin(LitElement));
-
-/**
- *
- * @param {any} self
- */
-
-const template$5 = self => function () {
+const template$6 = self => function () {
   // @ts-ignore
   const {
     topic,
@@ -24197,7 +24405,7 @@ const template$5 = self => function () {
   } = topic || {};
   return html`
     <style>
-      ${styles$g}
+      ${styles$i}
     </style>
 
     <div class="flex-area ${sub ? 'sub' : ''}">
@@ -24336,7 +24544,7 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
       key: "render",
       value: // @ts-ignore
       function render() {
-        return template$5(this);
+        return template$6(this);
       }
     }, {
       kind: "method",
@@ -24470,14 +24678,18 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
   };
 }, GetTopicMixin(LitElement));
 
+<<<<<<< HEAD
 var styles$i = ".empty-box{\n  height: 30px;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n  font-weight: bold;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
+=======
+var styles$j = ".empty-box{\n  height: 30px;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
+>>>>>>> 9138c98f74ef12ed6962e6af84b762458b745efc
 
 /**
  *
  * @param {any} self
  */
 
-const template$6 = self => function () {
+const template$7 = self => function () {
   // @ts-ignore
   const {
     topics,
@@ -24485,7 +24697,7 @@ const template$6 = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$i}
+      ${styles$j}
     </style>
 
     <h1 style="text-align: center">
@@ -24522,7 +24734,7 @@ let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], functio
       kind: "method",
       key: "render",
       value: function render() {
-        return template$6(this);
+        return template$7(this);
       }
     }, {
       kind: "method",
@@ -24579,14 +24791,14 @@ let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], functio
   };
 }, GetDomainMixin(LitElement));
 
-var styles$j = "/* .flex-area {\n  display: flex;\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n} */\n\n.new-label {\n  background-color: rgb(82, 108, 255);\n  border: none;\n  border-radius: 4px;\n  color: white;\n  font-weight: bold;\n  font-size: 15px;\n  font-family: 'Raleway', sans-serif;\n  padding: 3px;\n}\n";
+var styles$k = "/* .flex-area {\n  display: flex;\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n} */\n\n.new-label {\n  background-color: rgb(82, 108, 255);\n  border: none;\n  border-radius: 4px;\n  color: white;\n  font-weight: bold;\n  font-size: 15px;\n  font-family: 'Raleway', sans-serif;\n  padding: 3px;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$7 = self => function () {
+const template$8 = self => function () {
   // @ts-ignore
   const {
     topic,
@@ -24598,7 +24810,7 @@ const template$7 = self => function () {
   } = topic || {};
   return html`
     <style>
-      ${styles$j}
+      ${styles$k}
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
@@ -24665,7 +24877,7 @@ let TopicListItem = _decorate([customElement('topic-list-item')], function (_ini
       key: "render",
       value: // @ts-ignore
       function render() {
-        return template$7(this);
+        return template$8(this);
       }
     }, {
       kind: "method",
@@ -24756,7 +24968,7 @@ function nextIndex(group, currentIndex, keyCode) {
   return null;
 }
 
-var styles$k = ``;
+var styles$l = ``;
 
 class RadioBehavior extends SwitchBehavior {
   constructor() {
@@ -24814,14 +25026,14 @@ class RadioBehavior extends SwitchBehavior {
 
 }
 
-RadioBehavior.styles = [...SwitchBehavior.styles, cssResult(styles$k)];
+RadioBehavior.styles = [...SwitchBehavior.styles, cssResult(styles$l)];
 
 __decorate([property({
   type: String,
   reflect: true
 }), __metadata('design:type', String)], RadioBehavior.prototype, 'role', void 0);
 
-var styles$l = `:host{--_radio-bg:var(--radio-bg,transparent);--_radio-color:var(--radio-color,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))));background:var(--_radio-bg);color:var(--_radio-color);width:var(--radio-size,1.25rem);height:var(--radio-size,1.25rem);border:var(--radio-border-config,.125rem solid) currentColor;border-radius:var(--radio-border-radius,100%);transition:var(--radio-transition,background var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)),border-color var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));position:relative;display:inline-flex;align-items:center;justify-content:center;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([disabled])){cursor:pointer}:host([checked]){--_radio-bg:var(--radio-bg-checked,transparent);--_radio-color:var(--radio-color-checked,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))))}:host([checked]) #dot{transform:scale(1)}:host(:focus),:host(:hover){will-change:border,background}:host(:focus) #dot,:host(:hover) #dot{will-change:transform,background}:host([disabled]){--_radio-bg:var(--radio-bg-disabled,transparent);--_radio-color:var(--radio-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));pointer-events:none}:host([disabled][checked]){--_radio-bg:var(--radio-bg-disabled-checked,transparent);--_radio-color:var(--radio-color-disabled-checked,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))))}#dot{background:currentColor;width:var(--radio-dot-size,.625rem);height:var(--radio-dot-size,.625rem);border-radius:var(--radio-dot-border-radius,100%);transition:var(--radio-dot-transition,transform var(--transition-duration-medium,.18s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));transform:scale(0)}#ripple{transform:var(--radio-ripple-transform,translate(-50%,-50%) scale(1.8))}`;
+var styles$m = `:host{--_radio-bg:var(--radio-bg,transparent);--_radio-color:var(--radio-color,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))));background:var(--_radio-bg);color:var(--_radio-color);width:var(--radio-size,1.25rem);height:var(--radio-size,1.25rem);border:var(--radio-border-config,.125rem solid) currentColor;border-radius:var(--radio-border-radius,100%);transition:var(--radio-transition,background var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)),border-color var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));position:relative;display:inline-flex;align-items:center;justify-content:center;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([disabled])){cursor:pointer}:host([checked]){--_radio-bg:var(--radio-bg-checked,transparent);--_radio-color:var(--radio-color-checked,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))))}:host([checked]) #dot{transform:scale(1)}:host(:focus),:host(:hover){will-change:border,background}:host(:focus) #dot,:host(:hover) #dot{will-change:transform,background}:host([disabled]){--_radio-bg:var(--radio-bg-disabled,transparent);--_radio-color:var(--radio-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));pointer-events:none}:host([disabled][checked]){--_radio-bg:var(--radio-bg-disabled-checked,transparent);--_radio-color:var(--radio-color-disabled-checked,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))))}#dot{background:currentColor;width:var(--radio-dot-size,.625rem);height:var(--radio-dot-size,.625rem);border-radius:var(--radio-dot-border-radius,100%);transition:var(--radio-dot-transition,transform var(--transition-duration-medium,.18s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));transform:scale(0)}#ripple{transform:var(--radio-ripple-transform,translate(-50%,-50%) scale(1.8))}`;
 
 let Radio = class Radio extends RadioBehavior {
   render() {
@@ -24829,7 +25041,7 @@ let Radio = class Radio extends RadioBehavior {
   }
 
 };
-Radio.styles = [...RadioBehavior.styles, cssResult(styles$l)];
+Radio.styles = [...RadioBehavior.styles, cssResult(styles$m)];
 Radio = __decorate([customElement('wl-radio')], Radio);
 
 const $_documentContainer$3 = html$1`<dom-module id="lumo-radio-button" theme-for="vaadin-radio-button">
@@ -25218,7 +25430,7 @@ class RadioButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(
 
 customElements.define(RadioButtonElement.is, RadioButtonElement);
 
-var styles$m = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n}\n\n.dialog{\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
+var styles$n = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n}\n\n.dialog{\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
 
 /**
  * @license
@@ -25925,7 +26137,7 @@ customElements.define(ButtonElement.is, ButtonElement);
  * @param {any} self
  */
 
-const template$8 = self => function () {
+const template$9 = self => function () {
   // @ts-ignore
   const {
     deployedVersion,
@@ -25946,7 +26158,7 @@ const template$8 = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$m}
+      ${styles$n}
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
@@ -26079,7 +26291,7 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
       kind: "method",
       key: "render",
       value: function render() {
-        return template$8(this);
+        return template$9(this);
       }
     }, {
       kind: "method",
@@ -26089,6 +26301,11 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
         const {
           domain
         } = this;
+        const snap2 = await database.ref(`deployed-history/lists/${this.domainId}`).once('value');
+        const list = snap2.val() || {};
+        const {
+          length
+        } = Object.keys(list);
 
         if (domain) {
           const {
@@ -26101,6 +26318,7 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
           const obj = { ...this.domain,
             deployedVersion: key,
             commitMessage: commitMessage || '',
+            versionNumber: length,
             parameters: {
               numUser: this.numUser,
               numSession: this.numSession,
@@ -26187,6 +26405,7 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
   };
 }, GetDomainMixin(LitElement));
 
+<<<<<<< HEAD
 var styles$n = ":host {\n  overflow-y: auto;\n  height: 250px;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\nul {\n  font-family: 'Open Sans', sans-serif;\n  font-size: 15px;\n}\n\na {\n  color: white;\n}\n";
 
 /**
@@ -26381,6 +26600,8 @@ let VersionList = _decorate([customElement('version-list')], function (_initiali
   };
 }, GetDomainVersionsMixin(LitElement));
 
+=======
+>>>>>>> 9138c98f74ef12ed6962e6af84b762458b745efc
 var styles$o = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
 /**

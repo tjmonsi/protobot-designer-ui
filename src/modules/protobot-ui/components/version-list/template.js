@@ -12,7 +12,7 @@ import '../conversational-flow-utterance';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { versions, gettingDomainName, changeVersion } = this;
+  const { versions, gettingDomainName, changeVersion, gettingDomainVersion } = this;
   // const { name } = topic || {};
 
   return html`
@@ -24,7 +24,7 @@ export const template = self => function () {
     <ul>
     ${versions && versions.length ? versions.map(item => html`
       <li>
-        <a href="#" @click="${changeVersion}" data-id="${item}">${until(gettingDomainName(item, this.domainId), 'Loading...')}</a>
+        <a href="#" @click="${changeVersion}" data-id="${item}">V.${until(gettingDomainVersion(item, this.domainId), 'Loading...')} - ${until(gettingDomainName(item, this.domainId), 'Loading...')}</a>
       </li>
     `) : ''}
     </ul>

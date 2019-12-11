@@ -170,23 +170,24 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
         array.push(utteranceName[u]);
       }
 
+      console.log(row[0], array, row[2]);
       if (index < 0) {
-        const obj = { name: row[0], utterances: [] };
-        // @ts-ignore
-        graph.nodes.push(obj);
-      }
-      //  else {
-      //   // @ts-ignore
-      //   graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
-      // }
-
-      if (index2 < 0) {
-        const obj = { name: row[1], utterances: array };
+        const obj = { name: row[0], utterances: array };
         // @ts-ignore
         graph.nodes.push(obj);
       } else {
         // @ts-ignore
-        graph.nodes[index2].utterances = [...graph.nodes[index2].utterances, ...array];
+        graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
+      }
+
+      if (index2 < 0) {
+        const obj = { name: row[1], utterances: [] };
+        // @ts-ignore
+        graph.nodes.push(obj);
+      } else {
+        // @ts-ignore
+        // graph.nodes[index2].utterances = [...graph.nodes[index2].utterances, ...array];
+        console.log('hey');
       }
     }
 

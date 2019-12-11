@@ -23766,7 +23766,6 @@ const template$3 = self => function () {
   // @ts-ignore
   const {
     versions,
-    gettingDomainName,
     changeVersion,
     gettingDomainVersion
   } = this; // const { name } = topic || {};
@@ -23780,7 +23779,7 @@ const template$3 = self => function () {
     <ul>
     ${versions && versions.length ? versions.map(item => html`
       <li>
-        <a href="#" @click="${changeVersion}" data-id="${item}">V.${until(gettingDomainVersion(item, this.domainId), 'Loading...')} - ${until(gettingDomainName(item, this.domainId), 'Loading...')}</a>
+        <a href="#" @click="${changeVersion}" data-id="${item}">V.${until(gettingDomainVersion(item, this.domainId), 'Loading...')}</a>
       </li>
     `) : ''}
     </ul>
@@ -27430,29 +27429,31 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             array.push(utteranceName[u]);
           }
 
+          console.log(row[0], array, row[2]);
+
           if (index < 0) {
             const obj = {
               name: row[0],
-              utterances: []
-            }; // @ts-ignore
-
-            graph.nodes.push(obj);
-          } //  else {
-          //   // @ts-ignore
-          //   graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
-          // }
-
-
-          if (index2 < 0) {
-            const obj = {
-              name: row[1],
               utterances: array
             }; // @ts-ignore
 
             graph.nodes.push(obj);
           } else {
             // @ts-ignore
-            graph.nodes[index2].utterances = [...graph.nodes[index2].utterances, ...array];
+            graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
+          }
+
+          if (index2 < 0) {
+            const obj = {
+              name: row[1],
+              utterances: []
+            }; // @ts-ignore
+
+            graph.nodes.push(obj);
+          } else {
+            // @ts-ignore
+            // graph.nodes[index2].utterances = [...graph.nodes[index2].utterances, ...array];
+            console.log('hey');
           }
         } // console.log(graph)
         // @ts-ignore

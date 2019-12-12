@@ -2,24 +2,26 @@
 import { LitElement, customElement, property } from 'lit-element';
 import { template } from './template.js';
 import { GetDomainMixin } from '../../mixins/get-domain';
-// import { GetDomainVersionsMixin } from '../../mixins/get-domain-versions';
 import { database } from '../../../firebase';
 
 // Extend the LitElement base class
 // @ts-ignore
-@customElement('protobot-design-history')
-class ProtobotDesignHistory extends GetDomainMixin(LitElement) {
+@customElement('protobot-design-history-sidebar')
+class ProtobotDesignHistorySidebar extends GetDomainMixin(LitElement) {
   @property({type: String})
   lastDeployedDomainVersion
 
-  @property ({type: Array})
-  lastDeployedDomainTopics = []
+  @property({type: Array})
+  versionsDetail
 
   render () {
     return template(this);
   }
 
+  async changeVersion({detail: versionId}){
+    this.dispatchEvent(new window.CustomEvent('change-version', {detail: versionId}))
+  }
 
 }
 
-export { ProtobotDesignHistory };
+export { ProtobotDesignHistorySidebar };

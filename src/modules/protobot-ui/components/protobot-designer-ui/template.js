@@ -11,6 +11,7 @@ import '../protobot-design-history'
 import '../protobot-macro-sidebar';
 import '../protobot-micro-sidebar';
 import '../protobot-history-sidebar';
+import '../protobot-design-history-sidebar';
 import '../protobot-deploy';
 import 'weightless/ripple';
 
@@ -23,7 +24,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { queryObject } = this;
+  const { queryObject, lastDeployedDomainVersion, lastDeployedDomainTopics, changeVersion, versionsDetail } = this;
   const { domain, page } = queryObject;
 
   return html`
@@ -58,7 +59,7 @@ export const template = self => function () {
         ` : ''}
 
         ${page === 'design-history' ? html`
-          <protobot-design-history></protobot-design-history>
+          <protobot-design-history lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopics=${lastDeployedDomainTopics}></protobot-design-history>
         ` : ''}
       </div>
 
@@ -73,8 +74,8 @@ export const template = self => function () {
         ${page === 'micro' ? html`
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
         ` : ''}
-        ${page === 'history' ? html`
-          <protobot-history-sidebar></protobot-history-sidebar>
+        ${page === 'design-history' ? html`
+          <protobot-design-history-sidebar .versionsDetail=${versionsDetail} lastDeployedDomainVersion=${lastDeployedDomainVersion} @change-version=${changeVersion.bind(this)}></protobot-design-history-sidebar>
         ` : ''}
         </div>
       </div>

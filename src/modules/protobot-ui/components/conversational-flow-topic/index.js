@@ -15,11 +15,17 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
   @property({ type: Boolean })
   sub = false;
 
+  @property({type: Boolean})
+  readonly = false;
+
   render () {
     return template(this);
   }
 
   async topicNameChanged (event) {
+    if(this.readonly){
+      return;
+    }
     const { target } = event;
     const { value } = target;
 

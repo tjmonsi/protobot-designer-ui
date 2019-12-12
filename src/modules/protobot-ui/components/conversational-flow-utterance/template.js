@@ -7,7 +7,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { utterance, utteranceTextChanged } = this;
+  const { utterance, utteranceTextChanged, readonly} = this;
   const { text } = utterance || {};
 
   return html`
@@ -16,7 +16,7 @@ export const template = self => function () {
     </style>
 
 
-    <input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">
+    <input class="text-area" type="text" value="${text}" placeholder="utterance" readonly=${readonly} @change="${utteranceTextChanged.bind(this)}">
 
   `;
 }.bind(self)();

@@ -23920,7 +23920,8 @@ const template$3 = self => function () {
   // @ts-ignore
   const {
     utterance,
-    utteranceTextChanged
+    utteranceTextChanged,
+    readonly
   } = this;
   const {
     text
@@ -23931,7 +23932,7 @@ const template$3 = self => function () {
     </style>
 
 
-    <input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">
+    <input class="text-area" type="text" value="${text}" placeholder="utterance" readonly=${readonly} @change="${utteranceTextChanged.bind(this)}">
 
   `;
 }.bind(self)();
@@ -24005,6 +24006,17 @@ let ConversationalFlowUtterance = _decorate([customElement('conversational-flow-
   return {
     F: ConversationalFlowUtterance,
     d: [{
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "readonly",
+
+      value() {
+        return false;
+      }
+
+    }, {
       kind: "method",
       key: "render",
       value: function render() {
@@ -24014,6 +24026,10 @@ let ConversationalFlowUtterance = _decorate([customElement('conversational-flow-
       kind: "method",
       key: "utteranceTextChanged",
       value: async function utteranceTextChanged(event) {
+        if (this.readonly) {
+          return;
+        }
+
         const {
           target
         } = event;
@@ -24071,15 +24087,16 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
     // @property({ type: String})
     // latestEditedDomainVersion = '';
     // @ts-ignore
+    // @ts-ignore
     constructor() {
       super();
 
       _initialize(this);
 
       this.boundSaveDomainVersions = this.saveDomainVersions.bind(this);
-      this.boundSaveDomainVersionsDetail = this.saveDomainVersionsDetail.bind(this); // this.boundSaveLatestEditedDomainVersion = this.saveLatestEditedDomainVersion.bind(this);
-
+      this.boundSaveDomainVersionsDetail = this.saveDomainVersionsDetail.bind(this);
       this.boundSaveLatestDeployedDomainVersion = this.saveLatestDeployedDomainVersion.bind(this);
+      this.boundSaveLatestDeployedDomainTopics = this.saveLatestDeployedDomainTopics.bind(this);
     }
 
   }
@@ -24127,6 +24144,17 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
       }
 
     }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopics",
+
+      value() {
+        return [];
+      }
+
+    }, {
       kind: "method",
       key: "connectedCallback",
       value: function connectedCallback() {
@@ -24162,9 +24190,9 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
 
         if (this.domainVersionsRef) {
           this.domainVersionsRef.off('value', this.boundSaveDomainVersions);
-          this.domainVersionsDetailRef.off('value', this.boundSaveDomainVersionsDetail); // this.LatestEditedDomainVersionRef.off('value', this.boundSaveLatestEditedDomainVersion);
-
+          this.domainVersionsDetailRef.off('value', this.boundSaveDomainVersionsDetail);
           this.LatestDeployedDomainVersionRef.off('value', this.boundSaveLatestDeployedDomainVersion);
+          this.LatestDeployedDomainTopicsRef.off('value', this.boundSaveLatestDeployedDomainTopics);
         }
       }
       /**
@@ -24182,11 +24210,11 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
           this.domainVersionsRef = database.ref(`deployed-history/lists/${id}`);
           this.domainVersionsRef.on('value', this.boundSaveDomainVersions);
           this.domainVersionsDetailRef = database.ref(`deployed-history/data/${id}`);
-          this.domainVersionsDetailRef.on('value', this.boundSaveDomainVersionsDetail); // this.LatestEditedDomainVersionRef = database.ref(`domains/data/${id}/deployedVersion`)
-          // this.LatestEditedDomainVersionRef.on('value', this.boundSaveLatestEditedDomainVersion);
-
+          this.domainVersionsDetailRef.on('value', this.boundSaveDomainVersionsDetail);
           this.LatestDeployedDomainVersionRef = database.ref(`last-deployed/data/${id}/deployedVersion`);
           this.LatestDeployedDomainVersionRef.on('value', this.boundSaveLatestDeployedDomainVersion);
+          this.LatestDeployedDomainTopicsRef = database.ref(`last-deployed/data/${id}`);
+          this.LatestDeployedDomainTopicsRef.on('value', this.boundSaveLatestDeployedDomainTopics);
         }
       }
     }, {
@@ -24208,13 +24236,7 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
         if (data) {
           this.versionsDetail = data;
         }
-      } // saveLatestEditedDomainVersion (snap) {
-      //   const data = snap.val();
-      //   if (data) {
-      //     this.latestEditedDomainVersion = data;
-      //   }
-      // }
-
+      }
     }, {
       kind: "method",
       key: "saveLatestDeployedDomainVersion",
@@ -24227,10 +24249,39 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
       }
     }, {
       kind: "method",
+      key: "saveLatestDeployedDomainTopics",
+      value: function saveLatestDeployedDomainTopics(snap) {
+        const domain = snap.val() || {
+          topics: {},
+          subs: []
+        };
+        const {
+          topics,
+          subs
+        } = domain;
+        const array = [];
+
+        for (const topic in topics) {
+          array.push({
+            topic,
+            order: topics[topic],
+            sub: subs[topic] || false
+          });
+        }
+
+        this.lastDeployedDomainTopics = array.sort((i, j) => i.order - j.order).map(i => ({
+          id: i.topic,
+          sub: i.sub
+        }));
+        console.log(this.lastDeployedDomainTopics);
+      }
+    }, {
+      kind: "method",
       key: "updateLatestDeployedDomainVersion",
-      value: function updateLatestDeployedDomainVersion(version, callback) {
+      value: async function updateLatestDeployedDomainVersion(version) {
         this.lastDeployedDomainVersion = version;
-        callback(version);
+        const snap = await database.ref(`deployed-history/data/${this.domainId}/${version}`).once('value');
+        this.saveLatestDeployedDomainTopics(snap);
       }
     }, {
       kind: "method",
@@ -24633,7 +24684,8 @@ const template$7 = self => function () {
     newTopic,
     subTopic,
     deleteTopic,
-    sub
+    sub,
+    readonly
   } = this;
   const {
     name
@@ -24645,23 +24697,26 @@ const template$7 = self => function () {
 
     <div class="flex-area ${sub ? 'sub' : ''}">
       <div class="flex-1">
-        <input class="text-area" type="text" value="${name}" placeholder="topic" @change="${topicNameChanged.bind(this)}">
+        <input class="text-area" type="text" value="${name}" placeholder="topic" readonly=${readonly} @change="${topicNameChanged.bind(this)}">
       </div>
 
 
-      <conversational-flow-utterance .utteranceId="${mainUtteranceId}" class="${sub ? 'sub-utter' : ''}"></conversational-flow-utterance>
+      <conversational-flow-utterance .utteranceId="${mainUtteranceId}" ?readonly=${readonly} class="${sub ? 'sub-utter' : ''}"></conversational-flow-utterance>
 
 
 
-      <!-- ternary expression -->
-      ${!sub ? html`
-        <wl-button type="button" @click="${newTopic.bind(this)}">New</wl-button>
-        <wl-button type="button" @click="${subTopic.bind(this)}">Sub</wl-button>
-      ` : html`
-        <wl-button type="button" @click="${subTopic.bind(this)}">New</wl-button>
-      `}
+      ${!readonly ? html`
+        ${!sub ? html`
+          <wl-button type="button" @click="${newTopic.bind(this)}">New</wl-button>
+          <wl-button type="button" @click="${subTopic.bind(this)}">Sub</wl-button>
+        ` : html`
+          <wl-button type="button" @click="${subTopic.bind(this)}">New</wl-button>
+        `}
+        <wl-button type="button" @click="${deleteTopic.bind(this)}">Delete</wl-button>
+      ` : ``}
 
-      <wl-button type="button" @click="${deleteTopic.bind(this)}">Delete</wl-button>
+
+
     </div>
   `;
 }.bind(self)();
@@ -24775,6 +24830,17 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
       }
 
     }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "readonly",
+
+      value() {
+        return false;
+      }
+
+    }, {
       kind: "method",
       key: "render",
       value: // @ts-ignore
@@ -24785,6 +24851,10 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
       kind: "method",
       key: "topicNameChanged",
       value: async function topicNameChanged(event) {
+        if (this.readonly) {
+          return;
+        }
+
         const {
           target
         } = event;
@@ -27995,7 +28065,7 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
   };
 }, GetDomainMixin(LitElement));
 
-var styles$u = "/* :host {\n  overflow-y: auto;\n} */\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n";
+var styles$u = ":host{\n\n}\n.topic-container {\n  margin: 3em;\n}";
 
 /**
  *
@@ -28005,105 +28075,27 @@ var styles$u = "/* :host {\n  overflow-y: auto;\n} */\n\nh3 {\n  font-family: 'O
 const template$g = self => function () {
   // @ts-ignore
   const {
-    versions,
-    changeVersion,
-    lastDeployedDomainVersion
-  } = this; // const { name } = topic || {};
-
+    lastDeployedDomainVersion,
+    lastDeployedDomainTopics
+  } = this;
   return html`
     <style>
       ${styles$u}
     </style>
     ${lastDeployedDomainVersion}
-    <select class="select-box" placeholder="Topic" @change=${changeVersion}>
-      ${versions && Object.keys(versions).map(item => html`
-      <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
-      ${versions[item].versionNumber}
-      </option>`)}
-
-    </select>
-
+    ${lastDeployedDomainTopics.map((topic, index) => html`
+      <div class="topic-container">
+        <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" ?readonly=${true} index="${index}"></conversational-flow-topic>
+      </div>
+    `)}
 
   `;
 }.bind(self)();
 
 // @ts-ignore
 
-let VersionList2 = _decorate([customElement('version-managable-list2')], function (_initialize, _LitElement) {
-  class VersionList2 extends _LitElement {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: VersionList2,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: Object
-      })],
-      key: "versions",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: String
-      })],
-      key: "lastDeployedDomainVersion",
-      value: void 0
-    }, {
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$g(this);
-      }
-    }, {
-      kind: "method",
-      key: "changeVersion",
-      value: async function changeVersion(event) {
-        this.dispatchEvent(new window.CustomEvent('change-version', {
-          detail: event.target.value
-        }));
-      }
-    }]
-  };
-}, LitElement);
-
-var styles$v = ":host{\n\n}";
-
-/**
- *
- * @param {any} self
- */
-
-const template$h = self => function () {
-  // @ts-ignore
-  const {
-    versionsDetail,
-    changeVersion,
-    lastDeployedDomainVersion
-  } = this;
-  return html`
-    <style>
-      ${styles$v}
-    </style>
-    ${lastDeployedDomainVersion}
-    <version-managable-list2
-      .versions=${versionsDetail}
-      lastDeployedDomainVersion=${lastDeployedDomainVersion}
-      @change-version=${changeVersion.bind(this)}
-      ></version-managable-list2>
-  `;
-}.bind(self)();
-
-// @ts-ignore
-
-let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')], function (_initialize, _GetDomainVersionsMix) {
-  class ProtobotDesignHistory extends _GetDomainVersionsMix {
+let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')], function (_initialize, _GetDomainMixin) {
+  class ProtobotDesignHistory extends _GetDomainMixin {
     constructor(...args) {
       super(...args);
 
@@ -28126,7 +28118,7 @@ let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')]
       decorators: [property({
         type: Array
       })],
-      key: "deployedTopics",
+      key: "lastDeployedDomainTopics",
 
       value() {
         return [];
@@ -28136,58 +28128,20 @@ let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')]
       kind: "method",
       key: "render",
       value: function render() {
-        return template$h(this);
-      }
-    }, {
-      kind: "method",
-      key: "changeVersion",
-      value: async function changeVersion({
-        detail: id
-      }) {
-        _get(_getPrototypeOf(ProtobotDesignHistory.prototype), "updateLatestDeployedDomainVersion", this).call(this, id, this.fetchHistory.bind(this));
-      }
-    }, {
-      kind: "method",
-      key: "fetchHistory",
-      value: async function fetchHistory(deployId) {
-        const snap = await database.ref(`deployed-history/data/${this.domainId}/${deployId}`).once('value');
-        console.log(snap.val());
-        const domain = snap.val() || {
-          topics: {},
-          subs: []
-        };
-        const {
-          topics,
-          subs
-        } = domain;
-        const array = [];
-
-        for (const topic in topics) {
-          array.push({
-            topic,
-            order: topics[topic],
-            sub: subs[topic] || false
-          });
-        }
-
-        this.deployedTopics = array.sort((i, j) => i.order - j.order).map(i => ({
-          id: i.topic,
-          sub: i.sub
-        }));
-        console.log(this.deployedTopics);
+        return template$g(this);
       }
     }]
   };
-}, GetDomainVersionsMixin(LitElement));
+}, GetDomainMixin(LitElement));
 
-var styles$w = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$v = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$i = self => function () {
+const template$h = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -28210,7 +28164,7 @@ const template$i = self => function () {
   console.log(dv);
   return html`
     <style>
-      ${styles$w}
+      ${styles$v}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -28273,7 +28227,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
       kind: "method",
       key: "render",
       value: function render() {
-        return template$i(this);
+        return template$h(this);
       }
     }, {
       kind: "method",
@@ -28325,14 +28279,14 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$x = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$w = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$j = self => function () {
+const template$i = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -28355,7 +28309,7 @@ const template$j = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$x}
+      ${styles$w}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -28419,7 +28373,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
       value: // @property({ type: Array })
       // memos = [''];
       function render() {
-        return template$j(this);
+        return template$i(this);
       }
     }, {
       kind: "method",
@@ -28488,9 +28442,9 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$y = "";
+var styles$x = "";
 
-var styles$z = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
+var styles$y = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
 
 const $_documentContainer$8 = document.createElement('template');
 $_documentContainer$8.innerHTML = `<dom-module id="lumo-required-field">
@@ -30936,10 +30890,10 @@ customElements.define(RadioGroupElement.is, RadioGroupElement);
  * @param {any} self
  */
 
-const template$k = self => function () {
+const template$j = self => function () {
   return html`
   <style>
-    ${styles$z}
+    ${styles$y}
   </style>
 
   <h2>Planning for revision</h2>
@@ -31007,7 +30961,7 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
       kind: "method",
       key: "render",
       value: function render() {
-        return template$k(this);
+        return template$j(this);
       }
     }, {
       kind: "method",
@@ -31049,11 +31003,11 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
  * @param {any} self
  */
 
-const template$l = self => function () {
+const template$k = self => function () {
   // const {} = this;
   return html`
     <style>
-      ${styles$y}
+      ${styles$x}
     </style>
 
     <to-do-list></to-do-list>
@@ -31077,13 +31031,91 @@ let ProtobotHistorySidebar = _decorate([customElement('protobot-history-sidebar'
       kind: "method",
       key: "render",
       value: function render() {
-        return template$l(this);
+        return template$k(this);
       }
     }]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$A = "h1 {\n  font-weight: 900;\n}\nh3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  font-family: 'Open Sans', sans-serif;\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n}\n\n.dialog{\n  font-family: 'Open Sans', sans-serif;\n  /* position: fixed; */\n  width:100%;\n  height: 100%;\n  /* left: 0; */\n  /* top: 0; */\n  /* background: rgba(10,10,10,0.8); */\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  font-family: 'Open Sans', sans-serif;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
+var styles$z = "/* :host {\n  overflow-y: auto;\n} */\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$l = self => function () {
+  // @ts-ignore
+  const {
+    versions,
+    changeVersion,
+    lastDeployedDomainVersion
+  } = this; // const { name } = topic || {};
+
+  return html`
+    <style>
+      ${styles$z}
+    </style>
+    ${lastDeployedDomainVersion}
+    <select class="select-box" placeholder="Topic" @change=${changeVersion}>
+      ${versions && Object.keys(versions).map(item => html`
+      <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
+      ${versions[item].versionNumber}
+      </option>`)}
+
+    </select>
+
+
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let VersionList2 = _decorate([customElement('version-managable-list2')], function (_initialize, _LitElement) {
+  class VersionList2 extends _LitElement {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: VersionList2,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "versions",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainVersion",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$l(this);
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion(event) {
+        this.dispatchEvent(new window.CustomEvent('change-version', {
+          detail: event.target.value
+        }));
+      }
+    }]
+  };
+}, LitElement);
+
+var styles$A = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
 /**
  *
@@ -31091,6 +31123,81 @@ var styles$A = "h1 {\n  font-weight: 900;\n}\nh3 {\n  color: rgb(72, 114, 193);\
  */
 
 const template$m = self => function () {
+  // @ts-ignore
+  const {
+    versionsDetail,
+    changeVersion,
+    lastDeployedDomainVersion
+  } = this;
+  return html`
+    <style>
+      ${styles$A}
+    </style>
+    <version-managable-list2
+      .versions=${versionsDetail}
+      lastDeployedDomainVersion=${lastDeployedDomainVersion}
+      @change-version=${changeVersion.bind(this)}
+      ></version-managable-list2>
+
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotDesignHistorySidebar = _decorate([customElement('protobot-design-history-sidebar')], function (_initialize, _GetDomainMixin) {
+  class ProtobotDesignHistorySidebar extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotDesignHistorySidebar,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainVersion",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "versionsDetail",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$m(this);
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion({
+        detail: versionId
+      }) {
+        this.dispatchEvent(new window.CustomEvent('change-version', {
+          detail: versionId
+        }));
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$B = "h1 {\n  font-weight: 900;\n}\nh3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  font-family: 'Open Sans', sans-serif;\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n}\n\n.dialog{\n  font-family: 'Open Sans', sans-serif;\n  /* position: fixed; */\n  width:100%;\n  height: 100%;\n  /* left: 0; */\n  /* top: 0; */\n  /* background: rgba(10,10,10,0.8); */\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  font-family: 'Open Sans', sans-serif;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$n = self => function () {
   // @ts-ignore
   const {
     deployedVersion,
@@ -31113,7 +31220,7 @@ const template$m = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$A}
+      ${styles$B}
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
@@ -31253,7 +31360,7 @@ let ProtobotDeployModal$1 = _decorate([customElement('protobot-deploy')], functi
       kind: "method",
       key: "render",
       value: function render() {
-        return template$m(this);
+        return template$n(this);
       }
     }, {
       kind: "method",
@@ -31408,17 +31515,21 @@ let ProtobotDeployModal$1 = _decorate([customElement('protobot-deploy')], functi
   };
 }, GetDomainMixin(LitElement));
 
-var styles$B = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 4fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n/* .left {\n  background: rgb(94, 94, 94);\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n} */\n\n.center {\n  background: white;\n  padding: 10px;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.left {\n  background: #252839;\n  color: white;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n.left-scrollable{\n  height: 100%;\n  padding: 10px;\n  overflow: auto;\n  box-sizing: border-box;\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$C = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 4fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n/* .left {\n  background: rgb(94, 94, 94);\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n} */\n\n.center {\n  background: white;\n  padding: 10px;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.left {\n  background: #252839;\n  color: white;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n.left-scrollable{\n  height: 100%;\n  padding: 10px;\n  overflow: auto;\n  box-sizing: border-box;\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$n = self => function () {
+const template$o = self => function () {
   // @ts-ignore
   const {
-    queryObject
+    queryObject,
+    lastDeployedDomainVersion,
+    lastDeployedDomainTopics,
+    changeVersion,
+    versionsDetail
   } = this;
   const {
     domain,
@@ -31426,7 +31537,7 @@ const template$n = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$B}
+      ${styles$C}
       @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
     </style>
 
@@ -31456,7 +31567,7 @@ const template$n = self => function () {
         ` : ''}
 
         ${page === 'design-history' ? html`
-          <protobot-design-history></protobot-design-history>
+          <protobot-design-history lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopics=${lastDeployedDomainTopics}></protobot-design-history>
         ` : ''}
       </div>
 
@@ -31471,8 +31582,8 @@ const template$n = self => function () {
         ${page === 'micro' ? html`
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
         ` : ''}
-        ${page === 'history' ? html`
-          <protobot-history-sidebar></protobot-history-sidebar>
+        ${page === 'design-history' ? html`
+          <protobot-design-history-sidebar .versionsDetail=${versionsDetail} lastDeployedDomainVersion=${lastDeployedDomainVersion} @change-version=${changeVersion.bind(this)}></protobot-design-history-sidebar>
         ` : ''}
         </div>
       </div>
@@ -31487,8 +31598,8 @@ const template$n = self => function () {
 
 // @ts-ignore
 
-let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], function (_initialize, _GetPathMixin) {
-  class ProtobotDesignerUI extends _GetPathMixin {
+let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], function (_initialize, _GetDomainVersionsMix) {
+  class ProtobotDesignerUI extends _GetDomainVersionsMix {
     constructor(...args) {
       super(...args);
 
@@ -31500,11 +31611,37 @@ let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], func
   return {
     F: ProtobotDesignerUI,
     d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainVersion",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopics",
+
+      value() {
+        return [];
+      }
+
+    }, {
       kind: "method",
       key: "render",
       value: function render() {
-        return template$n(this);
+        return template$o(this);
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion({
+        detail: id
+      }) {
+        _get(_getPrototypeOf(ProtobotDesignerUI.prototype), "updateLatestDeployedDomainVersion", this).call(this, id);
       }
     }]
   };
-}, GetPathMixin(LitElement));
+}, GetDomainVersionsMixin(LitElement));

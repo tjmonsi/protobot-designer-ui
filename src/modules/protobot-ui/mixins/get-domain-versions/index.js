@@ -27,12 +27,16 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
   @property({ type: String})
   lastDeployedDomainVersion = '';
 
+  // @ts-ignore
+  @property({ type: Array })
+  lastDeployedDomainTopics = [];
+
   constructor () {
     super();
     this.boundSaveDomainVersions = this.saveDomainVersions.bind(this);
     this.boundSaveDomainVersionsDetail = this.saveDomainVersionsDetail.bind(this);
-    // this.boundSaveLatestEditedDomainVersion = this.saveLatestEditedDomainVersion.bind(this);
     this.boundSaveLatestDeployedDomainVersion = this.saveLatestDeployedDomainVersion.bind(this);
+    this.boundSaveLatestDeployedDomainTopics = this.saveLatestDeployedDomainTopics.bind(this);
   }
 
   connectedCallback () {
@@ -61,8 +65,8 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
     if (this.domainVersionsRef) {
       this.domainVersionsRef.off('value', this.boundSaveDomainVersions);
       this.domainVersionsDetailRef.off('value', this.boundSaveDomainVersionsDetail);
-      // this.LatestEditedDomainVersionRef.off('value', this.boundSaveLatestEditedDomainVersion);
       this.LatestDeployedDomainVersionRef.off('value', this.boundSaveLatestDeployedDomainVersion);
+      this.LatestDeployedDomainTopicsRef.off('value', this.boundSaveLatestDeployedDomainTopics);
     }
   }
 
@@ -80,11 +84,11 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
       this.domainVersionsDetailRef = database.ref(`deployed-history/data/${id}`);
       this.domainVersionsDetailRef.on('value', this.boundSaveDomainVersionsDetail);
 
-      // this.LatestEditedDomainVersionRef = database.ref(`domains/data/${id}/deployedVersion`)
-      // this.LatestEditedDomainVersionRef.on('value', this.boundSaveLatestEditedDomainVersion);
-
       this.LatestDeployedDomainVersionRef = database.ref(`last-deployed/data/${id}/deployedVersion`)
       this.LatestDeployedDomainVersionRef.on('value', this.boundSaveLatestDeployedDomainVersion);
+
+      this.LatestDeployedDomainTopicsRef = database.ref(`last-deployed/data/${id}`)
+      this.LatestDeployedDomainTopicsRef.on('value', this.boundSaveLatestDeployedDomainTopics);
     }
   }
 
@@ -103,13 +107,6 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
     }
   }
 
-  // saveLatestEditedDomainVersion (snap) {
-  //   const data = snap.val();
-  //   if (data) {
-  //     this.latestEditedDomainVersion = data;
-  //   }
-  // }
-
   saveLatestDeployedDomainVersion (snap) {
     const data = snap.val();
     if (data) {
@@ -117,9 +114,21 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
     }
   }
 
-  updateLatestDeployedDomainVersion (version, callback) {
+  saveLatestDeployedDomainTopics (snap) {
+    const domain = snap.val() || { topics: {}, subs: [] };
+    const { topics, subs } = domain;
+    const array = [];
+    for (const topic in topics) {
+      array.push({ topic, order: topics[topic], sub: subs[topic] || false });
+    }
+    this.lastDeployedDomainTopics = array.sort((i, j) => (i.order - j.order)).map(i => ({ id: i.topic, sub: i.sub }));
+    console.log(this.lastDeployedDomainTopics)
+  }
+
+  async updateLatestDeployedDomainVersion (version) {
     this.lastDeployedDomainVersion = version
-    callback(version)
+    const snap = await database.ref(`deployed-history/data/${this.domainId}/${version}`).once('value');
+    this.saveLatestDeployedDomainTopics(snap)
   }
 
   domainChanged (domain) {}

@@ -24,9 +24,9 @@ export const template = self => function () {
         <input class="text-area" type="text" value="${name}" placeholder="topic" @change="${topicNameChanged.bind(this)}">
       </div>
 
-      <div class="flex-2">
-        <conversational-flow-utterance .utteranceId="${mainUtteranceId}" ></conversational-flow-utterance>
-      </div>
+
+      <conversational-flow-utterance .utteranceId="${mainUtteranceId}" class="${sub ? 'sub-utter': ''}"></conversational-flow-utterance>
+
 
 
       <!-- ternary expression -->

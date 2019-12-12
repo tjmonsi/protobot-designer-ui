@@ -7,6 +7,7 @@ import '../protobot-authoring-sidebar';
 import '../protobot-micro';
 import '../protobot-macro';
 import '../protobot-history';
+import '../protobot-design-history'
 import '../protobot-macro-sidebar';
 import '../protobot-micro-sidebar';
 import '../protobot-history-sidebar';
@@ -37,22 +38,7 @@ export const template = self => function () {
       </div> -->
       <protobot-header></protobot-header>
 
-      <div class="left">
-        <div class="left-scrollable">
-        ${page === 'authoring' || !page ? html`
-          <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
-        ` : ''}
-        ${page === 'macro' ? html`
-          <protobot-macro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-macro-sidebar>
-        ` : ''}
-        ${page === 'micro' ? html`
-          <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
-        ` : ''}
-        ${page === 'history' ? html`
-          <protobot-history-sidebar></protobot-history-sidebar>
-        ` : ''}
-        </div>
-      </div>
+
 
       <div class="center" style="overflow:scroll;">
         ${page === 'authoring' ? html`
@@ -71,9 +57,26 @@ export const template = self => function () {
           <protobot-micro></protobot-micro>
         ` : ''}
 
-        ${page === 'history' ? html`
-          <protobot-authoring></protobot-authoring>
+        ${page === 'design-history' ? html`
+          <protobot-design-history></protobot-design-history>
         ` : ''}
+      </div>
+
+      <div class="left">
+        <div class="left-scrollable">
+        ${page === 'authoring' || !page ? html`
+          <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
+        ` : ''}
+        ${page === 'macro' ? html`
+          <protobot-macro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-macro-sidebar>
+        ` : ''}
+        ${page === 'micro' ? html`
+          <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
+        ` : ''}
+        ${page === 'history' ? html`
+          <protobot-history-sidebar></protobot-history-sidebar>
+        ` : ''}
+        </div>
       </div>
 
     ` : html`

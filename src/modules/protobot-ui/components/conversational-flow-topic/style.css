@@ -1,36 +1,58 @@
+:host{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 20px;
+}
 .flex-area {
   overflow:hidden;
   display: flex;
-  margin: 20px;
+  width: 100%;
   max-width: 800px;
-  border-radius: 10px;
+  border-radius: 6px;
+  background: rgb(49, 63, 102);
+}
+.flex-area.sub{
+  background: rgb(74, 94, 150);
 }
 
 .flex-1 {
   flex: 1;
-  background: rgb(49, 63, 102);
-  padding: 12px;
-}
-
-.flex-2 {
-  flex: 3;
-  background:rgb(49, 63, 102);
-  padding: 12px
+  /* background: rgb(49, 63, 102); */
+  padding: .5em 1em;
 }
 
 .text-area {
   width: 100%;
   font-size : 15px;
-  font-weight: bold;
+  padding: .5em;
+  border: none;
+  outline: none;
+  color: #fff;
+  background: transparent;
 }
+.text-area:hover,
+.text-area:focus{
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size : 15px;
+  padding: .5em;
+  color: #fff;
+  background: transparent;
+}
+.text-area:hover{
+  background: rgba(0, 0, 0, 0.2);
+}
+
+
+
+
 
 .sub {
   margin-left: 80px;
 }
 
-.sub div {
-  background: rgb(74, 94, 150);
-}
 
 wl-button {
   --button-border-radius	: 0px;

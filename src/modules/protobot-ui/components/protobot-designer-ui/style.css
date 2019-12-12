@@ -3,7 +3,7 @@
   padding: 0;
   display: grid;
   /* grid-template-rows: 1fr 20fr; */
-  grid-template-columns: 1fr 4fr;
+  grid-template-columns: 4fr 1fr;
 }
 /*
 .top {

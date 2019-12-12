@@ -8,6 +8,7 @@ import { database } from '../../../firebase';
 // @ts-ignore
 @customElement('conversational-flow-utterance')
 class ConversationalFlowUtterance extends GetUtteranceMixin(LitElement) {
+
   render () {
     return template(this);
   }

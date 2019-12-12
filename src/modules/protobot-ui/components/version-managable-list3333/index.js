@@ -8,24 +8,28 @@ import { database } from '../../../firebase';
 // @ts-ignore
 @customElement('version-managable-list')
 class VersionList extends GetDomainVersionsMixin(LitElement) {
+  // @property ({type: String})
+  // lastDeployedDomainVersion
+
+
   render () {
+    console.log(this.lastDeployedDomainVersion)
     return template(this);
   }
 
   async changeVersion ({ target }) {
     const {value: id} = target
-    const updates = {};
-    const snap = await database.ref(`deployed-history/data/${this.domainId}/${id}/`).once('value');
-    const obj = snap.val();
-    if (obj) {
-      updates[`domains/data/${this.domainId}/`] = obj;
-      await database.ref().update(updates);
-      // window.location.reload();
-    }
-  }
+    // const updates = {};
+    // const snap = await database.ref(`deployed-history/data/${this.domainId}/${id}/`).once('value');
+    // const obj = snap.val();
+    // if (obj) {
+    //   updates[`domains/data/${this.domainId}/`] = obj;
+    //   await database.ref().update(updates);
+    //   // window.location.reload();
+    // }
 
-  async addVersion () {
-
+    super.updateLatestDeployedDomainVersion(id)
+    // this.lastDeployedDomainVersion = id
   }
 
   /**

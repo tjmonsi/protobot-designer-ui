@@ -11,16 +11,12 @@ import styles from './style.css';
 export const template = self => function () {
   // @ts-ignore
   const { topics, swap } = this;
-
+  console.log(topics)
   return html`
     <style>
       ${styles}
     </style>
 
-    <h1 style="text-align: center">
-      Conversation Flow
-    </h1>
-    <div class="empty-box"></div>
     ${topics.map((topic, index) => html`
       <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" index="${index}"></conversational-flow-topic>
 

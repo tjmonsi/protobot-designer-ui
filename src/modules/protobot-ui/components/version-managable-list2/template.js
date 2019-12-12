@@ -12,20 +12,19 @@ import '../conversational-flow-utterance';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { versions, changeVersion, gettingDomainVersion } = this;
+  const { versions, changeVersion, lastDeployedDomainVersion } = this;
   // const { name } = topic || {};
 
   return html`
     <style>
       ${styles}
     </style>
+    ${lastDeployedDomainVersion}
     <select class="select-box" placeholder="Topic" @change=${changeVersion}>
-      <option value="none">Choose the version</option>
-      ${versions && versions.map(item => html`
-      <option value="${item}" ?selected="${gettingDomainVersion(item, this.domainId) == item}">
-      ${until(gettingDomainVersion(item, this.domainId), 'Loading...')}
+      ${versions && Object.keys(versions).map(item => html`
+      <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
+      ${versions[item].versionNumber}
       </option>`)}
-      <option value="new-topic">New Topic</option>
 
     </select>
 

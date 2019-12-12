@@ -15,10 +15,8 @@ export const template = self => function () {
       ${styles}
     </style>
 
-    <div class="flex-area">
-      <div class="flex-1">
-        <input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">
-      </div>
-    </div>
+
+    <input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">
+
   `;
 }.bind(self)();

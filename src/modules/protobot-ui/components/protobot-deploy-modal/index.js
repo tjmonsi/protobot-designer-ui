@@ -55,12 +55,16 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
           amtOption: this.amtOption === 'amt'
         }
       };
+      console.log(obj)
       updates[`last-deployed/data/${this.domainId}/`] = obj;
       updates[`deployed-history/data/${this.domainId}/${key}`] = obj;
-      updates[`domains/data/${this.domainId}/deployed`] = false;
+      updates[`deployed-history/lists/${this.domainId}/${key}`] = true;
+
+      updates[`domains/data/${this.domainId}/versionNumber`] = length;
+      updates[`domains/data/${this.domainId}/deployed`] = true;
       updates[`domains/data/${this.domainId}/deployedVersion`] = key;
       updates[`domains/data/${this.domainId}/commitMessage`] = '';
-      updates[`deployed-history/lists/${this.domainId}/${key}`] = true;
+
       await database.ref().update(updates);
 
       this.dispatchEvent(new window.CustomEvent('dialog-accept', { detail: obj }));

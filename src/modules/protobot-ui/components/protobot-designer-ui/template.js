@@ -24,7 +24,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { queryObject, lastDeployedDomainVersion, lastDeployedDomainTopics, changeVersion, versionsDetail } = this;
+  const { queryObject, lastDeployedDomainParameters, lastDeployedDomainCommitMessage, lastDeployedDomainVersion, lastDeployedDomainTopics, lastDeployedDomainTopicList, changeVersion, versionsDetail } = this;
   const { domain, page } = queryObject;
 
   return html`
@@ -59,7 +59,7 @@ export const template = self => function () {
         ` : ''}
 
         ${page === 'design-history' ? html`
-          <protobot-design-history lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopics=${lastDeployedDomainTopics}></protobot-design-history>
+          <protobot-design-history .lastDeployedDomainParameters=${lastDeployedDomainParameters} lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopics=${lastDeployedDomainTopics}></protobot-design-history>
         ` : ''}
       </div>
 
@@ -75,7 +75,7 @@ export const template = self => function () {
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
         ` : ''}
         ${page === 'design-history' ? html`
-          <protobot-design-history-sidebar .versionsDetail=${versionsDetail} lastDeployedDomainVersion=${lastDeployedDomainVersion} @change-version=${changeVersion.bind(this)}></protobot-design-history-sidebar>
+          <protobot-design-history-sidebar lastDeployedDomainCommitMessage=${lastDeployedDomainCommitMessage} .versionsDetail=${versionsDetail} lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopicList=${lastDeployedDomainTopicList} @change-version=${changeVersion.bind(this)}></protobot-design-history-sidebar>
         ` : ''}
         </div>
       </div>

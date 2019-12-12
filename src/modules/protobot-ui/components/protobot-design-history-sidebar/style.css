@@ -7,15 +7,20 @@ h3 {
   font-family: 'Open Sans', sans-serif;
 }
 
+.topic-list {
+  margin-left: -10px;
+  font-size: 15px;
+  font-family: 'Open Sans', sans-serif;
+}
 
-.commit-input {
-  margin: 10px;
-  --input-bg: white;
-  --input-bg-filled: white;
-  --input-font-family: 'Open Sans', sans-serif;
-  --textarea-min-height: 150px;
-  --input-font-size: 15px;
-  color: blue;
+
+.commit-msg {
+  background: #fff;
+  font-family: 'Open Sans', sans-serif;
+  color: #222;
+  padding: 1em;
+  margin: .8em;
+  border-radius: 4px;
 }
 
 

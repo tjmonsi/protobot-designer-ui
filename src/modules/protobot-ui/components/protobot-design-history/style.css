@@ -4,3 +4,11 @@
 .topic-container {
   margin: 3em;
 }
+
+.parameter-container {
+  padding: .5em 2em 2em;
+  margin: 3em;
+  border-radius: 6px;
+  background: #f1f1f5;
+  font-family: 'Open Sans', sans-serif;
+}

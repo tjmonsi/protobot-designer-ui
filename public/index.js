@@ -24088,6 +24088,9 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
     // latestEditedDomainVersion = '';
     // @ts-ignore
     // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
     constructor() {
       super();
 
@@ -24096,7 +24099,7 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
       this.boundSaveDomainVersions = this.saveDomainVersions.bind(this);
       this.boundSaveDomainVersionsDetail = this.saveDomainVersionsDetail.bind(this);
       this.boundSaveLatestDeployedDomainVersion = this.saveLatestDeployedDomainVersion.bind(this);
-      this.boundSaveLatestDeployedDomainTopics = this.saveLatestDeployedDomainTopics.bind(this);
+      this.boundSaveLatestDeployedDomain = this.saveLatestDeployedDomain.bind(this);
     }
 
   }
@@ -24155,6 +24158,39 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
       }
 
     }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopicList",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainCommitMessage",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "lastDeployedDomainParameters",
+
+      value() {
+        return {};
+      }
+
+    }, {
       kind: "method",
       key: "connectedCallback",
       value: function connectedCallback() {
@@ -24192,7 +24228,7 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
           this.domainVersionsRef.off('value', this.boundSaveDomainVersions);
           this.domainVersionsDetailRef.off('value', this.boundSaveDomainVersionsDetail);
           this.LatestDeployedDomainVersionRef.off('value', this.boundSaveLatestDeployedDomainVersion);
-          this.LatestDeployedDomainTopicsRef.off('value', this.boundSaveLatestDeployedDomainTopics);
+          this.LatestDeployedDomainRef.off('value', this.boundSaveLatestDeployedDomain);
         }
       }
       /**
@@ -24213,8 +24249,8 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
           this.domainVersionsDetailRef.on('value', this.boundSaveDomainVersionsDetail);
           this.LatestDeployedDomainVersionRef = database.ref(`last-deployed/data/${id}/deployedVersion`);
           this.LatestDeployedDomainVersionRef.on('value', this.boundSaveLatestDeployedDomainVersion);
-          this.LatestDeployedDomainTopicsRef = database.ref(`last-deployed/data/${id}`);
-          this.LatestDeployedDomainTopicsRef.on('value', this.boundSaveLatestDeployedDomainTopics);
+          this.LatestDeployedDomainRef = database.ref(`last-deployed/data/${id}`);
+          this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
         }
       }
     }, {
@@ -24249,15 +24285,18 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
       }
     }, {
       kind: "method",
-      key: "saveLatestDeployedDomainTopics",
-      value: function saveLatestDeployedDomainTopics(snap) {
+      key: "saveLatestDeployedDomain",
+      value: function saveLatestDeployedDomain(snap) {
         const domain = snap.val() || {
           topics: {},
           subs: []
         };
         const {
           topics,
-          subs
+          subs,
+          topicList,
+          commitMessage,
+          parameters
         } = domain;
         const array = [];
 
@@ -24273,7 +24312,32 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
           id: i.topic,
           sub: i.sub
         }));
-        console.log(this.lastDeployedDomainTopics);
+        const arraytwo = [];
+
+        for (const topic in topics) {
+          arraytwo.push({
+            id: topic,
+            included: true
+          });
+        }
+
+        for (const topic in topicList) {
+          if (arraytwo.findIndex(item => item.id === topic) < 0) {
+            arraytwo.push({
+              id: topic,
+              included: false
+            });
+          }
+        }
+
+        this.lastDeployedDomainTopicList = arraytwo;
+        this.lastDeployedDomainCommitMessage = commitMessage;
+        this.lastDeployedDomainParameters = {
+          "Number of users": parameters.numUser,
+          "Number of sessions": parameters.numSession,
+          "Show other's responses?": parameters.otherResponse,
+          "Testing Methods": parameters.ampOption ? 'Amazon Mechanical Turk' : 'Share Online by myself'
+        };
       }
     }, {
       kind: "method",
@@ -24281,7 +24345,7 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
       value: async function updateLatestDeployedDomainVersion(version) {
         this.lastDeployedDomainVersion = version;
         const snap = await database.ref(`deployed-history/data/${this.domainId}/${version}`).once('value');
-        this.saveLatestDeployedDomainTopics(snap);
+        this.saveLatestDeployedDomain(snap);
       }
     }, {
       kind: "method",
@@ -28065,7 +28129,7 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
   };
 }, GetDomainMixin(LitElement));
 
-var styles$u = ":host{\n\n}\n.topic-container {\n  margin: 3em;\n}";
+var styles$u = ":host{\n\n}\n.topic-container {\n  margin: 3em;\n}\n\n.parameter-container {\n  padding: .5em 2em 2em;\n  margin: 3em;\n  border-radius: 6px;\n  background: #f1f1f5;\n  font-family: 'Open Sans', sans-serif;\n}";
 
 /**
  *
@@ -28076,13 +28140,20 @@ const template$g = self => function () {
   // @ts-ignore
   const {
     lastDeployedDomainVersion,
-    lastDeployedDomainTopics
+    lastDeployedDomainTopics,
+    lastDeployedDomainParameters
   } = this;
   return html`
     <style>
       ${styles$u}
     </style>
-    ${lastDeployedDomainVersion}
+    <div class="parameter-container">
+      <h3>Deploy Settings</h3>
+      ${Object.entries(lastDeployedDomainParameters).map(([key, value]) => html`
+          <div>${key} : ${value}</div>
+        `)}
+
+    </div>
     ${lastDeployedDomainTopics.map((topic, index) => html`
       <div class="topic-container">
         <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" ?readonly=${true} index="${index}"></conversational-flow-topic>
@@ -28122,6 +28193,17 @@ let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')]
 
       value() {
         return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "lastDeployedDomainParameters",
+
+      value() {
+        return {};
       }
 
     }, {
@@ -31115,7 +31197,7 @@ let VersionList2 = _decorate([customElement('version-managable-list2')], functio
   };
 }, LitElement);
 
-var styles$A = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
+var styles$A = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-msg {\n  background: #fff;\n  font-family: 'Open Sans', sans-serif;\n  color: #222;\n  padding: 1em;\n  margin: .8em;\n  border-radius: 4px;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
 /**
  *
@@ -31127,7 +31209,9 @@ const template$m = self => function () {
   const {
     versionsDetail,
     changeVersion,
-    lastDeployedDomainVersion
+    lastDeployedDomainVersion,
+    lastDeployedDomainTopicList,
+    lastDeployedDomainCommitMessage
   } = this;
   return html`
     <style>
@@ -31138,6 +31222,22 @@ const template$m = self => function () {
       lastDeployedDomainVersion=${lastDeployedDomainVersion}
       @change-version=${changeVersion.bind(this)}
       ></version-managable-list2>
+
+      <ul class ="topic-list">
+        ${lastDeployedDomainTopicList.map(topic => html`
+          <li>
+            <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}"></topic-list-item>
+          </li>
+
+        `)}
+      </ul>
+
+      <div>
+        <h3>Commit Message</h3>
+        <div class="commit-msg">
+          ${lastDeployedDomainCommitMessage}
+        </div>
+      </div>
 
   `;
 }.bind(self)();
@@ -31162,14 +31262,44 @@ let ProtobotDesignHistorySidebar = _decorate([customElement('protobot-design-his
         type: String
       })],
       key: "lastDeployedDomainVersion",
-      value: void 0
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopicList",
+
+      value() {
+        return [];
+      }
+
     }, {
       kind: "field",
       decorators: [property({
         type: Array
       })],
       key: "versionsDetail",
-      value: void 0
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainCommitMessage",
+
+      value() {
+        return '';
+      }
+
     }, {
       kind: "method",
       key: "render",
@@ -31526,8 +31656,11 @@ const template$o = self => function () {
   // @ts-ignore
   const {
     queryObject,
+    lastDeployedDomainParameters,
+    lastDeployedDomainCommitMessage,
     lastDeployedDomainVersion,
     lastDeployedDomainTopics,
+    lastDeployedDomainTopicList,
     changeVersion,
     versionsDetail
   } = this;
@@ -31567,7 +31700,7 @@ const template$o = self => function () {
         ` : ''}
 
         ${page === 'design-history' ? html`
-          <protobot-design-history lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopics=${lastDeployedDomainTopics}></protobot-design-history>
+          <protobot-design-history .lastDeployedDomainParameters=${lastDeployedDomainParameters} lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopics=${lastDeployedDomainTopics}></protobot-design-history>
         ` : ''}
       </div>
 
@@ -31583,7 +31716,7 @@ const template$o = self => function () {
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
         ` : ''}
         ${page === 'design-history' ? html`
-          <protobot-design-history-sidebar .versionsDetail=${versionsDetail} lastDeployedDomainVersion=${lastDeployedDomainVersion} @change-version=${changeVersion.bind(this)}></protobot-design-history-sidebar>
+          <protobot-design-history-sidebar lastDeployedDomainCommitMessage=${lastDeployedDomainCommitMessage} .versionsDetail=${versionsDetail} lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopicList=${lastDeployedDomainTopicList} @change-version=${changeVersion.bind(this)}></protobot-design-history-sidebar>
         ` : ''}
         </div>
       </div>
@@ -31626,6 +31759,39 @@ let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], func
 
       value() {
         return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopicList",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainCommitMessage",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "lastDeployedDomainParameters",
+
+      value() {
+        return {};
       }
 
     }, {

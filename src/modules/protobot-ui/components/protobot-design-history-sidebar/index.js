@@ -9,10 +9,16 @@ import { database } from '../../../firebase';
 @customElement('protobot-design-history-sidebar')
 class ProtobotDesignHistorySidebar extends GetDomainMixin(LitElement) {
   @property({type: String})
-  lastDeployedDomainVersion
+  lastDeployedDomainVersion = ''
 
   @property({type: Array})
-  versionsDetail
+  lastDeployedDomainTopicList = []
+
+  @property({type: Array})
+  versionsDetail = []
+
+  @property({type: String})
+  lastDeployedDomainCommitMessage = ''
 
   render () {
     return template(this);

@@ -15,6 +15,15 @@ class ProtobotDesignerUI extends GetDomainVersionsMixin(LitElement) {
   @property ({type: Array})
   lastDeployedDomainTopics = []
 
+  @property ({type: Array})
+  lastDeployedDomainTopicList = []
+
+  @property({type: String})
+  lastDeployedDomainCommitMessage = ''
+
+  @property({ type: Object })
+  lastDeployedDomainParameters = {};
+
   render () {
     return template(this);
   }

@@ -15,6 +15,9 @@ class ProtobotDesignHistory extends GetDomainMixin(LitElement) {
   @property ({type: Array})
   lastDeployedDomainTopics = []
 
+  @property({ type: Object })
+  lastDeployedDomainParameters = {};
+
   render () {
     return template(this);
   }

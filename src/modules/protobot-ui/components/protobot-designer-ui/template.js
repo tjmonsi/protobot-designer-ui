@@ -1,4 +1,5 @@
 import { html } from 'lit-element';
+import '../protobot-header';
 import '../protobot-sidebar';
 import '../protobot-start';
 import '../protobot-authoring';
@@ -9,6 +10,7 @@ import '../protobot-history';
 import '../protobot-macro-sidebar';
 import '../protobot-micro-sidebar';
 import '../protobot-history-sidebar';
+import '../protobot-deploy';
 import 'weightless/ripple';
 
 
@@ -33,27 +35,10 @@ export const template = self => function () {
       <!-- <div class="top">
         <h2>protobot</h2>
       </div> -->
-      <div class="left" style="overflow:scroll;">
-        <protobot-sidebar></protobot-sidebar>
-      </div>
-      <div class="center" style="overflow:scroll;">
-        ${page === 'authoring' ? html`
-          <protobot-authoring></protobot-authoring>
-        ` : ''}
+      <protobot-header></protobot-header>
 
-        ${page === 'macro' ? html`
-          <protobot-macro></protobot-macro>
-        ` : ''}
-
-        ${page === 'micro' || !page ? html`
-          <protobot-micro></protobot-micro>
-        ` : ''}
-
-        ${page === 'history' ? html`
-          <protobot-authoring></protobot-authoring>
-        ` : ''}
-      </div>
-      <div class="right" style="overflow:scroll;">
+      <div class="left">
+        <div class="left-scrollable">
         ${page === 'authoring' || !page ? html`
           <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
         ` : ''}
@@ -66,7 +51,31 @@ export const template = self => function () {
         ${page === 'history' ? html`
           <protobot-history-sidebar></protobot-history-sidebar>
         ` : ''}
+        </div>
       </div>
+
+      <div class="center" style="overflow:scroll;">
+        ${page === 'authoring' ? html`
+          <protobot-authoring></protobot-authoring>
+        ` : ''}
+
+        ${page === 'macro' ? html`
+          <protobot-macro></protobot-macro>
+        ` : ''}
+
+        ${page === 'test' ? html`
+          <protobot-deploy></protobot-deploy>
+        ` : ''}
+
+        ${page === 'micro' || !page ? html`
+          <protobot-micro></protobot-micro>
+        ` : ''}
+
+        ${page === 'history' ? html`
+          <protobot-authoring></protobot-authoring>
+        ` : ''}
+      </div>
+
     ` : html`
       <div style="background: white"></div>
       <protobot-start></protobot-start>

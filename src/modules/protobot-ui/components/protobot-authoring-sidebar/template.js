@@ -6,6 +6,7 @@ import 'weightless/radio';
 import '@vaadin/vaadin-radio-button';
 import '../protobot-deploy-modal';
 import '../version-list';
+import '../protobot-memo-all'
 // import '@vaadin/vaadin-radio-group';
 
 // @ts-ignore
@@ -52,7 +53,7 @@ export const template = self => function () {
       </wl-textarea outlined>
     </div>
 
-    <version-list></version-list>
+    <protobot-memo-all></protobot-memo-all>
 
     <div class="button-container">
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->

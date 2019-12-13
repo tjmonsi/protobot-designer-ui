@@ -8,7 +8,9 @@ import { database } from '../../../firebase';
 // @ts-ignore
 @customElement('protobot-memo-all')
 class ProtobotMemoAll extends GetDomainMemosMixin(LitElement) {
+
   render () {
+    console.log("??")
     return template(this);
   }
 

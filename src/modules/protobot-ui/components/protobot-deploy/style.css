@@ -1,3 +1,6 @@
+h1 {
+  font-weight: 900;
+}
 h3 {
   color: rgb(72, 114, 193);
 }
@@ -10,6 +13,7 @@ h3 {
 }
 
 .dialog-window {
+  font-family: 'Open Sans', sans-serif;
   position: relative;
   flex-direction: column;
   /* border: 2px outset black; */
@@ -18,16 +22,16 @@ h3 {
   margin: 1em;
   background: #fff;
   color: #000;
-  font-family: 'Open Sans', sans-serif;
 }
 
 .dialog{
-  position: fixed;
+  font-family: 'Open Sans', sans-serif;
+  /* position: fixed; */
   width:100%;
   height: 100%;
-  left: 0;
-  top: 0;
-  background: rgba(10,10,10,0.8);
+  /* left: 0; */
+  /* top: 0; */
+  /* background: rgba(10,10,10,0.8); */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -36,6 +40,7 @@ h3 {
 
 .button-container {
   display: flex;
+  font-family: 'Open Sans', sans-serif;
   flex-direction: row-reverse;
 }
 .accept {

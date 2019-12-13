@@ -3360,7 +3360,7 @@ LitElement['finalized'] = true;
 
 LitElement.render = render$1;
 
-var styles = ":host {\n  margin: 40px;\n}\n\nh1 {\n  color: rgb(255, 245, 152);\n  font-family: 'Josefin Sans', sans-serif;\n  font-weight: bold;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.left-side-text {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.review-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.crowd-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\na:link {\n  color:cornflowerblue;\n}\n\na:visited {\n  color:rgb(146, 146, 146);\n}\n\na:active {\n  color: lemonchiffon;\n}\n\n/* a:visited {\n  color: white;\n} */";
+var styles = ":host{\n  position: fixed;\n  display: grid;\n  grid-template-columns: 4fr 1fr;\n  width: 100%;\n  left: 0;\n  top: 0;\n  height: 50px;\n  background: #252839;\n  color: white;\n  border-bottom: 2px solid #333644;\n  box-sizing: border-box;\n  z-index: 9999;\n}\n\n.header-inner{\n  position: relative;\n  display: flex;\n  align-items: center;\n  padding: 0 3em;\n  height: 50px;\n  box-sizing: border-box;\n}\n\n.header-inner > *{\n  margin-right: 1em;\n}\nh1 {\n  color: rgb(255, 245, 152);\n  font-family: 'Josefin Sans', sans-serif;\n  font-weight: bold;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.left-side-text {\n  font-size: 14px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nul.review-link {\n  display: flex;\n  align-items: center;\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n  list-style: none;\n  height: 100%;\n}\nul.review-link.full-width{\n  flex: 1;\n}\n\nul.review-link > li{\n  position: relative;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  padding: 0 1em;\n  height: 100%;\n}\nul.review-link > li >a {\n  text-decoration: none;\n}\n\nul.review-link > li.orange >a{\n  color: rgba(255, 187, 0, 0.5);\n}\n\nul.review-link > li.active.blue >a{\n  color: cornflowerblue;\n}\nul.review-link > li.active.orange >a{\n  color: rgb(255, 187, 0);\n}\n\nul.review-link > li.active::after{\n  content:\"\";\n  position: absolute;\n  display: block;\n  left: 0;\n  bottom: 0;\n  width: 100%;\n  height: 4px;\n}\n\nul.review-link > li.active.blue::after{\n  background: cornflowerblue;\n}\n\nul.review-link > li.active.orange::after{\n  background: rgb(255, 187, 0);\n}\n\n.header-item-group{\n  font-family: 'Open Sans', sans-serif;\n}\n\n.crowd-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\na:link {\n  color:cornflowerblue;\n}\n\na:visited {\n  color:rgb(146, 146, 146);\n}\n\na:active {\n  color: lemonchiffon;\n}\n\n/* a:visited {\n  color: white;\n} */";
 
 /**
  * @license
@@ -23497,6 +23497,7 @@ let ProtobotMemoAll = _decorate([customElement('protobot-memo-all')], function (
       kind: "method",
       key: "render",
       value: function render() {
+        console.log("??");
         return template$1(this);
       }
       /**
@@ -23527,442 +23528,12 @@ let ProtobotMemoAll = _decorate([customElement('protobot-memo-all')], function (
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$d = ":host {\n  overflow-y: auto;\n  height: 250px;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\nul {\n  font-family: 'Open Sans', sans-serif;\n  font-size: 15px;\n}\n\na {\n  color: white;\n}\n";
-
-var styles$e = ``;
-
-class ButtonBehavior extends FormElementBehavior {
-  constructor() {
-    super(...arguments);
-    this.type = 'submit';
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.listeners.push(addListener(this, 'click', this.onClick.bind(this)), addListener(this, 'keydown', this.onKeyDown.bind(this)));
-  }
-
-  onKeyDown(e) {
-    if (e.code === ENTER || e.code === SPACE) {
-      this.click();
-      stopEvent(e);
-
-      if (this.$ripple != null) {
-        this.$ripple.spawnRipple(undefined, {
-          autoRelease: true
-        });
-      }
-    }
-  }
-
-  onClick(e) {
-    if (this.disabled) {
-      stopEvent(e);
-      return;
-    }
-
-    if (e.target == this && !e.defaultPrevented) {
-      this.$formElement.dispatchEvent(new MouseEvent('click', {
-        relatedTarget: this,
-        composed: true
-      }));
-    }
-  }
-
-  renderFormElement() {
-    return html` <button style="display: none;" id="${this.formElementId}" aria-hidden="true" tabindex="-1" type="${this.type}" ?disabled="${this.disabled}" name="${ifDefined(this.name)}" value="${ifDefined(this.value)}"> </button> `;
-  }
-
-}
-
-ButtonBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$e)];
-
-__decorate([property({
-  type: String
-}), __metadata('design:type', String)], ButtonBehavior.prototype, 'type', void 0);
-
-var styles$f = `:host{--_button-color:var(--button-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_button-shadow-color:var(--button-shadow-color,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.2));color:var(--_button-color);background:var(--_button-bg);box-shadow:var(--elevation-1,0 .3125rem .625rem -.125rem var(--_button-shadow-color));padding:var(--button-padding,.75rem 1.5rem);font-size:var(--button-font-size,1rem);border-radius:var(--button-border-radius,.5rem);font-family:var(--button-font-family,var(--font-family-sans-serif,"Roboto Condensed",helvetica,sans-serif));transition:var(--button-transition,box-shadow var(--transition-duration-slow,.25s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));letter-spacing:var(--button-letter-spacing,.125rem);line-height:1;text-transform:uppercase;cursor:pointer;text-align:center;-webkit-user-select:none;-moz-user-select:none;user-select:none;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:0}:host,:host([fab]){display:inline-flex;align-items:center;justify-content:center}:host([fab]){width:var(--button-fab-size,2.5rem);height:var(--button-fab-size,2.5rem);padding:0;letter-spacing:0;border-radius:100%}:host([inverted]){color:var(--_button-bg);background:var(--_button-color)}:host([outlined]){border:var(--button-border-outlined,.125rem solid currentColor)}:host(:focus),:host(:hover){--_button-color:var(--button-color-hover,hsl(var(--primary-400-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-hover,hsl(var(--primary-400,var(--primary-hue,224),var(--primary-saturation,42%),var(--primary-lightness,52%))));--_button-shadow-color:var(--button-shadow-color-hover,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.5));will-change:background,color,box-shadow}:host(:active){--_button-color:var(--button-color-active,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));box-shadow:var(--elevation-4,0 .5rem 1rem -.125rem var(--_button-shadow-color))}:host([flat]:focus){background:var(--button-bg-active-flat,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),.08))}:host([disabled]){--_button-color:var(--button-color-disabled,hsl(var(--shade-400-contrast,var(--shade-hue-contrast,0),var(--shade-saturation-contrast,100%),var(--shade-lightness-contrast,100%))));--_button-bg:var(--button-bg-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));box-shadow:none;cursor:default;pointer-events:none}:host([flat]){box-shadow:none;background:none}#ripple{z-index:-1}`;
-
-let Button = class Button extends ButtonBehavior {
-  constructor() {
-    super(...arguments);
-    this.inverted = false;
-    this.fab = false;
-    this.outlined = false;
-    this.noRipple = false;
-    this.flat = false;
-    this.role = 'button';
-  }
-
-  render() {
-    return html` <wl-ripple id="ripple" overlay .target="${this}" ?disabled="${this.disabled || this.noRipple}"></wl-ripple> <slot></slot> ${this.renderFormElement()} `;
-  }
-
-};
-Button.styles = [...ButtonBehavior.styles, cssResult(styles$f)];
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'inverted', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'fab', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'outlined', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'noRipple', void 0);
-
-__decorate([property({
-  type: Boolean,
-  reflect: true
-}), __metadata('design:type', Boolean)], Button.prototype, 'flat', void 0);
-
-__decorate([property({
-  type: String,
-  reflect: true
-}), __metadata('design:type', String)], Button.prototype, 'role', void 0);
-
-__decorate([query('#ripple'), __metadata('design:type', Ripple)], Button.prototype, '$ripple', void 0);
-
-Button = __decorate([customElement('wl-button')], Button);
-
-var styles$g = ".flex-area {\n  display: flex;\n}\n\n.flex-1 {\n  flex: 1;\n}\n\n.text-area {\n  width: 100%;\n  font-size: 15px;\n}\n";
-
 /**
  *
  * @param {any} self
  */
 
 const template$2 = self => function () {
-  // @ts-ignore
-  const {
-    utterance,
-    utteranceTextChanged
-  } = this;
-  const {
-    text
-  } = utterance || {};
-  return html`
-    <style>
-      ${styles$g}
-    </style>
-
-    <div class="flex-area">
-      <div class="flex-1">
-        <input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">
-      </div>
-    </div>
-  `;
-}.bind(self)();
-
-/**
- *
- * @param {*} base
- */
-
-const GetUtteranceMixin = base => _decorate(null, function (_initialize, _base) {
-  class _class extends _base {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: _class,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: String
-      })],
-      key: "utteranceId",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: Object
-      })],
-      key: "utterance",
-      value: void 0
-    }, {
-      kind: "method",
-      key: "updated",
-      value: // @ts-ignore
-      // @ts-ignore
-      function updated(changedProps) {
-        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
-
-        if (changedProps.has('utteranceId')) {
-          this.getUtterance(this.utteranceId);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "getUtterance",
-      value: async function getUtterance(utteranceId) {
-        const snap = await database.ref(`utterances/data/${utteranceId}`).once('value');
-        this.utterance = snap.val() || null;
-      }
-    }]
-  };
-}, base);
-
-// @ts-ignore
-
-let ConversationalFlowUtterance = _decorate([customElement('conversational-flow-utterance')], function (_initialize, _GetUtteranceMixin) {
-  class ConversationalFlowUtterance extends _GetUtteranceMixin {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ConversationalFlowUtterance,
-    d: [{
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$2(this);
-      }
-    }, {
-      kind: "method",
-      key: "utteranceTextChanged",
-      value: async function utteranceTextChanged(event) {
-        const {
-          target
-        } = event;
-        const {
-          value
-        } = target;
-
-        if (this.utterance.text !== value) {
-          await database.ref(`utterances/data/${this.utteranceId}/text`).set(value);
-        }
-      }
-    }]
-  };
-}, GetUtteranceMixin(LitElement));
-
-/**
- *
- * @param {any} self
- */
-
-const template$3 = self => function () {
-  // @ts-ignore
-  const {
-    versions,
-    changeVersion,
-    gettingDomainVersion
-  } = this; // const { name } = topic || {};
-
-  return html`
-    <style>
-      ${styles$d}
-    </style>
-
-    <h3>Versions: </h3>
-    <ul>
-    ${versions && versions.length ? versions.map(item => html`
-      <li>
-        <a href="#" @click="${changeVersion}" data-id="${item}">V.${until(gettingDomainVersion(item, this.domainId), 'Loading...')}</a>
-      </li>
-    `) : ''}
-    </ul>
-  `;
-}.bind(self)();
-
-/**
- *
- * @param {*} base
- */
-
-const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _GetPathMixin) {
-  class _class extends _GetPathMixin {
-    // @ts-ignore
-    constructor() {
-      super();
-
-      _initialize(this);
-
-      this.boundSaveDomainVersions = this.saveDomainVersions.bind(this);
-    }
-
-  }
-
-  return {
-    F: _class,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: Array
-      })],
-      key: "versions",
-
-      value() {
-        return [];
-      }
-
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: String
-      })],
-      key: "domainId",
-      value: void 0
-    }, {
-      kind: "method",
-      key: "connectedCallback",
-      value: function connectedCallback() {
-        _get(_getPrototypeOf(_class.prototype), "connectedCallback", this).call(this); // @ts-ignore
-
-
-        const {
-          domain
-        } = this.queryObject || {
-          domain: null
-        };
-
-        if (domain) {
-          this.domainId = domain;
-          this.getDomainName(domain);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "disconnectedCallback",
-      value: function disconnectedCallback() {
-        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
-          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
-        }
-
-        this.disconnectRef();
-      }
-    }, {
-      kind: "method",
-      key: "disconnectRef",
-      value: function disconnectRef() {
-        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
-
-        if (this.domainVersionsRef) {
-          this.domainVersionsRef.off('value', this.boundSaveDomainVersions);
-        }
-      }
-      /**
-       *
-       * @param {String} id
-       */
-
-    }, {
-      kind: "method",
-      key: "getDomainName",
-      value: function getDomainName(id) {
-        this.disconnectRef();
-
-        if (id) {
-          this.domainVersionsRef = database.ref(`deployed-history/lists/${id}`);
-          this.domainVersionsRef.on('value', this.boundSaveDomainVersions);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "saveDomainVersions",
-      value: function saveDomainVersions(snap) {
-        const data = snap.val();
-
-        if (data) {
-          this.versions = Object.keys(data);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "domainChanged",
-      value: function domainChanged(domain) {}
-    }]
-  };
-}, GetPathMixin(base));
-
-// @ts-ignore
-
-let VersionList = _decorate([customElement('version-list')], function (_initialize, _GetDomainVersionsMix) {
-  class VersionList extends _GetDomainVersionsMix {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: VersionList,
-    d: [{
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$3(this);
-      }
-    }, {
-      kind: "method",
-      key: "changeVersion",
-      value: async function changeVersion({
-        target
-      }) {
-        const id = target.getAttribute('data-id');
-        const updates = {};
-        const snap = await database.ref(`deployed-history/data/${this.domainId}/${id}/`).once('value');
-        const obj = snap.val();
-
-        if (obj) {
-          updates[`domains/data/${this.domainId}/`] = obj;
-          await database.ref().update(updates); // window.location.reload();
-        }
-      }
-      /**
-       *
-       * @param {String} id
-       */
-
-    }, {
-      kind: "method",
-      key: "gettingDomainName",
-      value: async function gettingDomainName(id, domainId) {
-        // console.log(`${id}`);
-        // console.log(`deployed-history/data/${domainId}/${id}/versionNumber`)
-        return (await database.ref(`deployed-history/data/${domainId}/${id}/commitMessage`).once('value')).val();
-      }
-    }, {
-      kind: "method",
-      key: "gettingDomainVersion",
-      value: async function gettingDomainVersion(id, domainId) {
-        // console.log(`${id}`);
-        // console.log(`deployed-history/data/${domainId}/${id}/versionNumber`)
-        return (await database.ref(`deployed-history/data/${domainId}/${id}/versionNumber`).once('value')).val();
-      }
-    }]
-  };
-}, GetDomainVersionsMixin(LitElement));
-
-/**
- *
- * @param {any} self
- */
-
-const template$4 = self => function () {
   // @ts-ignore
   const {
     domainName,
@@ -23985,39 +23556,35 @@ const template$4 = self => function () {
       @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap');
     </style>
-    <h1>PROTOBOT</h1>
-    <h3>Domain</h3>
-    <input class="left-side-text" type="text" value="${domainName}" @change="${changeDomainName.bind(this)}">
-    <h3>Designer</h3>
-    <input class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
-    <br>
-    <h3>Pages</h3>
-    <ul class = "review-link">
-      <li><a href="/?domain=${this.domainId}&page=micro">Micro Review</a></li>
-      <li><a href="/?domain=${this.domainId}&page=macro">Macro Review</a></li>
-      <li><a href="/?domain=${this.domainId}&page=authoring">Design and Revise</a></li>
-      <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
-    </ul>
-    ${page === 'micro' ? html`
-      <h3>Crowd list</h3>
-      <ul class = "crowd-link">
-        ${users ? users.map(item => html`
-        <li>
-          <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=1">${until(gettingCrowdId(item.user), 'Loading...')}</a> ${item.data ? Object.keys(item.data).map(i => html`
-              <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=${i}">${i}</a>
-          `) : ''}
-        </li>`) : ''}
+      <div class="header-inner">
+
+      <ul class = "review-link full-width">
+        <!-- <li><a href="/?domain=${this.domainId}&page=micro">Micro Review</a></li> -->
+        ${[['design-history', 'History'], // ['test', 'Test'],
+  ['macro', 'Review']].map(([page_name, page_label]) => html`<li class="${page == page_name && 'active blue'}"><a href="/?domain=${this.domainId}&page=${page_name}">${page_label}</a></li>`)}
+
+        <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
       </ul>
-      <version-list></version-list>
-    ` : ''}
 
-    ${page === 'macro' ? html`
-      <version-list></version-list>
-    ` : ''}
+      <ul class = "review-link">
+        <li class="${page == 'authoring' && 'active'} orange"><a href="/?domain=${this.domainId}&page=authoring">Draft</a></li>
+      </ul>
 
-    ${page === 'authoring' ? html`
-      <protobot-memo-all></protobot-memo-all>
-    ` : ''}
+
+
+
+<!--
+      <div class="header-item-group">
+        <label html-for="domain">Domain</label>
+        <input id="domain" class="left-side-text" type="text" value="${domainName}" @change="${changeDomainName.bind(this)}">
+      </div>
+
+      <div class="header-item-group">
+        <label html-for="designerName">Designer</label>
+        <input id="designerName" class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
+      </div>
+-->
+      </div>
   `;
 }.bind(self)();
 
@@ -24131,7 +23698,7 @@ const GetDomainUsersMixin = base => _decorate(null, function (_initialize, _GetD
 
 // @ts-ignore
 
-let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_initialize, _GetDomainUsersMixin) {
+let ProtobotSidebar = _decorate([customElement('protobot-header')], function (_initialize, _GetDomainUsersMixin) {
   class ProtobotSidebar extends _GetDomainUsersMixin {
     constructor(...args) {
       super(...args);
@@ -24165,7 +23732,7 @@ let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_
       kind: "method",
       key: "render",
       value: function render() {
-        return template$4(this);
+        return template$2(this);
       }
     }, {
       kind: "method",
@@ -24234,7 +23801,627 @@ let ProtobotSidebar = _decorate([customElement('protobot-sidebar')], function (_
   };
 }, GetDomainUsersMixin(LitElement));
 
-var styles$h = "\n.center-modal {\n  background: #221f4d;\n  font-family: 'Open Sans', sans-serif;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n}\n\n.domain-id {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n  margin: 10px;\n}\n\n.new-button {\n  --button-bg\t: rgb(78, 91, 150);\n}";
+var styles$d = ":host {\n  margin: 40px;\n}\n\nh1 {\n  color: rgb(255, 245, 152);\n  font-family: 'Josefin Sans', sans-serif;\n  font-weight: bold;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.left-side-text {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.review-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.crowd-link {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n}\n\na:link {\n  color:cornflowerblue;\n}\n\na:visited {\n  color:rgb(146, 146, 146);\n}\n\na:active {\n  color: lemonchiffon;\n}\n\n/* a:visited {\n  color: white;\n} */";
+
+var styles$e = ":host {\n  overflow-y: auto;\n  height: 250px;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\nul {\n  font-family: 'Open Sans', sans-serif;\n  font-size: 15px;\n}\n\na {\n  color: white;\n}\n";
+
+var styles$f = ``;
+
+class ButtonBehavior extends FormElementBehavior {
+  constructor() {
+    super(...arguments);
+    this.type = 'submit';
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.listeners.push(addListener(this, 'click', this.onClick.bind(this)), addListener(this, 'keydown', this.onKeyDown.bind(this)));
+  }
+
+  onKeyDown(e) {
+    if (e.code === ENTER || e.code === SPACE) {
+      this.click();
+      stopEvent(e);
+
+      if (this.$ripple != null) {
+        this.$ripple.spawnRipple(undefined, {
+          autoRelease: true
+        });
+      }
+    }
+  }
+
+  onClick(e) {
+    if (this.disabled) {
+      stopEvent(e);
+      return;
+    }
+
+    if (e.target == this && !e.defaultPrevented) {
+      this.$formElement.dispatchEvent(new MouseEvent('click', {
+        relatedTarget: this,
+        composed: true
+      }));
+    }
+  }
+
+  renderFormElement() {
+    return html` <button style="display: none;" id="${this.formElementId}" aria-hidden="true" tabindex="-1" type="${this.type}" ?disabled="${this.disabled}" name="${ifDefined(this.name)}" value="${ifDefined(this.value)}"> </button> `;
+  }
+
+}
+
+ButtonBehavior.styles = [...FormElementBehavior.styles, cssResult(styles$f)];
+
+__decorate([property({
+  type: String
+}), __metadata('design:type', String)], ButtonBehavior.prototype, 'type', void 0);
+
+var styles$g = `:host{--_button-color:var(--button-color,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));--_button-shadow-color:var(--button-shadow-color,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.2));color:var(--_button-color);background:var(--_button-bg);box-shadow:var(--elevation-1,0 .3125rem .625rem -.125rem var(--_button-shadow-color));padding:var(--button-padding,.75rem 1.5rem);font-size:var(--button-font-size,1rem);border-radius:var(--button-border-radius,.5rem);font-family:var(--button-font-family,var(--font-family-sans-serif,"Roboto Condensed",helvetica,sans-serif));transition:var(--button-transition,box-shadow var(--transition-duration-slow,.25s) var(--transition-timing-function-ease,ease),background var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease),color var(--transition-duration-medium,.18s) var(--transition-timing-function-ease,ease));letter-spacing:var(--button-letter-spacing,.125rem);line-height:1;text-transform:uppercase;cursor:pointer;text-align:center;-webkit-user-select:none;-moz-user-select:none;user-select:none;outline:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative;z-index:0}:host,:host([fab]){display:inline-flex;align-items:center;justify-content:center}:host([fab]){width:var(--button-fab-size,2.5rem);height:var(--button-fab-size,2.5rem);padding:0;letter-spacing:0;border-radius:100%}:host([inverted]){color:var(--_button-bg);background:var(--_button-color)}:host([outlined]){border:var(--button-border-outlined,.125rem solid currentColor)}:host(:focus),:host(:hover){--_button-color:var(--button-color-hover,hsl(var(--primary-400-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-hover,hsl(var(--primary-400,var(--primary-hue,224),var(--primary-saturation,42%),var(--primary-lightness,52%))));--_button-shadow-color:var(--button-shadow-color-hover,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),0.5));will-change:background,color,box-shadow}:host(:active){--_button-color:var(--button-color-active,hsl(var(--primary-500-contrast,var(--primary-hue-contrast,0),var(--primary-saturation-contrast,100%),var(--primary-lightness-contrast,100%))));--_button-bg:var(--button-bg-active,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))));box-shadow:var(--elevation-4,0 .5rem 1rem -.125rem var(--_button-shadow-color))}:host([flat]:focus){background:var(--button-bg-active-flat,hsla(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%)),.08))}:host([disabled]){--_button-color:var(--button-color-disabled,hsl(var(--shade-400-contrast,var(--shade-hue-contrast,0),var(--shade-saturation-contrast,100%),var(--shade-lightness-contrast,100%))));--_button-bg:var(--button-bg-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));box-shadow:none;cursor:default;pointer-events:none}:host([flat]){box-shadow:none;background:none}#ripple{z-index:-1}`;
+
+let Button = class Button extends ButtonBehavior {
+  constructor() {
+    super(...arguments);
+    this.inverted = false;
+    this.fab = false;
+    this.outlined = false;
+    this.noRipple = false;
+    this.flat = false;
+    this.role = 'button';
+  }
+
+  render() {
+    return html` <wl-ripple id="ripple" overlay .target="${this}" ?disabled="${this.disabled || this.noRipple}"></wl-ripple> <slot></slot> ${this.renderFormElement()} `;
+  }
+
+};
+Button.styles = [...ButtonBehavior.styles, cssResult(styles$g)];
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'inverted', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'fab', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'outlined', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'noRipple', void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+}), __metadata('design:type', Boolean)], Button.prototype, 'flat', void 0);
+
+__decorate([property({
+  type: String,
+  reflect: true
+}), __metadata('design:type', String)], Button.prototype, 'role', void 0);
+
+__decorate([query('#ripple'), __metadata('design:type', Ripple)], Button.prototype, '$ripple', void 0);
+
+Button = __decorate([customElement('wl-button')], Button);
+
+var styles$h = ":host{\n  flex: 3;\n  /* background:rgb(49, 63, 102); */\n  padding: .5em 1em;\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  padding: .5em;\n  border: none;\n  outline: none;\n  color: #fff;\n  background: transparent;\n  font-family: 'Open Sans', sans-serif;\n}\n.text-area:hover,\n.text-area:focus{\n  background: rgba(0, 0, 0, 0.2);\n}\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$3 = self => function () {
+  // @ts-ignore
+  const {
+    utterance,
+    utteranceTextChanged,
+    readonly
+  } = this;
+  const {
+    text
+  } = utterance || {};
+  return html`
+    <style>
+      ${styles$h}
+    </style>
+
+    ${readonly ? html`
+        <div class="text-area">
+        ${text}
+        </div>
+
+      ` : html`<input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">`}
+
+
+  `;
+}.bind(self)();
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetUtteranceMixin = base => _decorate(null, function (_initialize, _base) {
+  class _class extends _base {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "utteranceId",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "utterance",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "updated",
+      value: // @ts-ignore
+      // @ts-ignore
+      function updated(changedProps) {
+        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
+
+        if (changedProps.has('utteranceId')) {
+          this.getUtterance(this.utteranceId);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "getUtterance",
+      value: async function getUtterance(utteranceId) {
+        const snap = await database.ref(`utterances/data/${utteranceId}`).once('value');
+        this.utterance = snap.val() || null;
+      }
+    }]
+  };
+}, base);
+
+// @ts-ignore
+
+let ConversationalFlowUtterance = _decorate([customElement('conversational-flow-utterance')], function (_initialize, _GetUtteranceMixin) {
+  class ConversationalFlowUtterance extends _GetUtteranceMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ConversationalFlowUtterance,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "readonly",
+
+      value() {
+        return false;
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$3(this);
+      }
+    }, {
+      kind: "method",
+      key: "utteranceTextChanged",
+      value: async function utteranceTextChanged(event) {
+        if (this.readonly) {
+          return;
+        }
+
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.utterance.text !== value) {
+          await database.ref(`utterances/data/${this.utteranceId}/text`).set(value);
+        }
+      }
+    }]
+  };
+}, GetUtteranceMixin(LitElement));
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$4 = self => function () {
+  // @ts-ignore
+  const {
+    versions,
+    changeVersion,
+    gettingDomainVersion
+  } = this; // const { name } = topic || {};
+
+  return html`
+    <style>
+      ${styles$e}
+    </style>
+
+    <h3>Versions: </h3>
+    <ul>
+    ${versions && versions.length ? versions.map(item => html`
+      <li>
+        <a href="#" @click="${changeVersion}" data-id="${item}">V.${until(gettingDomainVersion(item, this.domainId), 'Loading...')}</a>
+      </li>
+    `) : ''}
+    </ul>
+  `;
+}.bind(self)();
+
+/**
+ *
+ * @param {*} base
+ */
+
+const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _GetPathMixin) {
+  class _class extends _GetPathMixin {
+    // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
+    // @property({ type: String})
+    // latestEditedDomainVersion = '';
+    // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
+    constructor() {
+      super();
+
+      _initialize(this);
+
+      this.boundSaveDomainVersions = this.saveDomainVersions.bind(this);
+      this.boundSaveDomainVersionsDetail = this.saveDomainVersionsDetail.bind(this);
+      this.boundSaveLatestDeployedDomainVersion = this.saveLatestDeployedDomainVersion.bind(this);
+      this.boundSaveLatestDeployedDomain = this.saveLatestDeployedDomain.bind(this);
+    }
+
+  }
+
+  return {
+    F: _class,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "versions",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "versions_detail",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "domainId",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainVersion",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopics",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopicList",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainCommitMessage",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "lastDeployedDomainParameters",
+
+      value() {
+        return {};
+      }
+
+    }, {
+      kind: "method",
+      key: "connectedCallback",
+      value: function connectedCallback() {
+        _get(_getPrototypeOf(_class.prototype), "connectedCallback", this).call(this); // @ts-ignore
+
+
+        const {
+          domain
+        } = this.queryObject || {
+          domain: null
+        };
+
+        if (domain) {
+          this.domainId = domain;
+          this.getDomainName(domain);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "disconnectedCallback",
+      value: function disconnectedCallback() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this)) {
+          _get(_getPrototypeOf(_class.prototype), "disconnectedCallback", this).call(this);
+        }
+
+        this.disconnectRef();
+      }
+    }, {
+      kind: "method",
+      key: "disconnectRef",
+      value: function disconnectRef() {
+        if (_get(_getPrototypeOf(_class.prototype), "disconnectRef", this)) _get(_getPrototypeOf(_class.prototype), "disconnectRef", this).call(this);
+
+        if (this.domainVersionsRef) {
+          this.domainVersionsRef.off('value', this.boundSaveDomainVersions);
+          this.domainVersionsDetailRef.off('value', this.boundSaveDomainVersionsDetail);
+          this.LatestDeployedDomainVersionRef.off('value', this.boundSaveLatestDeployedDomainVersion);
+          this.LatestDeployedDomainRef.off('value', this.boundSaveLatestDeployedDomain);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "getDomainName",
+      value: function getDomainName(id) {
+        this.disconnectRef();
+
+        if (id) {
+          this.domainVersionsRef = database.ref(`deployed-history/lists/${id}`);
+          this.domainVersionsRef.on('value', this.boundSaveDomainVersions);
+          this.domainVersionsDetailRef = database.ref(`deployed-history/data/${id}`);
+          this.domainVersionsDetailRef.on('value', this.boundSaveDomainVersionsDetail);
+          this.LatestDeployedDomainVersionRef = database.ref(`last-deployed/data/${id}/deployedVersion`);
+          this.LatestDeployedDomainVersionRef.on('value', this.boundSaveLatestDeployedDomainVersion);
+          this.LatestDeployedDomainRef = database.ref(`last-deployed/data/${id}`);
+          this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveDomainVersions",
+      value: function saveDomainVersions(snap) {
+        const data = snap.val();
+
+        if (data) {
+          this.versions = Object.keys(data);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveDomainVersionsDetail",
+      value: function saveDomainVersionsDetail(snap) {
+        const data = snap.val();
+
+        if (data) {
+          this.versionsDetail = data;
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveLatestDeployedDomainVersion",
+      value: function saveLatestDeployedDomainVersion(snap) {
+        const data = snap.val();
+
+        if (data) {
+          this.lastDeployedDomainVersion = data;
+        }
+      }
+    }, {
+      kind: "method",
+      key: "saveLatestDeployedDomain",
+      value: function saveLatestDeployedDomain(snap) {
+        const domain = snap.val() || {
+          topics: {},
+          subs: []
+        };
+        const {
+          topics,
+          subs,
+          topicList,
+          commitMessage,
+          parameters
+        } = domain;
+        const array = [];
+
+        for (const topic in topics) {
+          array.push({
+            topic,
+            order: topics[topic],
+            sub: subs[topic] || false
+          });
+        }
+
+        this.lastDeployedDomainTopics = array.sort((i, j) => i.order - j.order).map(i => ({
+          id: i.topic,
+          sub: i.sub
+        }));
+        const arraytwo = [];
+
+        for (const topic in topics) {
+          arraytwo.push({
+            id: topic,
+            included: true
+          });
+        }
+
+        for (const topic in topicList) {
+          if (arraytwo.findIndex(item => item.id === topic) < 0) {
+            arraytwo.push({
+              id: topic,
+              included: false
+            });
+          }
+        }
+
+        this.lastDeployedDomainTopicList = arraytwo;
+        this.lastDeployedDomainCommitMessage = commitMessage;
+        this.lastDeployedDomainParameters = {
+          "Number of users": parameters.numUser,
+          "Number of sessions": parameters.numSession,
+          "Show other's responses?": parameters.otherResponse,
+          "Testing Methods": parameters.ampOption ? 'Amazon Mechanical Turk' : 'Share Online by myself'
+        };
+      }
+    }, {
+      kind: "method",
+      key: "updateLatestDeployedDomainVersion",
+      value: async function updateLatestDeployedDomainVersion(version) {
+        this.lastDeployedDomainVersion = version;
+        const snap = await database.ref(`deployed-history/data/${this.domainId}/${version}`).once('value');
+        this.saveLatestDeployedDomain(snap);
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: function domainChanged(domain) {}
+    }]
+  };
+}, GetPathMixin(base));
+
+// @ts-ignore
+
+let VersionList = _decorate([customElement('version-list')], function (_initialize, _GetDomainVersionsMix) {
+  class VersionList extends _GetDomainVersionsMix {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: VersionList,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$4(this);
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion({
+        target
+      }) {
+        const id = target.getAttribute('data-id');
+        const updates = {};
+        const snap = await database.ref(`deployed-history/data/${this.domainId}/${id}/`).once('value');
+        const obj = snap.val();
+
+        if (obj) {
+          updates[`domains/data/${this.domainId}/`] = obj;
+          await database.ref().update(updates); // window.location.reload();
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingDomainName",
+      value: async function gettingDomainName(id, domainId) {
+        // console.log(`${id}`);
+        // console.log(`deployed-history/data/${domainId}/${id}/versionNumber`)
+        return (await database.ref(`deployed-history/data/${domainId}/${id}/commitMessage`).once('value')).val();
+      }
+    }, {
+      kind: "method",
+      key: "gettingDomainVersion",
+      value: async function gettingDomainVersion(id, domainId) {
+        // console.log(`${id}`);
+        // console.log(`deployed-history/data/${domainId}/${id}/versionNumber`)
+        return (await database.ref(`deployed-history/data/${domainId}/${id}/versionNumber`).once('value')).val();
+      }
+    }]
+  };
+}, GetDomainVersionsMixin(LitElement));
 
 /**
  *
@@ -24244,12 +24431,183 @@ var styles$h = "\n.center-modal {\n  background: #221f4d;\n  font-family: 'Open 
 const template$5 = self => function () {
   // @ts-ignore
   const {
+    domainName,
+    changeDomainName,
+    designerName,
+    changeDesignerName,
+    users,
+    gettingCrowdId,
+    queryObject
+  } = this;
+  const {
+    page
+  } = queryObject;
+  return html`
+    <style>
+      ${styles$d}
+      @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
+      @import url('https://fonts.googleapis.com/css?family=Josefin+Sans&display=swap');
+    </style>
+    <h1>PROTOBOT</h1>
+    <h3>Domain</h3>
+    <input class="left-side-text" type="text" value="${domainName}" @change="${changeDomainName.bind(this)}">
+    <h3>Designer</h3>
+    <input class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
+    <br>
+    <h3>Pages</h3>
+    <ul class = "review-link">
+      <li><a href="/?domain=${this.domainId}&page=micro">Micro Review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=macro">Macro Review</a></li>
+      <li><a href="/?domain=${this.domainId}&page=authoring">Design and Revise</a></li>
+      <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
+    </ul>
+    ${page === 'micro' ? html`
+      <h3>Crowd list</h3>
+      <ul class = "crowd-link">
+        ${users ? users.map(item => html`
+        <li>
+          <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=1">${until(gettingCrowdId(item.user), 'Loading...')}</a> ${item.data ? Object.keys(item.data).map(i => html`
+              <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=${i}">${i}</a>
+          `) : ''}
+        </li>`) : ''}
+      </ul>
+      <version-list></version-list>
+    ` : ''}
+
+    ${page === 'macro' ? html`
+      <version-list></version-list>
+    ` : ''}
+
+    ${page === 'authoring' ? html`
+      <protobot-memo-all></protobot-memo-all>
+    ` : ''}
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotSidebar$1 = _decorate([customElement('protobot-sidebar')], function (_initialize, _GetDomainUsersMixin) {
+  class ProtobotSidebar extends _GetDomainUsersMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotSidebar,
+    d: [{
+      kind: "field",
+      decorators: [property()],
+      key: "domainName",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property()],
+      key: "designerName",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$5(this);
+      }
+    }, {
+      kind: "method",
+      key: "domainChanged",
+      value: function domainChanged(domain) {
+        _get(_getPrototypeOf(ProtobotSidebar.prototype), "domainChanged", this).call(this, domain);
+
+        if (domain) {
+          this.domainName = domain.name || '';
+          this.designerName = domain.designer || '';
+        }
+      }
+    }, {
+      kind: "method",
+      key: "changeDomainName",
+      value: async function changeDomainName(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.domainName !== value) {
+          // saves the name
+          await database.ref(`domains/data/${this.domainId}/name`).set(value);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "changeDesignerName",
+      value: async function changeDesignerName(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.designerName !== value) {
+          // saves the designer
+          await database.ref(`domains/data/${this.domainId}/designer`).set(value);
+        }
+      }
+      /**
+       *
+       * @param {String} id
+       */
+
+    }, {
+      kind: "method",
+      key: "gettingCrowdId",
+      value: async function gettingCrowdId(id) {
+        // console.log(`${id}`);
+        return (await database.ref(`users/data/${id}/name`).once('value')).val();
+      } // /**
+      //  *
+      //  * @param {String} memoId
+      //  */
+      // async gettingMemo (memoId) {
+      //   // console.log(`${id}`);
+      //   return (await database.ref(`memos/data/${memoId}/text`).once('value')).val();
+      // }
+
+    }]
+  };
+}, GetDomainUsersMixin(LitElement));
+
+var styles$i = ".center-modal {\n  background: #221f4d;\n  font-family: 'Open Sans', sans-serif;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n  z-index: 99999;\n}\n\n.domain-id {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n  margin: 10px;\n}\n\n.new-button {\n  --button-bg\t: rgb(78, 91, 150);\n}";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$6 = self => function () {
+  // @ts-ignore
+  const {
     submit,
     newDomain
   } = this;
   return html`
     <style>
-      ${styles$h}
+      ${styles$i}
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
@@ -24259,7 +24617,7 @@ const template$5 = self => function () {
           For Designers:
         </p>
         <label>
-          Fill in the your ID<br>
+          Fill in your domain ID<br>
         </label>
         <input class= "domain-id" id="domain" name="domain" type="text">
         <wl-button class ="submit-button">Submit</wl-button>
@@ -24294,7 +24652,7 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
       kind: "method",
       key: "render",
       value: function render() {
-        return template$5(this);
+        return template$6(this);
       }
     }, {
       kind: "method",
@@ -24381,14 +24739,14 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
   };
 }, GetPathMixin(LitElement));
 
-var styles$i = ".flex-area {\n  overflow:hidden;\n  display: flex;\n  margin: 20px;\n  max-width: 800px;\n  border-radius: 10px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: rgb(49, 63, 102);\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background:rgb(49, 63, 102);\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  font-weight: bold;\n}\n\n.sub {\n  margin-left: 80px;\n}\n\n.sub div {\n  background: rgb(74, 94, 150);\n}\n\nwl-button {\n  --button-border-radius\t: 0px;\n  --button-padding : 10px;\n  --button-font-size\t:10px;\n  --button-bg\t: rgb(182, 182, 182);\n  --button-bg-hover : rgb(71, 71, 71);\n}\n";
+var styles$j = ":host{\n  display: flex;\n  justify-content: center;\n  width: 100%;\n  margin: 20px;\n}\n.flex-area {\n  overflow:hidden;\n  display: flex;\n  width: 100%;\n  max-width: 800px;\n  border-radius: 6px;\n  background: rgb(49, 63, 102);\n}\n.flex-area.sub{\n  background: rgb(74, 94, 150);\n}\n\n.flex-1 {\n  flex: 1;\n  /* background: rgb(49, 63, 102); */\n  padding: .5em 1em;\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  padding: .5em;\n  border: none;\n  outline: none;\n  color: #fff;\n  background: transparent;\n  font-family: 'Open Sans', sans-serif;\n}\n.text-area:hover,\n.text-area:focus{\n  width: 100%;\n  border: none;\n  outline: none;\n  font-size : 15px;\n  padding: .5em;\n  color: #fff;\n  background: transparent;\n}\n.text-area:hover{\n  background: rgba(0, 0, 0, 0.2);\n}\n\n\n\n\n\n.sub {\n  margin-left: 80px;\n}\n\n\nwl-button {\n  --button-border-radius\t: 0px;\n  --button-padding : 10px;\n  --button-font-size\t:10px;\n  --button-bg\t: rgb(182, 182, 182);\n  --button-bg-hover : rgb(71, 71, 71);\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$6 = self => function () {
+const template$7 = self => function () {
   // @ts-ignore
   const {
     topic,
@@ -24397,35 +24755,42 @@ const template$6 = self => function () {
     newTopic,
     subTopic,
     deleteTopic,
-    sub
+    sub,
+    readonly
   } = this;
   const {
     name
   } = topic || {};
   return html`
     <style>
-      ${styles$i}
+      ${styles$j}
     </style>
 
     <div class="flex-area ${sub ? 'sub' : ''}">
       <div class="flex-1">
-        <input class="text-area" type="text" value="${name}" placeholder="topic" @change="${topicNameChanged.bind(this)}">
+      ${readonly ? html`
+          <div class="text-area">${name}</div>
+        ` : html`<input class="text-area" type="text" value="${name}" placeholder="topic" @change="${topicNameChanged.bind(this)}">`}
+
       </div>
 
-      <div class="flex-2">
-        <conversational-flow-utterance .utteranceId="${mainUtteranceId}" ></conversational-flow-utterance>
-      </div>
+
+      <conversational-flow-utterance .utteranceId="${mainUtteranceId}" ?readonly=${readonly} class="${sub ? 'sub-utter' : ''}"></conversational-flow-utterance>
 
 
-      <!-- ternary expression -->
-      ${!sub ? html`
-        <wl-button type="button" @click="${newTopic.bind(this)}">New</wl-button>
-        <wl-button type="button" @click="${subTopic.bind(this)}">Sub</wl-button>
-      ` : html`
-        <wl-button type="button" @click="${subTopic.bind(this)}">New</wl-button>
-      `}
 
-      <wl-button type="button" @click="${deleteTopic.bind(this)}">Delete</wl-button>
+      ${!readonly ? html`
+        ${!sub ? html`
+          <wl-button type="button" @click="${newTopic.bind(this)}">New</wl-button>
+          <wl-button type="button" @click="${subTopic.bind(this)}">Sub</wl-button>
+        ` : html`
+          <wl-button type="button" @click="${subTopic.bind(this)}">New</wl-button>
+        `}
+        <wl-button type="button" @click="${deleteTopic.bind(this)}">Delete</wl-button>
+      ` : ``}
+
+
+
     </div>
   `;
 }.bind(self)();
@@ -24539,16 +24904,31 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
       }
 
     }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "readonly",
+
+      value() {
+        return false;
+      }
+
+    }, {
       kind: "method",
       key: "render",
       value: // @ts-ignore
       function render() {
-        return template$6(this);
+        return template$7(this);
       }
     }, {
       kind: "method",
       key: "topicNameChanged",
       value: async function topicNameChanged(event) {
+        if (this.readonly) {
+          return;
+        }
+
         const {
           target
         } = event;
@@ -24677,28 +25057,30 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
   };
 }, GetTopicMixin(LitElement));
 
-var styles$j = ".empty-box{\n  height: 30px;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n  font-weight: bold;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
+var styles$k = "/* :host{\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  padding: 5em 0;\n} */\n\n:host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 1fr 3fr;\n}\n\n.authoring-left {\n  background-color: rgb(240, 240, 240);\n  display: flex;\n  align-items: left;\n  flex-direction: column;\n  padding: 1em;\n  margin-right: 1em;\n}\n\n.authoring-center {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  padding: 5em 0;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n  font-weight: bold;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$7 = self => function () {
+const template$8 = self => function () {
   // @ts-ignore
   const {
     topics,
     swap
   } = this;
+  console.log(topics);
   return html`
     <style>
-      ${styles$j}
+      ${styles$k}
     </style>
 
-    <h1 style="text-align: center">
-      Conversation Flow
-    </h1>
-    <div class="empty-box"></div>
+    <div class = "authoring-left">
+      <protobot-memo-all></protobot-memo-all>
+    </div>
+
+    <div class = "authoring-center">
     ${topics.map((topic, index) => html`
       <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" index="${index}"></conversational-flow-topic>
 
@@ -24708,6 +25090,7 @@ const template$7 = self => function () {
         </div>
       ` : ''}
     `)}
+    </div>
   `;
 }.bind(self)();
 
@@ -24729,7 +25112,7 @@ let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], functio
       kind: "method",
       key: "render",
       value: function render() {
-        return template$7(this);
+        return template$8(this);
       }
     }, {
       kind: "method",
@@ -24744,7 +25127,6 @@ let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], functio
 
           if (deployed) {
             const updates = {};
-            updates[`last-deployed/data/${this.domainId}/`] = domain;
             updates[`domains/data/${this.domainId}/deployed`] = false;
             await database.ref().update(updates);
           }
@@ -24786,14 +25168,14 @@ let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], functio
   };
 }, GetDomainMixin(LitElement));
 
-var styles$k = "/* .flex-area {\n  display: flex;\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n} */\n\n.new-label {\n  background-color: rgb(82, 108, 255);\n  border: none;\n  border-radius: 4px;\n  color: white;\n  font-weight: bold;\n  font-size: 15px;\n  font-family: 'Raleway', sans-serif;\n  padding: 3px;\n}\n";
+var styles$l = "/* .flex-area {\n  display: flex;\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n} */\n\n.new-label {\n  background-color: rgb(82, 108, 255);\n  border: none;\n  border-radius: 4px;\n  color: white;\n  font-weight: bold;\n  font-size: 15px;\n  font-family: 'Raleway', sans-serif;\n  padding: 3px;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$8 = self => function () {
+const template$9 = self => function () {
   // @ts-ignore
   const {
     topic,
@@ -24805,7 +25187,7 @@ const template$8 = self => function () {
   } = topic || {};
   return html`
     <style>
-      ${styles$k}
+      ${styles$l}
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
@@ -24815,7 +25197,7 @@ const template$8 = self => function () {
     <!-- ${!included ? ' - not included' : ''} -->
     ${!included ? html`
       ${this.queryObject.page === 'authoring' ? html`
-        <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Add</button>
+        <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Insert</button>
       ` : html`
         <button class='new-label' >New</button>
       `}
@@ -24872,7 +25254,7 @@ let TopicListItem = _decorate([customElement('topic-list-item')], function (_ini
       key: "render",
       value: // @ts-ignore
       function render() {
-        return template$8(this);
+        return template$9(this);
       }
     }, {
       kind: "method",
@@ -24963,7 +25345,7 @@ function nextIndex(group, currentIndex, keyCode) {
   return null;
 }
 
-var styles$l = ``;
+var styles$m = ``;
 
 class RadioBehavior extends SwitchBehavior {
   constructor() {
@@ -25021,14 +25403,14 @@ class RadioBehavior extends SwitchBehavior {
 
 }
 
-RadioBehavior.styles = [...SwitchBehavior.styles, cssResult(styles$l)];
+RadioBehavior.styles = [...SwitchBehavior.styles, cssResult(styles$m)];
 
 __decorate([property({
   type: String,
   reflect: true
 }), __metadata('design:type', String)], RadioBehavior.prototype, 'role', void 0);
 
-var styles$m = `:host{--_radio-bg:var(--radio-bg,transparent);--_radio-color:var(--radio-color,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))));background:var(--_radio-bg);color:var(--_radio-color);width:var(--radio-size,1.25rem);height:var(--radio-size,1.25rem);border:var(--radio-border-config,.125rem solid) currentColor;border-radius:var(--radio-border-radius,100%);transition:var(--radio-transition,background var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)),border-color var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));position:relative;display:inline-flex;align-items:center;justify-content:center;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([disabled])){cursor:pointer}:host([checked]){--_radio-bg:var(--radio-bg-checked,transparent);--_radio-color:var(--radio-color-checked,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))))}:host([checked]) #dot{transform:scale(1)}:host(:focus),:host(:hover){will-change:border,background}:host(:focus) #dot,:host(:hover) #dot{will-change:transform,background}:host([disabled]){--_radio-bg:var(--radio-bg-disabled,transparent);--_radio-color:var(--radio-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));pointer-events:none}:host([disabled][checked]){--_radio-bg:var(--radio-bg-disabled-checked,transparent);--_radio-color:var(--radio-color-disabled-checked,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))))}#dot{background:currentColor;width:var(--radio-dot-size,.625rem);height:var(--radio-dot-size,.625rem);border-radius:var(--radio-dot-border-radius,100%);transition:var(--radio-dot-transition,transform var(--transition-duration-medium,.18s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));transform:scale(0)}#ripple{transform:var(--radio-ripple-transform,translate(-50%,-50%) scale(1.8))}`;
+var styles$n = `:host{--_radio-bg:var(--radio-bg,transparent);--_radio-color:var(--radio-color,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))));background:var(--_radio-bg);color:var(--_radio-color);width:var(--radio-size,1.25rem);height:var(--radio-size,1.25rem);border:var(--radio-border-config,.125rem solid) currentColor;border-radius:var(--radio-border-radius,100%);transition:var(--radio-transition,background var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)),border-color var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));position:relative;display:inline-flex;align-items:center;justify-content:center;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([disabled])){cursor:pointer}:host([checked]){--_radio-bg:var(--radio-bg-checked,transparent);--_radio-color:var(--radio-color-checked,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))))}:host([checked]) #dot{transform:scale(1)}:host(:focus),:host(:hover){will-change:border,background}:host(:focus) #dot,:host(:hover) #dot{will-change:transform,background}:host([disabled]){--_radio-bg:var(--radio-bg-disabled,transparent);--_radio-color:var(--radio-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));pointer-events:none}:host([disabled][checked]){--_radio-bg:var(--radio-bg-disabled-checked,transparent);--_radio-color:var(--radio-color-disabled-checked,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))))}#dot{background:currentColor;width:var(--radio-dot-size,.625rem);height:var(--radio-dot-size,.625rem);border-radius:var(--radio-dot-border-radius,100%);transition:var(--radio-dot-transition,transform var(--transition-duration-medium,.18s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));transform:scale(0)}#ripple{transform:var(--radio-ripple-transform,translate(-50%,-50%) scale(1.8))}`;
 
 let Radio = class Radio extends RadioBehavior {
   render() {
@@ -25036,7 +25418,7 @@ let Radio = class Radio extends RadioBehavior {
   }
 
 };
-Radio.styles = [...RadioBehavior.styles, cssResult(styles$m)];
+Radio.styles = [...RadioBehavior.styles, cssResult(styles$n)];
 Radio = __decorate([customElement('wl-radio')], Radio);
 
 const $_documentContainer$3 = html$1`<dom-module id="lumo-radio-button" theme-for="vaadin-radio-button">
@@ -25425,7 +25807,7 @@ class RadioButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(
 
 customElements.define(RadioButtonElement.is, RadioButtonElement);
 
-var styles$n = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n}\n\n.dialog{\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
+var styles$o = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.dialog{\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
 
 /**
  * @license
@@ -26132,7 +26514,7 @@ customElements.define(ButtonElement.is, ButtonElement);
  * @param {any} self
  */
 
-const template$9 = self => function () {
+const template$a = self => function () {
   // @ts-ignore
   const {
     deployedVersion,
@@ -26153,7 +26535,7 @@ const template$9 = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$n}
+      ${styles$o}
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
@@ -26286,7 +26668,7 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
       kind: "method",
       key: "render",
       value: function render() {
-        return template$9(this);
+        return template$a(this);
       }
     }, {
       kind: "method",
@@ -26320,12 +26702,14 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
               amtOption: this.amtOption === 'amt'
             }
           };
+          console.log(obj);
           updates[`last-deployed/data/${this.domainId}/`] = obj;
           updates[`deployed-history/data/${this.domainId}/${key}`] = obj;
-          updates[`domains/data/${this.domainId}/deployed`] = false;
+          updates[`deployed-history/lists/${this.domainId}/${key}`] = true;
+          updates[`domains/data/${this.domainId}/versionNumber`] = length;
+          updates[`domains/data/${this.domainId}/deployed`] = true;
           updates[`domains/data/${this.domainId}/deployedVersion`] = key;
           updates[`domains/data/${this.domainId}/commitMessage`] = '';
-          updates[`deployed-history/lists/${this.domainId}/${key}`] = true;
           await database.ref().update(updates);
           this.dispatchEvent(new window.CustomEvent('dialog-accept', {
             detail: obj
@@ -26399,14 +26783,14 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
   };
 }, GetDomainMixin(LitElement));
 
-var styles$o = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
+var styles$p = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$a = self => function () {
+const template$b = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -26427,7 +26811,7 @@ const template$a = self => function () {
   } = domain || {};
   return html`
     <style>
-      ${styles$o}
+      ${styles$p}
     </style>
     <h3>Existing Topic List</h3>
 
@@ -26458,7 +26842,7 @@ const template$a = self => function () {
       </wl-textarea outlined>
     </div>
 
-    <version-list></version-list>
+    <!-- <protobot-memo-all></protobot-memo-all> --!>
 
     <div class="button-container">
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->
@@ -26523,7 +26907,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       kind: "method",
       key: "render",
       value: function render() {
-        return template$a(this);
+        return template$b(this);
       }
     }, {
       kind: "method",
@@ -26630,9 +27014,9 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   };
 }, GetDomainMixin(LitElement));
 
-var styles$p = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
+var styles$q = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n";
 
-var styles$q = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n\n.utterance {\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n.utterance.utterance__right.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
+var styles$r = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n\n.utterance {\n  font-family: 'Montserrat', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n.utterance.utterance__right.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}";
 
 // import '@polymer/paper-item/paper-item.js';
 // import '@polymer/paper-listbox/paper-listbox.js';
@@ -26643,7 +27027,7 @@ var styles$q = ".feed{\n  display:flex;\n}\n\n.feed.feed__right{\n  flex-directi
  * @param {any} self
  */
 
-const template$b = self => function () {
+const template$c = self => function () {
   // @ts-ignore
   const {
     utterance,
@@ -26661,7 +27045,7 @@ const template$b = self => function () {
   } = utterance || {};
   return html`
     <style>
-      ${styles$q}
+      ${styles$r}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -26746,7 +27130,7 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
       kind: "method",
       key: "render",
       value: function render() {
-        return template$b(this);
+        return template$c(this);
       }
     }, {
       kind: "method",
@@ -26857,7 +27241,7 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
  * @param {any} self
  */
 
-const template$c = self => function () {
+const template$d = self => function () {
   // @ts-ignore
   const {
     crowdId,
@@ -26872,7 +27256,7 @@ const template$c = self => function () {
 
   return html`
     <style>
-      ${styles$p}
+      ${styles$q}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -27083,7 +27467,7 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
       kind: "method",
       key: "render",
       value: function render() {
-        return template$c(this);
+        return template$d(this);
       }
       /**
        *
@@ -27141,14 +27525,14 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
   };
 }, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
 
-var styles$r = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n";
+var styles$s = "h1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n}\n\n\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$d = self => function () {
+const template$e = self => function () {
   // @ts-ignore
   const {
     closeTooltip
@@ -27156,7 +27540,7 @@ const template$d = self => function () {
 
   return html`
     <style>
-      ${styles$r}
+      ${styles$s}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -27702,7 +28086,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
       kind: "method",
       key: "render",
       value: function render() {
-        return template$d(this);
+        return template$e(this);
       }
     }, {
       kind: "method",
@@ -27716,20 +28100,20 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
   };
 }, GetTreeStructureMixin(LitElement));
 
-var styles$s = "";
+var styles$t = "";
 
 /**
  *
  * @param {any} self
  */
 
-const template$e = self => function () {
+const template$f = self => function () {
   // @ts-ignore
   // const { topic } = this;
   console.log(this);
   return html`
     <style>
-      ${styles$s}
+      ${styles$t}
     </style>
 
     History
@@ -27755,20 +28139,107 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
       kind: "method",
       key: "render",
       value: function render() {
-        return template$e(this);
+        return template$f(this);
       }
     }]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$t = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$u = ":host{\n\n}\n.topic-container {\n  margin: 3em;\n}\n\n.parameter-container {\n  padding: .5em 2em 2em;\n  margin: 3em;\n  border-radius: 6px;\n  background: #f1f1f5;\n  font-family: 'Open Sans', sans-serif;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$f = self => function () {
+const template$g = self => function () {
+  // @ts-ignore
+  const {
+    lastDeployedDomainVersion,
+    lastDeployedDomainTopics,
+    lastDeployedDomainParameters
+  } = this;
+  return html`
+    <style>
+      ${styles$u}
+    </style>
+    <div class="parameter-container">
+      <h3>Deployment Settings</h3>
+      ${Object.entries(lastDeployedDomainParameters).map(([key, value]) => html`
+          <div>${key} : ${value}</div>
+        `)}
+
+    </div>
+    ${lastDeployedDomainTopics.map((topic, index) => html`
+      <div class="topic-container">
+        <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" ?readonly=${true} index="${index}"></conversational-flow-topic>
+      </div>
+    `)}
+
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')], function (_initialize, _GetDomainMixin) {
+  class ProtobotDesignHistory extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotDesignHistory,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainVersion",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopics",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "lastDeployedDomainParameters",
+
+      value() {
+        return {};
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$g(this);
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$v = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$h = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -27791,7 +28262,7 @@ const template$f = self => function () {
   console.log(dv);
   return html`
     <style>
-      ${styles$t}
+      ${styles$v}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -27854,7 +28325,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
       kind: "method",
       key: "render",
       value: function render() {
-        return template$f(this);
+        return template$h(this);
       }
     }, {
       kind: "method",
@@ -27906,14 +28377,14 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$u = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$w = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$g = self => function () {
+const template$i = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -27936,7 +28407,7 @@ const template$g = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$u}
+      ${styles$w}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -28000,7 +28471,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
       value: // @property({ type: Array })
       // memos = [''];
       function render() {
-        return template$g(this);
+        return template$i(this);
       }
     }, {
       kind: "method",
@@ -28069,9 +28540,9 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$v = "";
+var styles$x = "";
 
-var styles$w = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
+var styles$y = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
 
 const $_documentContainer$8 = document.createElement('template');
 $_documentContainer$8.innerHTML = `<dom-module id="lumo-required-field">
@@ -30517,10 +30988,10 @@ customElements.define(RadioGroupElement.is, RadioGroupElement);
  * @param {any} self
  */
 
-const template$h = self => function () {
+const template$j = self => function () {
   return html`
   <style>
-    ${styles$w}
+    ${styles$y}
   </style>
 
   <h2>Planning for revision</h2>
@@ -30588,7 +31059,7 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
       kind: "method",
       key: "render",
       value: function render() {
-        return template$h(this);
+        return template$j(this);
       }
     }, {
       kind: "method",
@@ -30630,11 +31101,11 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
  * @param {any} self
  */
 
-const template$i = self => function () {
+const template$k = self => function () {
   // const {} = this;
   return html`
     <style>
-      ${styles$v}
+      ${styles$x}
     </style>
 
     <to-do-list></to-do-list>
@@ -30658,59 +31129,597 @@ let ProtobotHistorySidebar = _decorate([customElement('protobot-history-sidebar'
       kind: "method",
       key: "render",
       value: function render() {
-        return template$i(this);
+        return template$k(this);
       }
     }]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$x = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 1fr 3fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n.left {\n  /* background: rgb(94, 94, 94); */\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center {\n  background: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$z = "/* :host {\n  overflow-y: auto;\n} */\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$j = self => function () {
+const template$l = self => function () {
   // @ts-ignore
   const {
-    queryObject
+    versions,
+    changeVersion,
+    lastDeployedDomainVersion
+  } = this; // const { name } = topic || {};
+
+  return html`
+    <style>
+      ${styles$z}
+    </style>
+    ${lastDeployedDomainVersion}
+    <select class="select-box" placeholder="Topic" @change=${changeVersion}>
+      ${versions && Object.keys(versions).map(item => html`
+      <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
+      ${versions[item].versionNumber}
+      </option>`)}
+
+    </select>
+
+
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let VersionList2 = _decorate([customElement('version-managable-list2')], function (_initialize, _LitElement) {
+  class VersionList2 extends _LitElement {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: VersionList2,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "versions",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainVersion",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$l(this);
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion(event) {
+        this.dispatchEvent(new window.CustomEvent('change-version', {
+          detail: event.target.value
+        }));
+      }
+    }]
+  };
+}, LitElement);
+
+var styles$A = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-msg {\n  background: #fff;\n  font-family: 'Open Sans', sans-serif;\n  color: #222;\n  padding: 1em;\n  margin: .8em;\n  border-radius: 4px;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$m = self => function () {
+  // @ts-ignore
+  const {
+    versionsDetail,
+    changeVersion,
+    lastDeployedDomainVersion,
+    lastDeployedDomainTopicList,
+    lastDeployedDomainCommitMessage
+  } = this;
+  return html`
+    <style>
+      ${styles$A}
+    </style>
+    <version-managable-list2
+      .versions=${versionsDetail}
+      lastDeployedDomainVersion=${lastDeployedDomainVersion}
+      @change-version=${changeVersion.bind(this)}
+      ></version-managable-list2>
+
+      <ul class ="topic-list">
+        ${lastDeployedDomainTopicList.map(topic => html`
+          <li>
+            <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}"></topic-list-item>
+          </li>
+
+        `)}
+      </ul>
+
+      <div>
+        <h3>Commit Message</h3>
+        <div class="commit-msg">
+          ${lastDeployedDomainCommitMessage}
+        </div>
+      </div>
+
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotDesignHistorySidebar = _decorate([customElement('protobot-design-history-sidebar')], function (_initialize, _GetDomainMixin) {
+  class ProtobotDesignHistorySidebar extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotDesignHistorySidebar,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainVersion",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopicList",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "versionsDetail",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainCommitMessage",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$m(this);
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion({
+        detail: versionId
+      }) {
+        this.dispatchEvent(new window.CustomEvent('change-version', {
+          detail: versionId
+        }));
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$B = "h1 {\n  font-weight: 900;\n}\nh3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  font-family: 'Open Sans', sans-serif;\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n}\n\n.dialog{\n  font-family: 'Open Sans', sans-serif;\n  /* position: fixed; */\n  width:100%;\n  height: 100%;\n  /* left: 0; */\n  /* top: 0; */\n  /* background: rgba(10,10,10,0.8); */\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  font-family: 'Open Sans', sans-serif;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$n = self => function () {
+  // @ts-ignore
+  const {
+    deployedVersion,
+    submit,
+    newDomain,
+    numUser,
+    changeNumUser,
+    numSession,
+    changeNumSession,
+    opened,
+    stage,
+    deployUrl,
+    otherResponse,
+    changeOtherResponse,
+    amtOption,
+    changeAmtOption,
+    deploy,
+    confirmAMT,
+    cancelAMT
+  } = this;
+  return html`
+    <style>
+      ${styles$B}
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+    </style>
+
+    <div class ="${classMap({
+    dialog: true,
+    opened: opened,
+    closed: !opened
+  })}">
+      ${stage === 0 ? html`
+        <div class="dialog-window">
+        <h1 class="title">How to deploy?</h1>
+        <div class = "param1">
+          <h3>Number of users<h3>
+          <input class="num-users" type="text" value="${numUser}" @change="${changeNumUser.bind(this)}">
+        </div>
+        <div class = "param2">
+          <h3>Number of sessions<h3>
+          <input class="num-session" type="text" value="${numSession}" @change="${changeNumSession.bind(this)}">
+        </div>
+        <div class = "param3">
+          <h3>Show other's responses?</h3>
+          <vaadin-radio-group class= "other-response" value="${otherResponse}" @value-changed="${changeOtherResponse.bind(this)}">
+            <vaadin-radio-button value="show">Show</vaadin-radio-button>
+            <vaadin-radio-button value="hide">Hide</vaadin-radio-button>
+          </vaadin-radio-group>
+        </div>
+        <div class = "param4">
+          <h3>Testing methods</h3>
+          <vaadin-radio-group class = "amt" value="${amtOption}" @value-changed="${changeAmtOption.bind(this)}">
+            <vaadin-radio-button value="amt">Amazon Mechanical Turk</vaadin-radio-button>
+            <vaadin-radio-button value="link-share">Share Online by myself</vaadin-radio-button>
+          </vaadin-radio-group>
+        </div>
+        <div class="button-container">
+          <vaadin-button class="deploy" @click="${deploy.bind(this)}">Deploy</vaadin-button>
+        </div>
+        </div>
+      </div>` : html`
+
+        <div class="dialog-window">
+          <h1 class="title">Success</h1>
+
+          <div class = "deploy-before">
+            ${amtOption === "amt" ? html`
+              <p>Are you sure to deploy?</p>
+              <p>You would spend ${numSession}*${numUser} dolloars!</p>
+              <div class="button-container">
+                <vaadin-button class="cancel" @click="${confirmAMT.bind(this)}">Okay</vaadin-button>
+                <vaadin-button class="cancel" @click="${cancelAMT.bind(this)}">Cancel</vaadin-button>
+              </div>
+              ` : html`
+              <h3>Copy below link!</h3><div>${deployUrl}</div>
+            `}
+          </div>
+        </div>
+      </div>
+      `}
+
+    </div>
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotDeployModal$1 = _decorate([customElement('protobot-deploy')], function (_initialize, _GetDomainMixin) {
+  class ProtobotDeployModal extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotDeployModal,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "opened",
+
+      value() {
+        return true;
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property()],
+      key: "numUser",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property()],
+      key: "numSession",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "otherResponse",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "amtOption",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Number
+      })],
+      key: "stage",
+
+      value() {
+        return 0;
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property()],
+      key: "deployUrl",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$n(this);
+      }
+    }, {
+      kind: "method",
+      key: "nextDialogStage",
+      value: async function nextDialogStage() {
+        this.stage++;
+        this.stage = Math.max(this.stage, 1); // window.location.reload();
+      }
+    }, {
+      kind: "method",
+      key: "confirmAMT",
+      value: async function confirmAMT() {
+        console.log("TODO");
+      }
+    }, {
+      kind: "method",
+      key: "cancelAMT",
+      value: async function cancelAMT() {
+        this.stage = 0;
+        this.deployUrl = '';
+      }
+    }, {
+      kind: "method",
+      key: "deploy",
+      value: async function deploy() {
+        const updates = {};
+        const {
+          domain
+        } = this;
+        const snap2 = await database.ref(`deployed-history/lists/${this.domainId}`).once('value');
+        const list = snap2.val() || {};
+        const {
+          length
+        } = Object.keys(list);
+
+        if (domain) {
+          const {
+            commitMessage
+          } = domain;
+          const {
+            key
+          } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+          const obj = { ...this.domain,
+            deployedVersion: key,
+            commitMessage: commitMessage || '',
+            versionNumber: length,
+            parameters: {
+              numUser: this.numUser,
+              numSession: this.numSession,
+              otherResponse: this.otherResponse === 'show',
+              amtOption: this.amtOption === 'amt'
+            }
+          };
+          updates[`last-deployed/data/${this.domainId}/`] = obj;
+          updates[`deployed-history/data/${this.domainId}/${key}`] = obj;
+          updates[`domains/data/${this.domainId}/deployed`] = false;
+          updates[`domains/data/${this.domainId}/deployedVersion`] = key;
+          updates[`domains/data/${this.domainId}/commitMessage`] = '';
+          updates[`deployed-history/lists/${this.domainId}/${key}`] = true;
+          await database.ref().update(updates);
+          this.urlGenerator(obj); // this.dispatchEvent(new window.CustomEvent('dialog-accept', { detail: obj }));
+        }
+      }
+    }, {
+      kind: "method",
+      key: "urlGenerator",
+      value: async function urlGenerator(obj) {
+        const {
+          numUser,
+          numSession,
+          otherResponse
+        } = obj.parameters; // with the domainId and chosen parameters, generating the URL
+        // domainID
+        // param1: num-users (number)
+        // param2: num-sessions (number)
+        // param3: other-response (boolean)
+        // [x] param4: amt (boolean) -- we do not need for link
+        //                              but we need it for showing the link or not
+        //                              amt = true: just deploying, amt = false: showing up link
+        // example URL:
+
+        this.deployUrl = `https://protobot-rawdata.firebaseapp.com/?domain=${this.domainId}&deployedVersion=${obj.deployedVersion}&numUser=${numUser}&numSession=${numSession}&otherResponse=${otherResponse}`;
+        console.log(this.deployUrl); // this.stage++;
+        // this.stage = Math.max(this.stage, 1);
+
+        this.nextDialogStage(); // this.closeDialog();
+      }
+    }, {
+      kind: "method",
+      key: "changeNumUser",
+      value: async function changeNumUser(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+        this.numUser = value; // if (this.numUser !== value) {
+        //   console.log(this.deployedVersion)
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/numUser`).set(value);
+        // }
+      }
+    }, {
+      kind: "method",
+      key: "changeNumSession",
+      value: async function changeNumSession(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+        this.numSession = value; // if (this.numSession !== value) {
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/numSession`).set(value);
+        // }
+      }
+    }, {
+      kind: "method",
+      key: "changeOtherResponse",
+      value: async function changeOtherResponse(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+        this.otherResponse = value; // if (this.otherResponse == "show") {
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/otherResponse`).set("True");
+        // }
+        // if (this.otherResponse == "hide") {
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/otherResponse`).set("False");
+        // }
+      }
+    }, {
+      kind: "method",
+      key: "changeAmtOption",
+      value: async function changeAmtOption(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+        this.amtOption = value; // if (this.amtOption == "amt") {
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("True");
+        // }
+        // if (this.amtOption == "link-share") {
+        //   await database.ref(`deployed-history/data/${this.domainId}/${this.domain.deployedVersion}/parameters/amtOption`).set("False");
+        // }
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$C = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 4fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n/* .left {\n  background: rgb(94, 94, 94);\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n} */\n\n.center {\n  background: white;\n  padding-right: 10px;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right-scrollable{\n  height: 100%;\n  padding: 10px;\n  overflow: auto;\n  box-sizing: border-box;\n}\n/*\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n} */\n";
+
+var startStyles = ":host {\n  margin: 0;\n  padding: 0;\n}";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$o = self => function () {
+  // @ts-ignore
+  const {
+    queryObject,
+    lastDeployedDomainParameters,
+    lastDeployedDomainCommitMessage,
+    lastDeployedDomainVersion,
+    lastDeployedDomainTopics,
+    lastDeployedDomainTopicList,
+    changeVersion,
+    versionsDetail
   } = this;
   const {
     domain,
     page
   } = queryObject;
   return html`
-    <style>
-      ${styles$x}
-      @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
-    </style>
 
     ${domain ? html`
-      <!-- <div class="top">
-        <h2>protobot</h2>
-      </div> -->
-      <div class="left" style="overflow:scroll;">
-        <protobot-sidebar></protobot-sidebar>
-      </div>
+      <style>
+        ${styles$C}
+        @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
+      </style>
+
+      <protobot-header></protobot-header>
+
       <div class="center" style="overflow:scroll;">
         ${page === 'authoring' ? html`
           <protobot-authoring></protobot-authoring>
         ` : ''}
 
-        ${page === 'macro' ? html`
+        ${page === 'macro' || !page ? html`
           <protobot-macro></protobot-macro>
         ` : ''}
 
-        ${page === 'micro' || !page ? html`
+        ${page === 'test' ? html`
+          <protobot-deploy></protobot-deploy>
+        ` : ''}
+
+        ${page === 'micro' ? html`
           <protobot-micro></protobot-micro>
         ` : ''}
 
-        ${page === 'history' ? html`
-          <protobot-authoring></protobot-authoring>
+        ${page === 'design-history' ? html`
+          <protobot-design-history .lastDeployedDomainParameters=${lastDeployedDomainParameters} lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopics=${lastDeployedDomainTopics}></protobot-design-history>
         ` : ''}
       </div>
-      <div class="right" style="overflow:scroll;">
+
+      <div class="right">
+        <div class="right-scrollable">
         ${page === 'authoring' || !page ? html`
           <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
         ` : ''}
@@ -30720,12 +31729,17 @@ const template$j = self => function () {
         ${page === 'micro' ? html`
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>
         ` : ''}
-        ${page === 'history' ? html`
-          <protobot-history-sidebar></protobot-history-sidebar>
+        ${page === 'design-history' ? html`
+          <protobot-design-history-sidebar lastDeployedDomainCommitMessage=${lastDeployedDomainCommitMessage} .versionsDetail=${versionsDetail} lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopicList=${lastDeployedDomainTopicList} @change-version=${changeVersion.bind(this)}></protobot-design-history-sidebar>
         ` : ''}
+        </div>
       </div>
+
     ` : html`
-      <div style="background: white"></div>
+      <style>
+        ${startStyles}
+        @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
+      </style>
       <protobot-start></protobot-start>
     `}
 
@@ -30734,8 +31748,8 @@ const template$j = self => function () {
 
 // @ts-ignore
 
-let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], function (_initialize, _GetPathMixin) {
-  class ProtobotDesignerUI extends _GetPathMixin {
+let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], function (_initialize, _GetDomainVersionsMix) {
+  class ProtobotDesignerUI extends _GetDomainVersionsMix {
     constructor(...args) {
       super(...args);
 
@@ -30747,11 +31761,70 @@ let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], func
   return {
     F: ProtobotDesignerUI,
     d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainVersion",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopics",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopicList",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainCommitMessage",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "lastDeployedDomainParameters",
+
+      value() {
+        return {};
+      }
+
+    }, {
       kind: "method",
       key: "render",
       value: function render() {
-        return template$j(this);
+        return template$o(this);
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion({
+        detail: id
+      }) {
+        _get(_getPrototypeOf(ProtobotDesignerUI.prototype), "updateLatestDeployedDomainVersion", this).call(this, id);
       }
     }]
   };
-}, GetPathMixin(LitElement));
+}, GetDomainVersionsMixin(LitElement));

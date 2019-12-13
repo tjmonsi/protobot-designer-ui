@@ -115,6 +115,7 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
 
       for (const topic in topicGraph) {
         for (const t in topicGraph[topic]) {
+
           const row = [topicMap[topic] || 'No Topic', topicMap[t] || 'No Topic', topicGraph[topic][t]];
           rows.push(row);
         }

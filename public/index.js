@@ -26824,14 +26824,6 @@ const template$b = self => function () {
     `)}
     </ul>
 
-    <!-- <div>
-      <h3>Testing methods</h3>
-      <vaadin-radio-group>
-        <vaadin-radio-button class="explore">Exploration</vaadin-radio-button>
-        <vaadin-radio-button class="verify">Verification</vaadin-radio-button>
-      </vaadin-radio-group>
-    </div> -->
-
     <div>
       <h3>Commit Message</h3>
       <wl-textarea outlined
@@ -26853,6 +26845,7 @@ const template$b = self => function () {
         @dialog-cancel="${closeDialog.bind(this)}"
         @dialog-close-2="${closeTwoDialog.bind(this)}">
       </protobot-deploy-modal>
+
     </div>
   `;
 }.bind(self)();
@@ -27557,13 +27550,10 @@ const template$e = self => function () {
   `;
 }.bind(self)();
 
-/**
- *
- * @param {*} base
- */
+// @ts-ignore
 
-const GetTreeStructureMixin = base => _decorate(null, function (_initialize, _GetDomainMixin) {
-  class _class extends _GetDomainMixin {
+let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_initialize, _GetDomainMixin) {
+  class ProtobotMacro extends _GetDomainMixin {
     constructor(...args) {
       super(...args);
 
@@ -27573,7 +27563,7 @@ const GetTreeStructureMixin = base => _decorate(null, function (_initialize, _Ge
   }
 
   return {
-    F: _class,
+    F: ProtobotMacro,
     d: [{
       kind: "field",
       decorators: [property({
@@ -27582,13 +27572,21 @@ const GetTreeStructureMixin = base => _decorate(null, function (_initialize, _Ge
       key: "tree",
       value: void 0
     }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainVersion",
+      value: void 0
+    }, {
       kind: "method",
       key: "updated",
       value: // @ts-ignore
+      // @ts-ignore
       function updated(changedProps) {
-        if (_get(_getPrototypeOf(_class.prototype), "updated", this)) _get(_getPrototypeOf(_class.prototype), "updated", this).call(this, changedProps);
+        if (_get(_getPrototypeOf(ProtobotMacro.prototype), "updated", this)) _get(_getPrototypeOf(ProtobotMacro.prototype), "updated", this).call(this, changedProps);
 
-        if (changedProps.has('domainId')) {
+        if (changedProps.has('domainId') || changedProps.has('lastDeployedDomainVersion')) {
           this.getTreeStructure(this.domainId);
         }
       }
@@ -27605,28 +27603,6 @@ const GetTreeStructureMixin = base => _decorate(null, function (_initialize, _Ge
     }, {
       kind: "method",
       key: "treeChanged",
-      value: function treeChanged(tree) {}
-    }]
-  };
-}, GetDomainMixin(base));
-
-// @ts-ignore
-
-let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_initialize, _GetTreeStructureMixi) {
-  class ProtobotMacro extends _GetTreeStructureMixi {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: ProtobotMacro,
-    d: [{
-      kind: "method",
-      key: "treeChanged",
       value: function treeChanged(tree) {
         if (tree) {
           console.log(this.tree); // this.setSankey(this.tree);
@@ -27638,14 +27614,14 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           const newTree = {};
 
           for (const i in this.tree) {
-            console.log(this.domain.deployedVersion, this.tree[i].version);
+            console.log(this.lastDeployedDomainVersion, this.tree[i].version);
 
-            if (this.domain.deployedVersion === this.tree[i].version) {
+            if (this.lastDeployedDomainVersion === this.tree[i].version) {
               newTree[i] = this.tree[i];
             }
           }
 
-          console.log(newTree);
+          console.log('fjdkjkdsf', newTree);
           this.drawChart(newTree);
         }
       }
@@ -27863,6 +27839,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
 
         const color = d3.scale.category20(); // append the svg canvas to the page
 
+        d3.select(this.shadowRoot).select('.sankey').html('');
         var svg = d3.select(this.shadowRoot).select('.sankey').append('svg').attr('width', width + margin.left + margin.right).attr('height', height + margin.top + margin.bottom).append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')'); // Set the sankey diagram properties
 
         var sankey = d3.sankey().nodeWidth(36).nodePadding(10).size([width, height]);
@@ -28098,7 +28075,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
       }
     }]
   };
-}, GetTreeStructureMixin(LitElement));
+}, GetDomainMixin(LitElement));
 
 var styles$t = "";
 
@@ -28232,7 +28209,7 @@ let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$v = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$v = "/* :host {\n  overflow-y: auto;\n} */\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n";
 
 /**
  *
@@ -28242,11 +28219,93 @@ var styles$v = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sa
 const template$h = self => function () {
   // @ts-ignore
   const {
+    versions,
+    changeVersion,
+    lastDeployedDomainVersion
+  } = this; // const { name } = topic || {};
+
+  return html`
+    <style>
+      ${styles$v}
+    </style>
+    ${lastDeployedDomainVersion}
+    <select class="select-box" placeholder="Topic" @change=${changeVersion}>
+      ${versions && Object.keys(versions).map(item => html`
+      <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
+      ${versions[item].versionNumber}
+      </option>`)}
+
+    </select>
+
+
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let VersionList2 = _decorate([customElement('version-managable-list2')], function (_initialize, _LitElement) {
+  class VersionList2 extends _LitElement {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: VersionList2,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Object
+      })],
+      key: "versions",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainVersion",
+      value: void 0
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$h(this);
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion(event) {
+        this.dispatchEvent(new window.CustomEvent('change-version', {
+          detail: event.target.value
+        }));
+      }
+    }]
+  };
+}, LitElement);
+
+var styles$w = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$i = self => function () {
+  // @ts-ignore
+  const {
     topicList,
     save,
     addMemo,
     memos,
-    domain
+    domain,
+    versionsDetail,
+    changeVersion,
+    lastDeployedDomainVersion,
+    lastDeployedDomainTopicList
   } = this;
   const {
     deployedVersion: dv
@@ -28262,7 +28321,7 @@ const template$h = self => function () {
   console.log(dv);
   return html`
     <style>
-      ${styles$v}
+      ${styles$w}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -28274,13 +28333,31 @@ const template$h = self => function () {
     </div>
     <br>
     <h3>Existing Topic List</h3>
-    <ul class ="topic-list">
+
+    <version-managable-list2
+      .versions=${versionsDetail}
+      lastDeployedDomainVersion=${lastDeployedDomainVersion}
+      @change-version=${changeVersion.bind(this)}
+      ></version-managable-list2>
+
+      <ul class ="topic-list">
+        ${lastDeployedDomainTopicList.map(topic => html`
+          <li>
+            <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}"></topic-list-item>
+          </li>
+
+        `)}
+      </ul>
+
+
+    <!--<ul class ="topic-list">
     ${topicList.map(topic => html`
       <li>
         <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}">
         </topic-list-item>
       </li>
     `)}
+    -->
     </ul>
     <br>
     <br>
@@ -28290,7 +28367,7 @@ const template$h = self => function () {
     crowdId,
     memoId,
     deployedVersion
-  }) => page === pageId && crowdId === crowd && deployedVersion === dv ? html`
+  }) => page === pageId && crowdId === crowd ? html`
       <protobot-memo .memoId="${memoId}"></protobot-memo>
     ` : '')}
     <div class="add-container">
@@ -28309,8 +28386,8 @@ const template$h = self => function () {
 // Extend the LitElement base class
 // @ts-ignore
 
-let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], function (_initialize, _GetDomainMemosMixin) {
-  class ProtobotMacroSidebar extends _GetDomainMemosMixin {
+let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], function (_initialize, _GetDomainMixin) {
+  class ProtobotMacroSidebar extends _GetDomainMixin {
     constructor(...args) {
       super(...args);
 
@@ -28322,15 +28399,69 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
   return {
     F: ProtobotMacroSidebar,
     d: [{
+      kind: "field",
+      decorators: [property({
+        type: String
+      })],
+      key: "lastDeployedDomainVersion",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "lastDeployedDomainTopicList",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "versionsDetail",
+
+      value() {
+        return [];
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Array
+      })],
+      key: "memos",
+
+      value() {
+        return [];
+      }
+
+    }, {
       kind: "method",
       key: "render",
       value: function render() {
-        return template$h(this);
+        return template$i(this);
       }
     }, {
       kind: "method",
       key: "save",
       value: function save() {}
+    }, {
+      kind: "method",
+      key: "updated",
+      value: function updated(changedProps) {
+        if (_get(_getPrototypeOf(ProtobotMacroSidebar.prototype), "updated", this)) _get(_getPrototypeOf(ProtobotMacroSidebar.prototype), "updated", this).call(this, changedProps);
+
+        if (changedProps.has('domainId')) {
+          this.loadMemo(this.lastDeployedDomainVersion);
+        }
+      }
     }, {
       kind: "method",
       key: "addMemo",
@@ -28345,24 +28476,19 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
         } = this.queryObject || {
           page: null
         };
-        const {
-          deployedVersion
-        } = this.domain || {
-          deployedVersion: null
-        };
         const memo = {
           text: '',
           domainId: this.domainId,
           crowdId: crowdId || null,
           // can be null
           page,
-          deployedVersion: deployedVersion || null
+          deployedVersion: this.lastDeployedDomainVersion || null
         }; // console.log(this.memos)
 
         updates[`memos/lists/domain-memo/${this.domainId}/${memoId}`] = {
           page,
           crowdId: crowdId || null,
-          deployedVersion: deployedVersion || null
+          deployedVersion: this.lastDeployedDomainVersion || null
         };
 
         if (crowdId) {
@@ -28371,20 +28497,60 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
 
         updates[`memos/data/${memoId}`] = memo; // this saves the memo in db
 
-        await database.ref().update(updates);
+        await database.ref().update(updates); // console.log({...memo, memoId})
+
+        await this.loadMemo(this.lastDeployedDomainVersion); // this.memos.push({
+        //   page,
+        //   memoId,
+        //   crowdId: crowdId || null,
+        //   deployedVersion: this.lastDeployedDomainVersion || null
+        // })
+      }
+    }, {
+      kind: "method",
+      key: "changeVersion",
+      value: async function changeVersion({
+        detail: versionId
+      }) {
+        this.dispatchEvent(new window.CustomEvent('change-version', {
+          detail: versionId
+        }));
+        this.loadMemo(versionId);
+      }
+    }, {
+      kind: "method",
+      key: "loadMemo",
+      value: async function loadMemo(versionId) {
+        const snap = await database.ref(`memos/lists/domain-memo/${this.domainId}`).orderByChild('deployedVersion').equalTo(versionId).once('value');
+        const data = snap.val() || null;
+        const array = [];
+
+        if (data) {
+          for (const memoId in data) {
+            array.push({ ...data[memoId],
+              memoId
+            });
+          }
+
+          this.memos = array;
+        } else {
+          this.memos = [];
+        }
+
+        console.log(this.memos);
       }
     }]
   };
-}, GetDomainMemosMixin(LitElement));
+}, GetDomainMixin(LitElement));
 
-var styles$w = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$x = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$i = self => function () {
+const template$j = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -28407,7 +28573,7 @@ const template$i = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$w}
+      ${styles$x}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -28471,7 +28637,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
       value: // @property({ type: Array })
       // memos = [''];
       function render() {
-        return template$i(this);
+        return template$j(this);
       }
     }, {
       kind: "method",
@@ -28540,9 +28706,9 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$x = "";
+var styles$y = "";
 
-var styles$y = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
+var styles$z = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
 
 const $_documentContainer$8 = document.createElement('template');
 $_documentContainer$8.innerHTML = `<dom-module id="lumo-required-field">
@@ -30988,10 +31154,10 @@ customElements.define(RadioGroupElement.is, RadioGroupElement);
  * @param {any} self
  */
 
-const template$j = self => function () {
+const template$k = self => function () {
   return html`
   <style>
-    ${styles$y}
+    ${styles$z}
   </style>
 
   <h2>Planning for revision</h2>
@@ -31059,7 +31225,7 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
       kind: "method",
       key: "render",
       value: function render() {
-        return template$j(this);
+        return template$k(this);
       }
     }, {
       kind: "method",
@@ -31101,11 +31267,11 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
  * @param {any} self
  */
 
-const template$k = self => function () {
+const template$l = self => function () {
   // const {} = this;
   return html`
     <style>
-      ${styles$x}
+      ${styles$y}
     </style>
 
     <to-do-list></to-do-list>
@@ -31129,89 +31295,11 @@ let ProtobotHistorySidebar = _decorate([customElement('protobot-history-sidebar'
       kind: "method",
       key: "render",
       value: function render() {
-        return template$k(this);
+        return template$l(this);
       }
     }]
   };
 }, GetDomainMixin(LitElement));
-
-var styles$z = "/* :host {\n  overflow-y: auto;\n} */\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n";
-
-/**
- *
- * @param {any} self
- */
-
-const template$l = self => function () {
-  // @ts-ignore
-  const {
-    versions,
-    changeVersion,
-    lastDeployedDomainVersion
-  } = this; // const { name } = topic || {};
-
-  return html`
-    <style>
-      ${styles$z}
-    </style>
-    ${lastDeployedDomainVersion}
-    <select class="select-box" placeholder="Topic" @change=${changeVersion}>
-      ${versions && Object.keys(versions).map(item => html`
-      <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
-      ${versions[item].versionNumber}
-      </option>`)}
-
-    </select>
-
-
-  `;
-}.bind(self)();
-
-// @ts-ignore
-
-let VersionList2 = _decorate([customElement('version-managable-list2')], function (_initialize, _LitElement) {
-  class VersionList2 extends _LitElement {
-    constructor(...args) {
-      super(...args);
-
-      _initialize(this);
-    }
-
-  }
-
-  return {
-    F: VersionList2,
-    d: [{
-      kind: "field",
-      decorators: [property({
-        type: Object
-      })],
-      key: "versions",
-      value: void 0
-    }, {
-      kind: "field",
-      decorators: [property({
-        type: String
-      })],
-      key: "lastDeployedDomainVersion",
-      value: void 0
-    }, {
-      kind: "method",
-      key: "render",
-      value: function render() {
-        return template$l(this);
-      }
-    }, {
-      kind: "method",
-      key: "changeVersion",
-      value: async function changeVersion(event) {
-        this.dispatchEvent(new window.CustomEvent('change-version', {
-          detail: event.target.value
-        }));
-      }
-    }]
-  };
-}, LitElement);
 
 var styles$A = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-msg {\n  background: #fff;\n  font-family: 'Open Sans', sans-serif;\n  color: #222;\n  padding: 1em;\n  margin: .8em;\n  border-radius: 4px;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
@@ -31702,7 +31790,7 @@ const template$o = self => function () {
         ` : ''}
 
         ${page === 'macro' || !page ? html`
-          <protobot-macro></protobot-macro>
+          <protobot-macro lastDeployedDomainVersion=${lastDeployedDomainVersion}></protobot-macro>
         ` : ''}
 
         ${page === 'test' ? html`
@@ -31724,7 +31812,9 @@ const template$o = self => function () {
           <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
         ` : ''}
         ${page === 'macro' ? html`
-          <protobot-macro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-macro-sidebar>
+          <protobot-macro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"
+          .versionsDetail=${versionsDetail} lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopicList=${lastDeployedDomainTopicList} @change-version=${changeVersion.bind(this)}
+          ></protobot-macro-sidebar>
         ` : ''}
         ${page === 'micro' ? html`
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>

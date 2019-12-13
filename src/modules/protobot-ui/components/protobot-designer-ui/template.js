@@ -47,7 +47,7 @@ export const template = self => function () {
         ` : ''}
 
         ${page === 'macro' || !page ? html`
-          <protobot-macro></protobot-macro>
+          <protobot-macro lastDeployedDomainVersion=${lastDeployedDomainVersion}></protobot-macro>
         ` : ''}
 
         ${page === 'test' ? html`
@@ -69,7 +69,9 @@ export const template = self => function () {
           <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
         ` : ''}
         ${page === 'macro' ? html`
-          <protobot-macro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-macro-sidebar>
+          <protobot-macro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"
+          .versionsDetail=${versionsDetail} lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopicList=${lastDeployedDomainTopicList} @change-version=${changeVersion.bind(this)}
+          ></protobot-macro-sidebar>
         ` : ''}
         ${page === 'micro' ? html`
           <protobot-micro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-micro-sidebar>

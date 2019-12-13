@@ -1,6 +1,7 @@
 import { html } from 'lit-element';
 import '../topic-list-item';
 import '../protobot-memo';
+import '../version-managable-list2';
 
 // @ts-ignore
 import styles from './style.css';
@@ -10,7 +11,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topicList, save, addMemo, memos, domain } = this;
+  const { topicList, save, addMemo, memos, domain, versionsDetail, changeVersion, lastDeployedDomainVersion, lastDeployedDomainTopicList, } = this;
   const { deployedVersion: dv } = domain || { deployedVersion: null };
   const { page: pageId, crowdId: crowd } = this.queryObject || { page: null };
 
@@ -30,18 +31,36 @@ export const template = self => function () {
     </div>
     <br>
     <h3>Existing Topic List</h3>
-    <ul class ="topic-list">
+
+    <version-managable-list2
+      .versions=${versionsDetail}
+      lastDeployedDomainVersion=${lastDeployedDomainVersion}
+      @change-version=${changeVersion.bind(this)}
+      ></version-managable-list2>
+
+      <ul class ="topic-list">
+        ${lastDeployedDomainTopicList.map(topic => html`
+          <li>
+            <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}"></topic-list-item>
+          </li>
+
+        `)}
+      </ul>
+
+
+    <!--<ul class ="topic-list">
     ${topicList.map(topic => html`
       <li>
         <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}">
         </topic-list-item>
       </li>
     `)}
+    -->
     </ul>
     <br>
     <br>
     <h3>Add Message</h3>
-    ${memos.map(({ page, crowdId, memoId, deployedVersion }) => page === pageId && crowdId === crowd && deployedVersion === dv ? html`
+    ${memos.map(({ page, crowdId, memoId, deployedVersion }) => page === pageId && crowdId === crowd ? html`
       <protobot-memo .memoId="${memoId}"></protobot-memo>
     ` : '')}
     <div class="add-container">

@@ -53,7 +53,7 @@ export const template = self => function () {
       </wl-textarea outlined>
     </div>
 
-    <protobot-memo-all></protobot-memo-all>
+    <!-- <protobot-memo-all></protobot-memo-all> --!>
 
     <div class="button-container">
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->

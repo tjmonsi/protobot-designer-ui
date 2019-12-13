@@ -17,6 +17,11 @@ export const template = self => function () {
       ${styles}
     </style>
 
+    <div class = "authoring-left">
+      <protobot-memo-all></protobot-memo-all>
+    </div>
+
+    <div class = "authoring-center">
     ${topics.map((topic, index) => html`
       <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" index="${index}"></conversational-flow-topic>
 
@@ -26,5 +31,6 @@ export const template = self => function () {
         </div>
       ` : ''}
     `)}
+    </div>
   `;
 }.bind(self)();

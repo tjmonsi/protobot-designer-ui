@@ -25057,7 +25057,7 @@ let ConversationalFlowTopic = _decorate([customElement('conversational-flow-topi
   };
 }, GetTopicMixin(LitElement));
 
-var styles$k = ":host{\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  padding: 5em 0;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n  font-weight: bold;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
+var styles$k = "/* :host{\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  padding: 5em 0;\n} */\n\n:host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 1fr 3fr;\n}\n\n.authoring-left {\n  background-color: rgb(240, 240, 240);\n  display: flex;\n  align-items: left;\n  flex-direction: column;\n  padding: 1em;\n  margin-right: 1em;\n}\n\n.authoring-center {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  padding: 5em 0;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n  font-weight: bold;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
 
 /**
  *
@@ -25076,6 +25076,11 @@ const template$8 = self => function () {
       ${styles$k}
     </style>
 
+    <div class = "authoring-left">
+      <protobot-memo-all></protobot-memo-all>
+    </div>
+
+    <div class = "authoring-center">
     ${topics.map((topic, index) => html`
       <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" index="${index}"></conversational-flow-topic>
 
@@ -25085,6 +25090,7 @@ const template$8 = self => function () {
         </div>
       ` : ''}
     `)}
+    </div>
   `;
 }.bind(self)();
 
@@ -25801,7 +25807,7 @@ class RadioButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(
 
 customElements.define(RadioButtonElement.is, RadioButtonElement);
 
-var styles$o = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n}\n\n.dialog{\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
+var styles$o = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.dialog{\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
 
 /**
  * @license
@@ -26836,7 +26842,7 @@ const template$b = self => function () {
       </wl-textarea outlined>
     </div>
 
-    <protobot-memo-all></protobot-memo-all>
+    <!-- <protobot-memo-all></protobot-memo-all> --!>
 
     <div class="button-container">
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->
@@ -31655,7 +31661,7 @@ let ProtobotDeployModal$1 = _decorate([customElement('protobot-deploy')], functi
   };
 }, GetDomainMixin(LitElement));
 
-var styles$C = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 4fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n/* .left {\n  background: rgb(94, 94, 94);\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n} */\n\n.center {\n  background: white;\n  padding: 10px;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right-scrollable{\n  height: 100%;\n  padding: 10px;\n  overflow: auto;\n  box-sizing: border-box;\n}\n/*\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n} */\n";
+var styles$C = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 4fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n/* .left {\n  background: rgb(94, 94, 94);\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n} */\n\n.center {\n  background: white;\n  padding-right: 10px;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right-scrollable{\n  height: 100%;\n  padding: 10px;\n  overflow: auto;\n  box-sizing: border-box;\n}\n/*\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n} */\n";
 
 var startStyles = ":host {\n  margin: 0;\n  padding: 0;\n}";
 

@@ -15,7 +15,7 @@ class ConversationalFlowTopic extends GetTopicMixin(LitElement) {
   @property({ type: Boolean })
   sub = false;
 
-  @property({type: Boolean})
+  @property({ type: Boolean })
   readonly = false;
 
   render () {

@@ -21,7 +21,12 @@ export const template = self => function () {
 
     <div class="flex-area ${sub ? 'sub' : ''}">
       <div class="flex-1">
-        <input class="text-area" type="text" value="${name}" placeholder="topic" readonly=${readonly} @change="${topicNameChanged.bind(this)}">
+      ${readonly ?
+        html`
+          <div class="text-area">${name}</div>
+        ` :
+        html`<input class="text-area" type="text" value="${name}" placeholder="topic" @change="${topicNameChanged.bind(this)}">`}
+
       </div>
 
 

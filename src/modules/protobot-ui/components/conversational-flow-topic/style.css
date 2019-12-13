@@ -30,6 +30,7 @@
   outline: none;
   color: #fff;
   background: transparent;
+  font-family: 'Open Sans', sans-serif;
 }
 .text-area:hover,
 .text-area:focus{

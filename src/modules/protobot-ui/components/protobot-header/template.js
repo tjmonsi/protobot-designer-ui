@@ -29,7 +29,7 @@ export const template = self => function () {
         <!-- <li><a href="/?domain=${this.domainId}&page=micro">Micro Review</a></li> -->
         ${[
           ['design-history', 'History'],
-          ['test', 'Test'],
+          // ['test', 'Test'],
           ['macro', 'Review']].map(([page_name, page_label]) => (
           html`<li class="${page == page_name && 'active blue'}"><a href="/?domain=${this.domainId}&page=${page_name}">${page_label}</a></li>`
         ))}
@@ -40,6 +40,7 @@ export const template = self => function () {
       <ul class = "review-link">
         <li class="${page == 'authoring' && 'active'} orange"><a href="/?domain=${this.domainId}&page=authoring">Draft</a></li>
       </ul>
+
 
 
 

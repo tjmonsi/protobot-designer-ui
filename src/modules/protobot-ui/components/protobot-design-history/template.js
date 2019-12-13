@@ -18,7 +18,7 @@ export const template = self => function () {
       ${styles}
     </style>
     <div class="parameter-container">
-      <h3>Deploy Settings</h3>
+      <h3>Deployment Settings</h3>
       ${Object.entries(lastDeployedDomainParameters).map(([key, value]) =>
         html`
           <div>${key} : ${value}</div>

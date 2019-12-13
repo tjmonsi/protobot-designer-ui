@@ -18,6 +18,10 @@ import 'weightless/ripple';
 
 // @ts-ignore
 import styles from './style.css';
+
+// @ts-ignore
+import startStyles from './start_style.css'
+
 /**
  *
  * @param {any} self
@@ -28,25 +32,21 @@ export const template = self => function () {
   const { domain, page } = queryObject;
 
   return html`
-    <style>
-      ${styles}
-      @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
-    </style>
 
     ${domain ? html`
-      <!-- <div class="top">
-        <h2>protobot</h2>
-      </div> -->
+      <style>
+        ${styles}
+        @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
+      </style>
+
       <protobot-header></protobot-header>
-
-
 
       <div class="center" style="overflow:scroll;">
         ${page === 'authoring' ? html`
           <protobot-authoring></protobot-authoring>
         ` : ''}
 
-        ${page === 'macro' ? html`
+        ${page === 'macro' || !page ? html`
           <protobot-macro></protobot-macro>
         ` : ''}
 
@@ -54,7 +54,7 @@ export const template = self => function () {
           <protobot-deploy></protobot-deploy>
         ` : ''}
 
-        ${page === 'micro' || !page ? html`
+        ${page === 'micro' ? html`
           <protobot-micro></protobot-micro>
         ` : ''}
 
@@ -63,8 +63,8 @@ export const template = self => function () {
         ` : ''}
       </div>
 
-      <div class="left">
-        <div class="left-scrollable">
+      <div class="right">
+        <div class="right-scrollable">
         ${page === 'authoring' || !page ? html`
           <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
         ` : ''}
@@ -81,7 +81,10 @@ export const template = self => function () {
       </div>
 
     ` : html`
-      <div style="background: white"></div>
+      <style>
+        ${startStyles}
+        @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
+      </style>
       <protobot-start></protobot-start>
     `}
 

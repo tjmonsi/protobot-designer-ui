@@ -31,24 +31,25 @@
   box-sizing: border-box;
 }
 
-.left {
+.right {
   background: #252839;
   color: white;
   padding-top: 50px;
   height: 100vh;
   box-sizing: border-box;
 }
-.left-scrollable{
+
+.right-scrollable{
   height: 100%;
   padding: 10px;
   overflow: auto;
   box-sizing: border-box;
 }
-
+/*
 .center-modal {
   background: #888888;
   font-size: 20px;
   color: white;
   padding: 20px;
   text-align: center;
-}
+} */

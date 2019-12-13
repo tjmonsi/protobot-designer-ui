@@ -23560,7 +23560,8 @@ const template$2 = self => function () {
 
       <ul class = "review-link full-width">
         <!-- <li><a href="/?domain=${this.domainId}&page=micro">Micro Review</a></li> -->
-        ${[['design-history', 'History'], ['test', 'Test'], ['macro', 'Review']].map(([page_name, page_label]) => html`<li class="${page == page_name && 'active blue'}"><a href="/?domain=${this.domainId}&page=${page_name}">${page_label}</a></li>`)}
+        ${[['design-history', 'History'], // ['test', 'Test'],
+  ['macro', 'Review']].map(([page_name, page_label]) => html`<li class="${page == page_name && 'active blue'}"><a href="/?domain=${this.domainId}&page=${page_name}">${page_label}</a></li>`)}
 
         <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
       </ul>
@@ -23568,6 +23569,7 @@ const template$2 = self => function () {
       <ul class = "review-link">
         <li class="${page == 'authoring' && 'active'} orange"><a href="/?domain=${this.domainId}&page=authoring">Draft</a></li>
       </ul>
+
 
 
 
@@ -23909,7 +23911,7 @@ __decorate([query('#ripple'), __metadata('design:type', Ripple)], Button.prototy
 
 Button = __decorate([customElement('wl-button')], Button);
 
-var styles$h = ":host{\n  flex: 3;\n  /* background:rgb(49, 63, 102); */\n  padding: .5em 1em;\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  padding: .5em;\n  border: none;\n  outline: none;\n  color: #fff;\n  background: transparent;\n}\n.text-area:hover,\n.text-area:focus{\n  background: rgba(0, 0, 0, 0.2);\n}\n";
+var styles$h = ":host{\n  flex: 3;\n  /* background:rgb(49, 63, 102); */\n  padding: .5em 1em;\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  padding: .5em;\n  border: none;\n  outline: none;\n  color: #fff;\n  background: transparent;\n  font-family: 'Open Sans', sans-serif;\n}\n.text-area:hover,\n.text-area:focus{\n  background: rgba(0, 0, 0, 0.2);\n}\n";
 
 /**
  *
@@ -23931,8 +23933,13 @@ const template$3 = self => function () {
       ${styles$h}
     </style>
 
+    ${readonly ? html`
+        <div class="text-area">
+        ${text}
+        </div>
 
-    <input class="text-area" type="text" value="${text}" placeholder="utterance" readonly=${readonly} @change="${utteranceTextChanged.bind(this)}">
+      ` : html`<input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">`}
+
 
   `;
 }.bind(self)();
@@ -24585,7 +24592,7 @@ let ProtobotSidebar$1 = _decorate([customElement('protobot-sidebar')], function 
   };
 }, GetDomainUsersMixin(LitElement));
 
-var styles$i = "\n.center-modal {\n  background: #221f4d;\n  font-family: 'Open Sans', sans-serif;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n}\n\n.domain-id {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n  margin: 10px;\n}\n\n.new-button {\n  --button-bg\t: rgb(78, 91, 150);\n}";
+var styles$i = ".center-modal {\n  background: #221f4d;\n  font-family: 'Open Sans', sans-serif;\n  font-size: 20px;\n  color: white;\n  padding: 60px 20px;\n  text-align: center;\n  z-index: 99999;\n}\n\n.domain-id {\n  font-size: 18px;\n  font-family: 'Open Sans', sans-serif;\n  margin: 10px;\n}\n\n.new-button {\n  --button-bg\t: rgb(78, 91, 150);\n}";
 
 /**
  *
@@ -24610,7 +24617,7 @@ const template$6 = self => function () {
           For Designers:
         </p>
         <label>
-          Fill in the your ID<br>
+          Fill in your domain ID<br>
         </label>
         <input class= "domain-id" id="domain" name="domain" type="text">
         <wl-button class ="submit-button">Submit</wl-button>
@@ -24732,7 +24739,7 @@ let ProtobotStart = _decorate([customElement('protobot-start')], function (_init
   };
 }, GetPathMixin(LitElement));
 
-var styles$j = ":host{\n  display: flex;\n  justify-content: center;\n  width: 100%;\n  margin: 20px;\n}\n.flex-area {\n  overflow:hidden;\n  display: flex;\n  width: 100%;\n  max-width: 800px;\n  border-radius: 6px;\n  background: rgb(49, 63, 102);\n}\n.flex-area.sub{\n  background: rgb(74, 94, 150);\n}\n\n.flex-1 {\n  flex: 1;\n  /* background: rgb(49, 63, 102); */\n  padding: .5em 1em;\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  padding: .5em;\n  border: none;\n  outline: none;\n  color: #fff;\n  background: transparent;\n}\n.text-area:hover,\n.text-area:focus{\n  width: 100%;\n  border: none;\n  outline: none;\n  font-size : 15px;\n  padding: .5em;\n  color: #fff;\n  background: transparent;\n}\n.text-area:hover{\n  background: rgba(0, 0, 0, 0.2);\n}\n\n\n\n\n\n.sub {\n  margin-left: 80px;\n}\n\n\nwl-button {\n  --button-border-radius\t: 0px;\n  --button-padding : 10px;\n  --button-font-size\t:10px;\n  --button-bg\t: rgb(182, 182, 182);\n  --button-bg-hover : rgb(71, 71, 71);\n}\n";
+var styles$j = ":host{\n  display: flex;\n  justify-content: center;\n  width: 100%;\n  margin: 20px;\n}\n.flex-area {\n  overflow:hidden;\n  display: flex;\n  width: 100%;\n  max-width: 800px;\n  border-radius: 6px;\n  background: rgb(49, 63, 102);\n}\n.flex-area.sub{\n  background: rgb(74, 94, 150);\n}\n\n.flex-1 {\n  flex: 1;\n  /* background: rgb(49, 63, 102); */\n  padding: .5em 1em;\n}\n\n.text-area {\n  width: 100%;\n  font-size : 15px;\n  padding: .5em;\n  border: none;\n  outline: none;\n  color: #fff;\n  background: transparent;\n  font-family: 'Open Sans', sans-serif;\n}\n.text-area:hover,\n.text-area:focus{\n  width: 100%;\n  border: none;\n  outline: none;\n  font-size : 15px;\n  padding: .5em;\n  color: #fff;\n  background: transparent;\n}\n.text-area:hover{\n  background: rgba(0, 0, 0, 0.2);\n}\n\n\n\n\n\n.sub {\n  margin-left: 80px;\n}\n\n\nwl-button {\n  --button-border-radius\t: 0px;\n  --button-padding : 10px;\n  --button-font-size\t:10px;\n  --button-bg\t: rgb(182, 182, 182);\n  --button-bg-hover : rgb(71, 71, 71);\n}\n";
 
 /**
  *
@@ -24761,7 +24768,10 @@ const template$7 = self => function () {
 
     <div class="flex-area ${sub ? 'sub' : ''}">
       <div class="flex-1">
-        <input class="text-area" type="text" value="${name}" placeholder="topic" readonly=${readonly} @change="${topicNameChanged.bind(this)}">
+      ${readonly ? html`
+          <div class="text-area">${name}</div>
+        ` : html`<input class="text-area" type="text" value="${name}" placeholder="topic" @change="${topicNameChanged.bind(this)}">`}
+
       </div>
 
 
@@ -28148,7 +28158,7 @@ const template$g = self => function () {
       ${styles$u}
     </style>
     <div class="parameter-container">
-      <h3>Deploy Settings</h3>
+      <h3>Deployment Settings</h3>
       ${Object.entries(lastDeployedDomainParameters).map(([key, value]) => html`
           <div>${key} : ${value}</div>
         `)}
@@ -31645,7 +31655,9 @@ let ProtobotDeployModal$1 = _decorate([customElement('protobot-deploy')], functi
   };
 }, GetDomainMixin(LitElement));
 
-var styles$C = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 4fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n/* .left {\n  background: rgb(94, 94, 94);\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n} */\n\n.center {\n  background: white;\n  padding: 10px;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.left {\n  background: #252839;\n  color: white;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n.left-scrollable{\n  height: 100%;\n  padding: 10px;\n  overflow: auto;\n  box-sizing: border-box;\n}\n\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n}\n";
+var styles$C = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 4fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n/* .left {\n  background: rgb(94, 94, 94);\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n} */\n\n.center {\n  background: white;\n  padding: 10px;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right-scrollable{\n  height: 100%;\n  padding: 10px;\n  overflow: auto;\n  box-sizing: border-box;\n}\n/*\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n} */\n";
+
+var startStyles = ":host {\n  margin: 0;\n  padding: 0;\n}";
 
 /**
  *
@@ -31669,25 +31681,21 @@ const template$o = self => function () {
     page
   } = queryObject;
   return html`
-    <style>
-      ${styles$C}
-      @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
-    </style>
 
     ${domain ? html`
-      <!-- <div class="top">
-        <h2>protobot</h2>
-      </div> -->
+      <style>
+        ${styles$C}
+        @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
+      </style>
+
       <protobot-header></protobot-header>
-
-
 
       <div class="center" style="overflow:scroll;">
         ${page === 'authoring' ? html`
           <protobot-authoring></protobot-authoring>
         ` : ''}
 
-        ${page === 'macro' ? html`
+        ${page === 'macro' || !page ? html`
           <protobot-macro></protobot-macro>
         ` : ''}
 
@@ -31695,7 +31703,7 @@ const template$o = self => function () {
           <protobot-deploy></protobot-deploy>
         ` : ''}
 
-        ${page === 'micro' || !page ? html`
+        ${page === 'micro' ? html`
           <protobot-micro></protobot-micro>
         ` : ''}
 
@@ -31704,8 +31712,8 @@ const template$o = self => function () {
         ` : ''}
       </div>
 
-      <div class="left">
-        <div class="left-scrollable">
+      <div class="right">
+        <div class="right-scrollable">
         ${page === 'authoring' || !page ? html`
           <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
         ` : ''}
@@ -31722,7 +31730,10 @@ const template$o = self => function () {
       </div>
 
     ` : html`
-      <div style="background: white"></div>
+      <style>
+        ${startStyles}
+        @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
+      </style>
       <protobot-start></protobot-start>
     `}
 

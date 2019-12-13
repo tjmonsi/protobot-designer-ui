@@ -15,8 +15,17 @@ export const template = self => function () {
       ${styles}
     </style>
 
+    ${
+      readonly ?
+      html`
+        <div class="text-area">
+        ${text}
+        </div>
 
-    <input class="text-area" type="text" value="${text}" placeholder="utterance" readonly=${readonly} @change="${utteranceTextChanged.bind(this)}">
+      `:
+      html`<input class="text-area" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}">`
+    }
+
 
   `;
 }.bind(self)();

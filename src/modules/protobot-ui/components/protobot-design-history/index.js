@@ -22,7 +22,6 @@ class ProtobotDesignHistory extends GetDomainMixin(LitElement) {
     return template(this);
   }
 
-
 }
 
 export { ProtobotDesignHistory };

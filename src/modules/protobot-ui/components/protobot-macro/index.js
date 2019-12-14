@@ -1,7 +1,7 @@
 // Import the LitElement base class and html helper function
-import { LitElement, customElement } from 'lit-element';
+import { LitElement, customElement, property } from 'lit-element';
 import { template } from './template.js';
-import { GetTreeStructureMixin } from '../../mixins/get-tree-structure';
+import { GetDomainMixin } from '../../mixins/get-domain';
 // import { GoogleCharts } from 'google-charts';
 // import * as d3 from 'd3';
 // import { d3sankey } from './sankey';
@@ -12,7 +12,35 @@ import { database } from '../../../firebase';
 // Extend the LitElement base class
 // @ts-ignore
 @customElement('protobot-macro')
-class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
+class ProtobotMacro extends GetDomainMixin(LitElement) {
+
+  // @ts-ignore
+  @property({ type: Object })
+  tree;
+
+  // @ts-ignore
+  @property({type: String})
+  lastDeployedDomainVersion
+
+
+
+  updated (changedProps) {
+    if (super.updated) super.updated(changedProps);
+    if (changedProps.has('domainId') || changedProps.has('lastDeployedDomainVersion')) {
+      this.getTreeStructure(this.domainId);
+    }
+
+  }
+
+  async getTreeStructure (domainId) {
+    // console.log(domainId);
+    const snap = await database.ref('tree-structure/data/').orderByChild('domain').equalTo(domainId)
+      // .limitToFirst(10)
+      .once('value');
+    this.tree = snap.val() || null;
+    this.treeChanged(this.tree);
+  }
+
   treeChanged (tree) {
     if (tree) {
       console.log(this.tree);
@@ -24,13 +52,13 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
       const newTree = {};
 
       for (const i in this.tree) {
-        console.log(this.domain.deployedVersion, this.tree[i].version)
-        if (this.domain.deployedVersion === this.tree[i].version) {
+        console.log(this.lastDeployedDomainVersion, this.tree[i].version)
+        if (this.lastDeployedDomainVersion === this.tree[i].version) {
 
           newTree[i] = this.tree[i];
         }
       }
-      console.log(newTree)
+      console.log('fjdkjkdsf', newTree)
       this.drawChart(newTree);
     }
   }
@@ -205,6 +233,7 @@ class ProtobotMacro extends GetTreeStructureMixin(LitElement) {
     const color = d3.scale.category20();
 
     // append the svg canvas to the page
+    d3.select(this.shadowRoot).select('.sankey').html('')
     var svg = d3.select(this.shadowRoot).select('.sankey').append('svg')
       .attr('width', width + margin.left + margin.right)
       .attr('height', height + margin.top + margin.bottom)

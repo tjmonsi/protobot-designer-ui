@@ -6,6 +6,7 @@ import 'weightless/radio';
 import '@vaadin/vaadin-radio-button';
 import '../protobot-deploy-modal';
 import '../version-list';
+import '../protobot-memo-all'
 // import '@vaadin/vaadin-radio-group';
 
 // @ts-ignore
@@ -34,14 +35,6 @@ export const template = self => function () {
     `)}
     </ul>
 
-    <!-- <div>
-      <h3>Testing methods</h3>
-      <vaadin-radio-group>
-        <vaadin-radio-button class="explore">Exploration</vaadin-radio-button>
-        <vaadin-radio-button class="verify">Verification</vaadin-radio-button>
-      </vaadin-radio-group>
-    </div> -->
-
     <div>
       <h3>Commit Message</h3>
       <wl-textarea outlined
@@ -52,7 +45,7 @@ export const template = self => function () {
       </wl-textarea outlined>
     </div>
 
-    <version-list></version-list>
+    <!-- <protobot-memo-all></protobot-memo-all> --!>
 
     <div class="button-container">
       <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->
@@ -63,6 +56,7 @@ export const template = self => function () {
         @dialog-cancel="${closeDialog.bind(this)}"
         @dialog-close-2="${closeTwoDialog.bind(this)}">
       </protobot-deploy-modal>
+
     </div>
   `;
 }.bind(self)();

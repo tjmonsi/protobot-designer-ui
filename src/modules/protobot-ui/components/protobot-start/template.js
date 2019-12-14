@@ -24,7 +24,7 @@ export const template = self => function () {
           For Designers:
         </p>
         <label>
-          Fill in the your ID<br>
+          Fill in your domain ID<br>
         </label>
         <input class= "domain-id" id="domain" name="domain" type="text">
         <wl-button class ="submit-button">Submit</wl-button>

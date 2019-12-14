@@ -1,12 +1,20 @@
-.flex-area {
-  display: flex;
-}
-
-.flex-1 {
-  flex: 1;
+:host{
+  flex: 3;
+  /* background:rgb(49, 63, 102); */
+  padding: .5em 1em;
 }
 
 .text-area {
   width: 100%;
-  font-size: 15px;
+  font-size : 15px;
+  padding: .5em;
+  border: none;
+  outline: none;
+  color: #fff;
+  background: transparent;
+  font-family: 'Open Sans', sans-serif;
+}
+.text-area:hover,
+.text-area:focus{
+  background: rgba(0, 0, 0, 0.2);
 }

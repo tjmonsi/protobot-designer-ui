@@ -19,7 +19,6 @@ class ProtobotAuthoring extends GetDomainMixin(LitElement) {
       const { deployed } = domain;
       if (deployed) {
         const updates = {};
-        updates[`last-deployed/data/${this.domainId}/`] = domain;
         updates[`domains/data/${this.domainId}/deployed`] = false;
         await database.ref().update(updates);
       }

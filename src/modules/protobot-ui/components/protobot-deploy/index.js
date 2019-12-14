@@ -6,10 +6,10 @@ import { database } from '../../../firebase';
 
 // Extend the LitElement base class
 // @ts-ignore
-@customElement('protobot-deploy-modal')
+@customElement('protobot-deploy')
 class ProtobotDeployModal extends GetDomainMixin(LitElement) {
   @property({ type: Boolean })
-  opened;
+  opened = true;
 
   @property()
   numUser = '';
@@ -24,7 +24,7 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
   amtOption
 
   @property({ type: Number })
-  stage;
+  stage = 0;
 
   @property()
   deployUrl;
@@ -33,7 +33,24 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
     return template(this);
   }
 
+
+  async nextDialogStage () {
+    this.stage++;
+    this.stage = Math.max(this.stage, 1);
+    // window.location.reload();
+  }
+
+  async confirmAMT(){
+    console.log("TODO")
+  }
+
+  async cancelAMT() {
+    this.stage = 0
+    this.deployUrl = ''
+  }
+
   async deploy () {
+
     const updates = {};
     const { domain } = this;
     const snap2 = await database.ref(`deployed-history/lists/${this.domainId}`).once('value');
@@ -55,21 +72,41 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
           amtOption: this.amtOption === 'amt'
         }
       };
-      console.log(obj)
       updates[`last-deployed/data/${this.domainId}/`] = obj;
       updates[`deployed-history/data/${this.domainId}/${key}`] = obj;
-      updates[`deployed-history/lists/${this.domainId}/${key}`] = true;
-
-      updates[`domains/data/${this.domainId}/versionNumber`] = length;
-      updates[`domains/data/${this.domainId}/deployed`] = true;
+      updates[`domains/data/${this.domainId}/deployed`] = false;
       updates[`domains/data/${this.domainId}/deployedVersion`] = key;
       updates[`domains/data/${this.domainId}/commitMessage`] = '';
-
+      updates[`deployed-history/lists/${this.domainId}/${key}`] = true;
       await database.ref().update(updates);
 
-      this.dispatchEvent(new window.CustomEvent('dialog-accept', { detail: obj }));
+      this.urlGenerator(obj)
+      // this.dispatchEvent(new window.CustomEvent('dialog-accept', { detail: obj }));
     }
   }
+
+  async urlGenerator (obj) {
+    const { numUser, numSession, otherResponse } = obj.parameters;
+    // with the domainId and chosen parameters, generating the URL
+
+    // domainID
+    // param1: num-users (number)
+    // param2: num-sessions (number)
+    // param3: other-response (boolean)
+
+    // [x] param4: amt (boolean) -- we do not need for link
+    //                              but we need it for showing the link or not
+    //                              amt = true: just deploying, amt = false: showing up link
+
+    // example URL:
+    this.deployUrl = `https://protobot-rawdata.firebaseapp.com/?domain=${this.domainId}&deployedVersion=${obj.deployedVersion}&numUser=${numUser}&numSession=${numSession}&otherResponse=${otherResponse}`
+    console.log(this.deployUrl)
+    // this.stage++;
+    // this.stage = Math.max(this.stage, 1);
+    this.nextDialogStage();
+    // this.closeDialog();
+  }
+
 
   async changeNumUser (event) {
     const { target } = event;

@@ -1,0 +1,48 @@
+h3 {
+  font-family: 'Open Sans', sans-serif;
+}
+
+.topic-list {
+  font-size: 15px;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.topic-list {
+  margin-left: -10px;
+  font-size: 15px;
+  font-family: 'Open Sans', sans-serif;
+}
+
+
+.commit-msg {
+  background: #fff;
+  font-family: 'Open Sans', sans-serif;
+  color: #222;
+  padding: 1em;
+  margin: .8em;
+  border-radius: 4px;
+}
+
+
+.button-container  {
+  display: flex;
+  flex-direction: column-reverse;
+  flex:1;
+}
+
+.explore, .verify {
+  color: white;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.button {
+  color: white;
+  font-size: 20px;
+  bottom: 30px;
+  padding: 12px;
+  border-radius: 10px;
+}
+/*
+vaadin-text-area.min-height {
+  min-height: 150px;
+} */

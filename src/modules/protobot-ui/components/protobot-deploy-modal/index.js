@@ -33,6 +33,21 @@ class ProtobotDeployModal extends GetDomainMixin(LitElement) {
     return template(this);
   }
 
+
+  async cancelAMT() {
+    this.dispatchEvent(new window.CustomEvent('dialog-prev'))
+  }
+
+
+  async conditionalDeploy() {
+    // console.log("fjkdsjfksdjfksdkjfjsdk", this.amtOption)
+    if ( this.amtOption != 'amt' ) {
+      this.deploy()
+    } else {
+      this.dispatchEvent(new window.CustomEvent('dialog-next'))
+    }
+  }
+
   async deploy () {
     const updates = {};
     const { domain } = this;

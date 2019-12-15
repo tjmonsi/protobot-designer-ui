@@ -44,32 +44,33 @@ export const template = self => function () {
     </div>
     <div class="button-container">
       <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-cancel'))}">Cancel</vaadin-button>
-      <vaadin-button class="deploy" @click="${conditionalDeploy.bind(this)}">Next</vaadin-button>
+      <div class="gap-container"></div>
+      <vaadin-button class="accept" @click="${conditionalDeploy.bind(this)}">Next</vaadin-button>
       <!-- <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-next'))}">Deploy</vaadin-button> -->
     </div>
     </div>
   </div>`,
 
   html`
-
         <div class="dialog-window">
-
         <div class = "deploy-before">
           ${amtOption === "amt" ? html`
             <h1 class="title">One step more...</h1>
             <h3>Are you sure to deploy?</h3>
-            <p>You would spend ${numSession}*${numUser} dolloars!</p>
+            <p>You would spend ${numSession}*${numUser} dollars to recruit crowdworkers!</p>
             <div class="button-container">
-                <vaadin-button class="cancel" @click="${deploy.bind(this)}">Okay</vaadin-button>
-                <vaadin-button class="cancel" @click="${cancelAMT.bind(this)}">Cancel</vaadin-button>
-              </div>`
-
+              <vaadin-button class="cancel" @click="${cancelAMT.bind(this)}">Cancel</vaadin-button>
+                <div class="gap-container"></div>
+              <vaadin-button class="accept" @click="${deploy.bind(this)}">Okay</vaadin-button>
+            </div>`
 
           : html`
           <h1 class="title">Success</h1>
-          <h3>Copy below link!</h3>
+          <h3>Copy link below and share!</h3>
           <div>${deployUrl}</div>
-          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-close-2'))}">Close</vaadin-button>
+          <div class="button-container">
+            <vaadin-button class="link-close" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-close-2'))}">Close</vaadin-button>
+          </div>
           `}
         </div>
         </div>

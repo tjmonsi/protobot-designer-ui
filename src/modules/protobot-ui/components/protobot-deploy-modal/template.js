@@ -57,7 +57,7 @@ export const template = self => function () {
           ${amtOption === "amt" ? html`
             <h1 class="title">One step more...</h1>
             <h3>Are you sure to deploy?</h3>
-            <p>You would spend ${numSession}*${numUser} dollars to recruit crowdworkers!</p>
+            You would spend <strong class="money">${Number(numSession)*Number(numUser)}</strong> dollars to recruit crowdworkers!
             <div class="button-container">
               <vaadin-button class="cancel" @click="${cancelAMT.bind(this)}">Cancel</vaadin-button>
                 <div class="gap-container"></div>

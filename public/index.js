@@ -25807,7 +25807,7 @@ class RadioButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(
 
 customElements.define(RadioButtonElement.is, RadioButtonElement);
 
-var styles$o = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 50px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.dialog{\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n  background-color: rgb(35, 35, 146);\n  color: white;\n}\n\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n  color: rgb(35, 35, 146);\n  border: 1px solid rgb(57, 57, 143);\n}\n\n.gap-container {\n  width:15px;\n  height:auto;\n  display:inline-block;\n}\n\n.link-close {\n  justify-content: space-around;\n  align-content: space-around;\n  background-color: rgb(35, 35, 146);\n  color: white;\n  margin-top: 20px;\n\n}";
+var styles$o = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 50px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.dialog {\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n  margin-top: 20px;\n}\n\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n  background-color: rgb(35, 35, 146);\n  color: white;\n}\n\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n  color: rgb(35, 35, 146);\n  border: 1px solid rgb(57, 57, 143);\n}\n\n.gap-container {\n  width:15px;\n  height:auto;\n  display:inline-block;\n}\n\n.link-close {\n  justify-content: space-around;\n  align-content: space-around;\n  background-color: rgb(35, 35, 146);\n  color: white;\n  margin-top: 20px;\n}\n\n.money {\n  color: tomato;\n}";
 
 /**
  * @license
@@ -26574,7 +26574,7 @@ const template$a = self => function () {
           ${amtOption === "amt" ? html`
             <h1 class="title">One step more...</h1>
             <h3>Are you sure to deploy?</h3>
-            <p>You would spend ${numSession}*${numUser} dollars to recruit crowdworkers!</p>
+            You would spend <strong class="money">${Number(numSession) * Number(numUser)}</strong> dollars to recruit crowdworkers!
             <div class="button-container">
               <vaadin-button class="cancel" @click="${cancelAMT.bind(this)}">Cancel</vaadin-button>
                 <div class="gap-container"></div>

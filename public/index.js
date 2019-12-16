@@ -25807,7 +25807,7 @@ class RadioButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(
 
 customElements.define(RadioButtonElement.is, RadioButtonElement);
 
-var styles$o = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.dialog{\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
+var styles$o = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 50px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.dialog {\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n  margin-top: 20px;\n}\n\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n  background-color: rgb(35, 35, 146);\n  color: white;\n}\n\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n  color: rgb(35, 35, 146);\n  border: 1px solid rgb(57, 57, 143);\n}\n\n.gap-container {\n  width:15px;\n  height:auto;\n  display:inline-block;\n}\n\n.link-close {\n  justify-content: space-around;\n  align-content: space-around;\n  background-color: rgb(35, 35, 146);\n  color: white;\n  margin-top: 20px;\n}\n\n.money {\n  color: tomato;\n}";
 
 /**
  * @license
@@ -26531,8 +26531,71 @@ const template$a = self => function () {
     changeOtherResponse,
     amtOption,
     changeAmtOption,
-    deploy
+    conditionalDeploy,
+    deploy,
+    confirmAMT,
+    cancelAMT
   } = this;
+  const modal_contents = [html`
+    <div class="dialog-window">
+    <h1 class="title">How to deploy?</h1>
+    <div class = "param1">
+      <h3>Number of users<h3>
+      <input class="num-users" type="text" value="${numUser}" @change="${changeNumUser.bind(this)}">
+    </div>
+    <div class = "param2">
+      <h3>Number of sessions<h3>
+      <input class="num-session" type="text" value="${numSession}" @change="${changeNumSession.bind(this)}">
+    </div>
+    <div class = "param3">
+      <h3>Show other's responses?</h3>
+      <vaadin-radio-group class= "other-response" value="${otherResponse}" @value-changed="${changeOtherResponse.bind(this)}">
+        <vaadin-radio-button value="show">Show</vaadin-radio-button>
+        <vaadin-radio-button value="hide">Hide</vaadin-radio-button>
+      </vaadin-radio-group>
+    </div>
+    <div class = "param4">
+      <h3>Testing methods</h3>
+      <vaadin-radio-group class = "amt" value="${amtOption}" @value-changed="${changeAmtOption.bind(this)}">
+        <vaadin-radio-button value="amt">Amazon Mechanical Turk</vaadin-radio-button>
+        <vaadin-radio-button value="link-share">Share Online by myself</vaadin-radio-button>
+      </vaadin-radio-group>
+    </div>
+    <div class="button-container">
+      <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-cancel'))}">Cancel</vaadin-button>
+      <div class="gap-container"></div>
+      <vaadin-button class="accept" @click="${conditionalDeploy.bind(this)}">Next</vaadin-button>
+      <!-- <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-next'))}">Deploy</vaadin-button> -->
+    </div>
+    </div>
+  </div>`, html`
+        <div class="dialog-window">
+        <div class = "deploy-before">
+          ${amtOption === "amt" ? html`
+            <h1 class="title">One step more...</h1>
+            <h3>Are you sure to deploy?</h3>
+            You would spend <strong class="money">${Number(numSession) * Number(numUser)}</strong> dollars to recruit crowdworkers!
+            <div class="button-container">
+              <vaadin-button class="cancel" @click="${cancelAMT.bind(this)}">Cancel</vaadin-button>
+                <div class="gap-container"></div>
+              <vaadin-button class="accept" @click="${deploy.bind(this)}">Okay</vaadin-button>
+            </div>` : html`
+          <h1 class="title">Success</h1>
+          <h3>Copy link below and share!</h3>
+          <div>${deployUrl}</div>
+          <div class="button-container">
+            <vaadin-button class="link-close" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-close-2'))}">Close</vaadin-button>
+          </div>
+          `}
+        </div>
+        </div>
+      </div>
+      `, html`
+      <div class="dialog-window">
+        <h1 class="title">Done!</h1>
+        <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-close-2'))}">Close</vaadin-button>
+      </div>
+      `];
   return html`
     <style>
       ${styles$o}
@@ -26544,56 +26607,7 @@ const template$a = self => function () {
     opened: opened,
     closed: !opened
   })}">
-      ${stage === 0 ? html`
-        <div class="dialog-window">
-        <h1 class="title">How to deploy?</h1>
-        <div class = "param1">
-          <h3>Number of users<h3>
-          <input class="num-users" type="text" value="${numUser}" @change="${changeNumUser.bind(this)}">
-        </div>
-        <div class = "param2">
-          <h3>Number of sessions<h3>
-          <input class="num-session" type="text" value="${numSession}" @change="${changeNumSession.bind(this)}">
-        </div>
-        <div class = "param3">
-          <h3>Show other's responses?</h3>
-          <vaadin-radio-group class= "other-response" value="${otherResponse}" @value-changed="${changeOtherResponse.bind(this)}">
-            <vaadin-radio-button value="show">Show</vaadin-radio-button>
-            <vaadin-radio-button value="hide">Hide</vaadin-radio-button>
-          </vaadin-radio-group>
-        </div>
-        <div class = "param4">
-          <h3>Testing methods</h3>
-          <vaadin-radio-group class = "amt" value="${amtOption}" @value-changed="${changeAmtOption.bind(this)}">
-            <vaadin-radio-button value="amt">Amazon Mechanical Turk</vaadin-radio-button>
-            <vaadin-radio-button value="link-share">Share Online by myself</vaadin-radio-button>
-          </vaadin-radio-group>
-        </div>
-        <div class="button-container">
-          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-cancel'))}">Cancel</vaadin-button>
-          <vaadin-button class="deploy" @click="${deploy.bind(this)}">Deploy</vaadin-button>
-          <!-- <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-next'))}">Deploy</vaadin-button> -->
-        </div>
-        </div>
-      </div>` : html`
-
-        <div class="dialog-window">
-        <h1 class="title">Success</h1>
-
-        <div class = "deploy-before">
-          ${amtOption === "amt" ? html`
-            <p>Are you sure to deploy?</p>
-            <p>You would spend ${numSession}*${numUser} dolloars!</p>` : html`<h3>Copy below link!</h3>
-          <div>${deployUrl}</div>`}
-        </div>
-        <div class="button-container">
-          <vaadin-button class="cancel" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-close-2'))}">Close</vaadin-button>
-          <!-- <vaadin-button class="deploy" @click="${deploy.bind(this)}">Deploy</vaadin-button> -->
-          <!-- <vaadin-button class="deploy" @click="${() => this.dispatchEvent(new window.CustomEvent('dialog-next'))}">Deploy</vaadin-button> -->
-        </div>
-        </div>
-      </div>
-      `}
+      ${modal_contents[stage]}
 
     </div>
   `;
@@ -26669,6 +26683,23 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
       key: "render",
       value: function render() {
         return template$a(this);
+      }
+    }, {
+      kind: "method",
+      key: "cancelAMT",
+      value: async function cancelAMT() {
+        this.dispatchEvent(new window.CustomEvent('dialog-prev'));
+      }
+    }, {
+      kind: "method",
+      key: "conditionalDeploy",
+      value: async function conditionalDeploy() {
+        // console.log("fjkdsjfksdjfksdkjfjsdk", this.amtOption)
+        if (this.amtOption != 'amt') {
+          this.deploy();
+        } else {
+          this.dispatchEvent(new window.CustomEvent('dialog-next'));
+        }
       }
     }, {
       kind: "method",
@@ -26801,6 +26832,7 @@ const template$b = self => function () {
     dialogStage,
     deployUrl,
     nextDialogStage,
+    prevDialogStage,
     toggleDialog,
     closeDialog,
     urlGenerator,
@@ -26841,6 +26873,7 @@ const template$b = self => function () {
       <wl-button class="button" type="button" @click="${toggleDialog.bind(this)}">Ready to Deploy</wl-button>
       <protobot-deploy-modal ?opened="${dialogVisible}" stage="${dialogStage}" deployUrl="${deployUrl}"
         @dialog-next="${nextDialogStage.bind(this)}"
+        @dialog-prev="${prevDialogStage.bind(this)}"
         @dialog-accept="${urlGenerator.bind(this)}"
         @dialog-cancel="${closeDialog.bind(this)}"
         @dialog-close-2="${closeTwoDialog.bind(this)}">
@@ -26977,10 +27010,17 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       }
     }, {
       kind: "method",
+      key: "prevDialogStage",
+      value: async function prevDialogStage() {
+        this.dialogStage--;
+        this.dialogStage = Math.max(this.dialogStage, 0);
+      }
+    }, {
+      kind: "method",
       key: "nextDialogStage",
       value: async function nextDialogStage() {
         this.dialogStage++;
-        this.dialogStage = Math.max(this.dialogStage, 1); // window.location.reload();
+        this.dialogStage = Math.min(this.dialogStage, 2); // window.location.reload();
       }
     }, {
       kind: "method",
@@ -31893,7 +31933,7 @@ const template$o = self => function () {
 
       <div class="center" style="overflow:scroll;">
         ${page === 'authoring' ? html`
-          <protobot-authoring></protobot-authoring>
+          <protobot-authoring style="height:100%;"></protobot-authoring>
         ` : ''}
 
         ${page === 'macro' || !page ? html`

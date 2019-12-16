@@ -43,7 +43,7 @@ export const template = self => function () {
 
       <div class="center" style="overflow:scroll;">
         ${page === 'authoring' ? html`
-          <protobot-authoring></protobot-authoring>
+          <protobot-authoring style="height:100%;"></protobot-authoring>
         ` : ''}
 
         ${page === 'macro' || !page ? html`

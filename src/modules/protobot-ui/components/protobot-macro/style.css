@@ -1,9 +1,32 @@
 h1 {
   text-align: center;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Open Sans', sans-serif;
 }
 
+h3 {
+  text-align: center;
+  font-family: 'Open Sans', sans-serif;
+  color: cornflowerblue;
+}
 
+.sankey {
+  height: 60%;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: row;
+}
+
+.no-label-utterance {
+  height: 40%;
+  width: 50%;
+}
+
+.new-topics {
+  height: 40%;
+  width: 50%;
+}
 .node rect {
   cursor: move;
   fill-opacity: .9;

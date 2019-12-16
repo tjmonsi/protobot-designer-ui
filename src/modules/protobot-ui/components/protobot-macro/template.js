@@ -19,13 +19,19 @@ export const template = self => function () {
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
-    <h1>Macro Review</h1>
+    <h1>Overview</h1>
     <br>
-
-
     <div class="sankey"></div>
-
     <div class="tooltip" @click="${closeTooltip.bind(this)}">
+    </div>
+
+    <div class="dashboard">
+      <div class="no-label-utterance">
+        <h3>Label topics below</h3>
+      </div>
+      <div class="new-topics">
+        <h3>New topics</h3>
+      </div>
     </div>
   `;
 }.bind(self)();

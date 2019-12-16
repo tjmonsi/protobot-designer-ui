@@ -9,16 +9,16 @@ import { database } from '../../../firebase';
 // @ts-ignore
 @customElement('protobot-macro-sidebar')
 class ProtobotMacroSidebar extends GetDomainMixin(LitElement) {
-  @property({type: String})
+  @property({ type: String })
   lastDeployedDomainVersion = ''
 
-  @property({type: Array})
+  @property({ type: Array })
   lastDeployedDomainTopicList = []
 
-  @property({type: Array})
+  @property({ type: Array })
   versionsDetail = []
 
-  @property({type: Array})
+  @property({ type: Array })
   memos = []
 
   render () {
@@ -72,15 +72,12 @@ class ProtobotMacroSidebar extends GetDomainMixin(LitElement) {
     // })
   }
 
-  async changeVersion({detail: versionId}){
-
-    this.dispatchEvent(new window.CustomEvent('change-version', {detail: versionId}))
-    this.loadMemo(versionId)
+  async changeVersion ({ detail: versionId }) {
+    this.dispatchEvent(new window.CustomEvent('change-version', { detail: versionId }));
+    this.loadMemo(versionId);
   }
 
-
-  async loadMemo(versionId){
-
+  async loadMemo (versionId) {
     const snap = await database.ref(`memos/lists/domain-memo/${this.domainId}`).orderByChild('deployedVersion').equalTo(versionId).once('value');
     const data = snap.val() || null;
     const array = [];

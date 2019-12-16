@@ -23674,7 +23674,7 @@ const GetDomainUsersMixin = base => _decorate(null, function (_initialize, _GetD
       value: function saveDomainUsers(snap) {
         const data = snap.val() || null;
         const array = [];
-        console.log(data, snap.path);
+        console.log(data, snap.key);
 
         if (data) {
           for (const user in data) {
@@ -24340,10 +24340,10 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
         this.lastDeployedDomainTopicList = arraytwo;
         this.lastDeployedDomainCommitMessage = commitMessage;
         this.lastDeployedDomainParameters = {
-          "Number of users": parameters.numUser,
-          "Number of sessions": parameters.numSession,
-          "Show other's responses?": parameters.otherResponse,
-          "Testing Methods": parameters.ampOption ? 'Amazon Mechanical Turk' : 'Share Online by myself'
+          'Number of users': parameters.numUser,
+          'Number of sessions': parameters.numSession,
+          'Show other\'s responses?': parameters.otherResponse,
+          'Testing Methods': parameters.ampOption ? 'Amazon Mechanical Turk' : 'Share Online by myself'
         };
       }
     }, {
@@ -27598,8 +27598,8 @@ const template$e = self => function () {
 
 // @ts-ignore
 
-let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_initialize, _GetDomainMixin) {
-  class ProtobotMacro extends _GetDomainMixin {
+let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_initialize, _GetDomainUsersMixin) {
+  class ProtobotMacro extends _GetDomainUsersMixin {
     constructor(...args) {
       super(...args);
 
@@ -27626,174 +27626,245 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
       value: void 0
     }, {
       kind: "method",
-      key: "updated",
+      key: "domainUsersChanged",
       value: // @ts-ignore
       // @ts-ignore
-      function updated(changedProps) {
+      function domainUsersChanged(data) {
+        console.log(data);
+      }
+    }, {
+      kind: "method",
+      key: "updated",
+      value: function updated(changedProps) {
         if (_get(_getPrototypeOf(ProtobotMacro.prototype), "updated", this)) _get(_getPrototypeOf(ProtobotMacro.prototype), "updated", this).call(this, changedProps);
 
         if (changedProps.has('domainId') || changedProps.has('lastDeployedDomainVersion')) {
-          this.getTreeStructure(this.domainId);
+          this.getTreeStructure(this.queryObject.domain, this.lastDeployedDomainVersion);
         }
       }
     }, {
       kind: "method",
       key: "getTreeStructure",
-      value: async function getTreeStructure(domainId) {
-        // console.log(domainId);
-        const snap = await database.ref('tree-structure/data/').orderByChild('domain').equalTo(domainId) // .limitToFirst(10)
-        .once('value');
-        this.tree = snap.val() || null;
-        this.treeChanged(this.tree);
-      }
-    }, {
-      kind: "method",
-      key: "treeChanged",
-      value: function treeChanged(tree) {
-        if (tree) {
-          console.log(this.tree); // this.setSankey(this.tree);
-          // Load the charts library with a callback
-          // GoogleCharts.load(this.drawChart.bind(this, tree), {
-          //   packages: ['sankey']
-          // });
+      value: async function getTreeStructure(domainId, lastDeployedDomainVersion) {
+        console.log('start', domainId, lastDeployedDomainVersion);
 
-          const newTree = {};
+        if (lastDeployedDomainVersion) {
+          const s1 = await database.ref(`users/lists/domains/${domainId}/${lastDeployedDomainVersion}`).once('value');
+          const d1 = s1.val();
 
-          for (const i in this.tree) {
-            console.log(this.lastDeployedDomainVersion, this.tree[i].version);
+          if (d1) {
+            // console.log(d1);
+            const promises = [];
+            const uniqueUtterances = {};
+            const utteranceDictionary = {};
+            const rowItems = [];
+            const upromises = []; // const
 
-            if (this.lastDeployedDomainVersion === this.tree[i].version) {
-              newTree[i] = this.tree[i];
-            }
-          }
+            for (const user in d1) {
+              // console.log(`users/lists/domain-utterances/${user}/${domainId}/`);
+              promises.push(database.ref(`users/lists/domain-utterances/${user}/${domainId}/`).once('value'));
+            } // console.log(promises);
 
-          console.log('fjdkjkdsf', newTree);
-          this.drawChart(newTree);
-        }
-      }
-    }, {
-      kind: "method",
-      key: "drawChart",
-      value: async function drawChart(tree) {
-        // const data = new GoogleCharts.api.visualization.DataTable();
-        // data.addColumn('string', 'From');
-        // data.addColumn('string', 'To');
-        // data.addColumn('number', 'Weight');
-        const rows = [];
-        const promises = [];
-        const topicMap = {};
-        const tpromises = [];
-        const utteranceTree = {};
-        const utteranceTopicMap = {};
-        const utteranceName = {};
 
-        if (tree) {
-          for (const i in tree) {
-            // console.log(tree[i])
-            const {
-              utterances,
-              parent
-            } = tree[i];
+            const results = await Promise.all(promises);
 
-            for (const utteranceId in utterances) {
-              promises.push(database.ref(`utterances/data/${utteranceId}`).once('value'));
-            }
+            for (const snap of results) {
+              const d2 = snap.val();
+              const userId = snap.ref.parent.key; // console.log('snap', parent)
+              // console.log(d2)
 
-            if (parent && tree[parent]) {
-              const {
-                utterances: utteranceParent
-              } = tree[parent];
+              if (d2) {
+                for (const z in d2) {
+                  const x = d2[z];
 
-              for (const utteranceId in utteranceParent) {
-                if (!utteranceTree[utteranceId]) utteranceTree[utteranceId] = [];
+                  if (x) {
+                    const arr = [];
 
-                for (const utteranceId2 in utterances) {
-                  utteranceTree[utteranceId].push(utteranceId2);
+                    for (const y in x) {
+                      arr[parseInt(x[y])] = y;
+                      uniqueUtterances[y] = true;
+                    } // console.log(arr)
+
+
+                    for (const index in arr) {
+                      // console.log(arr[index], index, index + 1, arr.length);
+                      // @ts-ignore
+                      if (parseInt(index) + 1 < arr.length) {
+                        let flag = true;
+
+                        for (const i in rowItems) {
+                          if (rowItems[i].sourceUtterance === arr[index] && rowItems[i].targetUtterance === arr[index + 1]) {
+                            rowItems[i].users.push({
+                              userId,
+                              set: z
+                            });
+                            flag = false;
+                          }
+                        }
+
+                        if (flag) {
+                          const obj = {
+                            sourceUtterance: arr[index],
+                            targetUtterance: arr[parseInt(index) + 1],
+                            users: [{
+                              userId,
+                              set: z
+                            }]
+                          };
+                          rowItems.push(obj);
+                        }
+                      }
+                    } // console.log(x);
+
+                  }
                 }
               }
             }
-          }
 
-          const results = await Promise.all(promises);
-
-          for (const i in results) {
-            const utterance = { ...results[i].val(),
-              utteranceId: results[i].key
-            };
-            const {
-              topics,
-              utteranceId,
-              text,
-              userId,
-              version
-            } = utterance;
-            utteranceName[utteranceId] = {
-              text,
-              userId,
-              version
-            };
-
-            for (const topic in topics) {
-              utteranceTopicMap[utteranceId] = topic;
-              topicMap[topic] = true;
-              break;
+            for (const utteranceId in uniqueUtterances) {
+              upromises.push(database.ref(`utterances/data/${utteranceId}/`).once('value'));
             }
-          }
 
-          for (const t in topicMap) {
-            tpromises.push(database.ref(`labels/data/${t}`).once('value'));
-          }
+            const uresults = await Promise.all(upromises);
 
-          const tresults = await Promise.all(tpromises);
+            for (const usnap of uresults) {
+              const d1 = usnap.val();
+              const k1 = usnap.key;
+              utteranceDictionary[usnap.key] = d1;
+              let topic = null;
 
-          for (const tr in tresults) {
-            // console.log(tresults[tr].val(), tr);
-            const {
-              name
-            } = tresults[tr].val() || {};
-            topicMap[tresults[tr].key] = name;
-          }
-
-          const topicGraph = {};
-
-          for (const utteranceId in utteranceTree) {
-            const topic = utteranceTopicMap[utteranceId] || 'No Topic';
-
-            for (const u of utteranceTree[utteranceId]) {
-              const t = utteranceTopicMap[u] || 'No Topic';
-
-              if (topic !== t) {
-                topicGraph[topic] = topicGraph[topic] || {};
-                topicGraph[topic][t] = topicGraph[topic][t] || [];
-                topicGraph[topic][t].push(u);
+              for (const t1 in d1.topics) {
+                topic = t1;
+                break;
               }
-            }
-          }
 
-          for (const topic in topicGraph) {
-            for (const t in topicGraph[topic]) {
-              const row = [topicMap[topic] || 'No Topic', topicMap[t] || 'No Topic', topicGraph[topic][t]];
-              rows.push(row);
-            }
-          }
+              for (const index in rowItems) {
+                if (rowItems[index].sourceUtterance === k1) {
+                  rowItems[index].source = topic;
+                }
 
-          this.setSankey(rows, utteranceName); // data.addRows(rows);
-          // const options = {
-          //   width: '100vw',
-          //   height: 500,
-          //   sankey: {
-          //     node: {
-          //       nodePadding: 30,
-          //       interactivity: true
-          //     }
-          //   }
-          // };
-          // if (this.chart) this.chart.clearChart();
-          // this.chart = new GoogleCharts.api.visualization.Sankey(this.shadowRoot.querySelector('.sankey'));
-          // this.chart.draw(data, options);
-          // GoogleCharts.api.visualization.events.addListener(this.chart, 'select', this.selectHandler.bind(this));
-        }
-      }
+                if (rowItems[index].targetUtterance === k1) {
+                  rowItems[index].target = topic;
+                }
+              } // console.log(topic, k1);
+
+            }
+
+            console.log(rowItems);
+            this.setSankey(rowItems, utteranceDictionary);
+          }
+        } // console.log(domainId);
+        // const snap = await database.ref('tree-structure/data/').orderByChild('domain').equalTo(domainId)
+        //   // .limitToFirst(10)
+        //   .once('value');
+        // this.tree = snap.val() || null;
+        // this.treeChanged(this.tree);
+
+      } // treeChanged (tree) {
+      //   if (tree) {
+      //     console.log(this.tree);
+      //     // this.setSankey(this.tree);
+      //     // Load the charts library with a callback
+      //     // GoogleCharts.load(this.drawChart.bind(this, tree), {
+      //     //   packages: ['sankey']
+      //     // });
+      //     const newTree = {};
+      //     for (const i in this.tree) {
+      //       console.log(this.lastDeployedDomainVersion, this.tree[i].version)
+      //       if (this.lastDeployedDomainVersion === this.tree[i].version) {
+      //         newTree[i] = this.tree[i];
+      //       }
+      //     }
+      //     console.log('fjdkjkdsf', newTree)
+      //     this.drawChart(newTree);
+      //   }
+      // }
+      // async drawChart (tree) {
+      //   // const data = new GoogleCharts.api.visualization.DataTable();
+      //   // data.addColumn('string', 'From');
+      //   // data.addColumn('string', 'To');
+      //   // data.addColumn('number', 'Weight');
+      //   const rows = [];
+      //   const promises = [];
+      //   const topicMap = {};
+      //   const tpromises = [];
+      //   const utteranceTree = {};
+      //   const utteranceTopicMap = {};
+      //   const utteranceName = {};
+      //   if (tree) {
+      //     for (const i in tree) {
+      //       // console.log(tree[i])
+      //       const { utterances, parent } = tree[i];
+      //       for (const utteranceId in utterances) {
+      //         promises.push(database.ref(`utterances/data/${utteranceId}`).once('value'));
+      //       }
+      //       if (parent && tree[parent]) {
+      //         const { utterances: utteranceParent } = tree[parent];
+      //         for (const utteranceId in utteranceParent) {
+      //           if (!utteranceTree[utteranceId]) utteranceTree[utteranceId] = [];
+      //           for (const utteranceId2 in utterances) {
+      //             utteranceTree[utteranceId].push(utteranceId2);
+      //           }
+      //         }
+      //       }
+      //     }
+      //     const results = await Promise.all(promises);
+      //     for (const i in results) {
+      //       const utterance = { ...results[i].val(), utteranceId: results[i].key };
+      //       const { topics, utteranceId, text, userId, version } = utterance;
+      //       utteranceName[utteranceId] = { text, userId, version };
+      //       for (const topic in topics) {
+      //         utteranceTopicMap[utteranceId] = topic;
+      //         topicMap[topic] = true;
+      //         break;
+      //       }
+      //     }
+      //     for (const t in topicMap) {
+      //       tpromises.push(database.ref(`labels/data/${t}`).once('value'));
+      //     }
+      //     const tresults = await Promise.all(tpromises);
+      //     for (const tr in tresults) {
+      //       // console.log(tresults[tr].val(), tr);
+      //       const { name } = tresults[tr].val() || {};
+      //       topicMap[tresults[tr].key] = name;
+      //     }
+      //     const topicGraph = {};
+      //     for (const utteranceId in utteranceTree) {
+      //       const topic = utteranceTopicMap[utteranceId] || 'No Topic';
+      //       for (const u of utteranceTree[utteranceId]) {
+      //         const t = utteranceTopicMap[u] || 'No Topic';
+      //         if (topic !== t) {
+      //           topicGraph[topic] = topicGraph[topic] || {};
+      //           topicGraph[topic][t] = topicGraph[topic][t] || [];
+      //           topicGraph[topic][t].push(u);
+      //         }
+      //       }
+      //     }
+      //     for (const topic in topicGraph) {
+      //       for (const t in topicGraph[topic]) {
+      //         const row = [topicMap[topic] || 'No Topic', topicMap[t] || 'No Topic', topicGraph[topic][t]];
+      //         rows.push(row);
+      //       }
+      //     }
+      //     this.setSankey(rows, utteranceName);
+      //     // data.addRows(rows);
+      //     // const options = {
+      //     //   width: '100vw',
+      //     //   height: 500,
+      //     //   sankey: {
+      //     //     node: {
+      //     //       nodePadding: 30,
+      //     //       interactivity: true
+      //     //     }
+      //     //   }
+      //     // };
+      //     // if (this.chart) this.chart.clearChart();
+      //     // this.chart = new GoogleCharts.api.visualization.Sankey(this.shadowRoot.querySelector('.sankey'));
+      //     // this.chart.draw(data, options);
+      //     // GoogleCharts.api.visualization.events.addListener(this.chart, 'select', this.selectHandler.bind(this));
+      //   }
+      // }
+
     }, {
       kind: "method",
       key: "selectHandler",
@@ -27813,57 +27884,82 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             utterances: []
           }],
           links: []
-        };
-        const {
-          domainId
-        } = this;
+        }; // const { domainId } = this;
 
         for (const row of rows) {
-          console.log(row); // @ts-ignore
+          let flag = true;
 
-          graph.links.push({
-            source: row[0] || 'No Topic',
-            target: row[1] || 'No Topic',
-            value: row[2].length
-          }); // @ts-ignore
-
-          const index = graph.nodes.findIndex(item => item.name === row[0]);
-          const index2 = graph.nodes.findIndex(item => item.name === row[1]);
-          const array = [];
-
-          for (const u of row[2]) {
-            array.push(utteranceName[u]);
-          }
-
-          console.log(row[0], array, row[2]);
-
-          if (index < 0) {
-            const obj = {
-              name: row[0],
-              utterances: array
-            }; // @ts-ignore
-
-            graph.nodes.push(obj);
-          } else {
+          for (const i in graph.links) {
             // @ts-ignore
-            graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
+            if (graph.links[i].source === row.source && graph.links[i].target === row.target) {
+              flag = false; // @ts-ignore
+
+              graph.links[i].value++;
+            }
           }
 
-          if (index2 < 0) {
-            const obj = {
-              name: row[1],
-              utterances: []
-            }; // @ts-ignore
-
-            graph.nodes.push(obj);
-          } else {
-            // @ts-ignore
-            // graph.nodes[index2].utterances = [...graph.nodes[index2].utterances, ...array];
-            console.log('hey');
+          if (flag) {
+            if (row.source !== row.target) {
+              graph.links.push({
+                // @ts-ignore
+                source: row.source || 'No Topic',
+                // @ts-ignore
+                target: row.target || 'No Topic',
+                // @ts-ignore
+                value: 1
+              });
+            }
           }
-        } // console.log(graph)
-        // @ts-ignore
 
+          const index = graph.nodes.findIndex(item => item.name === row.source);
+          const index2 = graph.nodes.findIndex(item => item.name === row.target);
+
+          if (index < 0 || index2 < 0) {
+            if (index < 0) {
+              graph.nodes.push({
+                name: row.source,
+                utterances: []
+              });
+            } else if (index2 < 0) {
+              graph.nodes.push({
+                name: row.target,
+                utterances: []
+              });
+            }
+          }
+        } // for (const row of rows) {
+        //   console.log(row)
+        //   // @ts-ignore
+        //   graph.links.push({ source: row[0] || 'No Topic', target: row[1] || 'No Topic', value: row[2].length });
+        //   // @ts-ignore
+        //   const index = graph.nodes.findIndex(item => item.name === row[0]);
+        //   const index2 = graph.nodes.findIndex(item => item.name === row[1]);
+        //   const array = [];
+        //   for (const u of row[2]) {
+        //     array.push(utteranceName[u]);
+        //   }
+        //   console.log(row[0], array, row[2]);
+        //   if (index < 0) {
+        //     const obj = { name: row[0], utterances: array };
+        //     // @ts-ignore
+        //     graph.nodes.push(obj);
+        //   } else {
+        //     // @ts-ignore
+        //     graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
+        //   }
+        //   if (index2 < 0) {
+        //     const obj = { name: row[1], utterances: [] };
+        //     // @ts-ignore
+        //     graph.nodes.push(obj);
+        //   } else {
+        //     // @ts-ignore
+        //     // graph.nodes[index2].utterances = [...graph.nodes[index2].utterances, ...array];
+        //     console.log('hey');
+        //   }
+        // }
+
+
+        console.log(graph); // @ts-ignore
 
         const {
           d3
@@ -28121,7 +28217,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
       }
     }]
   };
-}, GetDomainMixin(LitElement));
+}, GetDomainUsersMixin(LitElement));
 
 var styles$t = "";
 
@@ -28289,8 +28385,8 @@ const template$h = self => function () {
 
 // @ts-ignore
 
-let VersionList2 = _decorate([customElement('version-managable-list2')], function (_initialize, _LitElement) {
-  class VersionList2 extends _LitElement {
+let VersionList2 = _decorate([customElement('version-managable-list2')], function (_initialize, _GetPathMixin) {
+  class VersionList2 extends _GetPathMixin {
     constructor(...args) {
       super(...args);
 
@@ -28327,11 +28423,22 @@ let VersionList2 = _decorate([customElement('version-managable-list2')], functio
       value: async function changeVersion(event) {
         this.dispatchEvent(new window.CustomEvent('change-version', {
           detail: event.target.value
-        }));
+        })); // console.log(event.target.value, this.queryObject.domain);
+        // const updates = {};
+        // if (this.queryObject.domain) {
+        //   const snap = await database.ref(`deployed-history/data/${this.queryObject.domain}/${event.target.value}`).once('value');
+        //   const data = snap.val();
+        //   console.log(data);
+        //   if (data) {
+        //     updates[`domains/data/${this.queryObject.domain}`] = data;
+        //     console.log(updates);
+        //     await database.ref().update(updates);
+        //   }
+        // }
       }
     }]
   };
-}, LitElement);
+}, GetPathMixin(LitElement));
 
 var styles$w = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 

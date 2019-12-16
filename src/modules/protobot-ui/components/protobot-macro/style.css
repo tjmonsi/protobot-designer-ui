@@ -11,6 +11,7 @@ h3 {
 
 .sankey {
   height: 60%;
+  /* overflow: auto; */
 }
 
 .dashboard {

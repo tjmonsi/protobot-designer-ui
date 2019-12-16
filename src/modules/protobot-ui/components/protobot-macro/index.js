@@ -376,7 +376,8 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
     var units = 'Utterances';
     var margin = { top: 10, right: 10, bottom: 10, left: 10 };
     const width = this.getBoundingClientRect().width - margin.left - margin.right;
-    const height = 740 - margin.top - margin.bottom;
+    // const height = 740 - margin.top - margin.bottom;
+    const height  = this.getBoundingClientRect().height * 0.6 - margin.top - margin.bottom;
     var formatNumber = d3.format(',.0f');
     const format = function (d) { return formatNumber(d) + ' ' + units; };
     const color = d3.scale.category20();

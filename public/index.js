@@ -27558,7 +27558,7 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
   };
 }, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
 
-var styles$s = "h1 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n  color: cornflowerblue;\n}\n\n.sankey {\n  height: 60%;\n}\n\n.dashboard {\n  display: flex;\n  flex-direction: row;\n}\n\n.no-label-utterance {\n  height: 40%;\n  width: 50%;\n}\n\n.new-topics {\n  height: 40%;\n  width: 50%;\n}\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n";
+var styles$s = "h1 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n  color: cornflowerblue;\n}\n\n.sankey {\n  height: 60%;\n  /* overflow: auto; */\n}\n\n.dashboard {\n  display: flex;\n  flex-direction: row;\n}\n\n.no-label-utterance {\n  height: 40%;\n  width: 50%;\n}\n\n.new-topics {\n  height: 40%;\n  width: 50%;\n}\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n";
 
 /**
  *
@@ -27971,8 +27971,9 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           bottom: 10,
           left: 10
         };
-        const width = this.getBoundingClientRect().width - margin.left - margin.right;
-        const height = 740 - margin.top - margin.bottom;
+        const width = this.getBoundingClientRect().width - margin.left - margin.right; // const height = 740 - margin.top - margin.bottom;
+
+        const height = this.getBoundingClientRect().height * 0.6 - margin.top - margin.bottom;
         var formatNumber = d3.format(',.0f');
 
         const format = function (d) {
@@ -31961,10 +31962,10 @@ const template$o = self => function () {
 
       <div class="right">
         <div class="right-scrollable">
-        ${page === 'authoring' || !page ? html`
+        ${page === 'authoring' ? html`
           <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
         ` : ''}
-        ${page === 'macro' ? html`
+        ${page === 'macro' || !page ? html`
           <protobot-macro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"
           .versionsDetail=${versionsDetail} lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopicList=${lastDeployedDomainTopicList} @change-version=${changeVersion.bind(this)}
           ></protobot-macro-sidebar>

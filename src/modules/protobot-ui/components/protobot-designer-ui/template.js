@@ -65,10 +65,10 @@ export const template = self => function () {
 
       <div class="right">
         <div class="right-scrollable">
-        ${page === 'authoring' || !page ? html`
+        ${page === 'authoring' ? html`
           <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
         ` : ''}
-        ${page === 'macro' ? html`
+        ${page === 'macro' || !page ? html`
           <protobot-macro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"
           .versionsDetail=${versionsDetail} lastDeployedDomainVersion=${lastDeployedDomainVersion} .lastDeployedDomainTopicList=${lastDeployedDomainTopicList} @change-version=${changeVersion.bind(this)}
           ></protobot-macro-sidebar>

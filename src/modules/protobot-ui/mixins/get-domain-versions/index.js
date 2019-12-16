@@ -24,7 +24,7 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
   // latestEditedDomainVersion = '';
 
   // @ts-ignore
-  @property({ type: String})
+  @property({ type: String })
   lastDeployedDomainVersion = '';
 
   // @ts-ignore
@@ -96,14 +96,13 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
       this.domainVersionsDetailRef = database.ref(`deployed-history/data/${id}`);
       this.domainVersionsDetailRef.on('value', this.boundSaveDomainVersionsDetail);
 
-      this.LatestDeployedDomainVersionRef = database.ref(`last-deployed/data/${id}/deployedVersion`)
+      this.LatestDeployedDomainVersionRef = database.ref(`last-deployed/data/${id}/deployedVersion`);
       this.LatestDeployedDomainVersionRef.on('value', this.boundSaveLatestDeployedDomainVersion);
 
-      this.LatestDeployedDomainRef = database.ref(`last-deployed/data/${id}`)
+      this.LatestDeployedDomainRef = database.ref(`last-deployed/data/${id}`);
       this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
     }
   }
-
 
   saveDomainVersions (snap) {
     const data = snap.val();
@@ -135,7 +134,6 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
     }
     this.lastDeployedDomainTopics = array.sort((i, j) => (i.order - j.order)).map(i => ({ id: i.topic, sub: i.sub }));
 
-
     const arraytwo = [];
     for (const topic in topics) {
       arraytwo.push({ id: topic, included: true });
@@ -150,17 +148,17 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
     this.lastDeployedDomainTopicList = arraytwo;
     this.lastDeployedDomainCommitMessage = commitMessage;
     this.lastDeployedDomainParameters = {
-      "Number of users": parameters.numUser,
-      "Number of sessions": parameters.numSession,
-      "Show other's responses?": parameters.otherResponse,
-      "Testing Methods": parameters.ampOption ? 'Amazon Mechanical Turk' : 'Share Online by myself'
-    }
+      'Number of users': parameters.numUser,
+      'Number of sessions': parameters.numSession,
+      'Show other\'s responses?': parameters.otherResponse,
+      'Testing Methods': parameters.ampOption ? 'Amazon Mechanical Turk' : 'Share Online by myself'
+    };
   }
 
   async updateLatestDeployedDomainVersion (version) {
-    this.lastDeployedDomainVersion = version
+    this.lastDeployedDomainVersion = version;
     const snap = await database.ref(`deployed-history/data/${this.domainId}/${version}`).once('value');
-    this.saveLatestDeployedDomain(snap)
+    this.saveLatestDeployedDomain(snap);
   }
 
   domainChanged (domain) {}

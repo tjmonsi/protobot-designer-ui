@@ -9,16 +9,16 @@ import { database } from '../../../firebase';
 // @ts-ignore
 @customElement('protobot-designer-ui')
 class ProtobotDesignerUI extends GetDomainVersionsMixin(LitElement) {
-  @property ({type: String})
+  @property({ type: String })
   lastDeployedDomainVersion
 
-  @property ({type: Array})
+  @property({ type: Array })
   lastDeployedDomainTopics = []
 
-  @property ({type: Array})
+  @property({ type: Array })
   lastDeployedDomainTopicList = []
 
-  @property({type: String})
+  @property({ type: String })
   lastDeployedDomainCommitMessage = ''
 
   @property({ type: Object })
@@ -28,7 +28,7 @@ class ProtobotDesignerUI extends GetDomainVersionsMixin(LitElement) {
     return template(this);
   }
 
-  async changeVersion ({detail: id}) {
+  async changeVersion ({ detail: id }) {
     super.updateLatestDeployedDomainVersion(id)
   }
 }

@@ -182,8 +182,10 @@
 
         var flag = false;
         var paths = {};
+
         while (remainingNodes.length) {
           //
+          var length = remainingNodes.length;
           nextNodes = [];
           remainingNodes.forEach(function(node) {
             if (node.name === 'No Topic') {
@@ -195,7 +197,27 @@
               // console.log(flag, paths[link.target.name], node.name)
               // if (flag) {
 
-              if (nextNodes.findIndex(item => item.name === link.target.name) < 0 && link.target.name !== 'No Topic') {
+              var flag2 = true;
+              var name = link.target.name;
+              var source = name;
+              var keys = Object.keys(paths);
+              var count = 0;
+              do {
+                var target = paths[source];
+                console.log(source, target, name, count)
+                count++;
+                if (!target) {
+                  break;
+                } else if (target !== name) {
+                  source = paths[source];
+                } else {
+                  console.log(target, name, 'hey')
+                  flag2 = false;
+                  break;
+                }
+              } while (keys.length > count + 1);
+
+              if (flag2 && nextNodes.findIndex(item => item.name === link.target.name) < 0 && link.target.name !== 'No Topic') {
                 nextNodes.push(link.target);
                 paths[link.target.name] = node.name;
               }
@@ -214,10 +236,20 @@
           // } else if (remainingNodes.length === nextNodes.length) {
           //   break;
           // }
+          var length2 = nextNodes.length;
+          console.log(nextNodes);
+          if (length === length2) {
+
+            // break;
+          }
           remainingNodes = nextNodes;
           ++x;
           noTopicNode.x = x - 1;
 
+
+          if (x > 20) {
+            break;
+          }
           // console.log(x);
           // console.log(remainingNodes)
           // if (remainingNodes.length > 1000) {

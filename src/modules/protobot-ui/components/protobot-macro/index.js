@@ -44,9 +44,14 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
         // console.log(d1);
         const promises = [];
         const uniqueUtterances = {};
+        const uniqueTopic = {};
         const utteranceDictionary = {};
+        const topicDictionary = {
+          'No Topic': { name: 'No Topic' }
+        };
         const rowItems = [];
         const upromises = [];
+        const tpromises = [];
         // const
         for (const user in d1) {
           // console.log(`users/lists/domain-utterances/${user}/${domainId}/`);
@@ -115,9 +120,10 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
           const d1 = usnap.val();
           const k1 = usnap.key;
           utteranceDictionary[usnap.key] = d1;
-          let topic = null;
+          let topic = 'No Topic';
           for (const t1 in d1.topics) {
             topic = t1;
+            uniqueTopic[topic] = true;
             break;
           }
           for (const index in rowItems) {
@@ -131,9 +137,21 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
           // console.log(topic, k1);
         }
 
-        console.log(rowItems);
+        for (const topicId in uniqueTopic) {
+          tpromises.push(database.ref(`labels/data/${topicId}/`).once('value'));
+        }
 
-        this.setSankey(rowItems, utteranceDictionary);
+        const tresults = await Promise.all(tpromises);
+
+        for (const tsnap of tresults) {
+          const d1 = tsnap.val();
+          const k1 = tsnap.key;
+          topicDictionary[k1] = d1;
+        }
+
+        // console.log(rowItems);
+
+        this.setSankey(rowItems, utteranceDictionary, topicDictionary);
       }
     }
 
@@ -283,7 +301,7 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
     }
   }
 
-  setSankey (rows, utteranceName) {
+  setSankey (rows, utteranceName, topicDictionary) {
     const graph = {
       nodes: [{ name: 'No Topic', utterances: [] }],
       links: []
@@ -377,7 +395,7 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
     var margin = { top: 10, right: 10, bottom: 10, left: 10 };
     const width = this.getBoundingClientRect().width - margin.left - margin.right;
     // const height = 740 - margin.top - margin.bottom;
-    const height  = this.getBoundingClientRect().height * 0.6 - margin.top - margin.bottom;
+    const height = this.getBoundingClientRect().height * 0.6 - margin.top - margin.bottom;
     var formatNumber = d3.format(',.0f');
     const format = function (d) { return formatNumber(d) + ' ' + units; };
     const color = d3.scale.category20();
@@ -476,7 +494,7 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
     node.append('rect')
       .attr('height', function (d) { return d.dy; })
       .attr('width', sankey.nodeWidth())
-      .style('fill', function (d) { return color(d.name.replace(/ .*/, '')); })
+      .style('fill', function (d) { return d.name ? color(d.name.replace(/ .*/, '')) : 'red'; })
       .style('stroke', function (d) { return d3.rgb(d.color).darker(2); })
       .append('title')
       .text(function (d) { return d.name + '\n' + format(d.value); })

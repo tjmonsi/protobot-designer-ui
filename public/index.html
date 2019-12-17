@@ -173,39 +173,56 @@
       function computeNodeBreadths() {
         var remainingNodes = nodes,
             nextNodes,
+            noTopicNode,
             x = 0;
+
 
         var flag = false;
         var paths = {};
-
         while (remainingNodes.length) {
-          // console.log(remainingNodes)
+          //
           nextNodes = [];
           remainingNodes.forEach(function(node) {
+            if (node.name === 'No Topic') {
+              noTopicNode = node;
+            }
             node.x = x;
             node.dx = nodeWidth;
             node.sourceLinks.forEach(function(link) {
-              if (flag) {
-                if (paths[link.target.name] !== node.name) {
-                  nextNodes.push(link.target);
-                  paths[link.target.name] = node.name;
-                }
-              } else {
+              // console.log(flag, paths[link.target.name], node.name)
+              // if (flag) {
+
+              if (nextNodes.findIndex(item => item.name === link.target.name) < 0 && link.target.name !== 'No Topic') {
                 nextNodes.push(link.target);
                 paths[link.target.name] = node.name;
               }
 
+                // }
+              // } else {
+                // nextNodes.push(link.target);
+                // paths[link.target.name] = node.name;
+              // }
+
               // console.log(node.name, link.target.name)
             });
           });
-          if (flag) {
-            flag = false;
-          } else if (remainingNodes.length === nextNodes.length) {
-            flag = true;
-          }
+          // if (flag) {
+          //   flag = false;
+          // } else if (remainingNodes.length === nextNodes.length) {
+          //   break;
+          // }
           remainingNodes = nextNodes;
           ++x;
+          noTopicNode.x = x - 1;
+
+          // console.log(x);
+          // console.log(remainingNodes)
+          // if (remainingNodes.length > 1000) {
+          //   break;
+          // }
         }
+
+        console.log(paths)
 
         //
         moveSinksRight(x);

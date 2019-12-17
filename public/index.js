@@ -27656,9 +27656,16 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             // console.log(d1);
             const promises = [];
             const uniqueUtterances = {};
+            const uniqueTopic = {};
             const utteranceDictionary = {};
+            const topicDictionary = {
+              'No Topic': {
+                name: 'No Topic'
+              }
+            };
             const rowItems = [];
-            const upromises = []; // const
+            const upromises = [];
+            const tpromises = []; // const
 
             for (const user in d1) {
               // console.log(`users/lists/domain-utterances/${user}/${domainId}/`);
@@ -27731,10 +27738,11 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
               const d1 = usnap.val();
               const k1 = usnap.key;
               utteranceDictionary[usnap.key] = d1;
-              let topic = null;
+              let topic = 'No Topic';
 
               for (const t1 in d1.topics) {
                 topic = t1;
+                uniqueTopic[topic] = true;
                 break;
               }
 
@@ -27750,8 +27758,20 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
 
             }
 
-            console.log(rowItems);
-            this.setSankey(rowItems, utteranceDictionary);
+            for (const topicId in uniqueTopic) {
+              tpromises.push(database.ref(`labels/data/${topicId}/`).once('value'));
+            }
+
+            const tresults = await Promise.all(tpromises);
+
+            for (const tsnap of tresults) {
+              const d1 = tsnap.val();
+              const k1 = tsnap.key;
+              topicDictionary[k1] = d1;
+            } // console.log(rowItems);
+
+
+            this.setSankey(rowItems, utteranceDictionary, topicDictionary);
           }
         } // console.log(domainId);
         // const snap = await database.ref('tree-structure/data/').orderByChild('domain').equalTo(domainId)
@@ -27877,7 +27897,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
     }, {
       kind: "method",
       key: "setSankey",
-      value: function setSankey(rows, utteranceName) {
+      value: function setSankey(rows, utteranceName, topicDictionary) {
         const graph = {
           nodes: [{
             name: 'No Topic',
@@ -28051,7 +28071,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
         node.append('rect').attr('height', function (d) {
           return d.dy;
         }).attr('width', sankey.nodeWidth()).style('fill', function (d) {
-          return color(d.name.replace(/ .*/, ''));
+          return d.name ? color(d.name.replace(/ .*/, '')) : 'red';
         }).style('stroke', function (d) {
           return d3.rgb(d.color).darker(2);
         }).append('title').text(function (d) {

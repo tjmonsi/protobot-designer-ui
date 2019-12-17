@@ -10,7 +10,7 @@ h3 {
 }
 
 .sankey {
-  height: 60%;
+  height: 70%;
   /* overflow: auto; */
 }
 
@@ -20,12 +20,12 @@ h3 {
 }
 
 .no-label-utterance {
-  height: 40%;
+  height: 30%;
   width: 50%;
 }
 
 .new-topics {
-  height: 40%;
+  height: 30%;
   width: 50%;
 }
 .node rect {

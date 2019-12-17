@@ -1,6 +1,10 @@
 import { html } from 'lit-element';
 import '../topic-list-item';
 import '../protobot-memo';
+import { until } from 'lit-html/directives/until';
+import '../version-list';
+
+
 
 // @ts-ignore
 import styles from './style.css';
@@ -10,7 +14,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topicList, save, addMemo, memos, domain } = this;
+  const { topicList, save, addMemo, memos, domain, users, gettingCrowdId } = this;
   const { queryObject } = this;
   const { deployedVersion: dv } = domain || { deployedVersion: null };
   const { page: pageId, crowdId: crowd } = queryObject;
@@ -47,10 +51,16 @@ export const template = self => function () {
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>
-    <!-- <div class="button-container">
-      <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
-        Done with Labeling
-      </vaadin-button>
-    </div> -->
+    <h3>Crowd list</h3>
+    <ul class = "crowd-link">
+      ${users ? users.map(item => html`
+      <li>
+        <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=1">${until(gettingCrowdId(item.user), 'Loading...')}</a> ${item.data ? Object.keys(item.data).map(i => html`
+            <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=${i}">${i}</a>
+        `) : ''}
+      </li>`) : ''}
+    </ul>
+    <version-list></version-list>
+
   `;
 }.bind(self)();

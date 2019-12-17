@@ -23573,7 +23573,7 @@ const template$2 = self => function () {
 
 
 
-<!--
+
       <div class="header-item-group">
         <label html-for="domain">Domain</label>
         <input id="domain" class="left-side-text" type="text" value="${domainName}" @change="${changeDomainName.bind(this)}">
@@ -23583,7 +23583,7 @@ const template$2 = self => function () {
         <label html-for="designerName">Designer</label>
         <input id="designerName" class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
       </div>
--->
+
       </div>
   `;
 }.bind(self)();
@@ -27558,7 +27558,7 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
   };
 }, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
 
-var styles$s = "h1 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n  color: cornflowerblue;\n}\n\n.sankey {\n  height: 60%;\n  /* overflow: auto; */\n}\n\n.dashboard {\n  display: flex;\n  flex-direction: row;\n}\n\n.no-label-utterance {\n  height: 40%;\n  width: 50%;\n}\n\n.new-topics {\n  height: 40%;\n  width: 50%;\n}\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n";
+var styles$s = "h1 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n  color: cornflowerblue;\n}\n\n.sankey {\n  height: 70%;\n  /* overflow: auto; */\n}\n\n.dashboard {\n  display: flex;\n  flex-direction: row;\n}\n\n.no-label-utterance {\n  height: 30%;\n  width: 50%;\n}\n\n.new-topics {\n  height: 30%;\n  width: 50%;\n}\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n";
 
 /**
  *
@@ -28734,7 +28734,9 @@ const template$j = self => function () {
     save,
     addMemo,
     memos,
-    domain
+    domain,
+    users,
+    gettingCrowdId
   } = this;
   const {
     queryObject
@@ -28785,11 +28787,17 @@ const template$j = self => function () {
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>
-    <!-- <div class="button-container">
-      <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
-        Done with Labeling
-      </vaadin-button>
-    </div> -->
+    <h3>Crowd list</h3>
+    <ul class = "crowd-link">
+      ${users ? users.map(item => html`
+      <li>
+        <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=1">${until(gettingCrowdId(item.user), 'Loading...')}</a> ${item.data ? Object.keys(item.data).map(i => html`
+            <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=${i}">${i}</a>
+        `) : ''}
+      </li>`) : ''}
+    </ul>
+    <version-list></version-list>
+
   `;
 }.bind(self)();
 

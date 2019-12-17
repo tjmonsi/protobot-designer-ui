@@ -44,7 +44,7 @@ export const template = self => function () {
 
 
 
-<!--
+
       <div class="header-item-group">
         <label html-for="domain">Domain</label>
         <input id="domain" class="left-side-text" type="text" value="${domainName}" @change="${changeDomainName.bind(this)}">
@@ -54,7 +54,7 @@ export const template = self => function () {
         <label html-for="designerName">Designer</label>
         <input id="designerName" class="left-side-text" type="text" value="${designerName}" @change="${changeDesignerName.bind(this)}">
       </div>
--->
+
       </div>
   `;
 }.bind(self)();

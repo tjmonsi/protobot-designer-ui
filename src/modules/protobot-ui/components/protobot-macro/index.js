@@ -307,7 +307,7 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
       links: []
     };
 
-    // const { domainId } = this;
+    const { domainId } = this;
 
     for (const row of rows) {
       let flag = true;
@@ -506,7 +506,7 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
       .attr('dy', '.35em')
       .attr('text-anchor', 'end')
       .attr('transform', null)
-      .text(function (d) { return `${d.name}`; })
+      .text(function (d) { return `${topicDictionary[d.name].name}`; })
       .filter(function (d) { return d.x < width / 2; })
       .attr('x', 6 + sankey.nodeWidth())
       .attr('text-anchor', 'start')

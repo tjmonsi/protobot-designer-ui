@@ -27904,7 +27904,10 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             utterances: []
           }],
           links: []
-        }; // const { domainId } = this;
+        };
+        const {
+          domainId
+        } = this;
 
         for (const row of rows) {
           let flag = true;
@@ -28081,7 +28084,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
         const text = node.append('text').attr('x', -6).attr('y', function (d) {
           return d.dy / 2;
         }).attr('dy', '.35em').attr('text-anchor', 'end').attr('transform', null).text(function (d) {
-          return `${d.name}`;
+          return `${topicDictionary[d.name].name}`;
         }).filter(function (d) {
           return d.x < width / 2;
         }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start').attr('name', function (d) {

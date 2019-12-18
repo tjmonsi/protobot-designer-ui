@@ -57,6 +57,9 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
           // console.log(`users/lists/domain-utterances/${user}/${domainId}/`);
           promises.push(database.ref(`users/lists/domain-utterances/${user}/${domainId}/`).once('value'));
         }
+
+        // TODO: ADD USER
+
         // console.log(promises);
         const results = await Promise.all(promises);
 
@@ -82,7 +85,7 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
                   if (parseInt(index) + 1 < arr.length) {
                     let flag = true;
                     for (const i in rowItems) {
-                      if (rowItems[i].sourceUtterance === arr[index] && rowItems[i].targetUtterance === arr[index + 1]) {
+                      if (rowItems[i].sourceUtterance === arr[index] && rowItems[i].targetUtterance === arr[parseInt(index) + 1]) {
                         rowItems[i].users.push({
                           userId,
                           set: z
@@ -140,24 +143,24 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
           // console.log(topic, k1);
         }
 
-        for (const index in rowItems) {
-          while (rowItems[index].topic === rowItems[index].topicTarget) {
-            const index2 = rowItems.findIndex(item => item.source === rowItems[index].target && item.source !== rowItems[index].source);
-            if (index2 >= 0) {
-              rowItems[index].target = rowItems[index2].target;
-              rowItems[index].topicTarget = rowItems[index2].topicTarget;
-              rowItems[index2].ignore = true;
-            } else {
-              rowItems[index].ignore = true;
-              break;
-            }
+        // for (const index in rowItems) {
+        //   while (rowItems[index].topic === rowItems[index].topicTarget) {
+        //     const index2 = rowItems.findIndex(item => item.source === rowItems[index].target && item.source !== rowItems[index].source);
+        //     if (index2 >= 0) {
+        //       rowItems[index].target = rowItems[index2].target;
+        //       rowItems[index].topicTarget = rowItems[index2].topicTarget;
+        //       // console.log(rowItems[index2], index2);
+        //       rowItems[index2].ignore = true;
+        //     } else {
+        //       rowItems[index].ignore = true;
+        //     }
 
-            if (index2 < 0) {
-              break;
-            }
-            console.log(index, index2)
-          }
-        }
+        //     if (index2 < 0) {
+        //       break;
+        //     }
+        //     // console.log(index, index2)
+        //   }
+        // }
 
         for (const topicId in uniqueTopic) {
           tpromises.push(database.ref(`labels/data/${topicId}/`).once('value'));
@@ -171,7 +174,29 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
           topicDictionary[k1] = d1;
         }
 
-        // console.log(rowItems);
+        console.log(rowItems);
+
+        const newRowItems = [];
+
+        let sourceIndex = 0;
+        let currentTopic = rowItems[sourceIndex].topic;
+
+        for (const index in rowItems) {
+          console.log(rowItems[index].topic, rowItems[index].topicTarget, currentTopic, index);
+          if (currentTopic === rowItems[index].topic) {
+            if (sourceIndex !== parseInt(index)) {
+              rowItems[index].ignore = true;
+              console.log(rowItems[index]);
+            }
+          } else {
+            rowItems[sourceIndex].target = rowItems[index].source;
+            rowItems[sourceIndex].topicTarget = rowItems[index].topic;
+            console.log(sourceIndex, rowItems[sourceIndex].sourceUtterance, rowItems[sourceIndex].target, rowItems[sourceIndex].topicTarget);
+            console.log(index, rowItems[index].sourceUtterance, rowItems[index].target, rowItems[index].topicTarget);
+            sourceIndex = parseInt(index);
+            currentTopic = rowItems[sourceIndex].topic;
+          }
+        }
 
         this.setSankey(rowItems, utteranceDictionary, topicDictionary);
       }
@@ -331,7 +356,8 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
 
     const { domainId } = this;
 
-    for (const row of rows) {
+    for (const rowindex in rows) {
+      const row = rows[rowindex];
       let flag = true;
 
       if (row.ignore) continue;
@@ -369,16 +395,26 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
           graph.nodes.push({
             name: row.source,
             topic: row.topic,
+            title: topicDictionary[row.topic].name,
+            sourceUtterance: row.sourceUtterance,
+            index: rowindex,
             utterances: []
           });
+        } else {
+          graph.nodes[index].index = rowindex;
         }
         if (index2 < 0) {
           // console.log(row.target)
           graph.nodes.push({
             name: row.target,
             topic: row.topicTarget,
+            title: topicDictionary[row.topicTarget].name,
+            sourceUtterance: row.targetUtterance,
+            index: rowindex,
             utterances: []
           });
+        } else {
+          graph.nodes[index2].index = rowindex;
         }
       }
     }
@@ -535,7 +571,7 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
       .attr('dy', '.35em')
       .attr('text-anchor', 'end')
       .attr('transform', null)
-      .text(function (d) { return `${topicDictionary[d.topic].name}`; })
+      .text(function (d) { return `${d.index} ${d.sourceUtterance} ${topicDictionary[d.topic].name}`; })
       .filter(function (d) { return d.x < width / 2; })
       .attr('x', 6 + sankey.nodeWidth())
       .attr('text-anchor', 'start')

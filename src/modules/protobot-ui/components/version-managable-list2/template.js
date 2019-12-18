@@ -19,13 +19,14 @@ export const template = self => function () {
     <style>
       ${styles}
     </style>
-    ${lastDeployedDomainVersion}
+    <!-- ${lastDeployedDomainVersion} --!>
+    <div class="version-container">Version
     <select class="select-box" placeholder="Topic" @change=${changeVersion}>
-      ${versions && Object.keys(versions).map(item => html`
-      <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
-      ${versions[item].versionNumber}
-      </option>`)}
-
+        ${versions && Object.keys(versions).map(item => html`
+        <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
+        ${versions[item].versionNumber}
+        </option>`)}
+    </div>
     </select>
 
 

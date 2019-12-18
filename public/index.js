@@ -25194,12 +25194,12 @@ const template$9 = self => function () {
 
     ${name}
 
-    <!-- ${!included ? ' - not included' : ''} -->
+    <!-- ${!included ? ' - not included' : ''} --!>
     ${!included ? html`
       ${this.queryObject.page === 'authoring' ? html`
         <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Insert</button>
       ` : html`
-        <button class='new-label' >New</button>
+        <button class='new-label'>New</button>
       `}
     ` : ''}
 
@@ -28407,7 +28407,7 @@ let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$v = "/* :host {\n  overflow-y: auto;\n} */\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n";
+var styles$v = "/* :host {\n  overflow-y: auto;\n} */\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\nversion-container {\n  display:flex;\n  flex-direction: row;\n  align-items:flex-end;\n\n}";
 
 /**
  *
@@ -28426,13 +28426,14 @@ const template$h = self => function () {
     <style>
       ${styles$v}
     </style>
-    ${lastDeployedDomainVersion}
+    <!-- ${lastDeployedDomainVersion} --!>
+    <div class="version-container">Version
     <select class="select-box" placeholder="Topic" @change=${changeVersion}>
-      ${versions && Object.keys(versions).map(item => html`
-      <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
-      ${versions[item].versionNumber}
-      </option>`)}
-
+        ${versions && Object.keys(versions).map(item => html`
+        <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
+        ${versions[item].versionNumber}
+        </option>`)}
+    </div>
     </select>
 
 
@@ -28540,7 +28541,7 @@ const template$i = self => function () {
       <h3>Instruction</h3>
       <p>In Macro Review, you can explore the whole conversation flows which are followed and prototyped by crowds.</p>
     </div>
-    <br>
+<br>
     <h3>Existing Topic List</h3>
 
     <version-managable-list2
@@ -28549,24 +28550,22 @@ const template$i = self => function () {
       @change-version=${changeVersion.bind(this)}
       ></version-managable-list2>
 
-      <ul class ="topic-list">
+      <!-- <ul class ="topic-list">
         ${lastDeployedDomainTopicList.map(topic => html`
           <li>
             <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}"></topic-list-item>
           </li>
-
         `)}
-      </ul>
+      </ul> --!>
 
 
-    <!--<ul class ="topic-list">
+    <ul class ="topic-list">
     ${topicList.map(topic => html`
       <li>
         <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}">
         </topic-list-item>
       </li>
     `)}
-    -->
     </ul>
     <br>
     <br>
@@ -28819,7 +28818,7 @@ const template$j = self => function () {
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>
-    <h3>Crowd list</h3>
+    <!-- <h3>Crowd list</h3>
     <ul class = "crowd-link">
       ${users ? users.map(item => html`
       <li>
@@ -28827,9 +28826,7 @@ const template$j = self => function () {
             <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=${i}">${i}</a>
         `) : ''}
       </li>`) : ''}
-    </ul>
-    <version-list></version-list>
-
+    </ul> --!>
   `;
 }.bind(self)();
 

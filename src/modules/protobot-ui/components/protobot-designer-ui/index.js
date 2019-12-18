@@ -3,7 +3,7 @@ import { LitElement, customElement, property } from 'lit-element';
 import { template } from './template.js';
 // import { GetPathMixin } from '../../mixins/get-path';
 import { GetDomainVersionsMixin } from '../../mixins/get-domain-versions';
-import { database } from '../../../firebase';
+// import { database } from '../../../firebase';
 
 // Extend the LitElement base class
 // @ts-ignore
@@ -29,7 +29,7 @@ class ProtobotDesignerUI extends GetDomainVersionsMixin(LitElement) {
   }
 
   async changeVersion ({ detail: id }) {
-    super.updateLatestDeployedDomainVersion(id)
+    super.updateLatestDeployedDomainVersion(id);
   }
 }
 

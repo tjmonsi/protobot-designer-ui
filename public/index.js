@@ -27716,6 +27716,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
                           const obj = {
                             sourceUtterance: arr[index],
                             targetUtterance: arr[parseInt(index) + 1],
+                            index,
                             users: [{
                               userId,
                               set: z
@@ -27751,14 +27752,37 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
 
               for (const index in rowItems) {
                 if (rowItems[index].sourceUtterance === k1) {
-                  rowItems[index].source = topic;
+                  rowItems[index].source = topic + `::${rowItems[index].index}`;
+                  rowItems[index].topic = topic;
                 }
 
                 if (rowItems[index].targetUtterance === k1) {
-                  rowItems[index].target = topic;
+                  rowItems[index].target = topic + `::${parseInt(rowItems[index].index) + 1}`;
+                  rowItems[index].topicTarget = topic;
                 }
               } // console.log(topic, k1);
 
+            }
+
+            for (const index in rowItems) {
+              while (rowItems[index].topic === rowItems[index].topicTarget) {
+                const index2 = rowItems.findIndex(item => item.source === rowItems[index].target && item.source !== rowItems[index].source);
+
+                if (index2 >= 0) {
+                  rowItems[index].target = rowItems[index2].target;
+                  rowItems[index].topicTarget = rowItems[index2].topicTarget;
+                  rowItems[index2].ignore = true;
+                } else {
+                  rowItems[index].ignore = true;
+                  break;
+                }
+
+                if (index2 < 0) {
+                  break;
+                }
+
+                console.log(index, index2);
+              }
             }
 
             for (const topicId in uniqueTopic) {
@@ -27904,6 +27928,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
         const graph = {
           nodes: [{
             name: 'No Topic',
+            topic: 'No Topic',
             utterances: []
           }],
           links: []
@@ -27914,6 +27939,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
 
         for (const row of rows) {
           let flag = true;
+          if (row.ignore) continue;
 
           for (const i in graph.links) {
             // @ts-ignore
@@ -27926,6 +27952,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
 
           if (flag) {
             if (row.source !== row.target) {
+              // console.log(row.source, row.target)
               graph.links.push({
                 // @ts-ignore
                 source: row.source || 'No Topic',
@@ -27944,11 +27971,16 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             if (index < 0) {
               graph.nodes.push({
                 name: row.source,
+                topic: row.topic,
                 utterances: []
               });
-            } else if (index2 < 0) {
+            }
+
+            if (index2 < 0) {
+              // console.log(row.target)
               graph.nodes.push({
                 name: row.target,
+                topic: row.topicTarget,
                 utterances: []
               });
             }
@@ -28087,7 +28119,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
         const text = node.append('text').attr('x', -6).attr('y', function (d) {
           return d.dy / 2;
         }).attr('dy', '.35em').attr('text-anchor', 'end').attr('transform', null).text(function (d) {
-          return `${topicDictionary[d.name].name}`;
+          return `${topicDictionary[d.topic].name}`;
         }).filter(function (d) {
           return d.x < width / 2;
         }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start').attr('name', function (d) {
@@ -32021,6 +32053,7 @@ const template$o = self => function () {
   `;
 }.bind(self)();
 
+// Extend the LitElement base class
 // @ts-ignore
 
 let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], function (_initialize, _GetDomainVersionsMix) {

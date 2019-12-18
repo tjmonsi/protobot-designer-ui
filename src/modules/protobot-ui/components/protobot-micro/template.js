@@ -25,15 +25,18 @@ export const template = self => function () {
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
-    <h1>Micro Review</h1>
-    <!-- <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3> -->
-    <h3>Crowd name: ${until(gettingCrowdId(crowdId))}</h3>
-
     <br>
+
+    <!-- <h1>Micro Review</h1> -->
+    <!-- <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3> -->
+    <!-- <h3>Crowd name: ${until(gettingCrowdId(crowdId))}</h3> -->
+
 
     ${utterances && utterances.length ? utterances.map(item => html`
       <utterance-review-item .utteranceId="${item.id}"></utterance-review-item>
     `) : ''}
+
+    <div class="empty-bottom"></div>
   `;
 }.bind(self)();
 

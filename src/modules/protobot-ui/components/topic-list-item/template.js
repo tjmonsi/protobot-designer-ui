@@ -20,12 +20,12 @@ export const template = self => function () {
 
     ${name}
 
-    <!-- ${!included ? ' - not included' : ''} -->
+    <!-- ${!included ? ' - not included' : ''} --!>
     ${!included ? html`
       ${this.queryObject.page === 'authoring' ? html`
         <button class='new-label' data-id="${this.topicId}" @click="${addTopic.bind(this)}">Insert</button>
       ` : html`
-        <button class='new-label' >New</button>
+        <button class='new-label'>New</button>
       `}
     ` : ''}
 

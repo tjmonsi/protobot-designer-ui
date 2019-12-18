@@ -29,7 +29,7 @@ export const template = self => function () {
       <h3>Instruction</h3>
       <p>In Macro Review, you can explore the whole conversation flows which are followed and prototyped by crowds.</p>
     </div>
-    <br>
+<br>
     <h3>Existing Topic List</h3>
 
     <version-managable-list2
@@ -38,24 +38,22 @@ export const template = self => function () {
       @change-version=${changeVersion.bind(this)}
       ></version-managable-list2>
 
-      <ul class ="topic-list">
+      <!-- <ul class ="topic-list">
         ${lastDeployedDomainTopicList.map(topic => html`
           <li>
             <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}"></topic-list-item>
           </li>
-
         `)}
-      </ul>
+      </ul> --!>
 
 
-    <!--<ul class ="topic-list">
+    <ul class ="topic-list">
     ${topicList.map(topic => html`
       <li>
         <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}">
         </topic-list-item>
       </li>
     `)}
-    -->
     </ul>
     <br>
     <br>

@@ -51,7 +51,7 @@ export const template = self => function () {
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>
-    <h3>Crowd list</h3>
+    <!-- <h3>Crowd list</h3>
     <ul class = "crowd-link">
       ${users ? users.map(item => html`
       <li>
@@ -59,8 +59,6 @@ export const template = self => function () {
             <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=${i}">${i}</a>
         `) : ''}
       </li>`) : ''}
-    </ul>
-    <version-list></version-list>
-
+    </ul> --!>
   `;
 }.bind(self)();

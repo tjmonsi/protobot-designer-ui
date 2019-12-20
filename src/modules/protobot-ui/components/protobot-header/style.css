@@ -13,7 +13,7 @@
   z-index: 9999;
 }
 
-.header-inner{
+.header-inner {
   position: relative;
   display: flex;
   align-items: center;
@@ -25,6 +25,7 @@
 .header-inner > *{
   margin-right: 1em;
 }
+
 h1 {
   color: rgb(255, 245, 152);
   font-family: 'Josefin Sans', sans-serif;
@@ -93,7 +94,7 @@ ul.review-link > li.active.orange::after{
   background: rgb(255, 187, 0);
 }
 
-.header-item-group{
+.header-item-group {
   font-family: 'Open Sans', sans-serif;
 }
 

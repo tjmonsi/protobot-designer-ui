@@ -27768,11 +27768,11 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
               for (const set in userTopics[user]) {
                 for (const index in userTopics[user][set]) {
                   // console.log(userTopics[user][set][parseInt(index) + 1], index + 1)
-                  userTopics[user][set][index].sourceTopic = `${userTopics[user][set][index].topicId}::${index}`;
+                  userTopics[user][set][index].sourceTopic = `${userTopics[user][set][index].topicId}::${parseInt(index) === userTopics[user][set].length - 1 ? 'last' : index}`;
 
                   if (userTopics[user][set][parseInt(index) + 1]) {
                     userTopics[user][set][index].targetUtterance = userTopics[user][set][parseInt(index) + 1].utterances[0];
-                    userTopics[user][set][index].targetTopic = `${userTopics[user][set][parseInt(index) + 1].topicId}::${parseInt(index) + 1}`;
+                    userTopics[user][set][index].targetTopic = `${userTopics[user][set][parseInt(index) + 1].topicId}::${parseInt(index) + 1 === userTopics[user][set].length - 1 ? 'last' : parseInt(index) + 1}`;
                   }
                 }
               }

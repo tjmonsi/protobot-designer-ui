@@ -25,13 +25,13 @@ export const template = self => function () {
     <div class="tooltip" style="display: none" @click="${closeTooltip.bind(this)}">
     </div>
 
-    <div class="dashboard">
+    <!-- <div class="dashboard">
       <div class="no-label-utterance">
         <h3>Label topics below</h3>
       </div>
       <div class="new-topics">
         <h3>New topics</h3>
       </div>
-    </div>
+    </div> -->
   `;
 }.bind(self)();

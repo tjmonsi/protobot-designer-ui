@@ -10,8 +10,8 @@ h3 {
 }
 
 .sankey {
-  height: 70%;
-  /* overflow: auto; */
+  height: 100%;
+  overflow: auto;
 }
 
 .dashboard {

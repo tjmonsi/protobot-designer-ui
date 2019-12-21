@@ -27555,7 +27555,7 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
   };
 }, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
 
-var styles$s = "h1 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n  color: cornflowerblue;\n}\n\n.sankey {\n  height: 70%;\n  /* overflow: auto; */\n}\n\n.dashboard {\n  display: flex;\n  flex-direction: row;\n}\n\n.no-label-utterance {\n  height: 30%;\n  width: 50%;\n}\n\n.new-topics {\n  height: 30%;\n  width: 50%;\n}\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n\n.tooltip {\n  width: 300px;\n  height: 300px;\n  overflow: auto;\n  border: 1px solid black;\n  padding: 12px;\n}\n";
+var styles$s = "h1 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n  color: cornflowerblue;\n}\n\n.sankey {\n  height: 100%;\n  overflow: auto;\n}\n\n.dashboard {\n  display: flex;\n  flex-direction: row;\n}\n\n.no-label-utterance {\n  height: 30%;\n  width: 50%;\n}\n\n.new-topics {\n  height: 30%;\n  width: 50%;\n}\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n\n.tooltip {\n  width: 300px;\n  height: 300px;\n  overflow: auto;\n  border: 1px solid black;\n  padding: 12px;\n}\n";
 
 /**
  *
@@ -27582,14 +27582,14 @@ const template$e = self => function () {
     <div class="tooltip" style="display: none" @click="${closeTooltip.bind(this)}">
     </div>
 
-    <div class="dashboard">
+    <!-- <div class="dashboard">
       <div class="no-label-utterance">
         <h3>Label topics below</h3>
       </div>
       <div class="new-topics">
         <h3>New topics</h3>
       </div>
-    </div>
+    </div> -->
   `;
 }.bind(self)();
 

@@ -27555,7 +27555,7 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
   };
 }, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
 
-var styles$s = "h1 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n  color: cornflowerblue;\n}\n\n.sankey {\n  height: 70%;\n  /* overflow: auto; */\n}\n\n.dashboard {\n  display: flex;\n  flex-direction: row;\n}\n\n.no-label-utterance {\n  height: 30%;\n  width: 50%;\n}\n\n.new-topics {\n  height: 30%;\n  width: 50%;\n}\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n";
+var styles$s = "h1 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n  color: cornflowerblue;\n}\n\n.sankey {\n  height: 70%;\n  /* overflow: auto; */\n}\n\n.dashboard {\n  display: flex;\n  flex-direction: row;\n}\n\n.no-label-utterance {\n  height: 30%;\n  width: 50%;\n}\n\n.new-topics {\n  height: 30%;\n  width: 50%;\n}\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n\n.tooltip {\n  width: 300px;\n  height: 300px;\n  overflow: auto;\n  border: 1px solid black;\n  padding: 12px;\n}\n";
 
 /**
  *
@@ -27579,7 +27579,7 @@ const template$e = self => function () {
     <h1>Overview</h1>
     <br>
     <div class="sankey"></div>
-    <div class="tooltip" @click="${closeTooltip.bind(this)}">
+    <div class="tooltip" style="display: none" @click="${closeTooltip.bind(this)}">
     </div>
 
     <div class="dashboard">
@@ -27655,28 +27655,48 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             const uniqueUtterances = {};
             const uniqueTopic = {};
             const utteranceDictionary = {};
+            const userDictionary = {};
             const topicDictionary = {
               'No Topic': {
                 name: 'No Topic'
               }
             };
-            const rowItems = [];
             const upromises = [];
-            const tpromises = []; // const
+            const tpromises = [];
+            const u1promises = [];
+            const d1users = {};
+            const userUtterances = {};
+            const userTopics = {};
 
             for (const user in d1) {
-              // console.log(`users/lists/domain-utterances/${user}/${domainId}/`);
-              promises.push(database.ref(`users/lists/domain-utterances/${user}/${domainId}/`).once('value'));
-            } // TODO: ADD USER
-            // console.log(promises);
+              u1promises.push(database.ref(`users/data/${user}`).once('value'));
+            }
 
+            const u1results = await Promise.all(u1promises);
+
+            for (const snap of u1results) {
+              const data = snap.val();
+              const {
+                LastEndTime
+              } = data;
+              const user = snap.key;
+
+              if (LastEndTime) {
+                d1users[user] = true;
+                userDictionary[user] = data;
+              }
+            }
+
+            for (const user in d1users) {
+              promises.push(database.ref(`users/lists/domain-utterances/${user}/${domainId}/`).once('value'));
+            }
 
             const results = await Promise.all(promises);
 
             for (const snap of results) {
               const d2 = snap.val();
-              const userId = snap.ref.parent.key; // console.log('snap', parent)
-              // console.log(d2)
+              const userId = snap.ref.parent.key;
+              userUtterances[userId] = {};
 
               if (d2) {
                 for (const z in d2) {
@@ -27686,46 +27706,21 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
                     const arr = [];
 
                     for (const y in x) {
-                      arr[parseInt(x[y])] = y;
+                      arr.push({
+                        y,
+                        order: parseInt(x[y])
+                      });
                       uniqueUtterances[y] = true;
-                    } // console.log(arr)
+                    }
 
-
-                    for (const index in arr) {
-                      // console.log(arr[index], index, index + 1, arr.length);
-                      // @ts-ignore
-                      if (parseInt(index) + 1 < arr.length) {
-                        let flag = true;
-
-                        for (const i in rowItems) {
-                          if (rowItems[i].sourceUtterance === arr[index] && rowItems[i].targetUtterance === arr[parseInt(index) + 1]) {
-                            rowItems[i].users.push({
-                              userId,
-                              set: z
-                            });
-                            flag = false;
-                          }
-                        }
-
-                        if (flag) {
-                          const obj = {
-                            sourceUtterance: arr[index],
-                            targetUtterance: arr[parseInt(index) + 1],
-                            index,
-                            users: [{
-                              userId,
-                              set: z
-                            }]
-                          };
-                          rowItems.push(obj);
-                        }
-                      }
-                    } // console.log(x);
-
+                    const newArr = arr.sort((i, j) => i.order - j.order).map(i => i.y);
+                    userUtterances[userId][z] = newArr;
                   }
                 }
               }
             }
+
+            console.log(userUtterances);
 
             for (const utteranceId in uniqueUtterances) {
               upromises.push(database.ref(`utterances/data/${utteranceId}/`).once('value'));
@@ -27736,7 +27731,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             for (const usnap of uresults) {
               const d1 = usnap.val();
               const k1 = usnap.key;
-              utteranceDictionary[usnap.key] = d1;
+              utteranceDictionary[k1] = d1;
               let topic = 'No Topic';
 
               for (const t1 in d1.topics) {
@@ -27745,35 +27740,43 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
                 break;
               }
 
-              for (const index in rowItems) {
-                if (rowItems[index].sourceUtterance === k1) {
-                  rowItems[index].source = topic + `::${rowItems[index].index}`;
-                  rowItems[index].topic = topic;
-                }
+              utteranceDictionary[k1].topic = topic;
+            }
 
-                if (rowItems[index].targetUtterance === k1) {
-                  rowItems[index].target = topic + `::${parseInt(rowItems[index].index) + 1}`;
-                  rowItems[index].topicTarget = topic;
-                }
-              } // console.log(topic, k1);
+            for (const user in userUtterances) {
+              userTopics[user] = {};
 
-            } // for (const index in rowItems) {
-            //   while (rowItems[index].topic === rowItems[index].topicTarget) {
-            //     const index2 = rowItems.findIndex(item => item.source === rowItems[index].target && item.source !== rowItems[index].source);
-            //     if (index2 >= 0) {
-            //       rowItems[index].target = rowItems[index2].target;
-            //       rowItems[index].topicTarget = rowItems[index2].topicTarget;
-            //       // console.log(rowItems[index2], index2);
-            //       rowItems[index2].ignore = true;
-            //     } else {
-            //       rowItems[index].ignore = true;
-            //     }
-            //     if (index2 < 0) {
-            //       break;
-            //     }
-            //     // console.log(index, index2)
-            //   }
-            // }
+              for (const set in userUtterances[user]) {
+                userTopics[user][set] = [];
+
+                for (const utteranceId of userUtterances[user][set]) {
+                  const topicId = utteranceDictionary[utteranceId].topic; // console.log(userTopics[user][set][userTopics[user][set].length - 1], topicId);
+
+                  if (userTopics[user][set].length === 0 || userTopics[user][set][userTopics[user][set].length - 1].topicId !== topicId) {
+                    userTopics[user][set].push({
+                      topicId,
+                      utterances: [utteranceId]
+                    });
+                  } else {
+                    userTopics[user][set][userTopics[user][set].length - 1].utterances.push(utteranceId);
+                  }
+                }
+              }
+            }
+
+            for (const user in userTopics) {
+              for (const set in userTopics[user]) {
+                for (const index in userTopics[user][set]) {
+                  // console.log(userTopics[user][set][parseInt(index) + 1], index + 1)
+                  userTopics[user][set][index].sourceTopic = `${userTopics[user][set][index].topicId}::${index}`;
+
+                  if (userTopics[user][set][parseInt(index) + 1]) {
+                    userTopics[user][set][index].targetUtterance = userTopics[user][set][parseInt(index) + 1].utterances[0];
+                    userTopics[user][set][index].targetTopic = `${userTopics[user][set][parseInt(index) + 1].topicId}::${parseInt(index) + 1}`;
+                  }
+                }
+              }
+            } // console.log(userTopics);
 
 
             for (const topicId in uniqueTopic) {
@@ -27788,142 +27791,10 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
               topicDictionary[k1] = d1;
             }
 
-            console.log(rowItems);
-            let sourceIndex = 0;
-            let currentTopic = rowItems[sourceIndex].topic;
-
-            for (const index in rowItems) {
-              console.log(rowItems[index].topic, rowItems[index].topicTarget, currentTopic, index);
-
-              if (currentTopic === rowItems[index].topic) {
-                if (sourceIndex !== parseInt(index)) {
-                  rowItems[index].ignore = true;
-                  console.log(rowItems[index]);
-                }
-              } else {
-                rowItems[sourceIndex].target = rowItems[index].source;
-                rowItems[sourceIndex].topicTarget = rowItems[index].topic;
-                console.log(sourceIndex, rowItems[sourceIndex].sourceUtterance, rowItems[sourceIndex].target, rowItems[sourceIndex].topicTarget);
-                console.log(index, rowItems[index].sourceUtterance, rowItems[index].target, rowItems[index].topicTarget);
-                sourceIndex = parseInt(index);
-                currentTopic = rowItems[sourceIndex].topic;
-              }
-            }
-
-            this.setSankey(rowItems, utteranceDictionary, topicDictionary);
+            this.setSankey(userTopics, lastDeployedDomainVersion, utteranceDictionary, topicDictionary, userDictionary);
           }
-        } // console.log(domainId);
-        // const snap = await database.ref('tree-structure/data/').orderByChild('domain').equalTo(domainId)
-        //   // .limitToFirst(10)
-        //   .once('value');
-        // this.tree = snap.val() || null;
-        // this.treeChanged(this.tree);
-
-      } // treeChanged (tree) {
-      //   if (tree) {
-      //     console.log(this.tree);
-      //     // this.setSankey(this.tree);
-      //     // Load the charts library with a callback
-      //     // GoogleCharts.load(this.drawChart.bind(this, tree), {
-      //     //   packages: ['sankey']
-      //     // });
-      //     const newTree = {};
-      //     for (const i in this.tree) {
-      //       console.log(this.lastDeployedDomainVersion, this.tree[i].version)
-      //       if (this.lastDeployedDomainVersion === this.tree[i].version) {
-      //         newTree[i] = this.tree[i];
-      //       }
-      //     }
-      //     console.log('fjdkjkdsf', newTree)
-      //     this.drawChart(newTree);
-      //   }
-      // }
-      // async drawChart (tree) {
-      //   // const data = new GoogleCharts.api.visualization.DataTable();
-      //   // data.addColumn('string', 'From');
-      //   // data.addColumn('string', 'To');
-      //   // data.addColumn('number', 'Weight');
-      //   const rows = [];
-      //   const promises = [];
-      //   const topicMap = {};
-      //   const tpromises = [];
-      //   const utteranceTree = {};
-      //   const utteranceTopicMap = {};
-      //   const utteranceName = {};
-      //   if (tree) {
-      //     for (const i in tree) {
-      //       // console.log(tree[i])
-      //       const { utterances, parent } = tree[i];
-      //       for (const utteranceId in utterances) {
-      //         promises.push(database.ref(`utterances/data/${utteranceId}`).once('value'));
-      //       }
-      //       if (parent && tree[parent]) {
-      //         const { utterances: utteranceParent } = tree[parent];
-      //         for (const utteranceId in utteranceParent) {
-      //           if (!utteranceTree[utteranceId]) utteranceTree[utteranceId] = [];
-      //           for (const utteranceId2 in utterances) {
-      //             utteranceTree[utteranceId].push(utteranceId2);
-      //           }
-      //         }
-      //       }
-      //     }
-      //     const results = await Promise.all(promises);
-      //     for (const i in results) {
-      //       const utterance = { ...results[i].val(), utteranceId: results[i].key };
-      //       const { topics, utteranceId, text, userId, version } = utterance;
-      //       utteranceName[utteranceId] = { text, userId, version };
-      //       for (const topic in topics) {
-      //         utteranceTopicMap[utteranceId] = topic;
-      //         topicMap[topic] = true;
-      //         break;
-      //       }
-      //     }
-      //     for (const t in topicMap) {
-      //       tpromises.push(database.ref(`labels/data/${t}`).once('value'));
-      //     }
-      //     const tresults = await Promise.all(tpromises);
-      //     for (const tr in tresults) {
-      //       // console.log(tresults[tr].val(), tr);
-      //       const { name } = tresults[tr].val() || {};
-      //       topicMap[tresults[tr].key] = name;
-      //     }
-      //     const topicGraph = {};
-      //     for (const utteranceId in utteranceTree) {
-      //       const topic = utteranceTopicMap[utteranceId] || 'No Topic';
-      //       for (const u of utteranceTree[utteranceId]) {
-      //         const t = utteranceTopicMap[u] || 'No Topic';
-      //         if (topic !== t) {
-      //           topicGraph[topic] = topicGraph[topic] || {};
-      //           topicGraph[topic][t] = topicGraph[topic][t] || [];
-      //           topicGraph[topic][t].push(u);
-      //         }
-      //       }
-      //     }
-      //     for (const topic in topicGraph) {
-      //       for (const t in topicGraph[topic]) {
-      //         const row = [topicMap[topic] || 'No Topic', topicMap[t] || 'No Topic', topicGraph[topic][t]];
-      //         rows.push(row);
-      //       }
-      //     }
-      //     this.setSankey(rows, utteranceName);
-      //     // data.addRows(rows);
-      //     // const options = {
-      //     //   width: '100vw',
-      //     //   height: 500,
-      //     //   sankey: {
-      //     //     node: {
-      //     //       nodePadding: 30,
-      //     //       interactivity: true
-      //     //     }
-      //     //   }
-      //     // };
-      //     // if (this.chart) this.chart.clearChart();
-      //     // this.chart = new GoogleCharts.api.visualization.Sankey(this.shadowRoot.querySelector('.sankey'));
-      //     // this.chart.draw(data, options);
-      //     // GoogleCharts.api.visualization.events.addListener(this.chart, 'select', this.selectHandler.bind(this));
-      //   }
-      // }
-
+        }
+      }
     }, {
       kind: "method",
       key: "selectHandler",
@@ -27936,7 +27807,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
     }, {
       kind: "method",
       key: "setSankey",
-      value: function setSankey(rows, utteranceName, topicDictionary) {
+      value: function setSankey(userTopics, lastDeployedDomainVersion, utteranceDictionary, topicDictionary, userDictionary) {
         const graph = {
           nodes: [{
             name: 'No Topic',
@@ -27949,96 +27820,52 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           domainId
         } = this;
 
-        for (const rowindex in rows) {
-          const row = rows[rowindex];
-          let flag = true;
-          if (row.ignore) continue;
+        for (const user in userTopics) {
+          for (const set in userTopics[user]) {
+            for (const item of userTopics[user][set]) {
+              const target = item.targetTopic || 'End';
 
-          for (const i in graph.links) {
-            // @ts-ignore
-            if (graph.links[i].source === row.source && graph.links[i].target === row.target) {
-              flag = false; // @ts-ignore
+              if (graph.nodes.findIndex(obj => obj.name === item.sourceTopic) < 0) {
+                const obj = {
+                  name: item.sourceTopic,
+                  topic: item.topicId,
+                  userUtterance: {}
+                };
+                obj.userUtterance[target] = {};
+                obj.userUtterance[target][user] = {};
+                obj.userUtterance[target][user][set] = item.utterances; // @ts-ignore
 
-              graph.links[i].value++;
+                graph.nodes.push(obj);
+              } else {
+                const i = graph.nodes.findIndex(obj => obj.name === item.sourceTopic);
+                graph.nodes[i].userUtterance[target] = graph.nodes[i].userUtterance[target] || {};
+                graph.nodes[i].userUtterance[target][user] = graph.nodes[i].userUtterance[target][user] || {};
+                graph.nodes[i].userUtterance[target][user][set] = item.utterances;
+              }
+
+              if (item.targetTopic) {
+                // @ts-ignore
+                if (graph.links.findIndex(obj => obj.source === item.sourceTopic && obj.target === item.targetTopic) < 0) {
+                  const obj = {
+                    // @ts-ignore
+                    source: item.sourceTopic,
+                    // @ts-ignore
+                    target: item.targetTopic,
+                    // @ts-ignore
+                    value: 1
+                  }; // @ts-ignore
+
+                  graph.links.push(obj);
+                } else {
+                  // @ts-ignore
+                  const i = graph.links.findIndex(obj => obj.source === item.sourceTopic && obj.target === item.targetTopic); // @ts-ignore
+
+                  graph.links[i].value++;
+                }
+              }
             }
           }
-
-          if (flag) {
-            if (row.source !== row.target) {
-              // console.log(row.source, row.target)
-              graph.links.push({
-                // @ts-ignore
-                source: row.source || 'No Topic',
-                // @ts-ignore
-                target: row.target || 'No Topic',
-                // @ts-ignore
-                value: 1
-              });
-            }
-          }
-
-          const index = graph.nodes.findIndex(item => item.name === row.source);
-          const index2 = graph.nodes.findIndex(item => item.name === row.target);
-
-          if (index < 0 || index2 < 0) {
-            if (index < 0) {
-              graph.nodes.push({
-                name: row.source,
-                topic: row.topic,
-                title: topicDictionary[row.topic].name,
-                sourceUtterance: row.sourceUtterance,
-                index: rowindex,
-                utterances: []
-              });
-            } else {
-              graph.nodes[index].index = rowindex;
-            }
-
-            if (index2 < 0) {
-              // console.log(row.target)
-              graph.nodes.push({
-                name: row.target,
-                topic: row.topicTarget,
-                title: topicDictionary[row.topicTarget].name,
-                sourceUtterance: row.targetUtterance,
-                index: rowindex,
-                utterances: []
-              });
-            } else {
-              graph.nodes[index2].index = rowindex;
-            }
-          }
-        } // for (const row of rows) {
-        //   console.log(row)
-        //   // @ts-ignore
-        //   graph.links.push({ source: row[0] || 'No Topic', target: row[1] || 'No Topic', value: row[2].length });
-        //   // @ts-ignore
-        //   const index = graph.nodes.findIndex(item => item.name === row[0]);
-        //   const index2 = graph.nodes.findIndex(item => item.name === row[1]);
-        //   const array = [];
-        //   for (const u of row[2]) {
-        //     array.push(utteranceName[u]);
-        //   }
-        //   console.log(row[0], array, row[2]);
-        //   if (index < 0) {
-        //     const obj = { name: row[0], utterances: array };
-        //     // @ts-ignore
-        //     graph.nodes.push(obj);
-        //   } else {
-        //     // @ts-ignore
-        //     graph.nodes[index].utterances = [...graph.nodes[index].utterances, ...array];
-        //   }
-        //   if (index2 < 0) {
-        //     const obj = { name: row[1], utterances: [] };
-        //     // @ts-ignore
-        //     graph.nodes.push(obj);
-        //   } else {
-        //     // @ts-ignore
-        //     // graph.nodes[index2].utterances = [...graph.nodes[index2].utterances, ...array];
-        //     console.log('hey');
-        //   }
-        // }
-
+        }
 
         console.log(graph); // @ts-ignore
 
@@ -28085,7 +27912,6 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
             value: x.value
           };
         });
-        console.log(graph);
         sankey.nodes(graph.nodes).links(graph.links).layout(32); // console.log(graph)
 
         const tooltip = this.shadowRoot.querySelector('.tooltip'); // add in the links
@@ -28094,17 +27920,18 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           return Math.max(1, d.dy);
         }).sort(function (a, b) {
           return b.dy - a.dy;
-        }); // add the link titles
+        }).attr('toggle', 'False').on('mousedown', function (d) {
+          d.startDown = new Date();
+        }).on('mouseup', function (d) {
+          const up = new Date();
 
-        link.append('title').text(function (d) {
-          return d.source.name + ' → ' + d.target.name + '\n' + format(d.value);
-        }); // add in the nodes
+          if (up.getTime() - d.startDown.getTime() >= 500) {
+            return;
+          }
 
-        var node = svg.append('g').selectAll('.node').data(graph.nodes).enter().append('g').attr('class', 'node').attr('transform', function (d) {
-          return 'translate(' + d.x + ',' + d.y + ')';
-        }).on('mousedown', function (d) {
-          // console.log(this)
-          if (this.getAttribute('toggle') === 'False') {
+          const item = d.source.userUtterance[d.target.name]; // console.log(this)
+
+          if (this.getAttribute('toggle') === 'False' && item) {
             this.setAttribute('toggle', 'True');
             tooltip.style.display = null;
           } else {
@@ -28121,9 +27948,76 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
           tooltip.style.left = x + 'px';
           tooltip.style.background = 'white';
           tooltip.style.padding = '12px';
-          tooltip.innerHTML = d.utterances.map(item => `<a href="/?domain=${domainId}&page=${item.userId ? `micro&set=1&crowdId=${item.userId}` : 'authoring'}">${!item.userId ? 'Part of Authoring -' : ''}${item.text}</a>`).join('<br>'); //
-          // console.log(this);
-        }).attr('toggle', 'False').call(d3.behavior.drag().origin(function (d) {
+
+          if (item) {
+            const userArray = [];
+
+            for (const user in item) {
+              for (const set in item[user]) {
+                userArray.push({
+                  user,
+                  set,
+                  utterances: item[user][set]
+                });
+              }
+            }
+
+            console.log(userArray);
+            render(html`
+            <p style="font-weight: bold">${topicDictionary[d.source.topic].name} → ${topicDictionary[d.target.topic].name}</p>
+
+            <ul>
+              ${userArray.map(i => html`
+                <li style="padding-bottom: 12px;">
+                  <a href="/?page=micro&domain=${domainId}&crowdId=${i.user}&set=${i.set}&deployedVersion=${lastDeployedDomainVersion}">
+                    ${userDictionary[i.user].name} - Set ${i.set}: <ol>
+                      ${i.utterances.map(j => html`
+                        <li>
+                          ${utteranceDictionary[j].text}
+                        </li>
+                      `)}
+                    </ol>
+                  </a>
+                </li>
+              `)}
+            </ul>
+          `, tooltip);
+          }
+        }); // add the link titles
+
+        link.append('title').text(function (d) {
+          return d.source.name + ' → ' + d.target.name + '\n' + format(d.value);
+        }); // add in the nodes
+
+        var node = svg.append('g').selectAll('.node').data(graph.nodes).enter().append('g').attr('class', 'node').attr('transform', function (d) {
+          return 'translate(' + d.x + ',' + d.y + ')';
+        }) // .on('mousedown', function (d) {
+        //   d.startDown = new Date();
+        //   //
+        //   // console.log(this);
+        // })
+        // .on('mouseup', function (d) {
+        //   const up = new Date();
+        //   if (up.getTime() - d.startDown.getTime() >= 500) {
+        //     return;
+        //   }
+        //   // console.log(this)
+        //   if (this.getAttribute('toggle') === 'False') {
+        //     this.setAttribute('toggle', 'True');
+        //     tooltip.style.display = null;
+        //   } else {
+        //     this.setAttribute('toggle', 'False');
+        //     tooltip.style.display = 'none';
+        //   }
+        //   const { x, y } = this.getBoundingClientRect();
+        //   tooltip.style.position = 'absolute';
+        //   tooltip.style.top = y + 'px';
+        //   tooltip.style.left = x + 'px';
+        //   tooltip.style.background = 'white';
+        //   tooltip.style.padding = '12px';
+        //   // tooltip.innerHTML = 'Hi';
+        // })
+        .attr('toggle', 'False').call(d3.behavior.drag().origin(function (d) {
           return d;
         }).on('dragstart', function () {
           this.parentNode.appendChild(this);
@@ -28132,157 +28026,37 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
         node.append('rect').attr('height', function (d) {
           return d.dy;
         }).attr('width', sankey.nodeWidth()).style('fill', function (d) {
-          return d.name ? color(d.name.replace(/ .*/, '')) : 'red';
+          return d.topic ? color(d.topic.replace(/ .*/, '')) : 'red';
         }).style('stroke', function (d) {
           return d3.rgb(d.color).darker(2);
         }).append('title').text(function (d) {
           return d.name + '\n' + format(d.value);
         }); // add in the title for the nodes
 
-        const text = node.append('text').attr('x', -6).attr('y', function (d) {
+        node.append('text').attr('x', -6).attr('y', function (d) {
           return d.dy / 2;
         }).attr('dy', '.35em').attr('text-anchor', 'end').attr('transform', null).text(function (d) {
-          return `${d.index} ${d.sourceUtterance} ${topicDictionary[d.topic].name}`;
+          return `${topicDictionary[d.topic].name}`;
         }).filter(function (d) {
           return d.x < width / 2;
         }).attr('x', 6 + sankey.nodeWidth()).attr('text-anchor', 'start').attr('name', function (d) {
           return d.name;
-        }); // function dragobj
-
-        text.append('tspan').attr('x', -6).attr('y', function (d) {
-          return d.dy / 2;
-        }).attr('dy', '1.55em').attr('text-anchor', 'start').attr('x', 6 + sankey.nodeWidth()).text(function (d) {
-          return `${d.utterances.length} utterances`;
-        }); // the function for moving the nodes
+        }); // // function dragobj
+        // text.append('tspan')
+        //   .attr('x', -6)
+        //   .attr('y', function (d) { return d.dy / 2; })
+        //   .attr('dy', '1.55em')
+        //   .attr('text-anchor', 'start')
+        //   .attr('x', 6 + sankey.nodeWidth())
+        //   .text(function (d) { return `${d.utterances.length} utterances`; });
+        // the function for moving the nodes
 
         function dragmove(d) {
           d3.select(this).attr('transform', 'translate(' + (d.x = Math.max(0, Math.min(width - d.dx, d3.event.x))) + ',' + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ')');
           sankey.relayout();
           link.attr('d', path);
         }
-      } // async setSankey (tree) {
-      //   const margin = { top: 10, right: 10, bottom: 10, left: 10 };
-      //   const width = this.getBoundingClientRect().width - margin.left - margin.right;
-      //   const height = 480 - margin.top - margin.bottom;
-      //   const x = this.shadowRoot.querySelector('.sankey');
-      //   if (x) {
-      //     x.innerHTML = '';
-      //   }
-      //   const svg = d3.select(this.shadowRoot).select('.sankey').append('svg')
-      //     .attr('width', '100vw')
-      //     .attr('height', '100vh')
-      //     .append('g')
-      //     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-      //   const color = d3.scaleOrdinal([
-      //     '#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#e6550d',
-      //     '#fd8d3c', '#fdae6b', '#fdd0a2', '#31a354', '#74c476',
-      //     '#a1d99b', '#c7e9c0', '#756bb1', '#9e9ac8', '#bcbddc',
-      //     '#dadaeb', '#636363', '#969696', '#bdbdbd', '#d9d9d9']);
-      //   const sankey = d3sankey()
-      //     .nodeWidth(36)
-      //     // @ts-ignore
-      //     .nodePadding(290)
-      //     .size([this.getBoundingClientRect().width, this.getBoundingClientRect().height]);
-      //   const graph = await d3.json('https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_sankey.json');
-      //   // console.log(d3.json)
-      //   // console.log(graph);
-      //   const g = { nodes: [], links: [] };
-      //   let count = 0;
-      //   for (const i in tree) {
-      //     const node = {
-      //       node: count,
-      //       name: i
-      //     };
-      //     count++;
-      //     // @ts-ignore
-      //     g.nodes.push(node);
-      //   }
-      //   for (const i in tree) {
-      //     for (const j in tree[i].children) {
-      //       // @ts-ignore
-      //       const index = g.nodes.findIndex(item => item.name === i);
-      //       // @ts-ignore
-      //       const c = index > -1 ? g.nodes[index].node : null;
-      //       // @ts-ignore
-      //       const targetIndex = g.nodes.findIndex(item => item.name === j);
-      //       // @ts-ignore
-      //       const targetC = targetIndex > -1 ? g.nodes[targetIndex].node : null;
-      //       if (c && targetC) {
-      //         const link = {
-      //           source: c,
-      //           target: targetC,
-      //           value: Object.keys(tree[i].utterances).length
-      //         };
-      //         // @ts-ignore
-      //         g.links.push(link);
-      //       }
-      //     }
-      //   }
-      //   console.log(g)
-      //   // Constructs a new Sankey generator with the default settings.
-      //   sankey
-      //     .nodes(g.nodes)
-      //     .links(g.links)
-      //     .layout(1);
-      //   // add in the links
-      //   const link = svg.append('g')
-      //     .selectAll('.link')
-      //     .data(g.links)
-      //     .enter()
-      //     .append('path')
-      //     .attr('class', 'link')
-      //     .attr('d', sankey.link())
-      //     .style('stroke-width', function (d) { return Math.max(1, d.dy); })
-      //     .sort(function (a, b) { return b.dy - a.dy; });
-      //   // console.log(link);
-      //   // add in the nodes
-      //   const node = svg.append('g')
-      //     .selectAll('.node')
-      //     .data(g.nodes)
-      //     .enter().append('g')
-      //     .attr('class', 'node')
-      //     .attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; })
-      //     .call(d3.drag()
-      //       .subject(function (d) { return d; })
-      //       .on('start', function () { this.parentNode.appendChild(this); })
-      //       .on('drag', dragmove));
-      //   console.log(color);
-      //   // add the rectangles for the nodes
-      //   node
-      //     .append('rect')
-      //     .attr('height', function (d) { return d.dy; })
-      //     .attr('width', sankey.nodeWidth())
-      //     .style('fill', function (d) {
-      //       return color(d.name.replace(/ .*/, ''));
-      //     })
-      //     .style('stroke', function (d) { return d3.rgb(d.color).darker(2); })
-      //     // Add hover text
-      //     .append('title')
-      //     .text(function (d) { return d.name + '\n' + 'There is ' + d.value + ' stuff in this node'; });
-      //   // add in the title for the nodes
-      //   node
-      //     .append('text')
-      //     .attr('x', -6)
-      //     .attr('y', function (d) { return d.dy / 2; })
-      //     .attr('dy', '.35em')
-      //     .attr('text-anchor', 'end')
-      //     .attr('transform', null)
-      //     .text(function (d) { return d.name; })
-      //     .filter(function (d) { return d.x < width / 2; })
-      //     .attr('x', 6 + sankey.nodeWidth())
-      //     .attr('text-anchor', 'start');
-      //   // the function for moving the nodes
-      //   function dragmove (d) {
-      //     d3.select(this)
-      //       .attr('transform',
-      //         'translate(' +
-      //           d.x + ',' +
-      //           (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ')');
-      //     sankey.relayout();
-      //     link.attr('d', sankey.link());
-      //   }
-      // }
-
+      }
     }, {
       kind: "method",
       key: "render",

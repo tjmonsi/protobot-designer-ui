@@ -48,3 +48,11 @@ h3 {
 .link:hover {
   stroke-opacity: .5;
 }
+
+.tooltip {
+  width: 300px;
+  height: 300px;
+  overflow: auto;
+  border: 1px solid black;
+  padding: 12px;
+}

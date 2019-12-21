@@ -22,7 +22,7 @@ export const template = self => function () {
     <h1>Overview</h1>
     <br>
     <div class="sankey"></div>
-    <div class="tooltip" @click="${closeTooltip.bind(this)}">
+    <div class="tooltip" style="display: none" @click="${closeTooltip.bind(this)}">
     </div>
 
     <div class="dashboard">

@@ -30,7 +30,7 @@ export const template = self => function () {
       <p>In Macro Review, you can explore the whole conversation flows which are followed and prototyped by crowds.</p>
     </div>
 <br>
-    <h3>Existing Topic List</h3>
+
 
     <version-managable-list2
       .versions=${versionsDetail}
@@ -44,7 +44,7 @@ export const template = self => function () {
             <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}"></topic-list-item>
           </li>
         `)}
-      </ul> --!>
+      </ul>
 
 
     <ul class ="topic-list">
@@ -64,7 +64,7 @@ export const template = self => function () {
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>
-    <!-- <div class="button-container">
+    <div class="button-container">
       <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
         Done with Labeling
       </vaadin-button>

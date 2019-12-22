@@ -30,6 +30,8 @@ export const template = self => function () {
       @change-version=${changeVersion.bind(this)}
       ></version-managable-list2>
 
+      <h3>Existing Topic List</h3>
+
       <ul class ="topic-list">
         ${lastDeployedDomainTopicList.map(topic => html`
           <li>

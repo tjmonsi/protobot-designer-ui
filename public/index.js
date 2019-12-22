@@ -23560,12 +23560,14 @@ const template$2 = self => function () {
       <ul class = "review-link full-width">
         <!-- <li><a href="/?domain=${this.domainId}&page=micro">Micro Review</a></li> -->
         ${[['design-history', 'History'], // ['test', 'Test'],
-  ['macro', 'Review']].map(([page_name, page_label]) => html`<li class="${page == page_name && 'active blue'}"><a href="/?domain=${this.domainId}&page=${page_name}">${page_label}</a></li>`)}
+  // eslint-disable-next-line camelcase
+  ['macro', 'Review']].map(([page_name, page_label]) => // eslint-disable-next-line camelcase
+  html`<li class="${page === page_name && 'active blue'}"><a href="/?domain=${this.domainId}&page=${page_name}${this.queryObject && this.queryObject.deployedVersion ? `&deployedVersion=${this.queryObject.deployedVersion}` : ''}">${page_label}</a></li>`)}
         <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
       </ul>
 
       <ul class = "review-link">
-        <li class="${page == 'authoring' && 'active'} orange"><a href="/?domain=${this.domainId}&page=authoring">Draft</a></li>
+        <li class="${page === 'authoring' && 'active'} orange"><a href="/?domain=${this.domainId}&page=authoring">Draft</a></li>
       </ul>
     </div>
 
@@ -24199,14 +24201,16 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
 
 
         const {
-          domain
+          domain,
+          deployedVersion
         } = this.queryObject || {
-          domain: null
+          domain: null,
+          deployedVersion: null
         };
 
         if (domain) {
           this.domainId = domain;
-          this.getDomainName(domain);
+          this.getDomainName(domain, deployedVersion);
         }
       }
     }, {
@@ -24240,7 +24244,7 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
     }, {
       kind: "method",
       key: "getDomainName",
-      value: function getDomainName(id) {
+      value: function getDomainName(id, deployedVersion) {
         this.disconnectRef();
 
         if (id) {
@@ -24248,10 +24252,22 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
           this.domainVersionsRef.on('value', this.boundSaveDomainVersions);
           this.domainVersionsDetailRef = database.ref(`deployed-history/data/${id}`);
           this.domainVersionsDetailRef.on('value', this.boundSaveDomainVersionsDetail);
-          this.LatestDeployedDomainVersionRef = database.ref(`last-deployed/data/${id}/deployedVersion`);
-          this.LatestDeployedDomainVersionRef.on('value', this.boundSaveLatestDeployedDomainVersion);
-          this.LatestDeployedDomainRef = database.ref(`last-deployed/data/${id}`);
-          this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
+
+          if (deployedVersion) {
+            this.LatestDeployedDomainVersionRef = database.ref(`deployed-history/data/${id}/${deployedVersion}/deployedVersion`);
+            this.LatestDeployedDomainVersionRef.on('value', this.boundSaveLatestDeployedDomainVersion);
+            this.LatestDeployedDomainRef = database.ref(`deployed-history/data/${id}/${deployedVersion}`);
+            this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
+            this.LatestDeployedDomainRef = database.ref(`deployed-history/data/${id}/${deployedVersion}`);
+            this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
+          } else {
+            this.LatestDeployedDomainVersionRef = database.ref(`last-deployed/data/${id}/deployedVersion`);
+            this.LatestDeployedDomainVersionRef.on('value', this.boundSaveLatestDeployedDomainVersion);
+            this.LatestDeployedDomainRef = database.ref(`last-deployed/data/${id}`);
+            this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
+            this.LatestDeployedDomainRef = database.ref(`last-deployed/data/${id}`);
+            this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
+          }
         }
       }
     }, {
@@ -24278,7 +24294,7 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
       kind: "method",
       key: "saveLatestDeployedDomainVersion",
       value: function saveLatestDeployedDomainVersion(snap) {
-        const data = snap.val();
+        const data = snap.val(); // console.log(data);
 
         if (data) {
           this.lastDeployedDomainVersion = data;
@@ -24345,6 +24361,11 @@ const GetDomainVersionsMixin = base => _decorate(null, function (_initialize, _G
       key: "updateLatestDeployedDomainVersion",
       value: async function updateLatestDeployedDomainVersion(version) {
         this.lastDeployedDomainVersion = version;
+        window.history.pushState({
+          domain: this.queryObject.domain,
+          deployedVersion: version,
+          page: this.queryObject.page
+        }, '', `/?domain=${this.queryObject.domain}&page=${this.queryObject.page}&deployedVersion=${version}`);
         const snap = await database.ref(`deployed-history/data/${this.domainId}/${version}`).once('value');
         this.saveLatestDeployedDomain(snap);
       }
@@ -27295,6 +27316,7 @@ const template$d = self => function () {
     <!-- <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3> -->
     <!-- <h3>Crowd name: ${until(gettingCrowdId(crowdId))}</h3> -->
 
+    <a href="/?domain=${this.queryObject.domain}&page=macro&deployedVersion=${this.queryObject.deployedVersion}">Go back to Macro View</a>
 
     ${utterances && utterances.length ? utterances.map(item => html`
       <utterance-review-item .utteranceId="${item.id}"></utterance-review-item>
@@ -28154,10 +28176,11 @@ const template$g = self => function () {
   `;
 }.bind(self)();
 
+// Extend the LitElement base class
 // @ts-ignore
 
-let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')], function (_initialize, _GetDomainMixin) {
-  class ProtobotDesignHistory extends _GetDomainMixin {
+let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')], function (_initialize, _GetDomainVersionsMix) {
+  class ProtobotDesignHistory extends _GetDomainVersionsMix {
     constructor(...args) {
       super(...args);
 
@@ -28205,7 +28228,7 @@ let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')]
       }
     }]
   };
-}, GetDomainMixin(LitElement));
+}, GetDomainVersionsMixin(LitElement));
 
 var styles$v = "/* :host {\n  overflow-y: auto;\n} */\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\nversion-container {\n  display:flex;\n  flex-direction: row;\n  align-items:flex-end;\n\n}";
 
@@ -28226,16 +28249,15 @@ const template$h = self => function () {
     <style>
       ${styles$v}
     </style>
-    <!-- ${lastDeployedDomainVersion} --!>
     <div class="version-container">Version
-    <select class="select-box" placeholder="Topic" @change=${changeVersion}>
-        ${versions && Object.keys(versions).map(item => html`
-        <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
-        ${versions[item].versionNumber}
-        </option>`)}
+      <select class="select-box" placeholder="Topic" @change=${changeVersion}>
+          ${versions && Object.keys(versions).map(item => html`
+            <option value="${item}" ?selected="${lastDeployedDomainVersion === item}">
+              ${versions[item].versionNumber}
+            </option>`)}
+      </select>
     </div>
-    </select>
-
+    <a style="color: white" href="/?domain=${this.queryObject.domain}&page=${this.queryObject.page}">See latest version</a>
 
   `;
 }.bind(self)();
@@ -28342,7 +28364,7 @@ const template$i = self => function () {
       <p>In Macro Review, you can explore the whole conversation flows which are followed and prototyped by crowds.</p>
     </div>
 <br>
-    <h3>Existing Topic List</h3>
+
 
     <version-managable-list2
       .versions=${versionsDetail}
@@ -28356,7 +28378,7 @@ const template$i = self => function () {
             <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}"></topic-list-item>
           </li>
         `)}
-      </ul> --!>
+      </ul>
 
 
     <ul class ="topic-list">
@@ -28381,7 +28403,7 @@ const template$i = self => function () {
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>
-    <!-- <div class="button-container">
+    <div class="button-container">
       <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
         Done with Labeling
       </vaadin-button>
@@ -31340,6 +31362,8 @@ const template$m = self => function () {
       lastDeployedDomainVersion=${lastDeployedDomainVersion}
       @change-version=${changeVersion.bind(this)}
       ></version-managable-list2>
+
+      <h3>Existing Topic List</h3>
 
       <ul class ="topic-list">
         ${lastDeployedDomainTopicList.map(topic => html`

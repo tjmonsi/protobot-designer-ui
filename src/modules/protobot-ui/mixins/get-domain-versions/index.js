@@ -14,6 +14,7 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
 
   // @ts-ignore
   @property({ type: Array })
+  // eslint-disable-next-line camelcase
   versions_detail = [];
 
   // @ts-ignore
@@ -55,11 +56,11 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
     super.connectedCallback();
 
     // @ts-ignore
-    const { domain } = this.queryObject || { domain: null };
+    const { domain, deployedVersion } = this.queryObject || { domain: null, deployedVersion: null };
 
     if (domain) {
       this.domainId = domain;
-      this.getDomainName(domain);
+      this.getDomainName(domain, deployedVersion);
     }
   }
 
@@ -86,7 +87,7 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
    *
    * @param {String} id
    */
-  getDomainName (id) {
+  getDomainName (id, deployedVersion) {
     this.disconnectRef();
 
     if (id) {
@@ -96,11 +97,25 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
       this.domainVersionsDetailRef = database.ref(`deployed-history/data/${id}`);
       this.domainVersionsDetailRef.on('value', this.boundSaveDomainVersionsDetail);
 
-      this.LatestDeployedDomainVersionRef = database.ref(`last-deployed/data/${id}/deployedVersion`);
-      this.LatestDeployedDomainVersionRef.on('value', this.boundSaveLatestDeployedDomainVersion);
+      if (deployedVersion) {
+        this.LatestDeployedDomainVersionRef = database.ref(`deployed-history/data/${id}/${deployedVersion}/deployedVersion`);
+        this.LatestDeployedDomainVersionRef.on('value', this.boundSaveLatestDeployedDomainVersion);
 
-      this.LatestDeployedDomainRef = database.ref(`last-deployed/data/${id}`);
-      this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
+        this.LatestDeployedDomainRef = database.ref(`deployed-history/data/${id}/${deployedVersion}`);
+        this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
+
+        this.LatestDeployedDomainRef = database.ref(`deployed-history/data/${id}/${deployedVersion}`);
+        this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
+      } else {
+        this.LatestDeployedDomainVersionRef = database.ref(`last-deployed/data/${id}/deployedVersion`);
+        this.LatestDeployedDomainVersionRef.on('value', this.boundSaveLatestDeployedDomainVersion);
+
+        this.LatestDeployedDomainRef = database.ref(`last-deployed/data/${id}`);
+        this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
+
+        this.LatestDeployedDomainRef = database.ref(`last-deployed/data/${id}`);
+        this.LatestDeployedDomainRef.on('value', this.boundSaveLatestDeployedDomain);
+      }
     }
   }
 
@@ -120,6 +135,7 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
 
   saveLatestDeployedDomainVersion (snap) {
     const data = snap.val();
+    // console.log(data);
     if (data) {
       this.lastDeployedDomainVersion = data;
     }
@@ -157,6 +173,8 @@ export const GetDomainVersionsMixin = (base) => (class extends GetPathMixin(base
 
   async updateLatestDeployedDomainVersion (version) {
     this.lastDeployedDomainVersion = version;
+
+    window.history.pushState({ domain: this.queryObject.domain, deployedVersion: version, page: this.queryObject.page }, '', `/?domain=${this.queryObject.domain}&page=${this.queryObject.page}&deployedVersion=${version}`);
     const snap = await database.ref(`deployed-history/data/${this.domainId}/${version}`).once('value');
     this.saveLatestDeployedDomain(snap);
   }

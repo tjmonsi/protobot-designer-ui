@@ -37,7 +37,8 @@ h3 {
 }
 
 .left-side-text {
-  font-size: 14px;
+  font-size: 12px;
+  width: 100px;
   font-family: 'Open Sans', sans-serif;
 }
 
@@ -96,6 +97,10 @@ ul.review-link > li.active.orange::after{
 
 .header-item-group {
   font-family: 'Open Sans', sans-serif;
+  font-size: 12px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
 }
 
 .crowd-link {

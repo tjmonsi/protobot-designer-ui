@@ -31,6 +31,7 @@ export const template = self => function () {
     <!-- <h3>Crowd name: ${this.gettingCrowdId(this.crowdId)}</h3> -->
     <!-- <h3>Crowd name: ${until(gettingCrowdId(crowdId))}</h3> -->
 
+    <a href="/?domain=${this.queryObject.domain}&page=macro&deployedVersion=${this.queryObject.deployedVersion}">Go back to Macro View</a>
 
     ${utterances && utterances.length ? utterances.map(item => html`
       <utterance-review-item .utteranceId="${item.id}"></utterance-review-item>

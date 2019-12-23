@@ -29,14 +29,16 @@ export const template = self => function () {
         ${[
           ['design-history', 'History'],
           // ['test', 'Test'],
+          // eslint-disable-next-line camelcase
           ['macro', 'Review']].map(([page_name, page_label]) => (
-          html`<li class="${page == page_name && 'active blue'}"><a href="/?domain=${this.domainId}&page=${page_name}">${page_label}</a></li>`
+          // eslint-disable-next-line camelcase
+          html`<li class="${page === page_name && 'active blue'}"><a href="/?domain=${this.domainId}&page=${page_name}${this.queryObject && this.queryObject.deployedVersion ? `&deployedVersion=${this.queryObject.deployedVersion}` : ''}">${page_label}</a></li>`
         ))}
         <!-- <li><a href="/?domain=${this.domainId}&page=history">History review</a></li> -->
       </ul>
 
       <ul class = "review-link">
-        <li class="${page == 'authoring' && 'active'} orange"><a href="/?domain=${this.domainId}&page=authoring">Draft</a></li>
+        <li class="${page === 'authoring' && 'active'} orange"><a href="/?domain=${this.domainId}&page=authoring">Draft</a></li>
       </ul>
     </div>
 

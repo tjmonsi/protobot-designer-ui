@@ -18,7 +18,7 @@ class VersionList extends GetDomainVersionsMixin(LitElement) {
   }
 
   async changeVersion ({ target }) {
-    const {value: id} = target
+    const { value: id } = target;
     // const updates = {};
     // const snap = await database.ref(`deployed-history/data/${this.domainId}/${id}/`).once('value');
     // const obj = snap.val();
@@ -28,7 +28,7 @@ class VersionList extends GetDomainVersionsMixin(LitElement) {
     //   // window.location.reload();
     // }
 
-    super.updateLatestDeployedDomainVersion(id)
+    super.updateLatestDeployedDomainVersion(id);
     // this.lastDeployedDomainVersion = id
   }
 

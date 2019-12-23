@@ -4,7 +4,6 @@ import { until } from 'lit-html/directives/until';
 import styles from './style.css';
 import 'weightless/button';
 
-
 import '../conversational-flow-utterance';
 /**
  *
@@ -19,16 +18,16 @@ export const template = self => function () {
     <style>
       ${styles}
     </style>
-    <!-- ${lastDeployedDomainVersion} --!>
     <div class="version-container">Version
-    <select class="select-box" placeholder="Topic" @change=${changeVersion}>
-        ${versions && Object.keys(versions).map(item => html`
-        <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
-        ${versions[item].versionNumber}
-        </option>`)}
+      <select class="select-box" placeholder="Topic" @change=${changeVersion}>
+          ${versions && Object.keys(versions).map(item => html`
+            <option value="${item}" ?selected="${lastDeployedDomainVersion === item}">
+              ${versions[item].versionNumber}
+            </option>`)
+          }
+      </select>
     </div>
-    </select>
-
+    <a style="color: white" href="/?domain=${this.queryObject.domain}&page=${this.queryObject.page}">See latest version</a>
 
   `;
 }.bind(self)();

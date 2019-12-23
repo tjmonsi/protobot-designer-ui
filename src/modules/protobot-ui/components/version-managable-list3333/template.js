@@ -21,16 +21,14 @@ export const template = self => function () {
     </style>
     <select class="select-box" placeholder="Topic" @change=${changeVersion}>
       ${versions && versions.map(item => html`
-      <option value="${item}" ?selected="${lastDeployedDomainVersion == item}">
+      <option value="${item}" ?selected="${lastDeployedDomainVersion === item}">
       ${until(gettingDomainVersion(item, this.domainId), 'Loading...')}
       </option>`)}
-
     </select>
 
 
   `;
 }.bind(self)();
-
 
 /*
 ${versions && versions.map(item => {

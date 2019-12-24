@@ -27064,7 +27064,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
 
 var styles$q = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n.empty-bottom {\n    height: 30px;\n    width:100%\n}\n\n";
 
-var styles$r = ".feed{\n  display:flex;\n  margin-left:200px;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n  margin-right:200px;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n\n.utterance {\n  font-family: 'Open sans', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n.utterance.utterance__right.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}\n\n";
+var styles$r = ".feed{\n  display:flex;\n  margin-left:600px;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n  margin-right:600px;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n\n.utterance {\n  font-family: 'Open sans', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n.utterance.utterance__right.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}\n\n";
 
 // import '@polymer/paper-item/paper-item.js';
 // import '@polymer/paper-listbox/paper-listbox.js';
@@ -28390,7 +28390,7 @@ const template$i = self => function () {
     `)}
     </ul>
     <br>
-    <br>
+    <br> -->
     <h3>Add Message</h3>
     ${memos.map(({
     page,
@@ -28403,7 +28403,7 @@ const template$i = self => function () {
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>
-    <div class="button-container">
+    <!-- <div class="button-container">
       <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
         Done with Labeling
       </vaadin-button>
@@ -28648,7 +28648,7 @@ const template$j = self => function () {
             <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=${i}">${i}</a>
         `) : ''}
       </li>`) : ''}
-    </ul> --!>
+    </ul> -->
   `;
 }.bind(self)();
 

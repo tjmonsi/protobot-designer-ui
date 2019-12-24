@@ -11,7 +11,7 @@ import styles from './style.css';
  */
 export const template = self => function () {
   // @ts-ignore
-  const { topicList, save, addMemo, memos, domain, versionsDetail, changeVersion, lastDeployedDomainVersion, lastDeployedDomainTopicList, } = this;
+  const { topicList, save, addMemo, memos, domain, versionsDetail, changeVersion, lastDeployedDomainVersion, lastDeployedDomainTopicList } = this;
   const { deployedVersion: dv } = domain || { deployedVersion: null };
   const { page: pageId, crowdId: crowd } = this.queryObject || { page: null };
 
@@ -56,7 +56,7 @@ export const template = self => function () {
     `)}
     </ul>
     <br>
-    <br>
+    <br> -->
     <h3>Add Message</h3>
     ${memos.map(({ page, crowdId, memoId, deployedVersion }) => page === pageId && crowdId === crowd ? html`
       <protobot-memo .memoId="${memoId}"></protobot-memo>
@@ -64,7 +64,7 @@ export const template = self => function () {
     <div class="add-container">
       <button class="add-button" @click="${addMemo.bind(this)}">+</button>
     </div>
-    <div class="button-container">
+    <!-- <div class="button-container">
       <vaadin-button class="button-save" type="button" @click="${save.bind(this)}">
         Done with Labeling
       </vaadin-button>

@@ -59,6 +59,6 @@ export const template = self => function () {
             <a href="/?domain=${this.domainId}&page=micro&crowdId=${item.user}&set=${i}">${i}</a>
         `) : ''}
       </li>`) : ''}
-    </ul> --!>
+    </ul> -->
   `;
 }.bind(self)();

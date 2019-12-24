@@ -1,11 +1,11 @@
 .feed{
   display:flex;
-  margin-left:200px;
+  margin-left:600px;
 }
 
 .feed.feed__right{
   flex-direction: row-reverse;
-  margin-right:200px;
+  margin-right:600px;
 }
 
 .label{

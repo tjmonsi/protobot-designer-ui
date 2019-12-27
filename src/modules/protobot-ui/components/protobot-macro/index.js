@@ -38,8 +38,39 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
     console.log('start', domainId, lastDeployedDomainVersion);
     if (lastDeployedDomainVersion) {
       const s1 = await database.ref(`users/lists/domains/${domainId}/${lastDeployedDomainVersion}`).once('value');
-      const d1 = s1.val();
+      let d1 = s1.val();
 
+      if (!d1){
+        // TJ HELP US
+        let all_utterances = (await database.ref(`utterances/data/`).once('value')).val()
+        const all_users = (await database.ref(`users/data/`).once('value')).val()
+        all_utterances = Object.entries(all_utterances)
+        const filtered_utterences = all_utterances
+          .filter(([utteranceId, utterenceObj]) => utterenceObj.version == lastDeployedDomainVersion)
+          .map(([utterenceId, utterenceObj]) => {
+            return utterenceObj.userId
+          })
+        const filtered_userId = [...new Set(filtered_utterences)];
+
+        const last_filtered_userId = Object.entries(all_users).filter(([userId, activityObj]) => {
+          return filtered_userId.includes(userId) && activityObj.LastEndTime !== undefined
+        }).map(([userId, activityObj]) => userId)
+
+
+        const current_version = (await database.ref(`deployed-history/data/${domainId}/${lastDeployedDomainVersion}`).once('value')).val();
+        const {parameters: {numSession}}  = current_version
+
+        d1 = {}
+
+        for (const userId of last_filtered_userId){
+          let trash = {}
+          for (let i=0; i<numSession; i++){
+            trash[i+1] = true
+          }
+          d1[userId] = trash
+        }
+      }
+      console.log('Am I ready?', d1)
       if (d1) {
         // console.log(d1);
         const promises = [];
@@ -167,6 +198,8 @@ class ProtobotMacro extends GetDomainUsersMixin(LitElement) {
         }
 
         this.setSankey(userTopics, lastDeployedDomainVersion, utteranceDictionary, topicDictionary, userDictionary);
+      } else {
+
       }
     }
   }

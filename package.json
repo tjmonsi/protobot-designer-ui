@@ -107,6 +107,7 @@
     ]
   },
   "dependencies": {
+    "@material/mwc-textarea": "^0.13.0",
     "@polymer/paper-dropdown-menu": "^3.0.1",
     "@vaadin/vaadin": "^14.0.10",
     "d3": "^5.12.0",

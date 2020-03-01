@@ -2,13 +2,16 @@ import { html } from 'lit-element';
 // @ts-ignore
 import styles from './style.css';
 // import 'weightless/button';
+import '../protobot-draft-topic';
+import '../protobot-draft-utterance';
+
 /**
  *
  * @param {any} self
  */
 
 export const template = self => function () {
-  const { topicUtterance } = this;
+  // const { topicUtterance } = this;
 
   return html`
     <style>
@@ -17,9 +20,11 @@ export const template = self => function () {
 
     </style>
 
-    <!-- <textarea class="topic-utterance" value="${topicUtterance}" @change="${saveTopic.bind(this)}"><textarea> -->
-    <textarea class="topic-utterance" value="${topicUtterance}"><textarea>
+    <div class = "topic-utterance-set">
+      <protobot-draft-topic></protobot-draft-topic>
+      <protobot-draft-utterance></protobot-draft-utterance>
+    </div>
 
-    <br>
+
   `;
 }.bind(self)();

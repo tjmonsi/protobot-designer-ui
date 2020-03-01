@@ -1,0 +1,9 @@
+.topic-input {
+  margin: 10px;
+  width: 300px;
+  height: 100px;
+  background: rgb(49, 63, 102);
+  --mdc-theme-primary	: rgb(49, 63, 102);
+  color: white;
+  --mdc-text-field-ink-color: #ffffff;
+}

@@ -1,0 +1,11 @@
+:host{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 20px;
+}
+
+.topic-utterance-set {
+  display:flex;
+  flex-direction: row;
+}

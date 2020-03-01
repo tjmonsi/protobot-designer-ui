@@ -3085,6 +3085,54 @@ const standardQuery = (descriptor, element) => ({
   descriptor
 });
 
+const standardEventOptions = (options, element) => {
+  return Object.assign({}, element, {
+    finisher(clazz) {
+      Object.assign(clazz.prototype[element.key], options);
+    }
+
+  });
+};
+
+const legacyEventOptions = // tslint:disable-next-line:no-any legacy decorator
+(options, proto, name) => {
+  Object.assign(proto[name], options);
+};
+/**
+ * Adds event listener options to a method used as an event listener in a
+ * lit-html template.
+ *
+ * @param options An object that specifis event listener options as accepted by
+ * `EventTarget#addEventListener` and `EventTarget#removeEventListener`.
+ *
+ * Current browsers support the `capture`, `passive`, and `once` options. See:
+ * https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener#Parameters
+ *
+ * @example
+ *
+ *     class MyElement {
+ *
+ *       clicked = false;
+ *
+ *       render() {
+ *         return html`<div @click=${this._onClick}`><button></button></div>`;
+ *       }
+ *
+ *       @eventOptions({capture: true})
+ *       _onClick(e) {
+ *         this.clicked = true;
+ *       }
+ *     }
+ */
+
+
+const eventOptions = options => // Return value typed as any to prevent TypeScript from complaining that
+// standard decorator function signature does not match TypeScript decorator
+// signature
+// TODO(kschaaf): unclear why it was only failing on this decorator and not
+// the others
+(protoOrDescriptor, name) => name !== undefined ? legacyEventOptions(options, protoOrDescriptor, name) : standardEventOptions(options, protoOrDescriptor);
+
 /**
 @license
 Copyright (c) 2019 The Polymer Project Authors. All rights reserved.
@@ -3139,6 +3187,29 @@ class CSSResult {
 
 const unsafeCSS = value => {
   return new CSSResult(String(value), constructionToken);
+};
+
+const textFromCSSResult = value => {
+  if (value instanceof CSSResult) {
+    return value.cssText;
+  } else if (typeof value === 'number') {
+    return value;
+  } else {
+    throw new Error(`Value passed to 'css' function must be a 'css' function result: ${value}. Use 'unsafeCSS' to pass non-literal values, but
+            take care to ensure page security.`);
+  }
+};
+/**
+ * Template tag which which can be used with LitElement's `style` property to
+ * set element styles. For security reasons, only literal string values may be
+ * used. To incorporate non-literal values `unsafeCSS` may be used inside a
+ * template string part.
+ */
+
+
+const css = (strings, ...values) => {
+  const cssText = values.reduce((acc, v, idx) => acc + textFromCSSResult(v) + strings[idx + 1], strings[0]);
+  return new CSSResult(cssText, constructionToken);
 };
 
 /**
@@ -25183,7 +25254,2329 @@ let ProtobotAuthoring = _decorate([customElement('protobot-authoring')], functio
   };
 }, GetDomainMixin(LitElement));
 
-var styles$l = "/* :host{\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  padding: 5em 0;\n} */\n\n:host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 1fr 3fr;\n}\n\n.authoring-left {\n  background-color: rgb(240, 240, 240);\n  display: flex;\n  align-items: left;\n  flex-direction: column;\n  padding: 1em;\n  margin-right: 1em;\n}\n\n.topic-button {\n  margin:10px;\n}\n\n.sub-button {\n  margin:10px;\n}\n\n.authoring-center {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  padding: 5em 0;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n  font-weight: bold;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
+var styles$l = ":host{\n  display: flex;\n  justify-content: center;\n  width: 100%;\n  margin: 20px;\n}\n\n.topic-utterance-set {\n  display:flex;\n  flex-direction: row;\n}\n";
+
+var styles$m = ".topic-input {\n  margin: 10px;\n  width: 300px;\n  height: 100px;\n  background: rgb(49, 63, 102);\n  --mdc-theme-primary\t: rgb(49, 63, 102);\n  color: white;\n  --mdc-text-field-ink-color: #ffffff;\n}";
+
+/**
+@license
+Copyright 2018 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+function addHasRemoveClass(element) {
+  return {
+    addClass: className => {
+      element.classList.add(className);
+    },
+    removeClass: className => {
+      element.classList.remove(className);
+    },
+    hasClass: className => element.classList.contains(className)
+  };
+}
+
+const fn = () => {};
+
+const optionsBlock = {
+  get passive() {
+    return false;
+  }
+
+};
+document.addEventListener('x', fn, optionsBlock);
+document.removeEventListener('x', fn);
+
+/**
+@license
+Copyright 2018 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+class BaseElement extends LitElement {
+  /**
+   * Create and attach the MDC Foundation to the instance
+   */
+  createFoundation() {
+    if (this.mdcFoundation !== undefined) {
+      this.mdcFoundation.destroy();
+    }
+
+    this.mdcFoundation = new this.mdcFoundationClass(this.createAdapter());
+    this.mdcFoundation.init();
+  }
+
+  firstUpdated() {
+    this.createFoundation();
+  }
+
+}
+
+/**
+@license
+Copyright 2018 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+class FormElement extends BaseElement {
+  createRenderRoot() {
+    return this.attachShadow({
+      mode: 'open',
+      delegatesFocus: true
+    });
+  }
+
+  click() {
+    if (this.formElement) {
+      this.formElement.focus();
+      this.formElement.click();
+    }
+  }
+
+  setAriaLabel(label) {
+    if (this.formElement) {
+      this.formElement.setAttribute('aria-label', label);
+    }
+  }
+
+  firstUpdated() {
+    super.firstUpdated();
+    this.mdcRoot.addEventListener('change', e => {
+      this.dispatchEvent(new Event('change', e));
+    });
+  }
+
+}
+
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+var MDCFoundation =
+/** @class */
+function () {
+  function MDCFoundation(adapter) {
+    if (adapter === void 0) {
+      adapter = {};
+    }
+
+    this.adapter_ = adapter;
+  }
+
+  Object.defineProperty(MDCFoundation, "cssClasses", {
+    get: function () {
+      // Classes extending MDCFoundation should implement this method to return an object which exports every
+      // CSS class the foundation class needs as a property. e.g. {ACTIVE: 'mdc-component--active'}
+      return {};
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCFoundation, "strings", {
+    get: function () {
+      // Classes extending MDCFoundation should implement this method to return an object which exports all
+      // semantic strings as constants. e.g. {ARIA_ROLE: 'tablist'}
+      return {};
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCFoundation, "numbers", {
+    get: function () {
+      // Classes extending MDCFoundation should implement this method to return an object which exports all
+      // of its semantic numbers as constants. e.g. {ANIMATION_DELAY_MS: 350}
+      return {};
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCFoundation, "defaultAdapter", {
+    get: function () {
+      // Classes extending MDCFoundation may choose to implement this getter in order to provide a convenient
+      // way of viewing the necessary methods of an adapter. In the future, this could also be used for adapter
+      // validation.
+      return {};
+    },
+    enumerable: true,
+    configurable: true
+  });
+
+  MDCFoundation.prototype.init = function () {// Subclasses should override this method to perform initialization routines (registering events, etc.)
+  };
+
+  MDCFoundation.prototype.destroy = function () {// Subclasses should override this method to perform de-initialization routines (de-registering events, etc.)
+  };
+
+  return MDCFoundation;
+}();
+
+/**
+ * @license
+ * Copyright 2018 Google Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+var strings = {
+  NOTCH_ELEMENT_SELECTOR: '.mdc-notched-outline__notch'
+};
+var numbers = {
+  // This should stay in sync with $mdc-notched-outline-padding * 2.
+  NOTCH_ELEMENT_PADDING: 8
+};
+var cssClasses = {
+  NO_LABEL: 'mdc-notched-outline--no-label',
+  OUTLINE_NOTCHED: 'mdc-notched-outline--notched',
+  OUTLINE_UPGRADED: 'mdc-notched-outline--upgraded'
+};
+
+/**
+ * @license
+ * Copyright 2017 Google Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+var MDCNotchedOutlineFoundation =
+/** @class */
+function (_super) {
+  __extends(MDCNotchedOutlineFoundation, _super);
+
+  function MDCNotchedOutlineFoundation(adapter) {
+    return _super.call(this, __assign({}, MDCNotchedOutlineFoundation.defaultAdapter, adapter)) || this;
+  }
+
+  Object.defineProperty(MDCNotchedOutlineFoundation, "strings", {
+    get: function () {
+      return strings;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCNotchedOutlineFoundation, "cssClasses", {
+    get: function () {
+      return cssClasses;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCNotchedOutlineFoundation, "numbers", {
+    get: function () {
+      return numbers;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCNotchedOutlineFoundation, "defaultAdapter", {
+    /**
+     * See {@link MDCNotchedOutlineAdapter} for typing information on parameters and return types.
+     */
+    get: function () {
+      // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+      return {
+        addClass: function () {
+          return undefined;
+        },
+        removeClass: function () {
+          return undefined;
+        },
+        setNotchWidthProperty: function () {
+          return undefined;
+        },
+        removeNotchWidthProperty: function () {
+          return undefined;
+        }
+      }; // tslint:enable:object-literal-sort-keys
+    },
+    enumerable: true,
+    configurable: true
+  });
+  /**
+   * Adds the outline notched selector and updates the notch width calculated based off of notchWidth.
+   */
+
+  MDCNotchedOutlineFoundation.prototype.notch = function (notchWidth) {
+    var OUTLINE_NOTCHED = MDCNotchedOutlineFoundation.cssClasses.OUTLINE_NOTCHED;
+
+    if (notchWidth > 0) {
+      notchWidth += numbers.NOTCH_ELEMENT_PADDING; // Add padding from left/right.
+    }
+
+    this.adapter_.setNotchWidthProperty(notchWidth);
+    this.adapter_.addClass(OUTLINE_NOTCHED);
+  };
+  /**
+   * Removes notched outline selector to close the notch in the outline.
+   */
+
+
+  MDCNotchedOutlineFoundation.prototype.closeNotch = function () {
+    var OUTLINE_NOTCHED = MDCNotchedOutlineFoundation.cssClasses.OUTLINE_NOTCHED;
+    this.adapter_.removeClass(OUTLINE_NOTCHED);
+    this.adapter_.removeNotchWidthProperty();
+  };
+
+  return MDCNotchedOutlineFoundation;
+}(MDCFoundation);
+
+class NotchedOutlineBase extends BaseElement {
+  constructor() {
+    super(...arguments);
+    this.mdcFoundationClass = MDCNotchedOutlineFoundation;
+    this.width = 0;
+    this.open = false;
+    this.lastOpen = this.open;
+  }
+
+  createAdapter() {
+    return {
+      addClass: className => this.mdcRoot.classList.add(className),
+      removeClass: className => this.mdcRoot.classList.remove(className),
+      setNotchWidthProperty: width => this.notchElement.style.setProperty('width', `${width}px`),
+      removeNotchWidthProperty: () => this.notchElement.style.removeProperty('width')
+    };
+  }
+
+  openOrClose(shouldOpen, width) {
+    if (!this.mdcFoundation) {
+      return;
+    }
+
+    if (shouldOpen && width !== undefined) {
+      this.mdcFoundation.notch(width);
+    } else {
+      this.mdcFoundation.closeNotch();
+    }
+  }
+
+  render() {
+    this.openOrClose(this.open, this.width);
+    return html`
+      <div class="mdc-notched-outline">
+        <div class="mdc-notched-outline__leading"></div>
+        <div class="mdc-notched-outline__notch">
+          <slot></slot>
+        </div>
+        <div class="mdc-notched-outline__trailing"></div>
+      </div>`;
+  }
+
+}
+
+__decorate([query('.mdc-notched-outline')], NotchedOutlineBase.prototype, "mdcRoot", void 0);
+
+__decorate([property({
+  type: Number
+})], NotchedOutlineBase.prototype, "width", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+})], NotchedOutlineBase.prototype, "open", void 0);
+
+__decorate([query('.mdc-notched-outline__notch')], NotchedOutlineBase.prototype, "notchElement", void 0);
+
+/**
+@license
+Copyright 2018 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+const style = css`.mdc-notched-outline{display:flex;position:absolute;right:0;left:0;box-sizing:border-box;width:100%;max-width:100%;height:100%;text-align:left;pointer-events:none}[dir=rtl] .mdc-notched-outline,.mdc-notched-outline[dir=rtl]{text-align:right}.mdc-notched-outline__leading,.mdc-notched-outline__notch,.mdc-notched-outline__trailing{box-sizing:border-box;height:100%;border-top:1px solid;border-bottom:1px solid;pointer-events:none}.mdc-notched-outline__leading{border-left:1px solid;border-right:none;width:12px}[dir=rtl] .mdc-notched-outline__leading,.mdc-notched-outline__leading[dir=rtl]{border-left:none;border-right:1px solid}.mdc-notched-outline__trailing{border-left:none;border-right:1px solid;flex-grow:1}[dir=rtl] .mdc-notched-outline__trailing,.mdc-notched-outline__trailing[dir=rtl]{border-left:1px solid;border-right:none}.mdc-notched-outline__notch{flex:0 0 auto;width:auto;max-width:calc(100% - 12px * 2)}.mdc-notched-outline .mdc-floating-label{display:inline-block;position:relative;max-width:100%}.mdc-notched-outline .mdc-floating-label--float-above{text-overflow:clip}.mdc-notched-outline--upgraded .mdc-floating-label--float-above{max-width:calc(100% / .75)}.mdc-notched-outline--notched .mdc-notched-outline__notch{padding-left:0;padding-right:8px;border-top:none}[dir=rtl] .mdc-notched-outline--notched .mdc-notched-outline__notch,.mdc-notched-outline--notched .mdc-notched-outline__notch[dir=rtl]{padding-left:8px;padding-right:0}.mdc-notched-outline--no-label .mdc-notched-outline__notch{padding:0}:host{display:block;position:absolute;right:0;left:0;box-sizing:border-box;width:100%;max-width:100%;height:100%;text-align:left;pointer-events:none}[dir=rtl] :host,:host[dir=rtl]{text-align:right}::slotted(.mdc-floating-label){display:inline-block;position:relative;top:17px;bottom:auto;max-width:100%}::slotted(.mdc-floating-label--float-above){text-overflow:clip}.mdc-notched-outline--upgraded ::slotted(.mdc-floating-label--float-above){max-width:calc(100% / .75)}.mdc-notched-outline__leading{width:12px;width:var(--mdc-notched-outline-leading-width, 12px);border-radius:4px 0 0 4px;border-radius:var(--mdc-notched-outline-leading-border-radius, 4px 0 0 4px)}.mdc-notched-outline__trailing{border-radius:0 4px 4px 0;border-radius:var(--mdc-notched-outline-trailing-border-radius, 0 4px 4px 0)}.mdc-notched-outline__leading,.mdc-notched-outline__notch,.mdc-notched-outline__trailing{border-color:var(--mdc-notched-outline-border-color, var(--mdc-theme-primary, #6200ee));border-width:1px;border-width:var(--mdc-notched-outline-stroke-width, 1px)}`;
+
+let NotchedOutline = class NotchedOutline extends NotchedOutlineBase {};
+NotchedOutline.styles = style;
+NotchedOutline = __decorate([customElement('mwc-notched-outline')], NotchedOutline);
+
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+var cssClasses$1 = {
+  LABEL_FLOAT_ABOVE: 'mdc-floating-label--float-above',
+  LABEL_SHAKE: 'mdc-floating-label--shake',
+  ROOT: 'mdc-floating-label'
+};
+
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+var MDCFloatingLabelFoundation =
+/** @class */
+function (_super) {
+  __extends(MDCFloatingLabelFoundation, _super);
+
+  function MDCFloatingLabelFoundation(adapter) {
+    var _this = _super.call(this, __assign({}, MDCFloatingLabelFoundation.defaultAdapter, adapter)) || this;
+
+    _this.shakeAnimationEndHandler_ = function () {
+      return _this.handleShakeAnimationEnd_();
+    };
+
+    return _this;
+  }
+
+  Object.defineProperty(MDCFloatingLabelFoundation, "cssClasses", {
+    get: function () {
+      return cssClasses$1;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCFloatingLabelFoundation, "defaultAdapter", {
+    /**
+     * See {@link MDCFloatingLabelAdapter} for typing information on parameters and return types.
+     */
+    get: function () {
+      // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+      return {
+        addClass: function () {
+          return undefined;
+        },
+        removeClass: function () {
+          return undefined;
+        },
+        getWidth: function () {
+          return 0;
+        },
+        registerInteractionHandler: function () {
+          return undefined;
+        },
+        deregisterInteractionHandler: function () {
+          return undefined;
+        }
+      }; // tslint:enable:object-literal-sort-keys
+    },
+    enumerable: true,
+    configurable: true
+  });
+
+  MDCFloatingLabelFoundation.prototype.init = function () {
+    this.adapter_.registerInteractionHandler('animationend', this.shakeAnimationEndHandler_);
+  };
+
+  MDCFloatingLabelFoundation.prototype.destroy = function () {
+    this.adapter_.deregisterInteractionHandler('animationend', this.shakeAnimationEndHandler_);
+  };
+  /**
+   * Returns the width of the label element.
+   */
+
+
+  MDCFloatingLabelFoundation.prototype.getWidth = function () {
+    return this.adapter_.getWidth();
+  };
+  /**
+   * Styles the label to produce a shake animation to indicate an error.
+   * @param shouldShake If true, adds the shake CSS class; otherwise, removes shake class.
+   */
+
+
+  MDCFloatingLabelFoundation.prototype.shake = function (shouldShake) {
+    var LABEL_SHAKE = MDCFloatingLabelFoundation.cssClasses.LABEL_SHAKE;
+
+    if (shouldShake) {
+      this.adapter_.addClass(LABEL_SHAKE);
+    } else {
+      this.adapter_.removeClass(LABEL_SHAKE);
+    }
+  };
+  /**
+   * Styles the label to float or dock.
+   * @param shouldFloat If true, adds the float CSS class; otherwise, removes float and shake classes to dock the label.
+   */
+
+
+  MDCFloatingLabelFoundation.prototype.float = function (shouldFloat) {
+    var _a = MDCFloatingLabelFoundation.cssClasses,
+        LABEL_FLOAT_ABOVE = _a.LABEL_FLOAT_ABOVE,
+        LABEL_SHAKE = _a.LABEL_SHAKE;
+
+    if (shouldFloat) {
+      this.adapter_.addClass(LABEL_FLOAT_ABOVE);
+    } else {
+      this.adapter_.removeClass(LABEL_FLOAT_ABOVE);
+      this.adapter_.removeClass(LABEL_SHAKE);
+    }
+  };
+
+  MDCFloatingLabelFoundation.prototype.handleShakeAnimationEnd_ = function () {
+    var LABEL_SHAKE = MDCFloatingLabelFoundation.cssClasses.LABEL_SHAKE;
+    this.adapter_.removeClass(LABEL_SHAKE);
+  };
+
+  return MDCFloatingLabelFoundation;
+}(MDCFoundation);
+
+const createAdapter = labelElement => {
+  return {
+    addClass: className => labelElement.classList.add(className),
+    removeClass: className => labelElement.classList.remove(className),
+    getWidth: () => labelElement.scrollWidth,
+    registerInteractionHandler: (evtType, handler) => {
+      labelElement.addEventListener(evtType, handler);
+    },
+    deregisterInteractionHandler: (evtType, handler) => {
+      labelElement.removeEventListener(evtType, handler);
+    }
+  };
+};
+
+const partToFoundationMap = new WeakMap();
+const floatingLabel = directive(label => part => {
+  const lastFoundation = partToFoundationMap.get(part);
+
+  if (!lastFoundation) {
+    const labelElement = part.committer.element;
+    labelElement.classList.add('mdc-floating-label');
+    const adapter = createAdapter(labelElement);
+    const foundation = new MDCFloatingLabelFoundation(adapter);
+    foundation.init();
+    part.setValue(foundation);
+    partToFoundationMap.set(part, {
+      label,
+      foundation
+    });
+  } else if (lastFoundation.label !== label) {
+    const labelElement = part.committer.element;
+    const labelChangeEvent = new Event('labelchange');
+    labelElement.dispatchEvent(labelChangeEvent);
+  }
+});
+
+/**
+ * @license
+ * Copyright 2018 Google Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+var cssClasses$2 = {
+  LINE_RIPPLE_ACTIVE: 'mdc-line-ripple--active',
+  LINE_RIPPLE_DEACTIVATING: 'mdc-line-ripple--deactivating'
+};
+
+/**
+ * @license
+ * Copyright 2018 Google Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+var MDCLineRippleFoundation =
+/** @class */
+function (_super) {
+  __extends(MDCLineRippleFoundation, _super);
+
+  function MDCLineRippleFoundation(adapter) {
+    var _this = _super.call(this, __assign({}, MDCLineRippleFoundation.defaultAdapter, adapter)) || this;
+
+    _this.transitionEndHandler_ = function (evt) {
+      return _this.handleTransitionEnd(evt);
+    };
+
+    return _this;
+  }
+
+  Object.defineProperty(MDCLineRippleFoundation, "cssClasses", {
+    get: function () {
+      return cssClasses$2;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCLineRippleFoundation, "defaultAdapter", {
+    /**
+     * See {@link MDCLineRippleAdapter} for typing information on parameters and return types.
+     */
+    get: function () {
+      // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+      return {
+        addClass: function () {
+          return undefined;
+        },
+        removeClass: function () {
+          return undefined;
+        },
+        hasClass: function () {
+          return false;
+        },
+        setStyle: function () {
+          return undefined;
+        },
+        registerEventHandler: function () {
+          return undefined;
+        },
+        deregisterEventHandler: function () {
+          return undefined;
+        }
+      }; // tslint:enable:object-literal-sort-keys
+    },
+    enumerable: true,
+    configurable: true
+  });
+
+  MDCLineRippleFoundation.prototype.init = function () {
+    this.adapter_.registerEventHandler('transitionend', this.transitionEndHandler_);
+  };
+
+  MDCLineRippleFoundation.prototype.destroy = function () {
+    this.adapter_.deregisterEventHandler('transitionend', this.transitionEndHandler_);
+  };
+
+  MDCLineRippleFoundation.prototype.activate = function () {
+    this.adapter_.removeClass(cssClasses$2.LINE_RIPPLE_DEACTIVATING);
+    this.adapter_.addClass(cssClasses$2.LINE_RIPPLE_ACTIVE);
+  };
+
+  MDCLineRippleFoundation.prototype.setRippleCenter = function (xCoordinate) {
+    this.adapter_.setStyle('transform-origin', xCoordinate + "px center");
+  };
+
+  MDCLineRippleFoundation.prototype.deactivate = function () {
+    this.adapter_.addClass(cssClasses$2.LINE_RIPPLE_DEACTIVATING);
+  };
+
+  MDCLineRippleFoundation.prototype.handleTransitionEnd = function (evt) {
+    // Wait for the line ripple to be either transparent or opaque
+    // before emitting the animation end event
+    var isDeactivating = this.adapter_.hasClass(cssClasses$2.LINE_RIPPLE_DEACTIVATING);
+
+    if (evt.propertyName === 'opacity') {
+      if (isDeactivating) {
+        this.adapter_.removeClass(cssClasses$2.LINE_RIPPLE_ACTIVE);
+        this.adapter_.removeClass(cssClasses$2.LINE_RIPPLE_DEACTIVATING);
+      }
+    }
+  };
+
+  return MDCLineRippleFoundation;
+}(MDCFoundation);
+
+const createAdapter$1 = lineElement => {
+  return {
+    addClass: className => lineElement.classList.add(className),
+    removeClass: className => lineElement.classList.remove(className),
+    hasClass: className => lineElement.classList.contains(className),
+    setStyle: (propertyName, value) => lineElement.style.setProperty(propertyName, value),
+    registerEventHandler: (evtType, handler) => {
+      lineElement.addEventListener(evtType, handler);
+    },
+    deregisterEventHandler: (evtType, handler) => {
+      lineElement.removeEventListener(evtType, handler);
+    }
+  };
+};
+
+const partToFoundationMap$1 = new WeakMap();
+const lineRipple = directive(() => part => {
+  const lastFoundation = partToFoundationMap$1.get(part);
+
+  if (!lastFoundation) {
+    const lineElement = part.committer.element;
+    lineElement.classList.add('mdc-line-ripple');
+    const adapter = createAdapter$1(lineElement);
+    const foundation = new MDCLineRippleFoundation(adapter);
+    foundation.init();
+    part.setValue(foundation);
+    partToFoundationMap$1.set(part, foundation);
+  }
+});
+
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+var strings$1 = {
+  ARIA_CONTROLS: 'aria-controls',
+  INPUT_SELECTOR: '.mdc-text-field__input',
+  LABEL_SELECTOR: '.mdc-floating-label',
+  LEADING_ICON_SELECTOR: '.mdc-text-field__icon--leading',
+  LINE_RIPPLE_SELECTOR: '.mdc-line-ripple',
+  OUTLINE_SELECTOR: '.mdc-notched-outline',
+  TRAILING_ICON_SELECTOR: '.mdc-text-field__icon--trailing'
+};
+var cssClasses$3 = {
+  DENSE: 'mdc-text-field--dense',
+  DISABLED: 'mdc-text-field--disabled',
+  FOCUSED: 'mdc-text-field--focused',
+  FULLWIDTH: 'mdc-text-field--fullwidth',
+  HELPER_LINE: 'mdc-text-field-helper-line',
+  INVALID: 'mdc-text-field--invalid',
+  NO_LABEL: 'mdc-text-field--no-label',
+  OUTLINED: 'mdc-text-field--outlined',
+  ROOT: 'mdc-text-field',
+  TEXTAREA: 'mdc-text-field--textarea',
+  WITH_LEADING_ICON: 'mdc-text-field--with-leading-icon',
+  WITH_TRAILING_ICON: 'mdc-text-field--with-trailing-icon'
+};
+var numbers$1 = {
+  DENSE_LABEL_SCALE: 0.923,
+  LABEL_SCALE: 0.75
+};
+/**
+ * Whitelist based off of https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5/Constraint_validation
+ * under the "Validation-related attributes" section.
+ */
+
+var VALIDATION_ATTR_WHITELIST = ['pattern', 'min', 'max', 'required', 'step', 'minlength', 'maxlength'];
+/**
+ * Label should always float for these types as they show some UI even if value is empty.
+ */
+
+var ALWAYS_FLOAT_TYPES = ['color', 'date', 'datetime-local', 'month', 'range', 'time', 'week'];
+
+/**
+ * @license
+ * Copyright 2016 Google Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+var POINTERDOWN_EVENTS = ['mousedown', 'touchstart'];
+var INTERACTION_EVENTS = ['click', 'keydown'];
+
+var MDCTextFieldFoundation =
+/** @class */
+function (_super) {
+  __extends(MDCTextFieldFoundation, _super);
+  /**
+   * @param adapter
+   * @param foundationMap Map from subcomponent names to their subfoundations.
+   */
+
+
+  function MDCTextFieldFoundation(adapter, foundationMap) {
+    if (foundationMap === void 0) {
+      foundationMap = {};
+    }
+
+    var _this = _super.call(this, __assign({}, MDCTextFieldFoundation.defaultAdapter, adapter)) || this;
+
+    _this.isFocused_ = false;
+    _this.receivedUserInput_ = false;
+    _this.isValid_ = true;
+    _this.useNativeValidation_ = true;
+    _this.helperText_ = foundationMap.helperText;
+    _this.characterCounter_ = foundationMap.characterCounter;
+    _this.leadingIcon_ = foundationMap.leadingIcon;
+    _this.trailingIcon_ = foundationMap.trailingIcon;
+
+    _this.inputFocusHandler_ = function () {
+      return _this.activateFocus();
+    };
+
+    _this.inputBlurHandler_ = function () {
+      return _this.deactivateFocus();
+    };
+
+    _this.inputInputHandler_ = function () {
+      return _this.handleInput();
+    };
+
+    _this.setPointerXOffset_ = function (evt) {
+      return _this.setTransformOrigin(evt);
+    };
+
+    _this.textFieldInteractionHandler_ = function () {
+      return _this.handleTextFieldInteraction();
+    };
+
+    _this.validationAttributeChangeHandler_ = function (attributesList) {
+      return _this.handleValidationAttributeChange(attributesList);
+    };
+
+    return _this;
+  }
+
+  Object.defineProperty(MDCTextFieldFoundation, "cssClasses", {
+    get: function () {
+      return cssClasses$3;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCTextFieldFoundation, "strings", {
+    get: function () {
+      return strings$1;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCTextFieldFoundation, "numbers", {
+    get: function () {
+      return numbers$1;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCTextFieldFoundation.prototype, "shouldAlwaysFloat_", {
+    get: function () {
+      var type = this.getNativeInput_().type;
+      return ALWAYS_FLOAT_TYPES.indexOf(type) >= 0;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCTextFieldFoundation.prototype, "shouldFloat", {
+    get: function () {
+      return this.shouldAlwaysFloat_ || this.isFocused_ || !!this.getValue() || this.isBadInput_();
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCTextFieldFoundation.prototype, "shouldShake", {
+    get: function () {
+      return !this.isFocused_ && !this.isValid() && !!this.getValue();
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCTextFieldFoundation, "defaultAdapter", {
+    /**
+     * See {@link MDCTextFieldAdapter} for typing information on parameters and return types.
+     */
+    get: function () {
+      // tslint:disable:object-literal-sort-keys Methods should be in the same order as the adapter interface.
+      return {
+        addClass: function () {
+          return undefined;
+        },
+        removeClass: function () {
+          return undefined;
+        },
+        hasClass: function () {
+          return true;
+        },
+        registerTextFieldInteractionHandler: function () {
+          return undefined;
+        },
+        deregisterTextFieldInteractionHandler: function () {
+          return undefined;
+        },
+        registerInputInteractionHandler: function () {
+          return undefined;
+        },
+        deregisterInputInteractionHandler: function () {
+          return undefined;
+        },
+        registerValidationAttributeChangeHandler: function () {
+          return new MutationObserver(function () {
+            return undefined;
+          });
+        },
+        deregisterValidationAttributeChangeHandler: function () {
+          return undefined;
+        },
+        getNativeInput: function () {
+          return null;
+        },
+        isFocused: function () {
+          return false;
+        },
+        activateLineRipple: function () {
+          return undefined;
+        },
+        deactivateLineRipple: function () {
+          return undefined;
+        },
+        setLineRippleTransformOrigin: function () {
+          return undefined;
+        },
+        shakeLabel: function () {
+          return undefined;
+        },
+        floatLabel: function () {
+          return undefined;
+        },
+        hasLabel: function () {
+          return false;
+        },
+        getLabelWidth: function () {
+          return 0;
+        },
+        hasOutline: function () {
+          return false;
+        },
+        notchOutline: function () {
+          return undefined;
+        },
+        closeOutline: function () {
+          return undefined;
+        }
+      }; // tslint:enable:object-literal-sort-keys
+    },
+    enumerable: true,
+    configurable: true
+  });
+
+  MDCTextFieldFoundation.prototype.init = function () {
+    var _this = this;
+
+    if (this.adapter_.isFocused()) {
+      this.inputFocusHandler_();
+    } else if (this.adapter_.hasLabel() && this.shouldFloat) {
+      this.notchOutline(true);
+      this.adapter_.floatLabel(true);
+    }
+
+    this.adapter_.registerInputInteractionHandler('focus', this.inputFocusHandler_);
+    this.adapter_.registerInputInteractionHandler('blur', this.inputBlurHandler_);
+    this.adapter_.registerInputInteractionHandler('input', this.inputInputHandler_);
+    POINTERDOWN_EVENTS.forEach(function (evtType) {
+      _this.adapter_.registerInputInteractionHandler(evtType, _this.setPointerXOffset_);
+    });
+    INTERACTION_EVENTS.forEach(function (evtType) {
+      _this.adapter_.registerTextFieldInteractionHandler(evtType, _this.textFieldInteractionHandler_);
+    });
+    this.validationObserver_ = this.adapter_.registerValidationAttributeChangeHandler(this.validationAttributeChangeHandler_);
+    this.setCharacterCounter_(this.getValue().length);
+  };
+
+  MDCTextFieldFoundation.prototype.destroy = function () {
+    var _this = this;
+
+    this.adapter_.deregisterInputInteractionHandler('focus', this.inputFocusHandler_);
+    this.adapter_.deregisterInputInteractionHandler('blur', this.inputBlurHandler_);
+    this.adapter_.deregisterInputInteractionHandler('input', this.inputInputHandler_);
+    POINTERDOWN_EVENTS.forEach(function (evtType) {
+      _this.adapter_.deregisterInputInteractionHandler(evtType, _this.setPointerXOffset_);
+    });
+    INTERACTION_EVENTS.forEach(function (evtType) {
+      _this.adapter_.deregisterTextFieldInteractionHandler(evtType, _this.textFieldInteractionHandler_);
+    });
+    this.adapter_.deregisterValidationAttributeChangeHandler(this.validationObserver_);
+  };
+  /**
+   * Handles user interactions with the Text Field.
+   */
+
+
+  MDCTextFieldFoundation.prototype.handleTextFieldInteraction = function () {
+    var nativeInput = this.adapter_.getNativeInput();
+
+    if (nativeInput && nativeInput.disabled) {
+      return;
+    }
+
+    this.receivedUserInput_ = true;
+  };
+  /**
+   * Handles validation attribute changes
+   */
+
+
+  MDCTextFieldFoundation.prototype.handleValidationAttributeChange = function (attributesList) {
+    var _this = this;
+
+    attributesList.some(function (attributeName) {
+      if (VALIDATION_ATTR_WHITELIST.indexOf(attributeName) > -1) {
+        _this.styleValidity_(true);
+
+        return true;
+      }
+
+      return false;
+    });
+
+    if (attributesList.indexOf('maxlength') > -1) {
+      this.setCharacterCounter_(this.getValue().length);
+    }
+  };
+  /**
+   * Opens/closes the notched outline.
+   */
+
+
+  MDCTextFieldFoundation.prototype.notchOutline = function (openNotch) {
+    if (!this.adapter_.hasOutline()) {
+      return;
+    }
+
+    if (openNotch) {
+      var isDense = this.adapter_.hasClass(cssClasses$3.DENSE);
+      var labelScale = isDense ? numbers$1.DENSE_LABEL_SCALE : numbers$1.LABEL_SCALE;
+      var labelWidth = this.adapter_.getLabelWidth() * labelScale;
+      this.adapter_.notchOutline(labelWidth);
+    } else {
+      this.adapter_.closeOutline();
+    }
+  };
+  /**
+   * Activates the text field focus state.
+   */
+
+
+  MDCTextFieldFoundation.prototype.activateFocus = function () {
+    this.isFocused_ = true;
+    this.styleFocused_(this.isFocused_);
+    this.adapter_.activateLineRipple();
+
+    if (this.adapter_.hasLabel()) {
+      this.notchOutline(this.shouldFloat);
+      this.adapter_.floatLabel(this.shouldFloat);
+      this.adapter_.shakeLabel(this.shouldShake);
+    }
+
+    if (this.helperText_) {
+      this.helperText_.showToScreenReader();
+    }
+  };
+  /**
+   * Sets the line ripple's transform origin, so that the line ripple activate
+   * animation will animate out from the user's click location.
+   */
+
+
+  MDCTextFieldFoundation.prototype.setTransformOrigin = function (evt) {
+    var touches = evt.touches;
+    var targetEvent = touches ? touches[0] : evt;
+    var targetClientRect = targetEvent.target.getBoundingClientRect();
+    var normalizedX = targetEvent.clientX - targetClientRect.left;
+    this.adapter_.setLineRippleTransformOrigin(normalizedX);
+  };
+  /**
+   * Handles input change of text input and text area.
+   */
+
+
+  MDCTextFieldFoundation.prototype.handleInput = function () {
+    this.autoCompleteFocus();
+    this.setCharacterCounter_(this.getValue().length);
+  };
+  /**
+   * Activates the Text Field's focus state in cases when the input value
+   * changes without user input (e.g. programmatically).
+   */
+
+
+  MDCTextFieldFoundation.prototype.autoCompleteFocus = function () {
+    if (!this.receivedUserInput_) {
+      this.activateFocus();
+    }
+  };
+  /**
+   * Deactivates the Text Field's focus state.
+   */
+
+
+  MDCTextFieldFoundation.prototype.deactivateFocus = function () {
+    this.isFocused_ = false;
+    this.adapter_.deactivateLineRipple();
+    var isValid = this.isValid();
+    this.styleValidity_(isValid);
+    this.styleFocused_(this.isFocused_);
+
+    if (this.adapter_.hasLabel()) {
+      this.notchOutline(this.shouldFloat);
+      this.adapter_.floatLabel(this.shouldFloat);
+      this.adapter_.shakeLabel(this.shouldShake);
+    }
+
+    if (!this.shouldFloat) {
+      this.receivedUserInput_ = false;
+    }
+  };
+
+  MDCTextFieldFoundation.prototype.getValue = function () {
+    return this.getNativeInput_().value;
+  };
+  /**
+   * @param value The value to set on the input Element.
+   */
+
+
+  MDCTextFieldFoundation.prototype.setValue = function (value) {
+    // Prevent Safari from moving the caret to the end of the input when the value has not changed.
+    if (this.getValue() !== value) {
+      this.getNativeInput_().value = value;
+    }
+
+    this.setCharacterCounter_(value.length);
+    var isValid = this.isValid();
+    this.styleValidity_(isValid);
+
+    if (this.adapter_.hasLabel()) {
+      this.notchOutline(this.shouldFloat);
+      this.adapter_.floatLabel(this.shouldFloat);
+      this.adapter_.shakeLabel(this.shouldShake);
+    }
+  };
+  /**
+   * @return The custom validity state, if set; otherwise, the result of a native validity check.
+   */
+
+
+  MDCTextFieldFoundation.prototype.isValid = function () {
+    return this.useNativeValidation_ ? this.isNativeInputValid_() : this.isValid_;
+  };
+  /**
+   * @param isValid Sets the custom validity state of the Text Field.
+   */
+
+
+  MDCTextFieldFoundation.prototype.setValid = function (isValid) {
+    this.isValid_ = isValid;
+    this.styleValidity_(isValid);
+    var shouldShake = !isValid && !this.isFocused_ && !!this.getValue();
+
+    if (this.adapter_.hasLabel()) {
+      this.adapter_.shakeLabel(shouldShake);
+    }
+  };
+  /**
+   * Enables or disables the use of native validation. Use this for custom validation.
+   * @param useNativeValidation Set this to false to ignore native input validation.
+   */
+
+
+  MDCTextFieldFoundation.prototype.setUseNativeValidation = function (useNativeValidation) {
+    this.useNativeValidation_ = useNativeValidation;
+  };
+
+  MDCTextFieldFoundation.prototype.isDisabled = function () {
+    return this.getNativeInput_().disabled;
+  };
+  /**
+   * @param disabled Sets the text-field disabled or enabled.
+   */
+
+
+  MDCTextFieldFoundation.prototype.setDisabled = function (disabled) {
+    this.getNativeInput_().disabled = disabled;
+    this.styleDisabled_(disabled);
+  };
+  /**
+   * @param content Sets the content of the helper text.
+   */
+
+
+  MDCTextFieldFoundation.prototype.setHelperTextContent = function (content) {
+    if (this.helperText_) {
+      this.helperText_.setContent(content);
+    }
+  };
+  /**
+   * Sets the aria label of the leading icon.
+   */
+
+
+  MDCTextFieldFoundation.prototype.setLeadingIconAriaLabel = function (label) {
+    if (this.leadingIcon_) {
+      this.leadingIcon_.setAriaLabel(label);
+    }
+  };
+  /**
+   * Sets the text content of the leading icon.
+   */
+
+
+  MDCTextFieldFoundation.prototype.setLeadingIconContent = function (content) {
+    if (this.leadingIcon_) {
+      this.leadingIcon_.setContent(content);
+    }
+  };
+  /**
+   * Sets the aria label of the trailing icon.
+   */
+
+
+  MDCTextFieldFoundation.prototype.setTrailingIconAriaLabel = function (label) {
+    if (this.trailingIcon_) {
+      this.trailingIcon_.setAriaLabel(label);
+    }
+  };
+  /**
+   * Sets the text content of the trailing icon.
+   */
+
+
+  MDCTextFieldFoundation.prototype.setTrailingIconContent = function (content) {
+    if (this.trailingIcon_) {
+      this.trailingIcon_.setContent(content);
+    }
+  };
+  /**
+   * Sets character counter values that shows characters used and the total character limit.
+   */
+
+
+  MDCTextFieldFoundation.prototype.setCharacterCounter_ = function (currentLength) {
+    if (!this.characterCounter_) {
+      return;
+    }
+
+    var maxLength = this.getNativeInput_().maxLength;
+
+    if (maxLength === -1) {
+      throw new Error('MDCTextFieldFoundation: Expected maxlength html property on text input or textarea.');
+    }
+
+    this.characterCounter_.setCounterValue(currentLength, maxLength);
+  };
+  /**
+   * @return True if the Text Field input fails in converting the user-supplied value.
+   */
+
+
+  MDCTextFieldFoundation.prototype.isBadInput_ = function () {
+    // The badInput property is not supported in IE 11 💩.
+    return this.getNativeInput_().validity.badInput || false;
+  };
+  /**
+   * @return The result of native validity checking (ValidityState.valid).
+   */
+
+
+  MDCTextFieldFoundation.prototype.isNativeInputValid_ = function () {
+    return this.getNativeInput_().validity.valid;
+  };
+  /**
+   * Styles the component based on the validity state.
+   */
+
+
+  MDCTextFieldFoundation.prototype.styleValidity_ = function (isValid) {
+    var INVALID = MDCTextFieldFoundation.cssClasses.INVALID;
+
+    if (isValid) {
+      this.adapter_.removeClass(INVALID);
+    } else {
+      this.adapter_.addClass(INVALID);
+    }
+
+    if (this.helperText_) {
+      this.helperText_.setValidity(isValid);
+    }
+  };
+  /**
+   * Styles the component based on the focused state.
+   */
+
+
+  MDCTextFieldFoundation.prototype.styleFocused_ = function (isFocused) {
+    var FOCUSED = MDCTextFieldFoundation.cssClasses.FOCUSED;
+
+    if (isFocused) {
+      this.adapter_.addClass(FOCUSED);
+    } else {
+      this.adapter_.removeClass(FOCUSED);
+    }
+  };
+  /**
+   * Styles the component based on the disabled state.
+   */
+
+
+  MDCTextFieldFoundation.prototype.styleDisabled_ = function (isDisabled) {
+    var _a = MDCTextFieldFoundation.cssClasses,
+        DISABLED = _a.DISABLED,
+        INVALID = _a.INVALID;
+
+    if (isDisabled) {
+      this.adapter_.addClass(DISABLED);
+      this.adapter_.removeClass(INVALID);
+    } else {
+      this.adapter_.removeClass(DISABLED);
+    }
+
+    if (this.leadingIcon_) {
+      this.leadingIcon_.setDisabled(isDisabled);
+    }
+
+    if (this.trailingIcon_) {
+      this.trailingIcon_.setDisabled(isDisabled);
+    }
+  };
+  /**
+   * @return The native text input element from the host environment, or an object with the same shape for unit tests.
+   */
+
+
+  MDCTextFieldFoundation.prototype.getNativeInput_ = function () {
+    // this.adapter_ may be undefined in foundation unit tests. This happens when testdouble is creating a mock object
+    // and invokes the shouldShake/shouldFloat getters (which in turn call getValue(), which calls this method) before
+    // init() has been called from the MDCTextField constructor. To work around that issue, we return a dummy object.
+    var nativeInput = this.adapter_ ? this.adapter_.getNativeInput() : null;
+    return nativeInput || {
+      disabled: false,
+      maxLength: -1,
+      type: 'input',
+      validity: {
+        badInput: false,
+        valid: true
+      },
+      value: ''
+    };
+  };
+
+  return MDCTextFieldFoundation;
+}(MDCFoundation);
+
+/**
+ * @license
+ * Copyright (c) 2018 The Polymer Project Authors. All rights reserved.
+ * This code may only be used under the BSD style license found at
+ * http://polymer.github.io/LICENSE.txt
+ * The complete set of authors may be found at
+ * http://polymer.github.io/AUTHORS.txt
+ * The complete set of contributors may be found at
+ * http://polymer.github.io/CONTRIBUTORS.txt
+ * Code distributed by Google as part of the polymer project is also
+ * subject to an additional IP rights grant found at
+ * http://polymer.github.io/PATENTS.txt
+ */
+/**
+ * Stores the ClassInfo object applied to a given AttributePart.
+ * Used to unset existing values when a new ClassInfo object is applied.
+ */
+
+const classMapCache = new WeakMap();
+/**
+ * A directive that applies CSS classes. This must be used in the `class`
+ * attribute and must be the only part used in the attribute. It takes each
+ * property in the `classInfo` argument and adds the property name to the
+ * element's `classList` if the property value is truthy; if the property value
+ * is falsey, the property name is removed from the element's `classList`. For
+ * example
+ * `{foo: bar}` applies the class `foo` if the value of `bar` is truthy.
+ * @param classInfo {ClassInfo}
+ */
+
+const classMap = directive(classInfo => part => {
+  if (!(part instanceof AttributePart) || part instanceof PropertyPart || part.committer.name !== 'class' || part.committer.parts.length > 1) {
+    throw new Error('The `classMap` directive must be used in the `class` attribute ' + 'and must be the only part in the attribute.');
+  }
+
+  const {
+    committer
+  } = part;
+  const {
+    element
+  } = committer; // handle static classes
+
+  if (!classMapCache.has(part)) {
+    element.className = committer.strings.join(' ');
+  }
+
+  const {
+    classList
+  } = element; // remove old classes that no longer apply
+
+  const oldInfo = classMapCache.get(part);
+
+  for (const name in oldInfo) {
+    if (!(name in classInfo)) {
+      classList.remove(name);
+    }
+  } // add new classes
+
+
+  for (const name in classInfo) {
+    const value = classInfo[name];
+
+    if (!oldInfo || value !== oldInfo[name]) {
+      // We explicitly want a loose truthy check here because
+      // it seems more convenient that '' and 0 are skipped.
+      const method = value ? 'add' : 'remove';
+      classList[method](name);
+    }
+  }
+
+  classMapCache.set(part, classInfo);
+});
+
+/**
+ * @license
+ * Copyright 2019 Google Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+var cssClasses$4 = {
+  ROOT: 'mdc-text-field-character-counter'
+};
+var strings$2 = {
+  ROOT_SELECTOR: "." + cssClasses$4.ROOT
+};
+
+/**
+ * @license
+ * Copyright 2019 Google Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+var MDCTextFieldCharacterCounterFoundation =
+/** @class */
+function (_super) {
+  __extends(MDCTextFieldCharacterCounterFoundation, _super);
+
+  function MDCTextFieldCharacterCounterFoundation(adapter) {
+    return _super.call(this, __assign({}, MDCTextFieldCharacterCounterFoundation.defaultAdapter, adapter)) || this;
+  }
+
+  Object.defineProperty(MDCTextFieldCharacterCounterFoundation, "cssClasses", {
+    get: function () {
+      return cssClasses$4;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCTextFieldCharacterCounterFoundation, "strings", {
+    get: function () {
+      return strings$2;
+    },
+    enumerable: true,
+    configurable: true
+  });
+  Object.defineProperty(MDCTextFieldCharacterCounterFoundation, "defaultAdapter", {
+    /**
+     * See {@link MDCTextFieldCharacterCounterAdapter} for typing information on parameters and return types.
+     */
+    get: function () {
+      return {
+        setContent: function () {
+          return undefined;
+        }
+      };
+    },
+    enumerable: true,
+    configurable: true
+  });
+
+  MDCTextFieldCharacterCounterFoundation.prototype.setCounterValue = function (currentLength, maxLength) {
+    currentLength = Math.min(currentLength, maxLength);
+    this.adapter_.setContent(currentLength + " / " + maxLength);
+  };
+
+  return MDCTextFieldCharacterCounterFoundation;
+}(MDCFoundation);
+
+const createAdapter$2 = hostElement => {
+  return {
+    setContent: content => hostElement.textContent = content
+  };
+};
+
+const partToFoundationMap$2 = new WeakMap();
+const characterCounter = directive(() => part => {
+  const lastFoundation = partToFoundationMap$2.get(part);
+
+  if (!lastFoundation) {
+    const hostElement = part.committer.element;
+    hostElement.classList.add('mdc-text-field-character-counter');
+    const adapter = createAdapter$2(hostElement);
+    const foundation = new MDCTextFieldCharacterCounterFoundation(adapter);
+    foundation.init();
+    part.setValue(foundation);
+    partToFoundationMap$2.set(part, foundation);
+  }
+});
+
+const passiveEvents = ['touchstart', 'touchmove', 'scroll', 'mousewheel'];
+
+const createValidityObj = (customValidity = {}) => {
+  /*
+   * We need to make ValidityState an object because it is readonly and
+   * we cannot use the spread operator. Also, we don't export
+   * `CustomValidityState` because it is a leaky implementation and the user
+   * already has access to `ValidityState` in lib.dom.ts. Also an interface
+   * {a: Type} can be casted to {readonly a: Type} so passing any object
+   * should be fine.
+   */
+  const objectifiedCustomValidity = {}; // eslint-disable-next-line guard-for-in
+
+  for (const propName in customValidity) {
+    /*
+     * Casting is needed because ValidityState's props are all readonly and
+     * thus cannot be set on `onjectifiedCustomValidity`. In the end, the
+     * interface is the same as ValidityState (but not readonly), but the
+     * function signature casts the output to ValidityState (thus readonly).
+     */
+    objectifiedCustomValidity[propName] = customValidity[propName];
+  }
+
+  return Object.assign({
+    badInput: false,
+    customError: false,
+    patternMismatch: false,
+    rangeOverflow: false,
+    rangeUnderflow: false,
+    stepMismatch: false,
+    tooLong: false,
+    tooShort: false,
+    typeMismatch: false,
+    valid: true,
+    valueMissing: false
+  }, objectifiedCustomValidity);
+};
+
+class TextFieldBase extends FormElement {
+  constructor() {
+    super(...arguments);
+    this.mdcFoundationClass = MDCTextFieldFoundation;
+    this.value = '';
+    this.type = 'text';
+    this.placeholder = '';
+    this.label = '';
+    this.icon = '';
+    this.iconTrailing = '';
+    this.disabled = false;
+    this.required = false;
+    this.maxLength = -1;
+    this.outlined = false;
+    this.fullWidth = false;
+    this.helper = '';
+    this.validateOnInitialRender = false;
+    this.validationMessage = '';
+    this.pattern = '';
+    this.min = '';
+    this.max = '';
+    this.step = null;
+    this.helperPersistent = false;
+    this.charCounter = false;
+    this.endAligned = false;
+    this.outlineOpen = false;
+    this.outlineWidth = 0;
+    this.isUiValid = true;
+    this._validity = createValidityObj();
+    this._outlineUpdateComplete = null;
+    this.validityTransform = null;
+  }
+
+  get validity() {
+    this._checkValidity(this.value);
+
+    return this._validity;
+  }
+
+  get willValidate() {
+    return this.formElement.willValidate;
+  }
+
+  get selectionStart() {
+    return this.formElement.selectionStart;
+  }
+
+  get selectionEnd() {
+    return this.formElement.selectionEnd;
+  }
+
+  get shouldRenderHelperText() {
+    return !!this.helper || !!this.validationMessage || this.charCounterVisible;
+  }
+
+  get charCounterVisible() {
+    return this.charCounter && this.maxLength !== -1;
+  }
+
+  focus() {
+    const focusEvt = new CustomEvent('focus');
+    this.formElement.dispatchEvent(focusEvt);
+    this.formElement.focus();
+  }
+
+  blur() {
+    const blurEvt = new CustomEvent('blur');
+    this.formElement.dispatchEvent(blurEvt);
+    this.formElement.blur();
+  }
+
+  select() {
+    this.formElement.select();
+  }
+
+  setSelectionRange(selectionStart, selectionEnd, selectionDirection) {
+    this.formElement.setSelectionRange(selectionStart, selectionEnd, selectionDirection);
+  }
+
+  render() {
+    const classes = {
+      'mdc-text-field--disabled': this.disabled,
+      'mdc-text-field--no-label': !this.label,
+      'mdc-text-field--outlined': this.outlined,
+      'mdc-text-field--fullwidth': this.fullWidth,
+      'mdc-text-field--with-leading-icon': this.icon,
+      'mdc-text-field--with-trailing-icon': this.iconTrailing,
+      'mdc-text-field--end-aligned': this.endAligned
+    };
+    return html`
+      <label class="mdc-text-field ${classMap(classes)}">
+        ${this.icon ? this.renderIcon(this.icon) : ''}
+        ${this.renderInput()}
+        ${this.iconTrailing ? this.renderIcon(this.iconTrailing, true) : ''}
+        ${this.outlined ? this.renderOutlined() : this.renderLabelText()}
+      </label>
+      ${this.renderHelperText(this.renderCharCounter())}
+    `;
+  }
+
+  updated(changedProperties) {
+    const maxLength = changedProperties.get('maxLength');
+    const maxLengthBecameDefined = maxLength === -1 && this.maxLength !== -1;
+    const maxLengthBecameUndefined = maxLength !== undefined && maxLength !== -1 && this.maxLength === -1;
+    /* We want to recreate the foundation if maxLength changes to defined or
+     * undefined, because the textfield foundation needs to be instantiated with
+     * the char counter's foundation, and the char counter's foundation needs
+     * to have maxLength defined to be instantiated. Additionally, there is no
+     * exposed API on the MdcTextFieldFoundation to dynamically add a char
+     * counter foundation, so we must recreate it.
+     */
+
+    if (maxLengthBecameDefined || maxLengthBecameUndefined) {
+      this.createFoundation();
+    }
+
+    if (changedProperties.has('value') && changedProperties.get('value') !== undefined) {
+      this.mdcFoundation.setValue(this.value);
+    }
+  }
+
+  renderInput() {
+    const maxOrUndef = this.maxLength === -1 ? undefined : this.maxLength;
+    return html`
+      <input
+          aria-labelledby="label"
+          class="mdc-text-field__input"
+          type="${this.type}"
+          .value="${this.value}"
+          ?disabled="${this.disabled}"
+          placeholder="${this.placeholder}"
+          ?required="${this.required}"
+          maxlength="${ifDefined(maxOrUndef)}"
+          pattern="${ifDefined(this.pattern ? this.pattern : undefined)}"
+          min="${ifDefined(this.min === '' ? undefined : this.min)}"
+          max="${ifDefined(this.max === '' ? undefined : this.max)}"
+          step="${ifDefined(this.step === null ? undefined : this.step)}"
+          @input="${this.handleInputChange}"
+          @blur="${this.onInputBlur}">`;
+  }
+
+  renderIcon(icon, isTrailingIcon = false) {
+    const classes = {
+      'mdc-text-field__icon--leading': !isTrailingIcon,
+      'mdc-text-field__icon--trailing': isTrailingIcon
+    };
+    return html`<i class="material-icons mdc-text-field__icon ${classMap(classes)}">${icon}</i>`;
+  }
+
+  renderOutlined() {
+    let labelTemplate = '';
+
+    if (this.label) {
+      labelTemplate = html`
+        <span
+            .floatingLabelFoundation=${floatingLabel(this.label)}
+            @labelchange=${this.onLabelChange}
+            id="label">
+          ${this.label}
+        </span>
+      `;
+    }
+
+    return html`
+      <mwc-notched-outline
+          .width=${this.outlineWidth}
+          .open=${this.outlineOpen}
+          class="mdc-notched-outline">
+        ${labelTemplate}
+      </mwc-notched-outline>`;
+  }
+
+  renderLabelText() {
+    let labelTemplate = '';
+
+    if (this.label && !this.fullWidth) {
+      labelTemplate = html`
+      <span
+          .floatingLabelFoundation=${floatingLabel(this.label)}
+          id="label">
+        ${this.label}
+      </span>`;
+    }
+
+    return html`
+      ${labelTemplate}
+      <div .lineRippleFoundation=${lineRipple()}></div>
+    `;
+  }
+
+  renderHelperText(charCounterTemplate) {
+    const showValidationMessage = this.validationMessage && !this.isUiValid;
+    const classes = {
+      'mdc-text-field-helper-text--persistent': this.helperPersistent,
+      'mdc-text-field-helper-text--validation-msg': showValidationMessage
+    };
+    const rootClasses = {
+      hidden: !this.shouldRenderHelperText
+    };
+    return html`
+      <div class="mdc-text-field-helper-line ${classMap(rootClasses)}">
+        <div class="mdc-text-field-helper-text ${classMap(classes)}">
+          ${showValidationMessage ? this.validationMessage : this.helper}
+        </div>
+        ${charCounterTemplate}
+      </div>
+    `;
+  }
+
+  renderCharCounter() {
+    const counterClasses = {
+      hidden: !this.charCounterVisible
+    };
+    return html`
+      <div
+          class="${classMap(counterClasses)}"
+          .charCounterFoundation=${characterCounter()}>
+      </div>`;
+  }
+
+  onInputBlur() {
+    this.reportValidity();
+  }
+
+  checkValidity() {
+    const isValid = this._checkValidity(this.value);
+
+    if (!isValid) {
+      const invalidEvent = new Event('invalid', {
+        bubbles: false,
+        cancelable: true
+      });
+      this.dispatchEvent(invalidEvent);
+    }
+
+    return isValid;
+  }
+
+  reportValidity() {
+    const isValid = this.checkValidity();
+    this.mdcFoundation.setValid(isValid);
+    this.isUiValid = isValid;
+    return isValid;
+  }
+
+  _checkValidity(value) {
+    const nativeValidity = this.formElement.validity;
+    let validity = createValidityObj(nativeValidity);
+
+    if (this.validityTransform) {
+      const customValidity = this.validityTransform(value, validity);
+      validity = Object.assign(Object.assign({}, validity), customValidity);
+      this.mdcFoundation.setUseNativeValidation(false);
+    } else {
+      this.mdcFoundation.setUseNativeValidation(true);
+    }
+
+    this._validity = validity;
+    return this._validity.valid;
+  }
+
+  setCustomValidity(message) {
+    this.validationMessage = message;
+    this.formElement.setCustomValidity(message);
+  }
+
+  handleInputChange() {
+    this.value = this.formElement.value;
+  }
+
+  createFoundation() {
+    if (this.mdcFoundation !== undefined) {
+      this.mdcFoundation.destroy();
+    }
+
+    this.mdcFoundation = new this.mdcFoundationClass(this.createAdapter(), {
+      characterCounter: this.maxLength !== -1 ? this.charCounterElement.charCounterFoundation : undefined
+    });
+    this.mdcFoundation.init();
+  }
+
+  createAdapter() {
+    return Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, this.getRootAdapterMethods()), this.getInputAdapterMethods()), this.getLabelAdapterMethods()), this.getLineRippleAdapterMethods()), this.getOutlineAdapterMethods());
+  }
+
+  getRootAdapterMethods() {
+    return Object.assign({
+      registerTextFieldInteractionHandler: (evtType, handler) => this.addEventListener(evtType, handler),
+      deregisterTextFieldInteractionHandler: (evtType, handler) => this.removeEventListener(evtType, handler),
+      registerValidationAttributeChangeHandler: () => {
+        const getAttributesList = mutationsList => {
+          return mutationsList.map(mutation => mutation.attributeName).filter(attributeName => attributeName);
+        };
+
+        const observer = new MutationObserver(mutationsList => {
+          const attributes = getAttributesList(mutationsList);
+
+          if (attributes.indexOf('maxlength') !== -1 && this.maxLength !== -1) {
+            this.charCounterElement.charCounterFoundation.setCounterValue(this.value.length, this.maxLength);
+          }
+        });
+        const config = {
+          attributes: true
+        };
+        observer.observe(this.formElement, config);
+        return observer;
+      },
+      deregisterValidationAttributeChangeHandler: observer => observer.disconnect()
+    }, addHasRemoveClass(this.mdcRoot));
+  }
+
+  getInputAdapterMethods() {
+    return {
+      getNativeInput: () => this.formElement,
+      isFocused: () => this.shadowRoot ? this.shadowRoot.activeElement === this.formElement : false,
+      registerInputInteractionHandler: (evtType, handler) => this.formElement.addEventListener(evtType, handler, {
+        passive: evtType in passiveEvents
+      }),
+      deregisterInputInteractionHandler: (evtType, handler) => this.formElement.removeEventListener(evtType, handler)
+    };
+  }
+
+  getLabelAdapterMethods() {
+    return {
+      floatLabel: shouldFloat => this.labelElement && this.labelElement.floatingLabelFoundation.float(shouldFloat),
+      getLabelWidth: () => {
+        return this.labelElement ? this.labelElement.floatingLabelFoundation.getWidth() : 0;
+      },
+      hasLabel: () => Boolean(this.labelElement),
+      shakeLabel: shouldShake => this.labelElement && this.labelElement.floatingLabelFoundation.shake(shouldShake)
+    };
+  }
+
+  getLineRippleAdapterMethods() {
+    return {
+      activateLineRipple: () => {
+        if (this.lineRippleElement) {
+          this.lineRippleElement.lineRippleFoundation.activate();
+        }
+      },
+      deactivateLineRipple: () => {
+        if (this.lineRippleElement) {
+          this.lineRippleElement.lineRippleFoundation.deactivate();
+        }
+      },
+      setLineRippleTransformOrigin: normalizedX => {
+        if (this.lineRippleElement) {
+          this.lineRippleElement.lineRippleFoundation.setRippleCenter(normalizedX);
+        }
+      }
+    };
+  }
+
+  async _getUpdateComplete() {
+    await super._getUpdateComplete();
+    await this._outlineUpdateComplete;
+  }
+
+  async firstUpdated() {
+    const outlineElement = this.outlineElement;
+
+    if (outlineElement) {
+      this._outlineUpdateComplete = outlineElement.updateComplete;
+      await this._outlineUpdateComplete;
+    }
+
+    super.firstUpdated();
+
+    if (this.validateOnInitialRender) {
+      this.reportValidity();
+    }
+  }
+
+  getOutlineAdapterMethods() {
+    return {
+      closeOutline: () => this.outlineElement && (this.outlineOpen = false),
+      hasOutline: () => Boolean(this.outlineElement),
+      notchOutline: labelWidth => {
+        const outlineElement = this.outlineElement;
+
+        if (outlineElement && !this.outlineOpen) {
+          this.outlineWidth = labelWidth;
+          this.outlineOpen = true;
+        }
+      }
+    };
+  }
+
+  async onLabelChange() {
+    if (this.label) {
+      await this.layout();
+    }
+  }
+
+  async layout() {
+    await this.updateComplete;
+
+    if (this.labelElement && this.outlineElement) {
+      /* When the textfield automatically notches due to a value and label
+       * being defined, the textfield may be set to `display: none` by the user.
+       * this means that the notch is of size 0px. We provide this function so
+       * that the user may manually resize the notch to the floated label's
+       * width.
+       */
+      const labelWidth = this.labelElement.floatingLabelFoundation.getWidth();
+
+      if (this.outlineOpen) {
+        this.outlineWidth = labelWidth;
+      }
+    }
+  }
+
+}
+
+__decorate([query('.mdc-text-field')], TextFieldBase.prototype, "mdcRoot", void 0);
+
+__decorate([query('input')], TextFieldBase.prototype, "formElement", void 0);
+
+__decorate([query('.mdc-floating-label')], TextFieldBase.prototype, "labelElement", void 0);
+
+__decorate([query('.mdc-line-ripple')], TextFieldBase.prototype, "lineRippleElement", void 0);
+
+__decorate([query('mwc-notched-outline')], TextFieldBase.prototype, "outlineElement", void 0);
+
+__decorate([query('.mdc-notched-outline__notch')], TextFieldBase.prototype, "notchElement", void 0);
+
+__decorate([query('.mdc-text-field-character-counter')], TextFieldBase.prototype, "charCounterElement", void 0);
+
+__decorate([property({
+  type: String
+})], TextFieldBase.prototype, "value", void 0);
+
+__decorate([property({
+  type: String
+})], TextFieldBase.prototype, "type", void 0);
+
+__decorate([property({
+  type: String
+})], TextFieldBase.prototype, "placeholder", void 0);
+
+__decorate([property({
+  type: String
+})], TextFieldBase.prototype, "label", void 0);
+
+__decorate([property({
+  type: String
+})], TextFieldBase.prototype, "icon", void 0);
+
+__decorate([property({
+  type: String
+})], TextFieldBase.prototype, "iconTrailing", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+})], TextFieldBase.prototype, "disabled", void 0);
+
+__decorate([property({
+  type: Boolean
+})], TextFieldBase.prototype, "required", void 0);
+
+__decorate([property({
+  type: Number
+})], TextFieldBase.prototype, "maxLength", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+})], TextFieldBase.prototype, "outlined", void 0);
+
+__decorate([property({
+  type: Boolean,
+  reflect: true
+})], TextFieldBase.prototype, "fullWidth", void 0);
+
+__decorate([property({
+  type: String
+})], TextFieldBase.prototype, "helper", void 0);
+
+__decorate([property({
+  type: Boolean
+})], TextFieldBase.prototype, "validateOnInitialRender", void 0);
+
+__decorate([property({
+  type: String
+})], TextFieldBase.prototype, "validationMessage", void 0);
+
+__decorate([property({
+  type: String
+})], TextFieldBase.prototype, "pattern", void 0);
+
+__decorate([property({
+  type: Number
+})], TextFieldBase.prototype, "min", void 0);
+
+__decorate([property({
+  type: Number
+})], TextFieldBase.prototype, "max", void 0);
+
+__decorate([property({
+  type: Number
+})], TextFieldBase.prototype, "step", void 0);
+
+__decorate([property({
+  type: Boolean
+})], TextFieldBase.prototype, "helperPersistent", void 0);
+
+__decorate([property({
+  type: Boolean
+})], TextFieldBase.prototype, "charCounter", void 0);
+
+__decorate([property({
+  type: Boolean
+})], TextFieldBase.prototype, "endAligned", void 0);
+
+__decorate([property({
+  type: Boolean
+})], TextFieldBase.prototype, "outlineOpen", void 0);
+
+__decorate([property({
+  type: Number
+})], TextFieldBase.prototype, "outlineWidth", void 0);
+
+__decorate([property({
+  type: Boolean
+})], TextFieldBase.prototype, "isUiValid", void 0);
+
+__decorate([eventOptions({
+  passive: true
+})], TextFieldBase.prototype, "handleInputChange", null);
+
+/**
+@license
+Copyright 2019 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+class TextAreaBase extends TextFieldBase {
+  constructor() {
+    super(...arguments);
+    this.rows = 2;
+    this.cols = 20;
+  }
+
+  get shouldRenderHelperText() {
+    return !!this.helper || !!this.validationMessage;
+  }
+
+  render() {
+    const classes = {
+      'mdc-text-field--disabled': this.disabled,
+      'mdc-text-field--no-label': !this.label,
+      'mdc-text-field--outlined': this.outlined,
+      'mdc-text-field--fullwidth': this.fullWidth,
+      'mdc-text-field--end-aligned': this.endAligned
+    };
+    return html`
+      <label class="mdc-text-field mdc-text-field--textarea ${classMap(classes)}">
+        ${this.renderCharCounter()}
+        ${this.renderInput()}
+        ${this.outlined ? this.renderOutlined() : this.renderLabelText()}
+      </label>
+      ${this.renderHelperText()}
+    `;
+  }
+
+  renderInput() {
+    const maxOrUndef = this.maxLength === -1 ? undefined : this.maxLength;
+    return html`
+      <textarea
+          aria-labelledby="label"
+          class="mdc-text-field__input"
+          .value="${this.value}"
+          rows="${this.rows}"
+          cols="${this.cols}"
+          ?disabled="${this.disabled}"
+          placeholder="${this.placeholder}"
+          ?required="${this.required}"
+          maxlength="${ifDefined(maxOrUndef)}"
+          @input="${this.handleInputChange}"
+          @blur="${this.onInputBlur}">
+      </textarea>`;
+  }
+
+}
+
+__decorate([query('textarea')], TextAreaBase.prototype, "formElement", void 0);
+
+__decorate([property({
+  type: Number
+})], TextAreaBase.prototype, "rows", void 0);
+
+__decorate([property({
+  type: Number
+})], TextAreaBase.prototype, "cols", void 0);
+
+/**
+@license
+Copyright 2018 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+const style$1 = css`.mdc-floating-label{font-family:Roboto, sans-serif;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-size:1rem;font-weight:400;letter-spacing:.009375em;text-decoration:inherit;text-transform:inherit;position:absolute;left:0;transform-origin:left top;line-height:1.15rem;text-align:left;text-overflow:ellipsis;white-space:nowrap;cursor:text;overflow:hidden;will-change:transform;transition:transform 150ms cubic-bezier(0.4, 0, 0.2, 1),color 150ms cubic-bezier(0.4, 0, 0.2, 1)}[dir=rtl] .mdc-floating-label,.mdc-floating-label[dir=rtl]{right:0;left:auto;transform-origin:right top;text-align:right}.mdc-floating-label--float-above{cursor:auto}.mdc-floating-label--float-above{transform:translateY(-106%) scale(0.75)}.mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-standard 250ms 1}@keyframes mdc-floating-label-shake-float-above-standard{0%{transform:translateX(calc(0 - 0%)) translateY(-106%) scale(0.75)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0%)) translateY(-106%) scale(0.75)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0%)) translateY(-106%) scale(0.75)}100%{transform:translateX(calc(0 - 0%)) translateY(-106%) scale(0.75)}}.mdc-line-ripple{position:absolute;bottom:0;left:0;width:100%;height:2px;transform:scaleX(0);opacity:0;z-index:2;transition:transform 180ms cubic-bezier(0.4, 0, 0.2, 1),opacity 180ms cubic-bezier(0.4, 0, 0.2, 1)}.mdc-line-ripple--active{transform:scaleX(1);opacity:1}.mdc-line-ripple--deactivating{opacity:0}.mdc-notched-outline{display:flex;position:absolute;right:0;left:0;box-sizing:border-box;width:100%;max-width:100%;height:100%;text-align:left;pointer-events:none}[dir=rtl] .mdc-notched-outline,.mdc-notched-outline[dir=rtl]{text-align:right}.mdc-notched-outline__leading,.mdc-notched-outline__notch,.mdc-notched-outline__trailing{box-sizing:border-box;height:100%;border-top:1px solid;border-bottom:1px solid;pointer-events:none}.mdc-notched-outline__leading{border-left:1px solid;border-right:none;width:12px}[dir=rtl] .mdc-notched-outline__leading,.mdc-notched-outline__leading[dir=rtl]{border-left:none;border-right:1px solid}.mdc-notched-outline__trailing{border-left:none;border-right:1px solid;flex-grow:1}[dir=rtl] .mdc-notched-outline__trailing,.mdc-notched-outline__trailing[dir=rtl]{border-left:1px solid;border-right:none}.mdc-notched-outline__notch{flex:0 0 auto;width:auto;max-width:calc(100% - 12px * 2)}.mdc-notched-outline .mdc-floating-label{display:inline-block;position:relative;max-width:100%}.mdc-notched-outline .mdc-floating-label--float-above{text-overflow:clip}.mdc-notched-outline--upgraded .mdc-floating-label--float-above{max-width:calc(100% / .75)}.mdc-notched-outline--notched .mdc-notched-outline__notch{padding-left:0;padding-right:8px;border-top:none}[dir=rtl] .mdc-notched-outline--notched .mdc-notched-outline__notch,.mdc-notched-outline--notched .mdc-notched-outline__notch[dir=rtl]{padding-left:8px;padding-right:0}.mdc-notched-outline--no-label .mdc-notched-outline__notch{padding:0}.mdc-text-field-helper-text{font-family:Roboto, sans-serif;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-size:.75rem;line-height:1.25rem;font-weight:400;letter-spacing:.0333333333em;text-decoration:inherit;text-transform:inherit;display:block;margin-top:0;line-height:normal;margin:0;opacity:0;will-change:opacity;transition:opacity 150ms cubic-bezier(0.4, 0, 0.2, 1)}.mdc-text-field-helper-text::before{display:inline-block;width:0;height:16px;content:"";vertical-align:0}.mdc-text-field-helper-text--persistent{transition:none;opacity:1;will-change:initial}.mdc-text-field-character-counter{font-family:Roboto, sans-serif;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-size:.75rem;line-height:1.25rem;font-weight:400;letter-spacing:.0333333333em;text-decoration:inherit;text-transform:inherit;display:block;margin-top:0;line-height:normal;margin-left:auto;margin-right:0;padding-left:16px;padding-right:0;white-space:nowrap}.mdc-text-field-character-counter::before{display:inline-block;width:0;height:16px;content:"";vertical-align:0}[dir=rtl] .mdc-text-field-character-counter,.mdc-text-field-character-counter[dir=rtl]{margin-left:0;margin-right:auto}[dir=rtl] .mdc-text-field-character-counter,.mdc-text-field-character-counter[dir=rtl]{padding-left:0;padding-right:16px}.mdc-text-field__icon{position:absolute;top:50%;transform:translateY(-50%);cursor:pointer}.mdc-text-field__icon:not([tabindex]),.mdc-text-field__icon[tabindex="-1"]{cursor:default;pointer-events:none}@keyframes mdc-ripple-fg-radius-in{from{animation-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transform:translate(var(--mdc-ripple-fg-translate-start, 0)) scale(1)}to{transform:translate(var(--mdc-ripple-fg-translate-end, 0)) scale(var(--mdc-ripple-fg-scale, 1))}}@keyframes mdc-ripple-fg-opacity-in{from{animation-timing-function:linear;opacity:0}to{opacity:var(--mdc-ripple-fg-opacity, 0)}}@keyframes mdc-ripple-fg-opacity-out{from{animation-timing-function:linear;opacity:var(--mdc-ripple-fg-opacity, 0)}to{opacity:0}}.mdc-text-field{--mdc-ripple-fg-size: 0;--mdc-ripple-left: 0;--mdc-ripple-top: 0;--mdc-ripple-fg-scale: 1;--mdc-ripple-fg-translate-end: 0;--mdc-ripple-fg-translate-start: 0;-webkit-tap-highlight-color:rgba(0,0,0,0)}.mdc-text-field::before,.mdc-text-field::after{position:absolute;border-radius:50%;opacity:0;pointer-events:none;content:""}.mdc-text-field::before{transition:opacity 15ms linear,background-color 15ms linear;z-index:1}.mdc-text-field.mdc-ripple-upgraded::before{transform:scale(var(--mdc-ripple-fg-scale, 1))}.mdc-text-field.mdc-ripple-upgraded::after{top:0;left:0;transform:scale(0);transform-origin:center center}.mdc-text-field.mdc-ripple-upgraded--unbounded::after{top:var(--mdc-ripple-top, 0);left:var(--mdc-ripple-left, 0)}.mdc-text-field.mdc-ripple-upgraded--foreground-activation::after{animation:mdc-ripple-fg-radius-in 225ms forwards,mdc-ripple-fg-opacity-in 75ms forwards}.mdc-text-field.mdc-ripple-upgraded--foreground-deactivation::after{animation:mdc-ripple-fg-opacity-out 150ms;transform:translate(var(--mdc-ripple-fg-translate-end, 0)) scale(var(--mdc-ripple-fg-scale, 1))}.mdc-text-field::before,.mdc-text-field::after{top:calc(50% - 100%);left:calc(50% - 100%);width:200%;height:200%}.mdc-text-field.mdc-ripple-upgraded::after{width:var(--mdc-ripple-fg-size, 100%);height:var(--mdc-ripple-fg-size, 100%)}.mdc-text-field{height:56px;border-radius:4px 4px 0 0;display:inline-flex;position:relative;box-sizing:border-box;overflow:hidden;will-change:opacity,transform,color}.mdc-text-field::before,.mdc-text-field::after{background-color:rgba(0,0,0,.87)}.mdc-text-field:hover::before{opacity:.04}.mdc-text-field.mdc-ripple-upgraded--background-focused::before,.mdc-text-field:not(.mdc-ripple-upgraded):focus::before{transition-duration:75ms;opacity:.12}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label{color:rgba(0,0,0,.6)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input{color:rgba(0,0,0,.87)}@media all{.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input::placeholder{color:rgba(0,0,0,.54)}}@media all{.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input:-ms-input-placeholder{color:rgba(0,0,0,.54)}}.mdc-text-field .mdc-text-field__input{caret-color:#6200ee;caret-color:var(--mdc-theme-primary, #6200ee)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input{border-bottom-color:rgba(0,0,0,.42)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input:hover{border-bottom-color:rgba(0,0,0,.87)}.mdc-text-field .mdc-line-ripple{background-color:#6200ee;background-color:var(--mdc-theme-primary, #6200ee)}.mdc-text-field:not(.mdc-text-field--disabled)+.mdc-text-field-helper-line .mdc-text-field-helper-text{color:rgba(0,0,0,.6)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field-character-counter,.mdc-text-field:not(.mdc-text-field--disabled)+.mdc-text-field-helper-line .mdc-text-field-character-counter{color:rgba(0,0,0,.6)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__icon--leading{color:rgba(0,0,0,.54)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__icon--trailing{color:rgba(0,0,0,.54)}.mdc-text-field:not(.mdc-text-field--disabled){background-color:#f5f5f5}.mdc-text-field .mdc-floating-label{left:16px;right:initial;top:50%;transform:translateY(-50%);pointer-events:none}[dir=rtl] .mdc-text-field .mdc-floating-label,.mdc-text-field .mdc-floating-label[dir=rtl]{left:initial;right:16px}.mdc-text-field .mdc-floating-label--float-above{transform:translateY(-106%) scale(0.75)}.mdc-text-field--textarea .mdc-floating-label{left:4px;right:initial}[dir=rtl] .mdc-text-field--textarea .mdc-floating-label,.mdc-text-field--textarea .mdc-floating-label[dir=rtl]{left:initial;right:4px}.mdc-text-field--outlined .mdc-floating-label{left:4px;right:initial}[dir=rtl] .mdc-text-field--outlined .mdc-floating-label,.mdc-text-field--outlined .mdc-floating-label[dir=rtl]{left:initial;right:4px}.mdc-text-field--outlined--with-leading-icon .mdc-floating-label{left:36px;right:initial}[dir=rtl] .mdc-text-field--outlined--with-leading-icon .mdc-floating-label,.mdc-text-field--outlined--with-leading-icon .mdc-floating-label[dir=rtl]{left:initial;right:36px}.mdc-text-field--outlined--with-leading-icon .mdc-floating-label--float-above{left:40px;right:initial}[dir=rtl] .mdc-text-field--outlined--with-leading-icon .mdc-floating-label--float-above,.mdc-text-field--outlined--with-leading-icon .mdc-floating-label--float-above[dir=rtl]{left:initial;right:40px}.mdc-text-field__input{font-family:Roboto, sans-serif;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-size:1rem;font-weight:400;letter-spacing:.009375em;text-decoration:inherit;text-transform:inherit;align-self:flex-end;box-sizing:border-box;width:100%;height:100%;padding:20px 16px 6px;border:none;border-bottom:1px solid;border-radius:0;background:none;appearance:none;transition:opacity 150ms cubic-bezier(0.4, 0, 0.2, 1)}.mdc-text-field__input::placeholder{transition:opacity 67ms cubic-bezier(0.4, 0, 0.2, 1);opacity:0}.mdc-text-field--fullwidth .mdc-text-field__input::placeholder,.mdc-text-field--no-label .mdc-text-field__input::placeholder,.mdc-text-field--focused .mdc-text-field__input::placeholder{transition-delay:40ms;transition-duration:110ms;opacity:1}.mdc-text-field__input:focus{outline:none}.mdc-text-field__input:invalid{box-shadow:none}.mdc-text-field__input:-webkit-autofill{z-index:auto !important}.mdc-text-field--no-label:not(.mdc-text-field--outlined):not(.mdc-text-field--textarea) .mdc-text-field__input{padding-top:16px;padding-bottom:16px}.mdc-text-field__input:-webkit-autofill+.mdc-floating-label{transform:translateY(-50%) scale(0.75);cursor:auto}.mdc-text-field--outlined{border:none;overflow:visible}.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.38)}.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.87)}.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__trailing{border-color:#6200ee;border-color:var(--mdc-theme-primary, #6200ee)}.mdc-text-field--outlined .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined 250ms 1}.mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__leading{border-radius:4px 0 0 4px}[dir=rtl] .mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__leading[dir=rtl]{border-radius:0 4px 4px 0}.mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__trailing{border-radius:0 4px 4px 0}[dir=rtl] .mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__trailing[dir=rtl]{border-radius:4px 0 0 4px}.mdc-text-field--outlined .mdc-floating-label--float-above{transform:translateY(-37.25px) scale(1)}.mdc-text-field--outlined .mdc-floating-label--float-above{font-size:.75rem}.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above{transform:translateY(-34.75px) scale(0.75)}.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above{font-size:1rem}.mdc-text-field--outlined .mdc-notched-outline--notched .mdc-notched-outline__notch{padding-top:1px}.mdc-text-field--outlined::before,.mdc-text-field--outlined::after{content:none}.mdc-text-field--outlined:not(.mdc-text-field--disabled){background-color:transparent}.mdc-text-field--outlined .mdc-text-field__input{display:flex;padding:12px 16px 14px;border:none !important;background-color:transparent;z-index:1}.mdc-text-field--outlined .mdc-text-field__icon{z-index:2}.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline--notched .mdc-notched-outline__notch{padding-top:2px}.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__trailing{border-width:2px}.mdc-text-field--outlined.mdc-text-field--disabled{background-color:transparent}.mdc-text-field--outlined.mdc-text-field--disabled .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--disabled .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--disabled .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.06)}.mdc-text-field--outlined.mdc-text-field--disabled .mdc-text-field__input{border-bottom:none}.mdc-text-field--outlined.mdc-text-field--dense{height:48px}.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above{transform:translateY(-134%) scale(1)}.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above{font-size:.8rem}.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above{transform:translateY(-120%) scale(0.8)}.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above{font-size:1rem}.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined-dense 250ms 1}.mdc-text-field--outlined.mdc-text-field--dense .mdc-text-field__input{padding:12px 12px 7px}.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label{top:14px}.mdc-text-field--outlined.mdc-text-field--dense .mdc-text-field__icon{top:12px}.mdc-text-field--with-leading-icon .mdc-text-field__icon--leading{left:16px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon .mdc-text-field__icon--leading,.mdc-text-field--with-leading-icon .mdc-text-field__icon--leading[dir=rtl]{left:initial;right:16px}.mdc-text-field--with-leading-icon .mdc-text-field__input{padding-left:48px;padding-right:16px}[dir=rtl] .mdc-text-field--with-leading-icon .mdc-text-field__input,.mdc-text-field--with-leading-icon .mdc-text-field__input[dir=rtl]{padding-left:16px;padding-right:48px}.mdc-text-field--with-leading-icon .mdc-floating-label{left:48px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon .mdc-floating-label,.mdc-text-field--with-leading-icon .mdc-floating-label[dir=rtl]{left:initial;right:48px}.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-text-field__icon--leading{left:16px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-text-field__icon--leading,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-text-field__icon--leading[dir=rtl]{left:initial;right:16px}.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--float-above{transform:translateY(-37.25px) translateX(-32px) scale(1)}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--float-above[dir=rtl]{transform:translateY(-37.25px) translateX(32px) scale(1)}.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--float-above{font-size:.75rem}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above{transform:translateY(-34.75px) translateX(-32px) scale(0.75)}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above[dir=rtl],[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above[dir=rtl]{transform:translateY(-34.75px) translateX(32px) scale(0.75)}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above{font-size:1rem}.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined-leading-icon 250ms 1}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--shake,.mdc-text-field--with-leading-icon.mdc-text-field--outlined[dir=rtl] .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-rtl 250ms 1}.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label{left:36px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label[dir=rtl]{left:initial;right:36px}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above{transform:translateY(-134%) translateX(-21px) scale(1)}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above[dir=rtl]{transform:translateY(-134%) translateX(21px) scale(1)}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above{font-size:.8rem}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above{transform:translateY(-120%) translateX(-21px) scale(0.8)}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above[dir=rtl],[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above[dir=rtl]{transform:translateY(-120%) translateX(21px) scale(0.8)}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above{font-size:1rem}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-dense 250ms 1}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--shake,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense[dir=rtl] .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-dense-rtl 250ms 1}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label{left:32px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label[dir=rtl]{left:initial;right:32px}.mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing{left:initial;right:12px}[dir=rtl] .mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing,.mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing[dir=rtl]{left:12px;right:initial}.mdc-text-field--with-trailing-icon .mdc-text-field__input{padding-left:16px;padding-right:48px}[dir=rtl] .mdc-text-field--with-trailing-icon .mdc-text-field__input,.mdc-text-field--with-trailing-icon .mdc-text-field__input[dir=rtl]{padding-left:48px;padding-right:16px}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--leading{left:16px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--leading,.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--leading[dir=rtl]{left:initial;right:16px}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing{left:initial;right:12px}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing,.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing[dir=rtl]{left:12px;right:initial}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__input{padding-right:48px;padding-left:48px}.mdc-text-field--dense .mdc-text-field__icon{bottom:16px;transform:scale(0.8)}.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__icon--leading{left:12px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__icon--leading,.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__icon--leading[dir=rtl]{left:initial;right:12px}.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__input{padding-left:44px;padding-right:16px}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__input,.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__input[dir=rtl]{padding-left:16px;padding-right:44px}.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-floating-label{left:44px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-floating-label,.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-floating-label[dir=rtl]{left:initial;right:44px}.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing{left:initial;right:12px}[dir=rtl] .mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing,.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing[dir=rtl]{left:12px;right:initial}.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__input{padding-left:16px;padding-right:44px}[dir=rtl] .mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__input,.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__input[dir=rtl]{padding-left:44px;padding-right:16px}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--leading{left:12px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--leading,.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--leading[dir=rtl]{left:initial;right:12px}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing{left:initial;right:12px}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing,.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing[dir=rtl]{left:12px;right:initial}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__input{padding-right:44px;padding-left:44px}.mdc-text-field--dense .mdc-floating-label--float-above{transform:translateY(-70%) scale(0.8)}.mdc-text-field--dense .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-dense 250ms 1}.mdc-text-field--dense .mdc-text-field__input{padding:12px 12px 0}.mdc-text-field--dense .mdc-floating-label{font-size:.813rem}.mdc-text-field--dense .mdc-floating-label--float-above{font-size:.813rem}.mdc-text-field__input:required~.mdc-floating-label::after,.mdc-text-field__input:required~.mdc-notched-outline .mdc-floating-label::after{margin-left:1px;content:"*"}.mdc-text-field--textarea{display:inline-flex;width:auto;height:auto;overflow:visible;transition:none}.mdc-text-field--textarea:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,.mdc-text-field--textarea:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,.mdc-text-field--textarea:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.38)}.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.87)}.mdc-text-field--textarea:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--textarea:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--textarea:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__trailing{border-color:#6200ee;border-color:var(--mdc-theme-primary, #6200ee)}.mdc-text-field--textarea .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-textarea 250ms 1}.mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__leading{border-radius:4px 0 0 4px}[dir=rtl] .mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__leading[dir=rtl]{border-radius:0 4px 4px 0}.mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__trailing{border-radius:0 4px 4px 0}[dir=rtl] .mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__trailing[dir=rtl]{border-radius:4px 0 0 4px}.mdc-text-field--textarea::before,.mdc-text-field--textarea::after{content:none}.mdc-text-field--textarea:not(.mdc-text-field--disabled){background-color:transparent}.mdc-text-field--textarea .mdc-floating-label--float-above{transform:translateY(-144%) scale(1)}.mdc-text-field--textarea .mdc-floating-label--float-above{font-size:.75rem}.mdc-text-field--textarea.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--textarea .mdc-notched-outline--upgraded .mdc-floating-label--float-above{transform:translateY(-130%) scale(0.75)}.mdc-text-field--textarea.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--textarea .mdc-notched-outline--upgraded .mdc-floating-label--float-above{font-size:1rem}.mdc-text-field--textarea .mdc-text-field-character-counter{left:initial;right:16px;position:absolute;bottom:13px}[dir=rtl] .mdc-text-field--textarea .mdc-text-field-character-counter,.mdc-text-field--textarea .mdc-text-field-character-counter[dir=rtl]{left:16px;right:initial}.mdc-text-field--textarea .mdc-text-field__input{align-self:auto;box-sizing:border-box;height:auto;margin:8px 1px 1px 0;padding:0 16px 16px;border:none;line-height:1.75rem}.mdc-text-field--textarea .mdc-text-field-character-counter+.mdc-text-field__input{margin-bottom:28px;padding-bottom:0}.mdc-text-field--textarea .mdc-floating-label{top:17px;width:auto;pointer-events:none}.mdc-text-field--textarea .mdc-floating-label:not(.mdc-floating-label--float-above){transform:none}.mdc-text-field--textarea.mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--focused .mdc-notched-outline__trailing{border-width:2px}.mdc-text-field--fullwidth{width:100%}.mdc-text-field--fullwidth:not(.mdc-text-field--disabled) .mdc-text-field__input{border-bottom-color:rgba(0,0,0,.42)}.mdc-text-field--fullwidth.mdc-text-field--disabled .mdc-text-field__input{border-bottom-color:rgba(0,0,0,.42)}.mdc-text-field--fullwidth:not(.mdc-text-field--textarea){display:block}.mdc-text-field--fullwidth:not(.mdc-text-field--textarea)::before,.mdc-text-field--fullwidth:not(.mdc-text-field--textarea)::after{content:none}.mdc-text-field--fullwidth:not(.mdc-text-field--textarea):not(.mdc-text-field--disabled){background-color:transparent}.mdc-text-field--fullwidth:not(.mdc-text-field--textarea) .mdc-text-field__input{padding:0}.mdc-text-field--fullwidth.mdc-text-field--textarea .mdc-text-field__input{resize:vertical}.mdc-text-field--fullwidth.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-text-field__input{border-bottom-color:#b00020;border-bottom-color:var(--mdc-theme-error, #b00020)}.mdc-text-field-helper-line{display:flex;justify-content:space-between;box-sizing:border-box}.mdc-text-field--dense+.mdc-text-field-helper-line{margin-bottom:4px}.mdc-text-field+.mdc-text-field-helper-line{padding-right:16px;padding-left:16px}.mdc-form-field>.mdc-text-field+label{align-self:flex-start}.mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label{color:rgba(98,0,238,.87)}.mdc-text-field--focused+.mdc-text-field-helper-line .mdc-text-field-helper-text:not(.mdc-text-field-helper-text--validation-msg){opacity:1}.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-text-field__input{border-bottom-color:#b00020;border-bottom-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-text-field__input:hover{border-bottom-color:#b00020;border-bottom-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-line-ripple{background-color:#b00020;background-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-floating-label{color:#b00020;color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--invalid+.mdc-text-field-helper-line .mdc-text-field-helper-text--validation-msg{color:#b00020;color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid .mdc-text-field__input{caret-color:#b00020;caret-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-text-field__icon--trailing{color:#b00020;color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid+.mdc-text-field-helper-line .mdc-text-field-helper-text--validation-msg{opacity:1}.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--disabled{background-color:#fafafa;border-bottom:none;pointer-events:none}.mdc-text-field--disabled .mdc-text-field__input{border-bottom-color:rgba(0,0,0,.06)}.mdc-text-field--disabled .mdc-text-field__input{color:rgba(0,0,0,.38)}@media all{.mdc-text-field--disabled .mdc-text-field__input::placeholder{color:rgba(0,0,0,.38)}}@media all{.mdc-text-field--disabled .mdc-text-field__input:-ms-input-placeholder{color:rgba(0,0,0,.38)}}.mdc-text-field--disabled .mdc-floating-label{color:rgba(0,0,0,.38)}.mdc-text-field--disabled+.mdc-text-field-helper-line .mdc-text-field-helper-text{color:rgba(0,0,0,.38)}.mdc-text-field--disabled .mdc-text-field-character-counter,.mdc-text-field--disabled+.mdc-text-field-helper-line .mdc-text-field-character-counter{color:rgba(0,0,0,.38)}.mdc-text-field--disabled .mdc-text-field__icon--leading{color:rgba(0,0,0,.3)}.mdc-text-field--disabled .mdc-text-field__icon--trailing{color:rgba(0,0,0,.3)}.mdc-text-field--disabled .mdc-floating-label{cursor:default}.mdc-text-field--textarea.mdc-text-field--disabled{background-color:transparent;background-color:#f9f9f9}.mdc-text-field--textarea.mdc-text-field--disabled .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--disabled .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--disabled .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.06)}.mdc-text-field--textarea.mdc-text-field--disabled .mdc-text-field__input{border-bottom:none}.mdc-text-field--end-aligned .mdc-text-field__input{text-align:right}[dir=rtl] .mdc-text-field--end-aligned .mdc-text-field__input,.mdc-text-field--end-aligned .mdc-text-field__input[dir=rtl]{text-align:left}@keyframes mdc-floating-label-shake-float-above-text-field-dense{0%{transform:translateX(calc(0 - 0%)) translateY(-70%) scale(0.8)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0%)) translateY(-70%) scale(0.8)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0%)) translateY(-70%) scale(0.8)}100%{transform:translateX(calc(0 - 0%)) translateY(-70%) scale(0.8)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined{0%{transform:translateX(calc(0 - 0%)) translateY(-34.75px) scale(0.75)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0%)) translateY(-34.75px) scale(0.75)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0%)) translateY(-34.75px) scale(0.75)}100%{transform:translateX(calc(0 - 0%)) translateY(-34.75px) scale(0.75)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined-dense{0%{transform:translateX(calc(0 - 0%)) translateY(-120%) scale(0.8)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0%)) translateY(-120%) scale(0.8)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0%)) translateY(-120%) scale(0.8)}100%{transform:translateX(calc(0 - 0%)) translateY(-120%) scale(0.8)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined-leading-icon{0%{transform:translateX(calc(0 - 0)) translateY(-34.75px) scale(0.75)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0)) translateY(-34.75px) scale(0.75)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0)) translateY(-34.75px) scale(0.75)}100%{transform:translateX(calc(0 - 0)) translateY(-34.75px) scale(0.75)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-dense{0%{transform:translateX(calc(0 - 21px)) translateY(-120%) scale(0.8)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 21px)) translateY(-120%) scale(0.8)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 21px)) translateY(-120%) scale(0.8)}100%{transform:translateX(calc(0 - 21px)) translateY(-120%) scale(0.8)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-rtl{0%{transform:translateX(calc(0 - 0)) translateY(-34.75px) scale(0.75)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0)) translateY(-34.75px) scale(0.75)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0)) translateY(-34.75px) scale(0.75)}100%{transform:translateX(calc(0 - 0)) translateY(-34.75px) scale(0.75)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-dense-rtl{0%{transform:translateX(calc(0 - -21px)) translateY(-120%) scale(0.8)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - -21px)) translateY(-120%) scale(0.8)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - -21px)) translateY(-120%) scale(0.8)}100%{transform:translateX(calc(0 - -21px)) translateY(-120%) scale(0.8)}}@keyframes mdc-floating-label-shake-float-above-textarea{0%{transform:translateX(calc(0 - 0%)) translateY(-130%) scale(0.75)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0%)) translateY(-130%) scale(0.75)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0%)) translateY(-130%) scale(0.75)}100%{transform:translateX(calc(0 - 0%)) translateY(-130%) scale(0.75)}}.material-icons{font-family:var(--mdc-icon-font, "Material Icons");font-weight:normal;font-style:normal;font-size:var(--mdc-icon-size, 24px);line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;-moz-osx-font-smoothing:grayscale;font-feature-settings:"liga"}.hidden,.hidden::before,.hidden::after{display:none}:host{display:inline-block;outline:none}:host([fullwidth]){display:block}.mdc-text-field{display:flex;width:100%;border-radius:4px 4px 0 0;border-radius:var(--mdc-text-field-filled-border-radius, 4px 4px 0 0)}mwc-notched-outline{--mdc-notched-outline-border-color: var(--mdc-text-field-outlined-idle-border-color, rgba(0, 0, 0, 0.38))}:host(:not([disabled]):hover) :not(.mdc-text-field--invalid):not(.mdc-text-field--focused) mwc-notched-outline{--mdc-notched-outline-border-color: var(--mdc-text-field-outlined-hover-border-color, rgba(0, 0, 0, 0.87))}:host(:not([disabled])) .mdc-text-field:not(.mdc-text-field--outlined){background-color:var(--mdc-text-field-fill-color, whitesmoke)}:host(:not([disabled])) .mdc-text-field:not(.mdc-text-field--outlined):not(.mdc-text-field--invalid) .mdc-text-field__input{border-bottom-color:var(--mdc-text-field-idle-line-color, black)}:host(:not([disabled])) .mdc-text-field:not(.mdc-text-field--outlined):not(.mdc-text-field--invalid) .mdc-text-field__input:hover{border-bottom-color:var(--mdc-text-field-hover-line-color, #000001)}:host(:not([disabled])) .mdc-text-field.mdc-text-field--invalid mwc-notched-outline{--mdc-notched-outline-border-color: var(--mdc-text-field-error-color, var(--mdc-theme-error, #b00020))}:host(:not([disabled])) .mdc-text-field.mdc-text-field--invalid+.mdc-text-field-helper-line .mdc-text-field-character-counter,:host(:not([disabled])) .mdc-text-field.mdc-text-field--invalid .mdc-text-field__icon{color:var(--mdc-text-field-error-color, var(--mdc-theme-error, #b00020))}:host(:not([disabled])) .mdc-text-field:not(.mdc-text-field--invalid):not(.mdc-text-field--focused) .mdc-floating-label,:host(:not([disabled])) .mdc-text-field:not(.mdc-text-field--invalid):not(.mdc-text-field--focused) .mdc-floating-label::after{color:var(--mdc-text-field-label-ink-color, rgba(0, 0, 0, 0.6))}:host(:not([disabled])) .mdc-text-field.mdc-text-field--focused mwc-notched-outline{--mdc-notched-outline-stroke-width: 2px}:host(:not([disabled])) .mdc-text-field.mdc-text-field--focused:not(.mdc-text-field--invalid) mwc-notched-outline{--mdc-notched-outline-border-color: var(--mdc-text-field-focused-label-color, var(--mdc-theme-primary, rgba(98, 0, 238, 0.87)))}:host(:not([disabled])) .mdc-text-field.mdc-text-field--focused:not(.mdc-text-field--invalid) .mdc-floating-label{color:#6200ee;color:var(--mdc-theme-primary, #6200ee)}:host(:not([disabled])) .mdc-text-field.mdc-text-field--focused:not(.mdc-text-field--invalid) .mdc-text-field__input:required~.mdc-floating-label::after,:host(:not([disabled])) .mdc-text-field.mdc-text-field--focused:not(.mdc-text-field--invalid) .mdc-text-field__input:required~.mdc-notched-outline .mdc-floating-label::after{color:#6200ee;color:var(--mdc-theme-primary, #6200ee)}:host(:not([disabled])) .mdc-text-field .mdc-text-field__input{color:var(--mdc-text-field-ink-color, rgba(0, 0, 0, 0.87))}:host(:not([disabled])) .mdc-text-field .mdc-text-field__input::placeholder{color:var(--mdc-text-field-label-ink-color, rgba(0, 0, 0, 0.6))}:host(:not([disabled])) .mdc-text-field-helper-line .mdc-text-field-helper-text:not(.mdc-text-field-helper-text--validation-msg),:host(:not([disabled])) .mdc-text-field-helper-line:not(.mdc-text-field--invalid) .mdc-text-field-character-counter{color:var(--mdc-text-field-label-ink-color, rgba(0, 0, 0, 0.6))}:host([disabled]) .mdc-text-field:not(.mdc-text-field--outlined){background-color:var(--mdc-text-field-disabled-fill-color, #fafafa)}:host([disabled]) .mdc-text-field.mdc-text-field--outlined mwc-notched-outline{--mdc-notched-outline-border-color: var(--mdc-text-field-outlined-disabled-border-color, rgba(0, 0, 0, 0.06))}:host([disabled]) .mdc-text-field:not(.mdc-text-field--invalid):not(.mdc-text-field--focused) .mdc-floating-label,:host([disabled]) .mdc-text-field:not(.mdc-text-field--invalid):not(.mdc-text-field--focused) .mdc-floating-label::after{color:var(--mdc-text-field-disabled-ink-color, rgba(0, 0, 0, 0.38))}:host([disabled]) .mdc-text-field .mdc-text-field__input,:host([disabled]) .mdc-text-field .mdc-text-field__input::placeholder{color:var(--mdc-text-field-disabled-ink-color, rgba(0, 0, 0, 0.38))}:host([disabled]) .mdc-text-field-helper-line .mdc-text-field-helper-text,:host([disabled]) .mdc-text-field-helper-line .mdc-text-field-character-counter{color:var(--mdc-text-field-disabled-ink-color, rgba(0, 0, 0, 0.38))}.mdc-text-field:not(.mdc-text-field--outlined){padding-bottom:1px}.mdc-text-field:not(.mdc-text-field--outlined):not(.mdc-text-field--disabled):not(.mdc-text-field--invalid){border-bottom-color:rgba(0,0,0,.42)}.mdc-text-field:not(.mdc-text-field--outlined):not(.mdc-text-field--disabled):not(.mdc-text-field--invalid):hover{border-bottom-color:rgba(0,0,0,.87)}.mdc-text-field:not(.mdc-text-field--outlined):not(.mdc-text-field--disabled).mdc-text-field--invalid{border-bottom-color:#b00020;border-bottom-color:var(--mdc-theme-error, #b00020)}.mdc-text-field:not(.mdc-text-field--outlined) .mdc-floating-label.mdc-floating-label--float-above{transform:translateY(-50%) scale(0.75);font-size:initial}.mdc-text-field:not(.mdc-text-field--outlined).mdc-text-field--disabled{border-bottom-color:rgba(0,0,0,.06)}.mdc-text-field:not(.mdc-text-field--outlined) .mdc-text-field__input,.mdc-text-field:not(.mdc-text-field--outlined) .mdc-text-field-character-counter.hidden+.mdc-text-field__input{padding:0 16px 0 16px;margin:20px 0 1px 0}.mdc-text-field:not(.mdc-text-field--outlined) .mdc-text-field-character-counter:not(.hidden)+.mdc-text-field__input{margin-bottom:28px}.mdc-text-field:not(.mdc-text-field--outlined) .mdc-text-field-character-counter{bottom:14px}.mdc-text-field:not(.mdc-text-field--outlined) .mdc-floating-label{top:18px;left:16px}.mdc-text-field{height:100%}.mdc-text-field.mdc-text-field--outlined.mdc-text-field--disabled{background-color:transparent}.mdc-text-field.mdc-text-field--outlined:not(.mdc-text-field--fullwidth) .mdc-text-field__input{margin-bottom:14px;padding-bottom:0px}.mdc-text-field.mdc-text-field--outlined:not(.mdc-text-field--fullwidth) .mdc-text-field-character-counter{bottom:14px}.mdc-text-field.mdc-text-field--outlined:not(.mdc-text-field--fullwidth) .mdc-text-field-character-counter:not(.hidden)+.mdc-text-field__input{margin-bottom:41px}.mdc-text-field__input{-ms-overflow-style:none;scrollbar-color:transparent transparent;resize:none}.mdc-text-field__input::-webkit-scrollbar{display:none}`;
+
+/**
+@license
+Copyright 2019 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+let TextArea = class TextArea extends TextAreaBase {};
+TextArea.styles = style$1;
+TextArea = __decorate([customElement('mwc-textarea')], TextArea);
 
 /**
  *
@@ -25193,36 +27586,466 @@ var styles$l = "/* :host{\n  display: flex;\n  align-items: center;\n  flex-dire
 const template$9 = self => function () {
   // @ts-ignore
   const {
-    topics,
-    swap,
-    addTopic,
-    addSub,
-    hello
+    topic,
+    topicNameChanged,
+    mainUtteranceId,
+    newTopic,
+    subTopic,
+    deleteTopic,
+    sub,
+    readonly
   } = this;
-  console.log(topics);
+  const {
+    topicName
+  } = topic || {};
+  return html`
+    <style>
+      ${styles$m}
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+
+    </style>
+
+    <!-- <textarea class="topic-input" type="text" value="${topicName}" placeholder="topic" @change="${topicNameChanged.bind(this)}"> -->
+    <mwc-textarea outlined class="topic-input" placeholder="topic" value="${topicName}" @change="${topicNameChanged.bind(this)}"></mwc-textarea>
+
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotDraftTopic = _decorate([customElement('protobot-draft-topic')], function (_initialize, _GetTopicMixin) {
+  class ProtobotDraftTopic extends _GetTopicMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotDraftTopic,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Number
+      })],
+      key: "index",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "sub",
+
+      value() {
+        return false;
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "readonly",
+
+      value() {
+        return false;
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: // @ts-ignore
+      function render() {
+        return template$9(this);
+      }
+    }, {
+      kind: "method",
+      key: "topicNameChanged",
+      value: async function topicNameChanged(event) {
+        if (this.readonly) {
+          return;
+        }
+
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.topic.name !== value) {
+          await database.ref(`labels/data/${this.topicId}/name`).set(value);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "newTopic",
+      value: function newTopic() {
+        this.createTopic();
+      }
+    }, {
+      kind: "method",
+      key: "subTopic",
+      value: function subTopic() {
+        this.createTopic(true);
+      }
+    }, {
+      kind: "method",
+      key: "createTopic",
+      value: async function createTopic(sub) {
+        const {
+          key: topicId
+        } = database.ref('labels/data').push();
+        const {
+          key: utteranceId
+        } = database.ref('utterances/data').push();
+        const {
+          domain
+        } = this.topic;
+        const updates = {};
+        const snap = await database.ref(`domains/data/${domain}`).once('value');
+        const {
+          topics,
+          deployedVersion
+        } = snap.val() || {
+          topics: {}
+        };
+        const array = [];
+
+        for (const topic in topics) {
+          array.push({
+            topic,
+            order: topics[topic]
+          });
+        }
+
+        const topicArray = array.sort((i, j) => i.order - j.order).map(i => i.topic);
+        const topic = {
+          domain,
+          name: 'Topic',
+          required: true,
+          mainUtterance: utteranceId,
+          utterances: {}
+        };
+        topic.utterances[utteranceId] = true;
+        const utterance = {
+          bot: true,
+          domain,
+          required: true,
+          text: 'Utterance',
+          version: deployedVersion,
+          topics: {}
+        };
+        utterance.topics[topicId] = true;
+        topicArray.splice(this.index + 1, 0, topicId);
+        const newTopics = {};
+
+        for (const i in topicArray) {
+          newTopics[topicArray[i]] = parseInt(i);
+        }
+
+        updates[`labels/data/${topicId}`] = topic;
+        updates[`utterances/data/${utteranceId}`] = utterance;
+        updates[`domains/data/${domain}/topics`] = newTopics;
+        updates[`domains/data/${domain}/subs/${topicId}`] = sub || false;
+        updates[`domains/data/${domain}/topicList/${topicId}`] = true;
+        await database.ref().update(updates);
+      }
+    }, {
+      kind: "method",
+      key: "deleteTopic",
+      value: async function deleteTopic() {
+        const {
+          topic
+        } = this;
+        const {
+          domain
+        } = topic;
+        const updates = {};
+        const snap = await database.ref(`domains/data/${domain}`).once('value');
+        const {
+          topics
+        } = snap.val() || {
+          topics: {}
+        };
+        const array = [];
+
+        for (const topic in topics) {
+          array.push({
+            topic,
+            order: topics[topic]
+          });
+        }
+
+        const topicArray = array.sort((i, j) => i.order - j.order).map(i => i.topic);
+        topicArray.splice(this.index, 1);
+        const newTopics = {};
+
+        for (const i in topicArray) {
+          newTopics[topicArray[i]] = parseInt(i);
+        } // updates[`labels/data/${topicId}`] = null;
+
+
+        updates[`domains/data/${domain}/topics`] = newTopics; // updates[`domains/data/${domain}/topicList/${topicId}`] = null;
+
+        await database.ref().update(updates);
+      }
+    }]
+  };
+}, GetTopicMixin(LitElement));
+
+var styles$n = ".utterance-input {\n  margin: 10px;\n  height: 30px;\n}";
+
+/**
+@license
+Copyright 2018 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+const style$2 = css`.mdc-floating-label{font-family:Roboto, sans-serif;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-size:1rem;font-weight:400;letter-spacing:.009375em;text-decoration:inherit;text-transform:inherit;position:absolute;left:0;transform-origin:left top;line-height:1.15rem;text-align:left;text-overflow:ellipsis;white-space:nowrap;cursor:text;overflow:hidden;will-change:transform;transition:transform 150ms cubic-bezier(0.4, 0, 0.2, 1),color 150ms cubic-bezier(0.4, 0, 0.2, 1)}[dir=rtl] .mdc-floating-label,.mdc-floating-label[dir=rtl]{right:0;left:auto;transform-origin:right top;text-align:right}.mdc-floating-label--float-above{cursor:auto}.mdc-floating-label--float-above{transform:translateY(-106%) scale(0.75)}.mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-standard 250ms 1}@keyframes mdc-floating-label-shake-float-above-standard{0%{transform:translateX(calc(0 - 0%)) translateY(-106%) scale(0.75)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0%)) translateY(-106%) scale(0.75)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0%)) translateY(-106%) scale(0.75)}100%{transform:translateX(calc(0 - 0%)) translateY(-106%) scale(0.75)}}.mdc-line-ripple{position:absolute;bottom:0;left:0;width:100%;height:2px;transform:scaleX(0);opacity:0;z-index:2;transition:transform 180ms cubic-bezier(0.4, 0, 0.2, 1),opacity 180ms cubic-bezier(0.4, 0, 0.2, 1)}.mdc-line-ripple--active{transform:scaleX(1);opacity:1}.mdc-line-ripple--deactivating{opacity:0}.mdc-notched-outline{display:flex;position:absolute;right:0;left:0;box-sizing:border-box;width:100%;max-width:100%;height:100%;text-align:left;pointer-events:none}[dir=rtl] .mdc-notched-outline,.mdc-notched-outline[dir=rtl]{text-align:right}.mdc-notched-outline__leading,.mdc-notched-outline__notch,.mdc-notched-outline__trailing{box-sizing:border-box;height:100%;border-top:1px solid;border-bottom:1px solid;pointer-events:none}.mdc-notched-outline__leading{border-left:1px solid;border-right:none;width:12px}[dir=rtl] .mdc-notched-outline__leading,.mdc-notched-outline__leading[dir=rtl]{border-left:none;border-right:1px solid}.mdc-notched-outline__trailing{border-left:none;border-right:1px solid;flex-grow:1}[dir=rtl] .mdc-notched-outline__trailing,.mdc-notched-outline__trailing[dir=rtl]{border-left:1px solid;border-right:none}.mdc-notched-outline__notch{flex:0 0 auto;width:auto;max-width:calc(100% - 12px * 2)}.mdc-notched-outline .mdc-floating-label{display:inline-block;position:relative;max-width:100%}.mdc-notched-outline .mdc-floating-label--float-above{text-overflow:clip}.mdc-notched-outline--upgraded .mdc-floating-label--float-above{max-width:calc(100% / .75)}.mdc-notched-outline--notched .mdc-notched-outline__notch{padding-left:0;padding-right:8px;border-top:none}[dir=rtl] .mdc-notched-outline--notched .mdc-notched-outline__notch,.mdc-notched-outline--notched .mdc-notched-outline__notch[dir=rtl]{padding-left:8px;padding-right:0}.mdc-notched-outline--no-label .mdc-notched-outline__notch{padding:0}.mdc-text-field-helper-text{font-family:Roboto, sans-serif;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-size:.75rem;line-height:1.25rem;font-weight:400;letter-spacing:.0333333333em;text-decoration:inherit;text-transform:inherit;display:block;margin-top:0;line-height:normal;margin:0;opacity:0;will-change:opacity;transition:opacity 150ms cubic-bezier(0.4, 0, 0.2, 1)}.mdc-text-field-helper-text::before{display:inline-block;width:0;height:16px;content:"";vertical-align:0}.mdc-text-field-helper-text--persistent{transition:none;opacity:1;will-change:initial}.mdc-text-field-character-counter{font-family:Roboto, sans-serif;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-size:.75rem;line-height:1.25rem;font-weight:400;letter-spacing:.0333333333em;text-decoration:inherit;text-transform:inherit;display:block;margin-top:0;line-height:normal;margin-left:auto;margin-right:0;padding-left:16px;padding-right:0;white-space:nowrap}.mdc-text-field-character-counter::before{display:inline-block;width:0;height:16px;content:"";vertical-align:0}[dir=rtl] .mdc-text-field-character-counter,.mdc-text-field-character-counter[dir=rtl]{margin-left:0;margin-right:auto}[dir=rtl] .mdc-text-field-character-counter,.mdc-text-field-character-counter[dir=rtl]{padding-left:0;padding-right:16px}.mdc-text-field__icon{position:absolute;top:50%;transform:translateY(-50%);cursor:pointer}.mdc-text-field__icon:not([tabindex]),.mdc-text-field__icon[tabindex="-1"]{cursor:default;pointer-events:none}@keyframes mdc-ripple-fg-radius-in{from{animation-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transform:translate(var(--mdc-ripple-fg-translate-start, 0)) scale(1)}to{transform:translate(var(--mdc-ripple-fg-translate-end, 0)) scale(var(--mdc-ripple-fg-scale, 1))}}@keyframes mdc-ripple-fg-opacity-in{from{animation-timing-function:linear;opacity:0}to{opacity:var(--mdc-ripple-fg-opacity, 0)}}@keyframes mdc-ripple-fg-opacity-out{from{animation-timing-function:linear;opacity:var(--mdc-ripple-fg-opacity, 0)}to{opacity:0}}.mdc-text-field{--mdc-ripple-fg-size: 0;--mdc-ripple-left: 0;--mdc-ripple-top: 0;--mdc-ripple-fg-scale: 1;--mdc-ripple-fg-translate-end: 0;--mdc-ripple-fg-translate-start: 0;-webkit-tap-highlight-color:rgba(0,0,0,0)}.mdc-text-field::before,.mdc-text-field::after{position:absolute;border-radius:50%;opacity:0;pointer-events:none;content:""}.mdc-text-field::before{transition:opacity 15ms linear,background-color 15ms linear;z-index:1}.mdc-text-field.mdc-ripple-upgraded::before{transform:scale(var(--mdc-ripple-fg-scale, 1))}.mdc-text-field.mdc-ripple-upgraded::after{top:0;left:0;transform:scale(0);transform-origin:center center}.mdc-text-field.mdc-ripple-upgraded--unbounded::after{top:var(--mdc-ripple-top, 0);left:var(--mdc-ripple-left, 0)}.mdc-text-field.mdc-ripple-upgraded--foreground-activation::after{animation:mdc-ripple-fg-radius-in 225ms forwards,mdc-ripple-fg-opacity-in 75ms forwards}.mdc-text-field.mdc-ripple-upgraded--foreground-deactivation::after{animation:mdc-ripple-fg-opacity-out 150ms;transform:translate(var(--mdc-ripple-fg-translate-end, 0)) scale(var(--mdc-ripple-fg-scale, 1))}.mdc-text-field::before,.mdc-text-field::after{top:calc(50% - 100%);left:calc(50% - 100%);width:200%;height:200%}.mdc-text-field.mdc-ripple-upgraded::after{width:var(--mdc-ripple-fg-size, 100%);height:var(--mdc-ripple-fg-size, 100%)}.mdc-text-field{height:56px;border-radius:4px 4px 0 0;display:inline-flex;position:relative;box-sizing:border-box;overflow:hidden;will-change:opacity,transform,color}.mdc-text-field::before,.mdc-text-field::after{background-color:rgba(0,0,0,.87)}.mdc-text-field:hover::before{opacity:.04}.mdc-text-field.mdc-ripple-upgraded--background-focused::before,.mdc-text-field:not(.mdc-ripple-upgraded):focus::before{transition-duration:75ms;opacity:.12}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-floating-label{color:rgba(0,0,0,.6)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input{color:rgba(0,0,0,.87)}@media all{.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input::placeholder{color:rgba(0,0,0,.54)}}@media all{.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input:-ms-input-placeholder{color:rgba(0,0,0,.54)}}.mdc-text-field .mdc-text-field__input{caret-color:#6200ee;caret-color:var(--mdc-theme-primary, #6200ee)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input{border-bottom-color:rgba(0,0,0,.42)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__input:hover{border-bottom-color:rgba(0,0,0,.87)}.mdc-text-field .mdc-line-ripple{background-color:#6200ee;background-color:var(--mdc-theme-primary, #6200ee)}.mdc-text-field:not(.mdc-text-field--disabled)+.mdc-text-field-helper-line .mdc-text-field-helper-text{color:rgba(0,0,0,.6)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field-character-counter,.mdc-text-field:not(.mdc-text-field--disabled)+.mdc-text-field-helper-line .mdc-text-field-character-counter{color:rgba(0,0,0,.6)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__icon--leading{color:rgba(0,0,0,.54)}.mdc-text-field:not(.mdc-text-field--disabled) .mdc-text-field__icon--trailing{color:rgba(0,0,0,.54)}.mdc-text-field:not(.mdc-text-field--disabled){background-color:#f5f5f5}.mdc-text-field .mdc-floating-label{left:16px;right:initial;top:50%;transform:translateY(-50%);pointer-events:none}[dir=rtl] .mdc-text-field .mdc-floating-label,.mdc-text-field .mdc-floating-label[dir=rtl]{left:initial;right:16px}.mdc-text-field .mdc-floating-label--float-above{transform:translateY(-106%) scale(0.75)}.mdc-text-field--textarea .mdc-floating-label{left:4px;right:initial}[dir=rtl] .mdc-text-field--textarea .mdc-floating-label,.mdc-text-field--textarea .mdc-floating-label[dir=rtl]{left:initial;right:4px}.mdc-text-field--outlined .mdc-floating-label{left:4px;right:initial}[dir=rtl] .mdc-text-field--outlined .mdc-floating-label,.mdc-text-field--outlined .mdc-floating-label[dir=rtl]{left:initial;right:4px}.mdc-text-field--outlined--with-leading-icon .mdc-floating-label{left:36px;right:initial}[dir=rtl] .mdc-text-field--outlined--with-leading-icon .mdc-floating-label,.mdc-text-field--outlined--with-leading-icon .mdc-floating-label[dir=rtl]{left:initial;right:36px}.mdc-text-field--outlined--with-leading-icon .mdc-floating-label--float-above{left:40px;right:initial}[dir=rtl] .mdc-text-field--outlined--with-leading-icon .mdc-floating-label--float-above,.mdc-text-field--outlined--with-leading-icon .mdc-floating-label--float-above[dir=rtl]{left:initial;right:40px}.mdc-text-field__input{font-family:Roboto, sans-serif;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased;font-size:1rem;font-weight:400;letter-spacing:.009375em;text-decoration:inherit;text-transform:inherit;align-self:flex-end;box-sizing:border-box;width:100%;height:100%;padding:20px 16px 6px;border:none;border-bottom:1px solid;border-radius:0;background:none;appearance:none;transition:opacity 150ms cubic-bezier(0.4, 0, 0.2, 1)}.mdc-text-field__input::placeholder{transition:opacity 67ms cubic-bezier(0.4, 0, 0.2, 1);opacity:0}.mdc-text-field--fullwidth .mdc-text-field__input::placeholder,.mdc-text-field--no-label .mdc-text-field__input::placeholder,.mdc-text-field--focused .mdc-text-field__input::placeholder{transition-delay:40ms;transition-duration:110ms;opacity:1}.mdc-text-field__input:focus{outline:none}.mdc-text-field__input:invalid{box-shadow:none}.mdc-text-field__input:-webkit-autofill{z-index:auto !important}.mdc-text-field--no-label:not(.mdc-text-field--outlined):not(.mdc-text-field--textarea) .mdc-text-field__input{padding-top:16px;padding-bottom:16px}.mdc-text-field__input:-webkit-autofill+.mdc-floating-label{transform:translateY(-50%) scale(0.75);cursor:auto}.mdc-text-field--outlined{border:none;overflow:visible}.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,.mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.38)}.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--outlined:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.87)}.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--outlined:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__trailing{border-color:#6200ee;border-color:var(--mdc-theme-primary, #6200ee)}.mdc-text-field--outlined .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined 250ms 1}.mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__leading{border-radius:4px 0 0 4px}[dir=rtl] .mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__leading[dir=rtl]{border-radius:0 4px 4px 0}.mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__trailing{border-radius:0 4px 4px 0}[dir=rtl] .mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--outlined .mdc-notched-outline .mdc-notched-outline__trailing[dir=rtl]{border-radius:4px 0 0 4px}.mdc-text-field--outlined .mdc-floating-label--float-above{transform:translateY(-37.25px) scale(1)}.mdc-text-field--outlined .mdc-floating-label--float-above{font-size:.75rem}.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above{transform:translateY(-34.75px) scale(0.75)}.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above{font-size:1rem}.mdc-text-field--outlined .mdc-notched-outline--notched .mdc-notched-outline__notch{padding-top:1px}.mdc-text-field--outlined::before,.mdc-text-field--outlined::after{content:none}.mdc-text-field--outlined:not(.mdc-text-field--disabled){background-color:transparent}.mdc-text-field--outlined .mdc-text-field__input{display:flex;padding:12px 16px 14px;border:none !important;background-color:transparent;z-index:1}.mdc-text-field--outlined .mdc-text-field__icon{z-index:2}.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline--notched .mdc-notched-outline__notch{padding-top:2px}.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--focused .mdc-notched-outline__trailing{border-width:2px}.mdc-text-field--outlined.mdc-text-field--disabled{background-color:transparent}.mdc-text-field--outlined.mdc-text-field--disabled .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--disabled .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--disabled .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.06)}.mdc-text-field--outlined.mdc-text-field--disabled .mdc-text-field__input{border-bottom:none}.mdc-text-field--outlined.mdc-text-field--dense{height:48px}.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above{transform:translateY(-134%) scale(1)}.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above{font-size:.8rem}.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above{transform:translateY(-120%) scale(0.8)}.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above{font-size:1rem}.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined-dense 250ms 1}.mdc-text-field--outlined.mdc-text-field--dense .mdc-text-field__input{padding:12px 12px 7px}.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label{top:14px}.mdc-text-field--outlined.mdc-text-field--dense .mdc-text-field__icon{top:12px}.mdc-text-field--with-leading-icon .mdc-text-field__icon--leading{left:16px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon .mdc-text-field__icon--leading,.mdc-text-field--with-leading-icon .mdc-text-field__icon--leading[dir=rtl]{left:initial;right:16px}.mdc-text-field--with-leading-icon .mdc-text-field__input{padding-left:48px;padding-right:16px}[dir=rtl] .mdc-text-field--with-leading-icon .mdc-text-field__input,.mdc-text-field--with-leading-icon .mdc-text-field__input[dir=rtl]{padding-left:16px;padding-right:48px}.mdc-text-field--with-leading-icon .mdc-floating-label{left:48px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon .mdc-floating-label,.mdc-text-field--with-leading-icon .mdc-floating-label[dir=rtl]{left:initial;right:48px}.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-text-field__icon--leading{left:16px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-text-field__icon--leading,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-text-field__icon--leading[dir=rtl]{left:initial;right:16px}.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--float-above{transform:translateY(-37.25px) translateX(-32px) scale(1)}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--float-above[dir=rtl]{transform:translateY(-37.25px) translateX(32px) scale(1)}.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--float-above{font-size:.75rem}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above{transform:translateY(-34.75px) translateX(-32px) scale(0.75)}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above[dir=rtl],[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above[dir=rtl]{transform:translateY(-34.75px) translateX(32px) scale(0.75)}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-notched-outline--upgraded .mdc-floating-label--float-above{font-size:1rem}.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined-leading-icon 250ms 1}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label--shake,.mdc-text-field--with-leading-icon.mdc-text-field--outlined[dir=rtl] .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-rtl 250ms 1}.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label{left:36px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label,.mdc-text-field--with-leading-icon.mdc-text-field--outlined .mdc-floating-label[dir=rtl]{left:initial;right:36px}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above{transform:translateY(-134%) translateX(-21px) scale(1)}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above[dir=rtl]{transform:translateY(-134%) translateX(21px) scale(1)}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--float-above{font-size:.8rem}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above{transform:translateY(-120%) translateX(-21px) scale(0.8)}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above[dir=rtl],[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above[dir=rtl]{transform:translateY(-120%) translateX(21px) scale(0.8)}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-notched-outline--upgraded .mdc-floating-label--float-above{font-size:1rem}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-dense 250ms 1}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label--shake,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense[dir=rtl] .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-dense-rtl 250ms 1}.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label{left:32px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label,.mdc-text-field--with-leading-icon.mdc-text-field--outlined.mdc-text-field--dense .mdc-floating-label[dir=rtl]{left:initial;right:32px}.mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing{left:initial;right:12px}[dir=rtl] .mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing,.mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing[dir=rtl]{left:12px;right:initial}.mdc-text-field--with-trailing-icon .mdc-text-field__input{padding-left:16px;padding-right:48px}[dir=rtl] .mdc-text-field--with-trailing-icon .mdc-text-field__input,.mdc-text-field--with-trailing-icon .mdc-text-field__input[dir=rtl]{padding-left:48px;padding-right:16px}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--leading{left:16px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--leading,.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--leading[dir=rtl]{left:initial;right:16px}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing{left:initial;right:12px}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing,.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__icon--trailing[dir=rtl]{left:12px;right:initial}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon .mdc-text-field__input{padding-right:48px;padding-left:48px}.mdc-text-field--dense .mdc-text-field__icon{bottom:16px;transform:scale(0.8)}.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__icon--leading{left:12px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__icon--leading,.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__icon--leading[dir=rtl]{left:initial;right:12px}.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__input{padding-left:44px;padding-right:16px}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__input,.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-text-field__input[dir=rtl]{padding-left:16px;padding-right:44px}.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-floating-label{left:44px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-floating-label,.mdc-text-field--with-leading-icon.mdc-text-field--dense .mdc-floating-label[dir=rtl]{left:initial;right:44px}.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing{left:initial;right:12px}[dir=rtl] .mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing,.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing[dir=rtl]{left:12px;right:initial}.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__input{padding-left:16px;padding-right:44px}[dir=rtl] .mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__input,.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__input[dir=rtl]{padding-left:44px;padding-right:16px}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--leading{left:12px;right:initial}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--leading,.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--leading[dir=rtl]{left:initial;right:12px}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing{left:initial;right:12px}[dir=rtl] .mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing,.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__icon--trailing[dir=rtl]{left:12px;right:initial}.mdc-text-field--with-leading-icon.mdc-text-field--with-trailing-icon.mdc-text-field--dense .mdc-text-field__input{padding-right:44px;padding-left:44px}.mdc-text-field--dense .mdc-floating-label--float-above{transform:translateY(-70%) scale(0.8)}.mdc-text-field--dense .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-text-field-dense 250ms 1}.mdc-text-field--dense .mdc-text-field__input{padding:12px 12px 0}.mdc-text-field--dense .mdc-floating-label{font-size:.813rem}.mdc-text-field--dense .mdc-floating-label--float-above{font-size:.813rem}.mdc-text-field__input:required~.mdc-floating-label::after,.mdc-text-field__input:required~.mdc-notched-outline .mdc-floating-label::after{margin-left:1px;content:"*"}.mdc-text-field--textarea{display:inline-flex;width:auto;height:auto;overflow:visible;transition:none}.mdc-text-field--textarea:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,.mdc-text-field--textarea:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,.mdc-text-field--textarea:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.38)}.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--textarea:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.87)}.mdc-text-field--textarea:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--textarea:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--textarea:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__trailing{border-color:#6200ee;border-color:var(--mdc-theme-primary, #6200ee)}.mdc-text-field--textarea .mdc-floating-label--shake{animation:mdc-floating-label-shake-float-above-textarea 250ms 1}.mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__leading{border-radius:4px 0 0 4px}[dir=rtl] .mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__leading[dir=rtl]{border-radius:0 4px 4px 0}.mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__trailing{border-radius:0 4px 4px 0}[dir=rtl] .mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--textarea .mdc-notched-outline .mdc-notched-outline__trailing[dir=rtl]{border-radius:4px 0 0 4px}.mdc-text-field--textarea::before,.mdc-text-field--textarea::after{content:none}.mdc-text-field--textarea:not(.mdc-text-field--disabled){background-color:transparent}.mdc-text-field--textarea .mdc-floating-label--float-above{transform:translateY(-144%) scale(1)}.mdc-text-field--textarea .mdc-floating-label--float-above{font-size:.75rem}.mdc-text-field--textarea.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--textarea .mdc-notched-outline--upgraded .mdc-floating-label--float-above{transform:translateY(-130%) scale(0.75)}.mdc-text-field--textarea.mdc-notched-outline--upgraded .mdc-floating-label--float-above,.mdc-text-field--textarea .mdc-notched-outline--upgraded .mdc-floating-label--float-above{font-size:1rem}.mdc-text-field--textarea .mdc-text-field-character-counter{left:initial;right:16px;position:absolute;bottom:13px}[dir=rtl] .mdc-text-field--textarea .mdc-text-field-character-counter,.mdc-text-field--textarea .mdc-text-field-character-counter[dir=rtl]{left:16px;right:initial}.mdc-text-field--textarea .mdc-text-field__input{align-self:auto;box-sizing:border-box;height:auto;margin:8px 1px 1px 0;padding:0 16px 16px;border:none;line-height:1.75rem}.mdc-text-field--textarea .mdc-text-field-character-counter+.mdc-text-field__input{margin-bottom:28px;padding-bottom:0}.mdc-text-field--textarea .mdc-floating-label{top:17px;width:auto;pointer-events:none}.mdc-text-field--textarea .mdc-floating-label:not(.mdc-floating-label--float-above){transform:none}.mdc-text-field--textarea.mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--focused .mdc-notched-outline__trailing{border-width:2px}.mdc-text-field--fullwidth{width:100%}.mdc-text-field--fullwidth:not(.mdc-text-field--disabled) .mdc-text-field__input{border-bottom-color:rgba(0,0,0,.42)}.mdc-text-field--fullwidth.mdc-text-field--disabled .mdc-text-field__input{border-bottom-color:rgba(0,0,0,.42)}.mdc-text-field--fullwidth:not(.mdc-text-field--textarea){display:block}.mdc-text-field--fullwidth:not(.mdc-text-field--textarea)::before,.mdc-text-field--fullwidth:not(.mdc-text-field--textarea)::after{content:none}.mdc-text-field--fullwidth:not(.mdc-text-field--textarea):not(.mdc-text-field--disabled){background-color:transparent}.mdc-text-field--fullwidth:not(.mdc-text-field--textarea) .mdc-text-field__input{padding:0}.mdc-text-field--fullwidth.mdc-text-field--textarea .mdc-text-field__input{resize:vertical}.mdc-text-field--fullwidth.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-text-field__input{border-bottom-color:#b00020;border-bottom-color:var(--mdc-theme-error, #b00020)}.mdc-text-field-helper-line{display:flex;justify-content:space-between;box-sizing:border-box}.mdc-text-field--dense+.mdc-text-field-helper-line{margin-bottom:4px}.mdc-text-field+.mdc-text-field-helper-line{padding-right:16px;padding-left:16px}.mdc-form-field>.mdc-text-field+label{align-self:flex-start}.mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-floating-label{color:rgba(98,0,238,.87)}.mdc-text-field--focused+.mdc-text-field-helper-line .mdc-text-field-helper-text:not(.mdc-text-field-helper-text--validation-msg){opacity:1}.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-text-field__input{border-bottom-color:#b00020;border-bottom-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-text-field__input:hover{border-bottom-color:#b00020;border-bottom-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-line-ripple{background-color:#b00020;background-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-floating-label{color:#b00020;color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--invalid+.mdc-text-field-helper-line .mdc-text-field-helper-text--validation-msg{color:#b00020;color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid .mdc-text-field__input{caret-color:#b00020;caret-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-text-field__icon--trailing{color:#b00020;color:var(--mdc-theme-error, #b00020)}.mdc-text-field--invalid+.mdc-text-field-helper-line .mdc-text-field-helper-text--validation-msg{opacity:1}.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__input:hover~.mdc-notched-outline .mdc-notched-outline__trailing,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled):not(.mdc-text-field--focused) .mdc-text-field__icon:hover~.mdc-notched-outline .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__leading,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__notch,.mdc-text-field--outlined.mdc-text-field--invalid:not(.mdc-text-field--disabled).mdc-text-field--focused .mdc-notched-outline__trailing{border-color:#b00020;border-color:var(--mdc-theme-error, #b00020)}.mdc-text-field--disabled{background-color:#fafafa;border-bottom:none;pointer-events:none}.mdc-text-field--disabled .mdc-text-field__input{border-bottom-color:rgba(0,0,0,.06)}.mdc-text-field--disabled .mdc-text-field__input{color:rgba(0,0,0,.38)}@media all{.mdc-text-field--disabled .mdc-text-field__input::placeholder{color:rgba(0,0,0,.38)}}@media all{.mdc-text-field--disabled .mdc-text-field__input:-ms-input-placeholder{color:rgba(0,0,0,.38)}}.mdc-text-field--disabled .mdc-floating-label{color:rgba(0,0,0,.38)}.mdc-text-field--disabled+.mdc-text-field-helper-line .mdc-text-field-helper-text{color:rgba(0,0,0,.38)}.mdc-text-field--disabled .mdc-text-field-character-counter,.mdc-text-field--disabled+.mdc-text-field-helper-line .mdc-text-field-character-counter{color:rgba(0,0,0,.38)}.mdc-text-field--disabled .mdc-text-field__icon--leading{color:rgba(0,0,0,.3)}.mdc-text-field--disabled .mdc-text-field__icon--trailing{color:rgba(0,0,0,.3)}.mdc-text-field--disabled .mdc-floating-label{cursor:default}.mdc-text-field--textarea.mdc-text-field--disabled{background-color:transparent;background-color:#f9f9f9}.mdc-text-field--textarea.mdc-text-field--disabled .mdc-notched-outline__leading,.mdc-text-field--textarea.mdc-text-field--disabled .mdc-notched-outline__notch,.mdc-text-field--textarea.mdc-text-field--disabled .mdc-notched-outline__trailing{border-color:rgba(0,0,0,.06)}.mdc-text-field--textarea.mdc-text-field--disabled .mdc-text-field__input{border-bottom:none}.mdc-text-field--end-aligned .mdc-text-field__input{text-align:right}[dir=rtl] .mdc-text-field--end-aligned .mdc-text-field__input,.mdc-text-field--end-aligned .mdc-text-field__input[dir=rtl]{text-align:left}@keyframes mdc-floating-label-shake-float-above-text-field-dense{0%{transform:translateX(calc(0 - 0%)) translateY(-70%) scale(0.8)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0%)) translateY(-70%) scale(0.8)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0%)) translateY(-70%) scale(0.8)}100%{transform:translateX(calc(0 - 0%)) translateY(-70%) scale(0.8)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined{0%{transform:translateX(calc(0 - 0%)) translateY(-34.75px) scale(0.75)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0%)) translateY(-34.75px) scale(0.75)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0%)) translateY(-34.75px) scale(0.75)}100%{transform:translateX(calc(0 - 0%)) translateY(-34.75px) scale(0.75)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined-dense{0%{transform:translateX(calc(0 - 0%)) translateY(-120%) scale(0.8)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0%)) translateY(-120%) scale(0.8)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0%)) translateY(-120%) scale(0.8)}100%{transform:translateX(calc(0 - 0%)) translateY(-120%) scale(0.8)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined-leading-icon{0%{transform:translateX(calc(0 - 0)) translateY(-34.75px) scale(0.75)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0)) translateY(-34.75px) scale(0.75)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0)) translateY(-34.75px) scale(0.75)}100%{transform:translateX(calc(0 - 0)) translateY(-34.75px) scale(0.75)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-dense{0%{transform:translateX(calc(0 - 21px)) translateY(-120%) scale(0.8)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 21px)) translateY(-120%) scale(0.8)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 21px)) translateY(-120%) scale(0.8)}100%{transform:translateX(calc(0 - 21px)) translateY(-120%) scale(0.8)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-rtl{0%{transform:translateX(calc(0 - 0)) translateY(-34.75px) scale(0.75)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0)) translateY(-34.75px) scale(0.75)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0)) translateY(-34.75px) scale(0.75)}100%{transform:translateX(calc(0 - 0)) translateY(-34.75px) scale(0.75)}}@keyframes mdc-floating-label-shake-float-above-text-field-outlined-leading-icon-dense-rtl{0%{transform:translateX(calc(0 - -21px)) translateY(-120%) scale(0.8)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - -21px)) translateY(-120%) scale(0.8)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - -21px)) translateY(-120%) scale(0.8)}100%{transform:translateX(calc(0 - -21px)) translateY(-120%) scale(0.8)}}@keyframes mdc-floating-label-shake-float-above-textarea{0%{transform:translateX(calc(0 - 0%)) translateY(-130%) scale(0.75)}33%{animation-timing-function:cubic-bezier(0.5, 0, 0.701732, 0.495819);transform:translateX(calc(4% - 0%)) translateY(-130%) scale(0.75)}66%{animation-timing-function:cubic-bezier(0.302435, 0.381352, 0.55, 0.956352);transform:translateX(calc(-4% - 0%)) translateY(-130%) scale(0.75)}100%{transform:translateX(calc(0 - 0%)) translateY(-130%) scale(0.75)}}.material-icons{font-family:var(--mdc-icon-font, "Material Icons");font-weight:normal;font-style:normal;font-size:var(--mdc-icon-size, 24px);line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;-moz-osx-font-smoothing:grayscale;font-feature-settings:"liga"}.hidden,.hidden::before,.hidden::after{display:none}:host{display:inline-block;outline:none}:host([fullwidth]){display:block}.mdc-text-field{display:flex;width:100%;border-radius:4px 4px 0 0;border-radius:var(--mdc-text-field-filled-border-radius, 4px 4px 0 0)}mwc-notched-outline{--mdc-notched-outline-border-color: var(--mdc-text-field-outlined-idle-border-color, rgba(0, 0, 0, 0.38))}:host(:not([disabled]):hover) :not(.mdc-text-field--invalid):not(.mdc-text-field--focused) mwc-notched-outline{--mdc-notched-outline-border-color: var(--mdc-text-field-outlined-hover-border-color, rgba(0, 0, 0, 0.87))}:host(:not([disabled])) .mdc-text-field:not(.mdc-text-field--outlined){background-color:var(--mdc-text-field-fill-color, whitesmoke)}:host(:not([disabled])) .mdc-text-field:not(.mdc-text-field--outlined):not(.mdc-text-field--invalid) .mdc-text-field__input{border-bottom-color:var(--mdc-text-field-idle-line-color, black)}:host(:not([disabled])) .mdc-text-field:not(.mdc-text-field--outlined):not(.mdc-text-field--invalid) .mdc-text-field__input:hover{border-bottom-color:var(--mdc-text-field-hover-line-color, #000001)}:host(:not([disabled])) .mdc-text-field.mdc-text-field--invalid mwc-notched-outline{--mdc-notched-outline-border-color: var(--mdc-text-field-error-color, var(--mdc-theme-error, #b00020))}:host(:not([disabled])) .mdc-text-field.mdc-text-field--invalid+.mdc-text-field-helper-line .mdc-text-field-character-counter,:host(:not([disabled])) .mdc-text-field.mdc-text-field--invalid .mdc-text-field__icon{color:var(--mdc-text-field-error-color, var(--mdc-theme-error, #b00020))}:host(:not([disabled])) .mdc-text-field:not(.mdc-text-field--invalid):not(.mdc-text-field--focused) .mdc-floating-label,:host(:not([disabled])) .mdc-text-field:not(.mdc-text-field--invalid):not(.mdc-text-field--focused) .mdc-floating-label::after{color:var(--mdc-text-field-label-ink-color, rgba(0, 0, 0, 0.6))}:host(:not([disabled])) .mdc-text-field.mdc-text-field--focused mwc-notched-outline{--mdc-notched-outline-stroke-width: 2px}:host(:not([disabled])) .mdc-text-field.mdc-text-field--focused:not(.mdc-text-field--invalid) mwc-notched-outline{--mdc-notched-outline-border-color: var(--mdc-text-field-focused-label-color, var(--mdc-theme-primary, rgba(98, 0, 238, 0.87)))}:host(:not([disabled])) .mdc-text-field.mdc-text-field--focused:not(.mdc-text-field--invalid) .mdc-floating-label{color:#6200ee;color:var(--mdc-theme-primary, #6200ee)}:host(:not([disabled])) .mdc-text-field.mdc-text-field--focused:not(.mdc-text-field--invalid) .mdc-text-field__input:required~.mdc-floating-label::after,:host(:not([disabled])) .mdc-text-field.mdc-text-field--focused:not(.mdc-text-field--invalid) .mdc-text-field__input:required~.mdc-notched-outline .mdc-floating-label::after{color:#6200ee;color:var(--mdc-theme-primary, #6200ee)}:host(:not([disabled])) .mdc-text-field .mdc-text-field__input{color:var(--mdc-text-field-ink-color, rgba(0, 0, 0, 0.87))}:host(:not([disabled])) .mdc-text-field .mdc-text-field__input::placeholder{color:var(--mdc-text-field-label-ink-color, rgba(0, 0, 0, 0.6))}:host(:not([disabled])) .mdc-text-field-helper-line .mdc-text-field-helper-text:not(.mdc-text-field-helper-text--validation-msg),:host(:not([disabled])) .mdc-text-field-helper-line:not(.mdc-text-field--invalid) .mdc-text-field-character-counter{color:var(--mdc-text-field-label-ink-color, rgba(0, 0, 0, 0.6))}:host([disabled]) .mdc-text-field:not(.mdc-text-field--outlined){background-color:var(--mdc-text-field-disabled-fill-color, #fafafa)}:host([disabled]) .mdc-text-field.mdc-text-field--outlined mwc-notched-outline{--mdc-notched-outline-border-color: var(--mdc-text-field-outlined-disabled-border-color, rgba(0, 0, 0, 0.06))}:host([disabled]) .mdc-text-field:not(.mdc-text-field--invalid):not(.mdc-text-field--focused) .mdc-floating-label,:host([disabled]) .mdc-text-field:not(.mdc-text-field--invalid):not(.mdc-text-field--focused) .mdc-floating-label::after{color:var(--mdc-text-field-disabled-ink-color, rgba(0, 0, 0, 0.38))}:host([disabled]) .mdc-text-field .mdc-text-field__input,:host([disabled]) .mdc-text-field .mdc-text-field__input::placeholder{color:var(--mdc-text-field-disabled-ink-color, rgba(0, 0, 0, 0.38))}:host([disabled]) .mdc-text-field-helper-line .mdc-text-field-helper-text,:host([disabled]) .mdc-text-field-helper-line .mdc-text-field-character-counter{color:var(--mdc-text-field-disabled-ink-color, rgba(0, 0, 0, 0.38))}`;
+
+/**
+@license
+Copyright 2019 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+let TextField = class TextField extends TextFieldBase {};
+TextField.styles = style$2;
+TextField = __decorate([customElement('mwc-textfield')], TextField);
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$a = self => function () {
+  // @ts-ignore
+  const {
+    utterance,
+    utteranceTextChanged,
+    readonly
+  } = this;
+  const {
+    text
+  } = utterance || {};
+  return html`
+    <style>
+      ${styles$n}
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+
+    </style>
+
+    <!-- <textarea class="utterance-input" type="text" value="${text}" placeholder="utterance" @change="${utteranceTextChanged.bind(this)}"> -->
+    <mwc-textfield outlined class="utterance-input" placeholder="topic" value="${text}" @change="${utteranceTextChanged.bind(this)}"></mwc-textfield>
+
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotDraftUtterance = _decorate([customElement('protobot-draft-utterance')], function (_initialize, _GetTopicMixin) {
+  class ProtobotDraftUtterance extends _GetTopicMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotDraftUtterance,
+    d: [{
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "readonly",
+
+      value() {
+        return false;
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$a(this);
+      }
+    }, {
+      kind: "method",
+      key: "utteranceTextChanged",
+      value: async function utteranceTextChanged(event) {
+        if (this.readonly) {
+          return;
+        }
+
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.utterance.text !== value) {
+          await database.ref(`utterances/data/${this.utteranceId}/text`).set(value);
+        }
+      }
+    }]
+  };
+}, GetTopicMixin(LitElement));
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$b = self => function () {
+  // const { topicUtterance } = this;
   return html`
     <style>
       ${styles$l}
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+
+    </style>
+
+    <div class = "topic-utterance-set">
+      <protobot-draft-topic></protobot-draft-topic>
+      <protobot-draft-utterance></protobot-draft-utterance>
+    </div>
+
+
+  `;
+}.bind(self)();
+
+// Extend the LitElement base class
+// @ts-ignore
+
+let ProtobotTopic = _decorate([customElement('protobot-topic')], function (_initialize, _GetTopicMixin) {
+  class ProtobotTopic extends _GetTopicMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotTopic,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$b(this);
+      }
+    }]
+  };
+}, GetTopicMixin(LitElement));
+
+var styles$o = ":host{\n  display: flex;\n  justify-content: center;\n  width: 100%;\n  margin: 20px;\n}\n\n.topic-utterance-set {\n  display:flex;\n  flex-direction: row;\n}\n";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$c = self => function () {
+  // const { topicUtterance } = this;
+  return html`
+    <style>
+      ${styles$o}
+      @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
+
+    </style>
+
+    <div class = "topic-utterance-set">
+      <protobot-draft-topic></protobot-draft-topic>
+      <protobot-draft-utterance></protobot-draft-utterance>
+    </div>
+
+
+  `;
+}.bind(self)();
+
+// Extend the LitElement base class
+// @ts-ignore
+
+let ProtobotSubtopic = _decorate([customElement('protobot-subtopic')], function (_initialize, _GetTopicMixin) {
+  class ProtobotSubtopic extends _GetTopicMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotSubtopic,
+    d: [{
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$c(this);
+      }
+    }]
+  };
+}, GetTopicMixin(LitElement));
+
+var styles$p = "/* :host{\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  padding: 5em 0;\n} */\n\n:host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 1fr 3fr;\n}\n\n.authoring-left {\n  background-color: rgb(240, 240, 240);\n  display: flex;\n  align-items: left;\n  flex-direction: column;\n  padding: 1em;\n  margin-right: 1em;\n}\n\n.topic-button {\n  margin:10px;\n}\n\n.sub-button {\n  margin:10px;\n}\n\n.authoring-center {\n  display: flex;\n  align-items: center;\n  flex-direction: column;\n  justify-content: center;\n  padding: 5em 0;\n}\n\nh1 {\n  text-align: center;\n  font-family: 'Montserrat', sans-serif;\n  font-weight: bold;\n}\n\n.swap-button {\n  --button-font-size: 10px;\n  --button-padding: 10px;\n  --button-bg\t: rgb(70, 70, 70);\n}";
+
+/**
+ *
+ * @param {any} self
+ */
+
+const template$d = self => function () {
+  // @ts-ignore
+  const {
+    topics,
+    swap,
+    newTopic,
+    subTopic,
+    hello
+  } = this;
+  return html`
+    <style>
+      ${styles$p}
     </style>
 
     <div class = "authoring-left">
-      <wl-button class="topic-button" style="text-align: center" type="button" @click="${addTopic.bind(this)}">Message</wl-button>
-      <wl-button class="sub-button" style="text-align: center" type="button" @click="${addSub.bind(this)}">Sub-Message</wl-button>
+      <wl-button class="topic-button" style="text-align: center" type="button" @click="${newTopic.bind(this)}">Message</wl-button>
+      <wl-button class="sub-button" style="text-align: center" type="button" @click="${subTopic.bind(this)}">Sub-Message</wl-button>
     </div>
 
     <div class = "authoring-center">
-    <!-- ${topics.map((topic, index) => html`
-      <conversational-flow-topic topicId="${topic.id}" .sub="${topic.sub}" index="${index}"></conversational-flow-topic>
-
-      ${index !== topics.length - 1 ? html`
-        <div style="text-align: center">
-          <wl-button class="swap-button" style="text-align: center" type="button" @click="${swap.bind(this)}" index="${index}">Swap</wl-button>
-        </div>
-      ` : ''}
-    `)} -->
-
-    ${hello.map((topic, index) => html`${topic}`)}
       <protobot-topic></protobot-topic>
+      <protobot-subtopic></protobot-subtopic>
     </div>
   `;
 }.bind(self)();
@@ -25242,12 +28065,44 @@ let ProtobotAuthoring2 = _decorate([customElement('protobot-authoring2')], funct
   return {
     F: ProtobotAuthoring2,
     d: [{
+      kind: "field",
+      decorators: [property({
+        type: Number
+      })],
+      key: "index",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "sub",
+
+      value() {
+        return false;
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "readonly",
+
+      value() {
+        return false;
+      }
+
+    }, {
       kind: "method",
       key: "render",
       value: function render() {
-        this.hello = ['a', 'b', 'c'];
-        return template$9(this);
-      }
+        return template$d(this);
+      } // render () {
+      //   this.hello = ['a','b','c']
+      //   return template(this);
+      // }
+
     }, {
       kind: "method",
       key: "domainChanged",
@@ -25269,12 +28124,136 @@ let ProtobotAuthoring2 = _decorate([customElement('protobot-authoring2')], funct
       }
     }, {
       kind: "method",
-      key: "addTopic",
-      value: async function addTopic(event) {}
+      key: "topicNameChanged",
+      value: async function topicNameChanged(event) {
+        if (this.readonly) {
+          return;
+        }
+
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+
+        if (this.topic.name !== value) {
+          await database.ref(`labels/data/${this.topicId}/name`).set(value);
+        }
+      }
     }, {
       kind: "method",
-      key: "addSub",
-      value: async function addSub(event) {}
+      key: "newTopic",
+      value: function newTopic() {
+        this.createTopic();
+      }
+    }, {
+      kind: "method",
+      key: "subTopic",
+      value: function subTopic() {
+        this.createTopic(true);
+      }
+    }, {
+      kind: "method",
+      key: "createTopic",
+      value: async function createTopic(sub) {
+        const {
+          key: topicId
+        } = database.ref('labels/data').push();
+        const {
+          key: utteranceId
+        } = database.ref('utterances/data').push();
+        const {
+          domain
+        } = this.topic;
+        const updates = {};
+        const snap = await database.ref(`domains/data/${domain}`).once('value');
+        const {
+          topics,
+          deployedVersion
+        } = snap.val() || {
+          topics: {}
+        };
+        const array = [];
+
+        for (const topic in topics) {
+          array.push({
+            topic,
+            order: topics[topic]
+          });
+        }
+
+        const topicArray = array.sort((i, j) => i.order - j.order).map(i => i.topic);
+        const topic = {
+          domain,
+          name: 'Topic',
+          required: true,
+          mainUtterance: utteranceId,
+          utterances: {}
+        };
+        topic.utterances[utteranceId] = true;
+        const utterance = {
+          bot: true,
+          domain,
+          required: true,
+          text: 'Utterance',
+          version: deployedVersion,
+          topics: {}
+        };
+        utterance.topics[topicId] = true;
+        topicArray.splice(this.index + 1, 0, topicId);
+        const newTopics = {};
+
+        for (const i in topicArray) {
+          newTopics[topicArray[i]] = parseInt(i);
+        }
+
+        updates[`labels/data/${topicId}`] = topic;
+        updates[`utterances/data/${utteranceId}`] = utterance;
+        updates[`domains/data/${domain}/topics`] = newTopics;
+        updates[`domains/data/${domain}/subs/${topicId}`] = sub || false;
+        updates[`domains/data/${domain}/topicList/${topicId}`] = true;
+        await database.ref().update(updates);
+      }
+    }, {
+      kind: "method",
+      key: "deleteTopic",
+      value: async function deleteTopic() {
+        const {
+          topic
+        } = this;
+        const {
+          domain
+        } = topic;
+        const updates = {};
+        const snap = await database.ref(`domains/data/${domain}`).once('value');
+        const {
+          topics
+        } = snap.val() || {
+          topics: {}
+        };
+        const array = [];
+
+        for (const topic in topics) {
+          array.push({
+            topic,
+            order: topics[topic]
+          });
+        }
+
+        const topicArray = array.sort((i, j) => i.order - j.order).map(i => i.topic);
+        topicArray.splice(this.index, 1);
+        const newTopics = {};
+
+        for (const i in topicArray) {
+          newTopics[topicArray[i]] = parseInt(i);
+        } // updates[`labels/data/${topicId}`] = null;
+
+
+        updates[`domains/data/${domain}/topics`] = newTopics; // updates[`domains/data/${domain}/topicList/${topicId}`] = null;
+
+        await database.ref().update(updates);
+      }
     }, {
       kind: "method",
       key: "swap",
@@ -25310,14 +28289,14 @@ let ProtobotAuthoring2 = _decorate([customElement('protobot-authoring2')], funct
   };
 }, GetDomainMixin(LitElement));
 
-var styles$m = "/* .flex-area {\n  display: flex;\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n} */\n\n.new-label {\n  background-color: rgb(82, 108, 255);\n  border: none;\n  border-radius: 4px;\n  color: white;\n  font-weight: bold;\n  font-size: 15px;\n  font-family: 'Raleway', sans-serif;\n  padding: 3px;\n}\n";
+var styles$q = "/* .flex-area {\n  display: flex;\n  margin: 20px auto;\n  max-width: 800px;\n}\n\n.flex-1 {\n  flex: 1;\n  background: purple;\n  padding: 12px;\n}\n\n.flex-2 {\n  flex: 3;\n  background: purple;\n  padding: 12px\n}\n\n.text-area {\n  width: 100%;\n}\n\n.sub {\n  padding-left: 80px\n} */\n\n.new-label {\n  background-color: rgb(82, 108, 255);\n  border: none;\n  border-radius: 4px;\n  color: white;\n  font-weight: bold;\n  font-size: 15px;\n  font-family: 'Raleway', sans-serif;\n  padding: 3px;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$a = self => function () {
+const template$e = self => function () {
   // @ts-ignore
   const {
     topic,
@@ -25329,7 +28308,7 @@ const template$a = self => function () {
   } = topic || {};
   return html`
     <style>
-      ${styles$m}
+      ${styles$q}
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
@@ -25396,7 +28375,7 @@ let TopicListItem = _decorate([customElement('topic-list-item')], function (_ini
       key: "render",
       value: // @ts-ignore
       function render() {
-        return template$a(this);
+        return template$e(this);
       }
     }, {
       kind: "method",
@@ -25487,7 +28466,7 @@ function nextIndex(group, currentIndex, keyCode) {
   return null;
 }
 
-var styles$n = ``;
+var styles$r = ``;
 
 class RadioBehavior extends SwitchBehavior {
   constructor() {
@@ -25545,14 +28524,14 @@ class RadioBehavior extends SwitchBehavior {
 
 }
 
-RadioBehavior.styles = [...SwitchBehavior.styles, cssResult(styles$n)];
+RadioBehavior.styles = [...SwitchBehavior.styles, cssResult(styles$r)];
 
 __decorate([property({
   type: String,
   reflect: true
 }), __metadata('design:type', String)], RadioBehavior.prototype, 'role', void 0);
 
-var styles$o = `:host{--_radio-bg:var(--radio-bg,transparent);--_radio-color:var(--radio-color,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))));background:var(--_radio-bg);color:var(--_radio-color);width:var(--radio-size,1.25rem);height:var(--radio-size,1.25rem);border:var(--radio-border-config,.125rem solid) currentColor;border-radius:var(--radio-border-radius,100%);transition:var(--radio-transition,background var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)),border-color var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));position:relative;display:inline-flex;align-items:center;justify-content:center;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([disabled])){cursor:pointer}:host([checked]){--_radio-bg:var(--radio-bg-checked,transparent);--_radio-color:var(--radio-color-checked,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))))}:host([checked]) #dot{transform:scale(1)}:host(:focus),:host(:hover){will-change:border,background}:host(:focus) #dot,:host(:hover) #dot{will-change:transform,background}:host([disabled]){--_radio-bg:var(--radio-bg-disabled,transparent);--_radio-color:var(--radio-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));pointer-events:none}:host([disabled][checked]){--_radio-bg:var(--radio-bg-disabled-checked,transparent);--_radio-color:var(--radio-color-disabled-checked,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))))}#dot{background:currentColor;width:var(--radio-dot-size,.625rem);height:var(--radio-dot-size,.625rem);border-radius:var(--radio-dot-border-radius,100%);transition:var(--radio-dot-transition,transform var(--transition-duration-medium,.18s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));transform:scale(0)}#ripple{transform:var(--radio-ripple-transform,translate(-50%,-50%) scale(1.8))}`;
+var styles$s = `:host{--_radio-bg:var(--radio-bg,transparent);--_radio-color:var(--radio-color,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))));background:var(--_radio-bg);color:var(--_radio-color);width:var(--radio-size,1.25rem);height:var(--radio-size,1.25rem);border:var(--radio-border-config,.125rem solid) currentColor;border-radius:var(--radio-border-radius,100%);transition:var(--radio-transition,background var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)),border-color var(--transition-duration-fast,.12s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));position:relative;display:inline-flex;align-items:center;justify-content:center;outline:none;-webkit-user-select:none;-moz-user-select:none;user-select:none}:host(:not([disabled])){cursor:pointer}:host([checked]){--_radio-bg:var(--radio-bg-checked,transparent);--_radio-color:var(--radio-color-checked,hsl(var(--primary-500,var(--primary-hue,224),var(--primary-saturation,47%),var(--primary-lightness,38%))))}:host([checked]) #dot{transform:scale(1)}:host(:focus),:host(:hover){will-change:border,background}:host(:focus) #dot,:host(:hover) #dot{will-change:transform,background}:host([disabled]){--_radio-bg:var(--radio-bg-disabled,transparent);--_radio-color:var(--radio-color-disabled,hsl(var(--shade-400,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,65%))));pointer-events:none}:host([disabled][checked]){--_radio-bg:var(--radio-bg-disabled-checked,transparent);--_radio-color:var(--radio-color-disabled-checked,hsl(var(--shade-500,var(--shade-hue,200),var(--shade-saturation,4%),var(--shade-lightness,55%))))}#dot{background:currentColor;width:var(--radio-dot-size,.625rem);height:var(--radio-dot-size,.625rem);border-radius:var(--radio-dot-border-radius,100%);transition:var(--radio-dot-transition,transform var(--transition-duration-medium,.18s) var(--transition-timing-function-deceleration-curve,cubic-bezier(0,0,.2,1)));transform:scale(0)}#ripple{transform:var(--radio-ripple-transform,translate(-50%,-50%) scale(1.8))}`;
 
 let Radio = class Radio extends RadioBehavior {
   render() {
@@ -25560,7 +28539,7 @@ let Radio = class Radio extends RadioBehavior {
   }
 
 };
-Radio.styles = [...RadioBehavior.styles, cssResult(styles$o)];
+Radio.styles = [...RadioBehavior.styles, cssResult(styles$s)];
 Radio = __decorate([customElement('wl-radio')], Radio);
 
 const $_documentContainer$3 = html$1`<dom-module id="lumo-radio-button" theme-for="vaadin-radio-button">
@@ -25949,7 +28928,7 @@ class RadioButtonElement extends ElementMixin$1(ControlStateMixin(ThemableMixin(
 
 customElements.define(RadioButtonElement.is, RadioButtonElement);
 
-var styles$p = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 50px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.dialog {\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n  margin-top: 20px;\n}\n\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n  background-color: rgb(35, 35, 146);\n  color: white;\n}\n\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n  color: rgb(35, 35, 146);\n  border: 1px solid rgb(57, 57, 143);\n}\n\n.gap-container {\n  width:15px;\n  height:auto;\n  display:inline-block;\n}\n\n.link-close {\n  justify-content: space-around;\n  align-content: space-around;\n  background-color: rgb(35, 35, 146);\n  color: white;\n  margin-top: 20px;\n}\n\n.money {\n  color: tomato;\n}";
+var styles$t = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 50px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.dialog {\n  position: fixed;\n  width:100%;\n  height: 100%;\n  left: 0;\n  top: 0;\n  background: rgba(10,10,10,0.8);\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  flex-direction: row-reverse;\n  margin-top: 20px;\n}\n\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n  background-color: rgb(35, 35, 146);\n  color: white;\n}\n\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n  color: rgb(35, 35, 146);\n  border: 1px solid rgb(57, 57, 143);\n}\n\n.gap-container {\n  width:15px;\n  height:auto;\n  display:inline-block;\n}\n\n.link-close {\n  justify-content: space-around;\n  align-content: space-around;\n  background-color: rgb(35, 35, 146);\n  color: white;\n  margin-top: 20px;\n}\n\n.money {\n  color: tomato;\n}";
 
 /**
  * @license
@@ -25969,7 +28948,7 @@ var styles$p = "h3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  disp
  * Used to unset existing values when a new ClassInfo object is applied.
  */
 
-const classMapCache = new WeakMap();
+const classMapCache$1 = new WeakMap();
 /**
  * A directive that applies CSS classes. This must be used in the `class`
  * attribute and must be the only part used in the attribute. It takes each
@@ -25981,7 +28960,7 @@ const classMapCache = new WeakMap();
  * @param classInfo {ClassInfo}
  */
 
-const classMap = directive(classInfo => part => {
+const classMap$1 = directive(classInfo => part => {
   if (!(part instanceof AttributePart) || part instanceof PropertyPart || part.committer.name !== 'class' || part.committer.parts.length > 1) {
     throw new Error('The `classMap` directive must be used in the `class` attribute ' + 'and must be the only part in the attribute.');
   }
@@ -25993,7 +28972,7 @@ const classMap = directive(classInfo => part => {
     element
   } = committer; // handle static classes
 
-  if (!classMapCache.has(part)) {
+  if (!classMapCache$1.has(part)) {
     element.className = committer.strings.join(' ');
   }
 
@@ -26001,7 +28980,7 @@ const classMap = directive(classInfo => part => {
     classList
   } = element; // remove old classes that no longer apply
 
-  const oldInfo = classMapCache.get(part);
+  const oldInfo = classMapCache$1.get(part);
 
   for (const name in oldInfo) {
     if (!(name in classInfo)) {
@@ -26021,7 +29000,7 @@ const classMap = directive(classInfo => part => {
     }
   }
 
-  classMapCache.set(part, classInfo);
+  classMapCache$1.set(part, classInfo);
 });
 
 const $_documentContainer$4 = document.createElement('template');
@@ -26656,7 +29635,7 @@ customElements.define(ButtonElement.is, ButtonElement);
  * @param {any} self
  */
 
-const template$b = self => function () {
+const template$f = self => function () {
   // @ts-ignore
   const {
     deployedVersion,
@@ -26740,11 +29719,11 @@ const template$b = self => function () {
       `];
   return html`
     <style>
-      ${styles$p}
+      ${styles$t}
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
-    <div class ="${classMap({
+    <div class ="${classMap$1({
     dialog: true,
     opened: opened,
     closed: !opened
@@ -26824,7 +29803,7 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
       kind: "method",
       key: "render",
       value: function render() {
-        return template$b(this);
+        return template$f(this);
       }
     }, {
       kind: "method",
@@ -26956,14 +29935,14 @@ let ProtobotDeployModal = _decorate([customElement('protobot-deploy-modal')], fu
   };
 }, GetDomainMixin(LitElement));
 
-var styles$q = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
+var styles$u = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$c = self => function () {
+const template$g = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -26985,7 +29964,7 @@ const template$c = self => function () {
   } = domain || {};
   return html`
     <style>
-      ${styles$q}
+      ${styles$u}
     </style>
     <h3>Existing Topic List</h3>
 
@@ -27075,7 +30054,7 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
       kind: "method",
       key: "render",
       value: function render() {
-        return template$c(this);
+        return template$g(this);
       }
     }, {
       kind: "method",
@@ -27189,9 +30168,242 @@ let ProtobotAuthoringSidebar = _decorate([customElement('protobot-authoring-side
   };
 }, GetDomainMixin(LitElement));
 
-var styles$r = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n.empty-bottom {\n    height: 30px;\n    width:100%\n}\n\n";
+var styles$v = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n  --input-font-family: 'Open Sans', sans-serif;\n  --textarea-min-height: 150px;\n  --input-font-size: 15px;\n  color: blue;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
-var styles$s = ".feed{\n  display:flex;\n  margin-left:400px;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n  margin-right:400px;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n\n.utterance {\n  font-family: 'Open sans', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n.utterance.utterance__right.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}\n\n";
+/**
+ *
+ * @param {any} self
+ */
+
+const template$h = self => function () {
+  // @ts-ignore
+  const {
+    topicList,
+    deploy,
+    domain,
+    handleCommitMsg,
+    dialogVisible,
+    dialogStage,
+    deployUrl,
+    nextDialogStage,
+    prevDialogStage,
+    toggleDialog,
+    closeDialog,
+    urlGenerator,
+    closeTwoDialog
+  } = this;
+  const {
+    commitMessage
+  } = domain || {};
+  return html`
+    <style>
+      ${styles$v}
+    </style>
+    <!-- <h3>Existing Topic List</h3>
+
+    <ul class ="topic-list">
+    ${topicList.map(topic => html`
+      <li>
+        <topic-list-item class="item" topicId="${topic.id}" .included="${topic.included}">
+        </topic-list-item>
+      </li>
+    `)}
+    </ul> -->
+
+    <div>
+      <h3>Commit Message</h3>
+      <wl-textarea outlined
+        class = "commit-input"
+        value="${commitMessage}"
+        @change="${handleCommitMsg.bind(this)}"
+        @submit="${handleCommitMsg.bind(this)}">
+      </wl-textarea outlined>
+    </div>
+
+    <!-- <protobot-memo-all></protobot-memo-all> -->
+
+    <div class="button-container">
+      <!-- <wl-button class="button" type="button" @click="${deploy.bind(this)}">Deploy</wl-button> -->
+      <wl-button class="button" type="button" @click="${toggleDialog.bind(this)}">Ready to Deploy</wl-button>
+      <protobot-deploy-modal ?opened="${dialogVisible}" stage="${dialogStage}" deployUrl="${deployUrl}"
+        @dialog-next="${nextDialogStage.bind(this)}"
+        @dialog-prev="${prevDialogStage.bind(this)}"
+        @dialog-accept="${urlGenerator.bind(this)}"
+        @dialog-cancel="${closeDialog.bind(this)}"
+        @dialog-close-2="${closeTwoDialog.bind(this)}">
+      </protobot-deploy-modal>
+
+    </div>
+  `;
+}.bind(self)();
+
+// @ts-ignore
+
+let ProtobotAuthoringSidebar2 = _decorate([customElement('protobot-authoring-sidebar2')], function (_initialize, _GetDomainMixin) {
+  class ProtobotAuthoringSidebar2 extends _GetDomainMixin {
+    constructor(...args) {
+      super(...args);
+
+      _initialize(this);
+    }
+
+  }
+
+  return {
+    F: ProtobotAuthoringSidebar2,
+    d: [{
+      kind: "field",
+      decorators: [property()],
+      key: "commitMessage",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Boolean
+      })],
+      key: "dialogVisible",
+      value: void 0
+    }, {
+      kind: "field",
+      decorators: [property({
+        type: Number
+      })],
+      key: "dialogStage",
+
+      value() {
+        return 0;
+      }
+
+    }, {
+      kind: "field",
+      decorators: [property()],
+      key: "deployUrl",
+
+      value() {
+        return '';
+      }
+
+    }, {
+      kind: "method",
+      key: "render",
+      value: function render() {
+        return template$h(this);
+      }
+    }, {
+      kind: "method",
+      key: "handleCommitMsg",
+      value: async function handleCommitMsg(event) {
+        const {
+          target
+        } = event;
+        const {
+          value
+        } = target;
+        const updates = {};
+        updates[`domains/data/${this.domainId}/commitMessage`] = value || '';
+        await database.ref().update(updates);
+      }
+    }, {
+      kind: "method",
+      key: "deploy",
+      value: async function deploy() {
+        // need to update all the testing parameters(numUser, otherResponse, numSession, amt) in last-deployed
+        const updates = {};
+        const {
+          domain
+        } = this;
+
+        if (domain) {
+          const {
+            commitMessage
+          } = domain;
+          const {
+            key: deployedVersion
+          } = database.ref(`deployed-history/data/${this.domainId}/`).push();
+          updates[`last-deployed/data/${this.domainId}/`] = { ...this.domain,
+            deployedVersion,
+            commitMessage: commitMessage || ''
+          };
+          updates[`deployed-history/data/${this.domainId}/${deployedVersion}`] = { ...this.domain,
+            deployedVersion,
+            commitMessage: commitMessage || ''
+          };
+          updates[`domains/data/${this.domainId}/deployed`] = false;
+          updates[`domains/data/${this.domainId}/deployedVersion`] = deployedVersion;
+          updates[`domains/data/${this.domainId}/commitMessage`] = commitMessage || '';
+          await database.ref().update(updates);
+        }
+      }
+    }, {
+      kind: "method",
+      key: "toggleDialog",
+      value: async function toggleDialog() {
+        this.dialogVisible = !this.dialogVisible;
+
+        if (!this.dialogVisible) {
+          this.dialogStage = 0;
+          this.deployUrl = '';
+        }
+      }
+    }, {
+      kind: "method",
+      key: "closeDialog",
+      value: async function closeDialog() {
+        this.dialogVisible = false;
+        this.dialogStage = 0;
+        this.deployUrl = '';
+      }
+    }, {
+      kind: "method",
+      key: "closeTwoDialog",
+      value: async function closeTwoDialog() {
+        this.dialogVisible = false;
+        this.dialogStage = 0;
+        this.deployUrl = '';
+        window.location.reload();
+      }
+    }, {
+      kind: "method",
+      key: "prevDialogStage",
+      value: async function prevDialogStage() {
+        this.dialogStage--;
+        this.dialogStage = Math.max(this.dialogStage, 0);
+      }
+    }, {
+      kind: "method",
+      key: "nextDialogStage",
+      value: async function nextDialogStage() {
+        this.dialogStage++;
+        this.dialogStage = Math.min(this.dialogStage, 2); // window.location.reload();
+      }
+    }, {
+      kind: "method",
+      key: "urlGenerator",
+      value: async function urlGenerator(event) {
+        const {
+          numUser,
+          numSession,
+          otherResponse
+        } = event.detail.parameters; // with the domainId and chosen parameters, generating the URL
+        // domainID
+        // param1: num-users (number)
+        // param2: num-sessions (number)
+        // param3: other-response (boolean)
+        // [x] param4: amt (boolean) -- we do not need for link
+        //                              but we need it for showing the link or not
+        //                              amt = true: just deploying, amt = false: showing up link
+        // example URL:
+
+        this.deployUrl = `https://protobot-rawdata.firebaseapp.com/?domain=${this.domainId}&deployedVersion=${event.detail.deployedVersion}&numUser=${numUser}&numSession=${numSession}&otherResponse=${otherResponse}`;
+        this.nextDialogStage(); // this.closeDialog();
+      }
+    }]
+  };
+}, GetDomainMixin(LitElement));
+
+var styles$w = "h1 {\n    text-align: center;\n    font-family: 'Montserrat', sans-serif;\n}\n\nh3 {\n    text-align: right;\n    font-family: 'Montserrat', sans-serif;\n}\n/*\n.feed{\n    display:flex;\n}\n\n.feed.feed__right{\n    flex-direction: row-reverse;\n}\n\n.label{\n    font-weight: bold;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.feed.feed__right .label{\n    text-align: right;\n}\n\n.feed.feed__right .button-container{\n    flex-direction: row-reverse;\n} */\n/*\n.user-label{\n    font-weight: bold;\n    text-align: right;\n    padding-right: 20px;\n    font-family: 'Montserrat', sans-serif;\n}\n\n.bot-label{\n    font-weight: bold;\n    margin-left: 10px;\n    font-family: 'Open Sans', sans-serif;\n\n} */\n/*\n.user-say{\n    border-radius: 15px;\n    background: cornflowerblue;\n    width: 300px;\n    height: 70px;\n    font-family: 'Open Sans', sans-serif;\n}\n\n.bot-say{\n    border-radius: 15px;\n    /*background: #73AD21;\n    padding: 20px;\n    width: 300px;\n    height: 70px;\n    font-family: 'Noto Sans', sans-serif;\n} */\n\n/* .bot-part {\n    float:left;\n    clear:both;\n} */\n\n.button-container{\n    display: flex;\n}\n\n.empty-bottom {\n    height: 30px;\n    width:100%\n}\n\n";
+
+var styles$x = ".feed{\n  display:flex;\n  margin-left:400px;\n}\n\n.feed.feed__right{\n  flex-direction: row-reverse;\n  margin-right:400px;\n}\n\n.label{\n  /* font-weight: bold; */\n  font-family: 'Open sans', sans-serif;\n}\n\n.feed.feed__right .label{\n  text-align: right;\n}\n\n.select-container{\n  display: flex;\n}\n\n.feed.feed__right .select-container{\n  flex-direction: row-reverse;\n}\n/*\n.user-label{\n  font-weight: bold;\n  text-align: right;\n  padding-right: 20px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.bot-label{\n  font-weight: bold;\n  margin-left: 10px;\n  font-family: 'Open Sans', sans-serif;\n} */\n\n\n.utterance {\n  font-family: 'Open sans', sans-serif;\n  border-radius: 10px;\n  font-size: 12pt;\n  font-weight: 500;\n  text-align: center;\n  background: cornflowerblue;\n  color: #fff;\n  width: 300px;\n  padding: 10px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n  /* font-family: 'Noto Sans', sans-serif; */\n}\n\n.utterance.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n.utterance.utterance__right.utterance__no_label {\n  background: rgb(214, 146, 0);\n  font-weight: 800;\n}\n\n\n.utterance.utterance__right{\n  background:black;\n  /* border-radius: 10px;\n  font-size: 15pt; */\n  /* color: #fff;\n  width: 300px;\n  padding: 20px;\n  margin: 10px;\n  font-family: 'Noto Sans', sans-serif; */\n}\n\n.bot-part {\n  float:left;\n  clear:both;\n}\n\n.select-box {\n  height: 30px;\n}\n\n.input-box{\n  height: 30px;\n  font-size: 12pt;\n  text-align: center;\n  margin-left: 10px;\n  margin-right: 10px;\n}\n\n.option {\n  zoom: 150%;\n  /* font-size: 10pt; */\n  /* padding:5px 0; */\n}\n\n";
 
 // import '@polymer/paper-item/paper-item.js';
 // import '@polymer/paper-listbox/paper-listbox.js';
@@ -27202,7 +30414,7 @@ var styles$s = ".feed{\n  display:flex;\n  margin-left:400px;\n}\n\n.feed.feed__
  * @param {any} self
  */
 
-const template$d = self => function () {
+const template$i = self => function () {
   // @ts-ignore
   const {
     utterance,
@@ -27220,7 +30432,7 @@ const template$d = self => function () {
   } = utterance || {};
   return html`
     <style>
-      ${styles$s}
+      ${styles$x}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -27305,7 +30517,7 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
       kind: "method",
       key: "render",
       value: function render() {
-        return template$d(this);
+        return template$i(this);
       }
     }, {
       kind: "method",
@@ -27416,7 +30628,7 @@ let UtteranceReviewItem = _decorate([customElement('utterance-review-item')], fu
  * @param {any} self
  */
 
-const template$e = self => function () {
+const template$j = self => function () {
   // @ts-ignore
   const {
     crowdId,
@@ -27431,7 +30643,7 @@ const template$e = self => function () {
 
   return html`
     <style>
-      ${styles$r}
+      ${styles$w}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -27646,7 +30858,7 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
       kind: "method",
       key: "render",
       value: function render() {
-        return template$e(this);
+        return template$j(this);
       }
       /**
        *
@@ -27704,14 +30916,14 @@ let ProtobotMicro = _decorate([customElement('protobot-micro')], function (_init
   };
 }, GetDomainUtterancesMixin(GetDomainMixin(LitElement)));
 
-var styles$t = "h1 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n  color: cornflowerblue;\n}\n\n.sankey {\n  height: 100%;\n  overflow: auto;\n}\n\n.dashboard {\n  display: flex;\n  flex-direction: row;\n}\n\n.no-label-utterance {\n  height: 30%;\n  width: 50%;\n}\n\n.new-topics {\n  height: 30%;\n  width: 50%;\n}\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n\n.tooltip {\n  width: 300px;\n  height: 300px;\n  overflow: auto;\n  border: 1px solid black;\n  padding: 12px;\n}\n";
+var styles$y = "h1 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  text-align: center;\n  font-family: 'Open Sans', sans-serif;\n  color: cornflowerblue;\n}\n\n.sankey {\n  height: 100%;\n  overflow: auto;\n}\n\n.dashboard {\n  display: flex;\n  flex-direction: row;\n}\n\n.no-label-utterance {\n  height: 30%;\n  width: 50%;\n}\n\n.new-topics {\n  height: 30%;\n  width: 50%;\n}\n.node rect {\n  cursor: move;\n  fill-opacity: .9;\n  shape-rendering: crispEdges;\n}\n\n.node text {\n  pointer-events: none;\n  text-shadow: 0 1px 0 #fff;\n}\n\n.link {\n  fill: none;\n  stroke: #000;\n  stroke-opacity: .2;\n}\n\n.link:hover {\n  stroke-opacity: .5;\n}\n\n.tooltip {\n  width: 300px;\n  height: 300px;\n  overflow: auto;\n  border: 1px solid black;\n  padding: 12px;\n}\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$f = self => function () {
+const template$k = self => function () {
   // @ts-ignore
   const {
     closeTooltip
@@ -27719,7 +30931,7 @@ const template$f = self => function () {
 
   return html`
     <style>
-      ${styles$t}
+      ${styles$y}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -28243,7 +31455,7 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
       kind: "method",
       key: "render",
       value: function render() {
-        return template$f(this);
+        return template$k(this);
       }
     }, {
       kind: "method",
@@ -28257,20 +31469,20 @@ let ProtobotMacro = _decorate([customElement('protobot-macro')], function (_init
   };
 }, GetDomainUsersMixin(LitElement));
 
-var styles$u = "";
+var styles$z = "";
 
 /**
  *
  * @param {any} self
  */
 
-const template$g = self => function () {
+const template$l = self => function () {
   // @ts-ignore
   // const { topic } = this;
   console.log(this);
   return html`
     <style>
-      ${styles$u}
+      ${styles$z}
     </style>
 
     History
@@ -28296,20 +31508,20 @@ let ProtobotHistory = _decorate([customElement('protobot-history')], function (_
       kind: "method",
       key: "render",
       value: function render() {
-        return template$g(this);
+        return template$l(this);
       }
     }]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$v = ":host{\n\n}\n.topic-container {\n  margin: 3em;\n}\n\n.parameter-container {\n  padding: .5em 2em 2em;\n  margin: 3em;\n  border-radius: 6px;\n  background: #f1f1f5;\n  font-family: 'Open Sans', sans-serif;\n}";
+var styles$A = ":host{\n\n}\n.topic-container {\n  margin: 3em;\n}\n\n.parameter-container {\n  padding: .5em 2em 2em;\n  margin: 3em;\n  border-radius: 6px;\n  background: #f1f1f5;\n  font-family: 'Open Sans', sans-serif;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$h = self => function () {
+const template$m = self => function () {
   // @ts-ignore
   const {
     lastDeployedDomainVersion,
@@ -28318,7 +31530,7 @@ const template$h = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$v}
+      ${styles$A}
     </style>
     <div class="parameter-container">
       <h3>Deployment Settings</h3>
@@ -28384,20 +31596,20 @@ let ProtobotDesignHistory = _decorate([customElement('protobot-design-history')]
       kind: "method",
       key: "render",
       value: function render() {
-        return template$h(this);
+        return template$m(this);
       }
     }]
   };
 }, GetDomainVersionsMixin(LitElement));
 
-var styles$w = "/* :host {\n  overflow-y: auto;\n} */\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\nversion-container {\n  display:flex;\n  flex-direction: row;\n  align-items:flex-end;\n\n}";
+var styles$B = "/* :host {\n  overflow-y: auto;\n} */\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\nversion-container {\n  display:flex;\n  flex-direction: row;\n  align-items:flex-end;\n\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$i = self => function () {
+const template$n = self => function () {
   // @ts-ignore
   const {
     versions,
@@ -28407,7 +31619,7 @@ const template$i = self => function () {
 
   return html`
     <style>
-      ${styles$w}
+      ${styles$B}
     </style>
     <div class="version-container">Version
       <select class="select-box" placeholder="Topic" @change=${changeVersion}>
@@ -28454,7 +31666,7 @@ let VersionList2 = _decorate([customElement('version-managable-list2')], functio
       kind: "method",
       key: "render",
       value: function render() {
-        return template$i(this);
+        return template$n(this);
       }
     }, {
       kind: "method",
@@ -28479,14 +31691,14 @@ let VersionList2 = _decorate([customElement('version-managable-list2')], functio
   };
 }, GetPathMixin(LitElement));
 
-var styles$x = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$C = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$j = self => function () {
+const template$o = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -28513,7 +31725,7 @@ const template$j = self => function () {
   console.log(dv);
   return html`
     <style>
-      ${styles$x}
+      ${styles$C}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -28636,7 +31848,7 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
       kind: "method",
       key: "render",
       value: function render() {
-        return template$j(this);
+        return template$o(this);
       }
     }, {
       kind: "method",
@@ -28733,14 +31945,14 @@ let ProtobotMacroSidebar = _decorate([customElement('protobot-macro-sidebar')], 
   };
 }, GetDomainMixin(LitElement));
 
-var styles$y = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
+var styles$D = "h2 {\n  /* margin-left: 20px; */\n  font-family: 'Open Sans', sans-serif;\n}\n\np {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\nh3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.item {\n  margin-bottom: 15px;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button-container .button-save {\n  background: coral;\n  color: white;\n  font-size: 15px;\n  font-weight: bold;\n  padding: 12px;\n  border-radius: 10px;\n  margin: 40px;\n  font-family: 'Open-sans', sans-serif;\n  text-align: center;\n}\n\n.button-container {\n  display: flex;\n  flex: 1;\n  justify-content: center;\n  align-items: flex-end;\n  /* flex-direction: column;\n  height: 100vh;\n  display: flex; */\n\n}\n\n.add-container {\n  display: flex;\n  flex-direction: row-reverse;\n}\n\n\nbutton {\n  /* -webkit-box-shadow: none;\n  -moz-box-shadow: none; */\n  font-size: 20px;\n  font-weight: bold;\n  color: white;\n  background: Transparent no-repeat;\n  border: none;\n  cursor:pointer;\n  overflow: hidden;\n  outline:none;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$k = self => function () {
+const template$p = self => function () {
   // @ts-ignore
   const {
     topicList,
@@ -28765,7 +31977,7 @@ const template$k = self => function () {
   } = queryObject;
   return html`
     <style>
-      ${styles$y}
+      ${styles$D}
       @import url('https://fonts.googleapis.com/css?family=Noto+Sans&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Raleway&display=swap');
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
@@ -28833,7 +32045,7 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
       value: // @property({ type: Array })
       // memos = [''];
       function render() {
-        return template$k(this);
+        return template$p(this);
       }
     }, {
       kind: "method",
@@ -28902,9 +32114,9 @@ let ProtobotMicroSidebar = _decorate([customElement('protobot-micro-sidebar')], 
   };
 }, GetDomainMemosMixin(LitElement));
 
-var styles$z = "";
+var styles$E = "";
 
-var styles$A = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
+var styles$F = "h2 {\n  margin-left:10px;\n}\n.plan-input {\n  display: flex;\n  flex-direction: row;\n}\n\n.new-input {\n  margin: 10px;\n  --input-bg: white;\n  --input-bg-filled: white;\n\n}\n.button-input {\n  margin: 10px;\n\n}\n\n.plan-list {\n  display: flex;\n  flex-direction: column;\n  margin: 10px;\n}\n\n";
 
 const $_documentContainer$8 = document.createElement('template');
 $_documentContainer$8.innerHTML = `<dom-module id="lumo-required-field">
@@ -31350,10 +34562,10 @@ customElements.define(RadioGroupElement.is, RadioGroupElement);
  * @param {any} self
  */
 
-const template$l = self => function () {
+const template$q = self => function () {
   return html`
   <style>
-    ${styles$A}
+    ${styles$F}
   </style>
 
   <h2>Planning for revision</h2>
@@ -31421,7 +34633,7 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
       kind: "method",
       key: "render",
       value: function render() {
-        return template$l(this);
+        return template$q(this);
       }
     }, {
       kind: "method",
@@ -31463,11 +34675,11 @@ let ToDoList = _decorate([customElement('to-do-list')], function (_initialize, _
  * @param {any} self
  */
 
-const template$m = self => function () {
+const template$r = self => function () {
   // const {} = this;
   return html`
     <style>
-      ${styles$z}
+      ${styles$E}
     </style>
 
     <to-do-list></to-do-list>
@@ -31491,20 +34703,20 @@ let ProtobotHistorySidebar = _decorate([customElement('protobot-history-sidebar'
       kind: "method",
       key: "render",
       value: function render() {
-        return template$m(this);
+        return template$r(this);
       }
     }]
   };
 }, GetDomainMixin(LitElement));
 
-var styles$B = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-msg {\n  background: #fff;\n  font-family: 'Open Sans', sans-serif;\n  color: #222;\n  padding: 1em;\n  margin: .8em;\n  border-radius: 4px;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
+var styles$G = "h3 {\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.topic-list {\n  margin-left: -10px;\n  font-size: 15px;\n  font-family: 'Open Sans', sans-serif;\n}\n\n\n.commit-msg {\n  background: #fff;\n  font-family: 'Open Sans', sans-serif;\n  color: #222;\n  padding: 1em;\n  margin: .8em;\n  border-radius: 4px;\n}\n\n\n.button-container  {\n  display: flex;\n  flex-direction: column-reverse;\n  flex:1;\n}\n\n.explore, .verify {\n  color: white;\n  font-family: 'Open Sans', sans-serif;\n}\n\n.button {\n  color: white;\n  font-size: 20px;\n  bottom: 30px;\n  padding: 12px;\n  border-radius: 10px;\n}\n/*\nvaadin-text-area.min-height {\n  min-height: 150px;\n} */\n";
 
 /**
  *
  * @param {any} self
  */
 
-const template$n = self => function () {
+const template$s = self => function () {
   // @ts-ignore
   const {
     versionsDetail,
@@ -31515,7 +34727,7 @@ const template$n = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$B}
+      ${styles$G}
     </style>
     <version-managable-list2
       .versions=${versionsDetail}
@@ -31606,7 +34818,7 @@ let ProtobotDesignHistorySidebar = _decorate([customElement('protobot-design-his
       kind: "method",
       key: "render",
       value: function render() {
-        return template$n(this);
+        return template$s(this);
       }
     }, {
       kind: "method",
@@ -31622,14 +34834,14 @@ let ProtobotDesignHistorySidebar = _decorate([customElement('protobot-design-his
   };
 }, GetDomainMixin(LitElement));
 
-var styles$C = "h1 {\n  font-weight: 900;\n}\nh3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  font-family: 'Open Sans', sans-serif;\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n}\n\n.dialog{\n  font-family: 'Open Sans', sans-serif;\n  /* position: fixed; */\n  width:100%;\n  height: 100%;\n  /* left: 0; */\n  /* top: 0; */\n  /* background: rgba(10,10,10,0.8); */\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  font-family: 'Open Sans', sans-serif;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
+var styles$H = "h1 {\n  font-weight: 900;\n}\nh3 {\n  color: rgb(72, 114, 193);\n}\n\n.dialog.opened {\n  display: flex;\n}\n.dialog.closed {\n  display: none;\n}\n\n.dialog-window {\n  font-family: 'Open Sans', sans-serif;\n  position: relative;\n  flex-direction: column;\n  /* border: 2px outset black; */\n  padding: 30px;\n  border-radius: 10px;\n  margin: 1em;\n  background: #fff;\n  color: #000;\n}\n\n.dialog{\n  font-family: 'Open Sans', sans-serif;\n  /* position: fixed; */\n  width:100%;\n  height: 100%;\n  /* left: 0; */\n  /* top: 0; */\n  /* background: rgba(10,10,10,0.8); */\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.button-container {\n  display: flex;\n  font-family: 'Open Sans', sans-serif;\n  flex-direction: row-reverse;\n}\n.accept {\n  justify-content: space-around;\n  align-content: space-around;\n}\n.cancel {\n  justify-content: space-around;\n  align-content: space-around;\n}";
 
 /**
  *
  * @param {any} self
  */
 
-const template$o = self => function () {
+const template$t = self => function () {
   // @ts-ignore
   const {
     deployedVersion,
@@ -31652,11 +34864,11 @@ const template$o = self => function () {
   } = this;
   return html`
     <style>
-      ${styles$C}
+      ${styles$H}
       @import url('https://fonts.googleapis.com/css?family=Montserrat|Open+Sans&display=swap');
     </style>
 
-    <div class ="${classMap({
+    <div class ="${classMap$1({
     dialog: true,
     opened: opened,
     closed: !opened
@@ -31792,7 +35004,7 @@ let ProtobotDeployModal$1 = _decorate([customElement('protobot-deploy')], functi
       kind: "method",
       key: "render",
       value: function render() {
-        return template$o(this);
+        return template$t(this);
       }
     }, {
       kind: "method",
@@ -31947,7 +35159,7 @@ let ProtobotDeployModal$1 = _decorate([customElement('protobot-deploy')], functi
   };
 }, GetDomainMixin(LitElement));
 
-var styles$D = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 4fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n/* .left {\n  background: rgb(94, 94, 94);\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n} */\n\n.center {\n  background: white;\n  padding-right: 10px;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right-scrollable{\n  height: 100%;\n  padding: 10px;\n  overflow: auto;\n  box-sizing: border-box;\n}\n/*\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n} */\n";
+var styles$I = ":host {\n  margin: 0;\n  padding: 0;\n  display: grid;\n  /* grid-template-rows: 1fr 20fr; */\n  grid-template-columns: 4fr 1fr;\n}\n/*\n.top {\n  background: gray;\n  grid-column-start: 1;\n  grid-column-end: 4;\n  color: rgb(225, 189, 255);\n  padding-left: 10px;\n  font-family: 'Miriam Libre', sans-serif;\n} */\n\n/* .left {\n  background: rgb(94, 94, 94);\n  background: #252839;\n  color: white;\n  padding: 10px;\n  height: 100vh\n} */\n\n.center {\n  background: white;\n  padding-right: 10px;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right {\n  background: #252839;\n  color: white;\n  padding-top: 50px;\n  height: 100vh;\n  box-sizing: border-box;\n}\n\n.right-scrollable{\n  height: 100%;\n  padding: 10px;\n  overflow: auto;\n  box-sizing: border-box;\n}\n/*\n.center-modal {\n  background: #888888;\n  font-size: 20px;\n  color: white;\n  padding: 20px;\n  text-align: center;\n} */\n";
 
 var startStyles = ":host {\n  margin: 0;\n  padding: 0;\n}";
 
@@ -31956,7 +35168,7 @@ var startStyles = ":host {\n  margin: 0;\n  padding: 0;\n}";
  * @param {any} self
  */
 
-const template$p = self => function () {
+const template$u = self => function () {
   // @ts-ignore
   const {
     queryObject,
@@ -31976,7 +35188,7 @@ const template$p = self => function () {
 
     ${domain ? html`
       <style>
-        ${styles$D}
+        ${styles$I}
         @import url('https://fonts.googleapis.com/css?family=Miriam+Libre:700&display=swap');
       </style>
 
@@ -32104,7 +35316,7 @@ let ProtobotDesignerUI = _decorate([customElement('protobot-designer-ui')], func
       kind: "method",
       key: "render",
       value: function render() {
-        return template$p(this);
+        return template$u(this);
       }
     }, {
       kind: "method",

@@ -4,57 +4,8 @@
   width: 100%;
   margin: 20px;
 }
-.flex-area {
-  overflow:hidden;
-  display: flex;
-  width: 100%;
-  max-width: 800px;
-  border-radius: 6px;
-  background: rgb(49, 63, 102);
-}
-.flex-area.sub{
-  background: rgb(74, 94, 150);
-}
 
-.flex-1 {
-  flex: 1;
-  /* background: rgb(49, 63, 102); */
-  padding: .5em 1em;
-}
-
-.text-area {
-  width: 100%;
-  font-size : 15px;
-  padding: .5em;
-  border: none;
-  outline: none;
-  color: #fff;
-  background: transparent;
-  font-family: 'Open Sans', sans-serif;
-}
-.text-area:hover,
-.text-area:focus{
-  width: 100%;
-  border: none;
-  outline: none;
-  font-size : 15px;
-  padding: .5em;
-  color: #fff;
-  background: transparent;
-}
-.text-area:hover{
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.sub {
-  margin-left: 80px;
-}
-
-
-wl-button {
-  --button-border-radius	: 0px;
-  --button-padding : 10px;
-  --button-font-size	:10px;
-  --button-bg	: rgb(182, 182, 182);
-  --button-bg-hover : rgb(71, 71, 71);
+.topic-utterance-set {
+  display:flex;
+  flex-direction: row;
 }

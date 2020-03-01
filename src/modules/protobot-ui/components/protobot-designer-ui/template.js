@@ -3,7 +3,9 @@ import '../protobot-header';
 import '../protobot-sidebar';
 import '../protobot-start';
 import '../protobot-authoring';
+import '../protobot-authoring2';
 import '../protobot-authoring-sidebar';
+import '../protobot-authoring-sidebar2';
 import '../protobot-micro';
 import '../protobot-macro';
 import '../protobot-history';
@@ -43,7 +45,7 @@ export const template = self => function () {
 
       <div class="center" style="overflow:scroll;">
         ${page === 'authoring' ? html`
-          <protobot-authoring style="height:100%;"></protobot-authoring>
+          <protobot-authoring2 style="height:100%;"></protobot-authoring2>
         ` : ''}
 
         ${page === 'macro' || !page ? html`
@@ -66,7 +68,7 @@ export const template = self => function () {
       <div class="right">
         <div class="right-scrollable">
         ${page === 'authoring' ? html`
-          <protobot-authoring-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar>
+          <protobot-authoring-sidebar2 style="display:flex; flex-direction:column; height:100%; padding: 10px;"></protobot-authoring-sidebar2>
         ` : ''}
         ${page === 'macro' || !page ? html`
           <protobot-macro-sidebar style="display:flex; flex-direction:column; height:100%; padding: 10px;"

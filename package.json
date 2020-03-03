@@ -107,7 +107,7 @@
     ]
   },
   "dependencies": {
-    "@vaadin/vaadin": "^14.0.10",
+    "@vaadin/vaadin": "^15.0.0",
     "firebase": "^7.0.0",
     "listbox-combobox": "^1.1.1",
     "lit-element": "^2.2.1"

@@ -77,7 +77,7 @@
     "rollup-plugin-generate-html-template": "1.6.0",
     "rollup-plugin-html-minifier": "1.0.1",
     "rollup-plugin-node-resolve": "5.2.0",
-    "rollup-plugin-postcss": "2.0.3",
+    "rollup-plugin-postcss": "2.9.0",
     "rollup-plugin-string": "3.0.0",
     "rollup-plugin-stylus-compiler": "1.0.1",
     "rollup-plugin-stylus-css-modules": "1.5.0",

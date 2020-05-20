@@ -45,7 +45,7 @@
     "@open-wc/testing": "2.3.8",
     "@open-wc/testing-helpers": "1.5.0",
     "@open-wc/testing-karma": "3.1.46",
-    "@typescript-eslint/eslint-plugin": "2.15.0",
+    "@typescript-eslint/eslint-plugin": "2.34.0",
     "babel-eslint": "10.0.3",
     "bundlesize": "0.18.0",
     "chai": "4.2.0",

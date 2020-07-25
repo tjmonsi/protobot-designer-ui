@@ -82,7 +82,7 @@
     "rollup-plugin-stylus-compiler": "1.0.1",
     "rollup-plugin-stylus-css-modules": "1.5.0",
     "rollup-plugin-terser": "5.2.0",
-    "semistandard": "14.2.0",
+    "semistandard": "14.2.3",
     "sinon": "8.0.4",
     "typescript": "3.6.4",
     "webpack-merge": "4.2.2"
